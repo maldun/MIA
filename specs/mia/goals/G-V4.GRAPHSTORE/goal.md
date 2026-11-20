@@ -50,17 +50,6 @@ Node and edge records are scoped by graph (`<graph id>/<local id>`) and the stor
 | G-V2.SNAPSHOT | real | the snapshot store reads versions of graph kinds; G-V2 is closed before this starts |
 | Graph app N-5 | stand-in (mock of IF-104) | it works only through the backend API; keep IF-104 stable or amend it |
 
-## Scope (candidate, to be confirmed in Plan)
-| Item | In/Out | Reason |
-|---|---|---|
-| `WorkflowLibrary` kinds `workflows` and `context_graphs` rebuilt on the record form (`GraphModel`) | in | one truth |
-| Context graphs in record form (`context_nodes`, `context_edges`, `graphs`) | in | owner: long-term goal; the tables exist since A-98 |
-| Migration tool with round-trip check (`migrate.py` / `storage_copy.py` style) | in | OC-2 |
-| `step_view` and the context-graph template (`budget_tokens` per step) | in | reads `context_graphs` today |
-| `snapshot_store` and the pointer for graph kinds | in | OC-3 |
-| networkx loader, rule and order code on a DiGraph | out | G-V4.GRAPHAPI |
-| Goal C: FR-41/FR-42 content, proposals of items, N-6 | out | see "Open questions" 2 |
-| New node types, new transforms | out | fixed list (D-262) |
 
 ## Parts
 | Part | Real or stand-in | Notes |
@@ -82,6 +71,22 @@ Node and edge records are scoped by graph (`<graph id>/<local id>`) and the stor
 3. Library on the record form for workflows; then for context graphs; the document form as a view.
 4. Migration tool with the comparison report; run on a copy of the real data first.
 5. Remove the old tables only after the owner's confirmation (own task, owner gate).
+
+## Scope
+Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
+
+| Item | In/Out | Reason |
+|---|---|---|
+| FR-40 | in | files and database interchangeable, one stored truth, migration (FR-57 to FR-62, FR-93 of its spec); legacy text stays (D-362) |
+| FR-47 | in | snapshots read and restore stored graph versions (OC-10 of G-V4) |
+| NFR-8 | in | files and database behave the same behind the storage interface (FR-58, FR-93) |
+| FR-36 | partly | a skill record points at its stored graph (FR-62); the skill definition itself is unchanged |
+| FR-45 | partly | the converted pipelines become an import path into stored graphs (FR-62); no new skill is converted |
+| FR-30 | partly | context graphs follow the same stored form (FR-57); their content, rules and editing are G-V4.CONTEXT |
+| REQ-GA-008 | in | export and seed of the library moved here from the graph app (D-367); the transfer is FR-59 and FR-93 |
+| REQ-GA-006 | out | editing context graphs is G-V4.CONTEXT (D-369); only the stored form is here |
+| FR-6, FR-7, FR-16, FR-37, FR-38, NFR-3 | out | the run, the rules, the run record and trust of steps are G-V4.GRAPHAPI |
+| FR-21, FR-22, FR-41, FR-42, NFR-6, NFR-9 | out | the graph app, access, the builder and containers are other subgoals |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

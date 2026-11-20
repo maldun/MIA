@@ -16,11 +16,20 @@ Proposed 2026-11-20 by the owner (maldun), D-369: editing context graphs is its 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given a stored context graph, when the owner changes and keeps it in the web app, then the same versions and restore apply as for a workflow graph and a change that breaks a structural, category or budget rule is refused with the rule named | OC-8 of G-V4 (FR-22, FR-30) |
-| OC-2 | Given a finished run, when the owner chooses to see its context graph, then the graph rebuilt from the run's events is drawn read-only and each item can be traced to the event that made it | OC-8 of G-V4 (FR-22, FR-16, FR-30) |
+| OC-1 | Given a stored context graph, when the owner changes and keeps it in the web app, then the same versions and restore apply as for a workflow graph and a change that breaks a structural, category or budget rule is refused with the rule named | OC-8 of G-V4 |
+| OC-2 | Given a finished run, when the owner chooses to see its context graph, then the graph rebuilt from the run's events is drawn read-only and each item can be traced to the event that made it | OC-8 of G-V4 |
 
 ## Source
 `../G-V4.EDIT/top-level-spec.md` (FR-75 moved here), REQ-GA-006 (approved in G-V1, assigned to EDIT by D-367, now to this subgoal). Open for the owner: whether viewing and storing context graphs (FR-48 of VIEW, FR-57 of GRAPHSTORE) stay where they are, and whether goal C (builder, categories as schemas) joins this subgoal later.
+
+## Scope
+Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
+
+| Item | In/Out | Reason |
+|---|---|---|
+| REQ-GA-006 | in | edit a context graph (FR-75); the rules for categories and budgets are an extension of the one rule set (FR-7 of G-V4.GRAPHAPI) |
+| FR-30 | out | the stored form of context graphs is G-V4.GRAPHSTORE; here only editing and the view of a run's context graph (FR-97) |
+| REQ-GA-002, REQ-GA-003, REQ-GA-004 | out | the general editor is G-V4.EDIT; CONTEXT adds the context-graph part on top |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

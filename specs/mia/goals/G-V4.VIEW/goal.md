@@ -25,6 +25,21 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 ## Source
 N-5 log (`nodes/N-5-graph-app/implementation-log.md`): T-01 is a vis-network mockup that opens a JSON file; IF-104 mock A-36 is drafted, not installed; Q-5 and Q-6 (context graphs, node positions) open.
 
+## Scope
+Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
+
+| Item | In/Out | Reason |
+|---|---|---|
+| REQ-GA-001 | in | show a graph as nodes and edges; superseded by FR-48 to FR-55 and FR-96 (D-367) |
+| REQ-GA-005 | in | the viewer works only through the graph interface IF-104 (v2, frozen at G-V4 level) |
+| REQ-GA-007 | in | login required; NFR-12 refines it |
+| REQ-GA-009 | in | plain page, vendored library (vis-network 10.1.2), no build step |
+| REQ-GA-010 | in | no outside request; superseded by NFR-13 (D-367) |
+| REQ-GA-011 | in | own container; the routing between page and backend is checked in the plan |
+| REQ-GA-002, REQ-GA-003, REQ-GA-004 | out | editing, rule checks, saving and restore are G-V4.EDIT; comparison is G-V4.REPLAY (the history list is a new item of VIEW) |
+| REQ-GA-006, REQ-GA-008 | out | context graph editing is G-V4.CONTEXT; export and seed are G-V4.GRAPHSTORE |
+| FR-21, NFR-6, NFR-9 | out | accounts, secure access and containers as a whole are not changed; the viewer meets them through REQ-GA-007 and REQ-GA-011 |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

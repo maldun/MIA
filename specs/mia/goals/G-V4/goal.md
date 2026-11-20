@@ -57,6 +57,7 @@ Written here so they are not lost; Plan turns them into `Kind: measure` items (M
 | the four leftovers (old OC-1 to OC-4) | moved out of G-V4 to G-V5.LEFTOVER | owner 2026-11-20 (D-385) | 2026-11-20 |
 | graph storage, runner on networkx | split: G-V4.GRAPHSTORE, G-V4.GRAPHAPI | owner 2026-11-19 and 2026-11-20 (D-360) | 2026-11-20 |
 | viewer stages | split: G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, each with all seven phases | owner 2026-11-20 (D-360) | 2026-11-20 |
+| size of GRAPHSTORE and GRAPHAPI by descendants (about 90 and 96 requirements, most of them verified in G-V1 and G-V2) | keep as one subgoal each (proposed by the agent, the owner confirms in Plan); the cut into tasks follows in step 5 | the number comes from the descendants of 5 and 6 top-level items, not from new work | 2026-11-20 |
 | editing context graphs | split: G-V4.CONTEXT | owner 2026-11-20 (D-369) | 2026-11-20 |
 | the context-graph builder (goal C) | split: G-V4.BUILDER, the largest and last graph subgoal; first slice documents only (proposed) | owner 2026-11-20 (D-380) | 2026-11-20 |
 
@@ -79,6 +80,7 @@ Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for th
 | FR-16 | partly | the run record names the stored graph and its version, the edit log shows who changed what (G-V4.GRAPHAPI, G-V4.REPLAY); the event schema is otherwise unchanged |
 | FR-21 | partly | the graph app needs login and attributes every edit to the account (G-V4.EDIT); no change to accounts |
 | NFR-3 | in | stored code and imported steps stay data until the toolbox runs them (G-V4.GRAPHAPI, THR-013); the refusal of harmful imports with a recorded case is in G-V5.LEFTOVER |
+| REQ-GA-010 | in | the viewer works inside the home network and loads nothing from outside (NFR-13 of G-V4.VIEW); the rest of NFR-5 is not changed |
 | NFR-6 | partly | the graph app is reached only through the same authenticated access (G-V4.VIEW); no change to the access rules |
 | NFR-8 | in | files and database behave the same behind the storage interface (G-V4.GRAPHSTORE) |
 | NFR-9 | partly | the graph app runs as its own container (G-V4.VIEW); the other containers are unchanged |

@@ -31,6 +31,18 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 ## Source
 REQ-GA-002, REQ-GA-003 (N-5 T-02, open Q-2: where the rules run in the page); the backend still validates (TB-edit).
 
+## Scope
+Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
+
+| Item | In/Out | Reason |
+|---|---|---|
+| REQ-GA-002 | in | edit nodes and edges; refined by FR-68, FR-92 (a form per kind of step plus text) |
+| REQ-GA-003 | in | graph rules before saving; amended so that the page asks the backend check route (D-363, D-367) |
+| REQ-GA-004 | in | versions, history, diff and restore: split in Plan; save and restore (FR-71, FR-73) stay here, history goes to VIEW, comparison to REPLAY |
+| FR-7 | out | the rules themselves are owned by G-V4.GRAPHAPI; the editor uses them |
+| REQ-GA-001, REQ-GA-005, REQ-GA-007, REQ-GA-009, REQ-GA-010, REQ-GA-011 | out | the viewer's requirements are G-V4.VIEW; the editor builds on them |
+| REQ-GA-006 | out | context graph editing is G-V4.CONTEXT |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

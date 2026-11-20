@@ -24,6 +24,16 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 ## Source
 `specs/mia/requirements.md` FR-41, FR-42; `specs/mia/explore-skill-rework/` (interview rows 18 and 21, `spikes.md` spike C, `n6-sample-plan.md` with the candidate FR-42 text, evidence 113 right and 0 invented of 120 on branch `explore-n6-sample`). Spike C decided: LightRAG is not the builder (7.7 % invented, bar 5 %); the base is an own builder. Node N-6 is standalone with its own container (NFR-9).
 
+## Scope
+Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
+
+| Item | In/Out | Reason |
+|---|---|---|
+| FR-41 | in | context graphs with categories as schemas, reading the confirmed part within a budget (FR-104) |
+| FR-42 | in | the builder: proposals with source, confirmation, limits (FR-98 to FR-103, FR-105, NFR-23 to NFR-25) |
+| FR-30 | out | the stored form is G-V4.GRAPHSTORE, editing G-V4.CONTEXT |
+| NFR-3 | out | untrusted input for the builder is handled by NFR-25 of its spec; the graph-side rule is G-V4.GRAPHAPI |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

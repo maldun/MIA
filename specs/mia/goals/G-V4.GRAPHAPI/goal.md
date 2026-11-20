@@ -20,7 +20,7 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given any stored graph, when a workflow is run or checked, then the stored graph reaches the execution as one graph, built in one place from the stored graph | OC-7 of G-V4 (FR-6, FR-40) |
+| OC-1 | Given any stored graph, when a workflow is run or checked, then the stored graph reaches the execution as one graph, built in one place from the stored graph | OC-7 of G-V4 (FR-6) |
 | OC-2 | Given the graphs and runs of the current tests, when the order, the rules and the run use the directed graph, then every result is the same as before (same order up to equal choices, same refusals with the same named nodes, same run result) | OC-7 of G-V4 (FR-6) |
 | OC-3 | Given a graph with master nodes, session nodes or a transform that reads several data nodes, when it is loaded, then everything the runner needs (node kind, type, stop criterion, edge role and `as` name) is on the loaded graph | OC-7 of G-V4 (REQ-RUN-030 to 035) |
 
@@ -31,14 +31,6 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 | G-V4.GRAPHSTORE | real | a loader needs one stored form |
 | Pipeline runner N-2.4.1, Workflow management N-2.3 | real | |
 
-## Scope (candidate, to be confirmed in Plan)
-| Item | In/Out | Reason |
-|---|---|---|
-| A loader module: stored graph (record form) to `networkx.DiGraph` with node and edge attributes | in | OC-1, OC-3 |
-| Cycle check and topological order on the DiGraph | in | OC-2 |
-| `graph_run` reads the DiGraph | in | OC-1 |
-| Plain order and rule code | in | keep as a test oracle during the move, remove after the owner agrees |
-| Drawing, layout, the Graph app | out | N-5 works through IF-104 |
 
 ## Explore result (2026-11-20, D-362)
 `research.md`, `spikes.md`. The loader must keep several edges between two nodes (a `MultiDiGraph`). Two sets of graph rules exist and must become one. Open for Plan: the single rule set and its order, whether the run applies the rules (today it does not, F4), the threat entry THR-013.
@@ -56,6 +48,21 @@ Code may be stored in a graph: a code snippet is a data node attached to a trans
 2. Requirements and red tests: loader, attributes, order, rules, run parity.
 3. Loader and `graph_model` order on it; then the rules; then `graph_run`.
 4. Remove the plain code after the oracle comparison and the owner's agreement.
+
+## Scope
+Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
+
+| Item | In/Out | Reason |
+|---|---|---|
+| FR-7 | in | one set of eight graph rules in one fixed order (FR-63, FR-64) |
+| FR-37 | in | the graph model: rules, order of steps, run order (FR-63 to FR-65) |
+| FR-6 | partly | skills run on the stored graph (FR-65, NFR-17); the live trust, lifecycle, budgets and stop are parked in G-V5 |
+| FR-38 | partly | code in a graph runs only through a trusted tool and step; trust stays on change with a mark (FR-66, FR-67); exchange of transforms is unchanged |
+| NFR-3 | in | stored code and imported steps stay data until the toolbox runs them (THR-013); harmful imports with a recorded case are parked in G-V5 |
+| REQ-GA-003 | out | graph rules before saving are refined in G-V4.EDIT, which asks the backend check route; the rules themselves are FR-7 here |
+| FR-16 | out | the run record naming the graph and version is a requirement under FR-6 here; the edit log is G-V4.REPLAY |
+| FR-30, FR-36, FR-40, FR-45, FR-47, NFR-8 | out | storing, moving and snapshots are G-V4.GRAPHSTORE |
+| FR-21, FR-22, FR-41, FR-42, NFR-6, NFR-9 | out | the graph app, access, the builder and containers are other subgoals |
 
 ## Agreement
 | Subgoal | Agreed by | Date |
