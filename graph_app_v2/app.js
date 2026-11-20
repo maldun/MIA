@@ -22,10 +22,18 @@ let editing = false;
 let draft = null;
 let livePositions = null;
 let isOwner = false;
+let tools = [];
 
 const viewGraph = () => (editing && draft ? draft : current.graph);
 const kindOf = (id) => viewGraph().nodes.find((n) => n.id === id)?.data?.type;
-const infoOf = (id) => current.steps[id] ?? { kind: kindOf(id) };
+const infoOf = (id) => {
+  const type = kindOf(id);
+  if (editing && (type === 'transform' || type === 'master')) {        // while editing the marks follow the tool chosen in the working copy
+    const tool = tools.find((t) => t.id === viewGraph().nodes.find((n) => n.id === id)?.data?.toolbox_id);
+    return { kind: type, trust: tool?.trust ?? 'untrusted', lifecycle: tool?.lifecycle ?? null, code: current.steps[id]?.code ?? false };
+  }
+  return current.steps[id] ?? { kind: type };
+};
 const localProblems = (graph) => { const ids = new Set(graph.nodes.map((n) => n.id)); return graph.edges.flatMap((e) => ['from', 'to'].filter((end) => !ids.has(e[end])).map((end) => ({ problem: 'missing_step', connection: e.id, step: e[end], end }))); };
 const problemsOf = () => (editing ? localProblems(draft) : current.problems);
 let storage = null;
@@ -202,7 +210,7 @@ function change(next) {
 
 function showEditor(step, errors = {}) {
   renderStepEditor(document, $('detail'), step, {
-    errors,
+    errors, tools,
     onApply: ({ data, errors: found }) => {
       if (Object.keys(found).length) { showEditor(step, found); return; }
       const r = changeStep(draft, step.id, data);
@@ -259,6 +267,7 @@ async function start() {
   if (!who.user && !who.account) { show('login'); return; }
   $('who').textContent = who.user ?? who.account;
   isOwner = (await (await api('/api/v2/me')).json()).owner;
+  if (isOwner) tools = await (await api('/api/v2/toolbox')).json();
   $('edit-toggle').hidden = !isOwner || editing;
   show('viewer');
   graphs = await (await api('/api/v2/graphs')).json();

@@ -11,7 +11,23 @@ function labelled(doc, labelText, input, error) {
 }
 
 /** the form of one step: its known fields, the rest as JSON text, and the buttons; `onApply(data)` gets the new content, `onRemove()` removes the step */
-export function renderStepEditor(doc, container, step, { onApply, onRemove, errors = {} }) {
+/** the tools as a list: the entries of the toolbox with their trust and lifecycle (controllers for a loop-controlling step, the others for a processing step);
+ *  a tool that is stored but not in the toolbox stays selectable at the top, marked */
+function toolSelect(doc, tools, current, controller) {
+  const select = el(doc, 'select');
+  select.setAttribute('aria-label', 'tool (toolbox entry)');
+  const list = (tools ?? []).filter((t) => t.controller === controller);
+  const known = new Set(list.map((t) => t.id));
+  const options = [];
+  if (!current) options.push({ id: '', label: '(choose a tool)' });
+  else if (!known.has(current)) options.push({ id: current, label: `${current}  (not in the toolbox)` });
+  options.push(...list.map((t) => ({ id: t.id, label: `${t.id}  (${t.trust}, ${t.lifecycle})` })));
+  for (const o of options) { const op = el(doc, 'option', o.label); op.value = o.id; select.append(op); }
+  select.value = current ?? '';
+  return select;
+}
+
+export function renderStepEditor(doc, container, step, { onApply, onRemove, errors = {}, tools = null }) {
   const form = formFor(step);
   const inputs = {};
   const box = el(doc, 'div');
@@ -19,7 +35,8 @@ export function renderStepEditor(doc, container, step, { onApply, onRemove, erro
   const kind = el(doc, 'p', `kind: ${KINDS[(step.data ?? {}).type] ?? 'unknown'} (the kind cannot be changed; remove the step and add another)`);
   box.append(kind);
   for (const f of form.fields) {
-    const input = el(doc, 'input'); input.value = String(f.value); input.setAttribute('aria-label', f.label);
+    const input = f.name === 'toolbox_id' && tools ? toolSelect(doc, tools, String(f.value), (step.data ?? {}).type === 'master') : el(doc, 'input');
+    if (!(f.name === 'toolbox_id' && tools)) { input.value = String(f.value); input.setAttribute('aria-label', f.label); }
     if (f.kind === 'number') input.setAttribute('inputmode', 'decimal');
     inputs[f.name] = input;
     box.append(labelled(doc, f.label, input, errors[f.name]));

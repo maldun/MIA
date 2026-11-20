@@ -72,6 +72,10 @@ check("FR-68 removing a step with its connection is kept", r.status_code == 200 
 check("FR-72 a change made on an old version is refused, nothing is overwritten", o.put(U, json=body(changed, expected_version=3), headers=ORIGIN).status_code == 409 and len(o.get(U + "/versions").get_json()) == 7)
 check("NFR-19 an account that is not the owner can neither check nor keep", gst.post(U + "/check", json=body(cur), headers=ORIGIN).status_code == 403 and gst.put(U, json=body(changed), headers=ORIGIN).status_code == 403)
 check("FR-70 a request without a graph is refused cleanly", o.put(U, json={}, headers=ORIGIN).status_code == 422 and o.put("/api/v2/graphs/nope", json=body(cur), headers=ORIGIN).status_code == 404)
+tb = o.get("/api/v2/toolbox").get_json()
+byid = {t["id"]: t for t in tb}
+check("FR-92 the toolbox lists the available tools with trust and lifecycle, controllers apart", len(tb) >= 70 and byid["check.number"] == {"id": "check.number", "trust": "trusted", "lifecycle": "tested", "controller": False} and byid["control.loop"]["controller"] is True and [t["id"] for t in tb] == sorted(byid), f"{len(tb)} tools")
+check("the toolbox list is not shown without a login", app.test_client().get("/api/v2/toolbox").status_code == 401)
 check("a keep without a login is not accepted", app.test_client().put(U, json=body(changed), headers=ORIGIN).status_code == 401)
 failed = [n for n, ok, _ in results if not ok]
 print("\n%d checks, %d failed" % (len(results), len(failed)))

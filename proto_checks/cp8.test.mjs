@@ -72,6 +72,30 @@ test('FR-92: other fields as JSON text join the stored fields; a field the form 
   assert.equal(applyForm(base.nodes[1], { toolbox_id: 't' }, '[1]').errors.other, 'This must be a JSON object.');
 });
 
+test('FR-92: the tool is a list of the toolbox entries with trust and lifecycle; a stored tool that is not in the toolbox stays selectable, marked', () => {
+  const doc = fakeDoc2(), box = doc.createElement('div');
+  const tools = [{ id: 'check.number', trust: 'trusted', lifecycle: 'tested', controller: false }, { id: 'code.tally', trust: 'trusted', lifecycle: 'tested', controller: false },
+                 { id: 'control.loop', trust: 'trusted', lifecycle: 'tested', controller: true }];
+  const step = { id: 's', data: { type: 'transform', toolbox_id: 'tool.v4' } };
+  const parts = renderStepEditor(doc, box, step, { onApply() {}, onRemove() {}, tools });
+  const options = parts.inputs.toolbox_id.children.map((o) => [o.value, o.textContent]);
+  assert.deepEqual(options, [['tool.v4', 'tool.v4  (not in the toolbox)'], ['check.number', 'check.number  (trusted, tested)'], ['code.tally', 'code.tally  (trusted, tested)']]);
+  assert.equal(parts.inputs.toolbox_id.value, 'tool.v4');
+  const master = renderStepEditor(doc, box, { id: 'm', data: { type: 'master', toolbox_id: 'control.loop', stop: { max_repetitions: 2 } } }, { onApply() {}, onRemove() {}, tools });
+  assert.deepEqual(master.inputs.toolbox_id.children.map((o) => o.value), ['control.loop']);                 // only the controllers for a loop-controlling step
+  const fresh = renderStepEditor(doc, box, { id: 'n', data: { type: 'transform', toolbox_id: '' } }, { onApply() {}, onRemove() {}, tools });
+  assert.deepEqual(fresh.inputs.toolbox_id.children.map((o) => o.value), ['', 'check.number', 'code.tally']);   // a new step asks to choose
+  fresh.inputs.toolbox_id.value = 'code.tally';
+  let got; renderStepEditor(doc, box, { id: 'n', data: { type: 'transform', toolbox_id: '' } }, { onApply(r) { got = r; }, onRemove() {}, tools });
+});
+
+function fakeDoc2() {
+  const make = (tag) => ({ tag, children: [], attrs: {}, _text: '', value: '', listeners: {},
+    get textContent() { return this._text; }, set textContent(v) { this._text = String(v); },
+    append(...c) { this.children.push(...c); }, replaceChildren(...c) { this.children = c; }, setAttribute(k, v) { this.attrs[k] = v; }, addEventListener(t, f) { this.listeners[t] = f; } });
+  return { createElement: make };
+}
+
 function fakeDoc() {
   const make = (tag) => ({ tag, children: [], attrs: {}, _text: '', value: '', listeners: {},
     get textContent() { return this._text; }, set textContent(v) { this._text = String(v); },

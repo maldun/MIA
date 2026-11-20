@@ -170,6 +170,15 @@ def create_app(backend, accounts_store, port=8801):
         return {"id": graph_id, "context_graph_id": stored["context_graph_id"], "testbench_id": stored["testbench_id"],
                 "description": sent.get("description", stored["description"]), "nodes": sent["nodes"], "edges": sent["edges"]}
 
+    @app.get("/api/v2/toolbox")
+    def toolbox():
+        """the tools a processing step can use: every entry of the toolbox that is not retired, with its trust and lifecycle; the controllers are the ones for loop-controlling steps"""
+        out = []
+        for tid in box.offer():
+            found = box.look_up(tid)
+            out.append({"id": tid, "trust": found["trust"], "lifecycle": found["lifecycle"], "controller": tid.startswith("control.")})
+        return jsonify(out)
+
     @app.get("/api/v2/me")
     def me():
         account = getattr(g, "account", None)
