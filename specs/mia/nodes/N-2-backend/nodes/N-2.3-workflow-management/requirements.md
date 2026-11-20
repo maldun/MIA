@@ -835,9 +835,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-34: per skill, the list of model calls of the old and the converted run on scripted replies is equal (exact, a diff is shown)
 - Verified by: TC-WFM-058
 - Status: Draft
-- Relaxed: TD-86
-- Target: converted runs read the live toolbox store of the app, trust and lifecycle included (see TD-86); TD-89 and TD-90 also name this requirement
-- History: G-V2 Plan step 1 (2026-11-07), new; Commit G-V2 (2026-11-20): Relaxed TD-86 (D-355)
+- Relaxed: TD-90
+- Target: a scripted proxy in front of Ollama so that the real half of the IF-103 contract suite runs (see TD-90); TD-86 and TD-89 are carried by REQ-WFM-060 and REQ-WFM-059
+- History: G-V2 Plan step 1 (2026-11-07), new; Commit G-V2 (2026-11-20): Relaxed TD-90 (D-357)
 
 ### REQ-WFM-059 – Same outcomes on the suite
 - Level: low   Subject: TaskRuntime
@@ -850,7 +850,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-34: on scripted run files, a skill whose criterion passes is accepted; a skill whose criterion fails or is not decided stays unconverted (exact)
 - Verified by: TC-WFM-059
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): the Eval criterion line did not parse (agent_check A2), so the criteria moved to REQ-WFM-110 to 114 and the text became the acceptance rule (owner: split per skill); approved text of the review of 2026-11-07 superseded, back to review
+- Relaxed: TD-89
+- Target: the check and the skill name the same research.escalate version (see TD-89)
+- History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): the Eval criterion line did not parse (agent_check A2), so the criteria moved to REQ-WFM-110 to 114 and the text became the acceptance rule (owner: split per skill); approved text of the review of 2026-11-07 superseded, back to review; Commit G-V2 (2026-11-20): Relaxed TD-89 (D-356)
 
 ### REQ-WFM-060 – Record of the check
 - Level: low   Subject: TaskRuntime
@@ -863,7 +865,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-34: the record of each existing skill names the form it runs on and either a verdict with suite, run and pins or a reason (inspection)
 - Verified by: TC-WFM-060
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- Relaxed: TD-86
+- Target: converted runs read the live toolbox store of the app, trust and lifecycle included (see TD-86)
+- History: G-V2 Plan step 1 (2026-11-07), new; Commit G-V2 (2026-11-20): Relaxed TD-86 (D-355)
 
 ### REQ-WFM-061 – Take a snapshot
 - Level: low   Subject: TaskRuntime
