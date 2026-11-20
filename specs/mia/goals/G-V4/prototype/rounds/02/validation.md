@@ -8,8 +8,8 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 ## Outcomes
 | Item | What the user tried (Given / When from the outcome) | What was observed | Result (met / partly / not met / not tried) | Finding |
 |---|---|---|---|---|
-| FR-48 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-49 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-48 | Given the sample store, start the viewer (`graph_proto_app.py --store files:/tmp/gs/v`), log in, type part of a name into the filter, pick a graph; then start it on the database store and compare | – | not tried | – |
+| FR-49 | Given the graph `sample.broken`, open it: a dashed connection to a marked missing step and the problem named above the picture | – | not tried | – |
 | FR-50 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-51 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-52 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
@@ -42,7 +42,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-95 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-10 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-11 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| NFR-12 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| NFR-12 | Given you are not logged in, open `/api/v2/graphs` and a graph: nothing is shown; log in once, log out | – | not tried | – |
 | NFR-13 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-14 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-15 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
