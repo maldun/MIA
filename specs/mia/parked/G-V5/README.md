@@ -12,6 +12,7 @@ Owner decision 2026-11-20: the definition of G-V5 is deferred until G-V4 is clos
 ## The goal_check and trace_check findings that belong to G-V5, not to G-V4
 These are the findings on the earlier goals that the rework does not fix; G-V4 does not carry them:
 - `goal_check`: GL1 (two open iteration goals) comes back as soon as G-V5 is defined while G-V4 is open; GL3 of G-V2 (SNAPSHOT scope ids, interface versions, TOOLBOX `IF-302`).
+- `goal_check` GL5 on the closed goal G-V2: IF-203 and IF-301 were frozen by G-V2 and are now frozen by G-V4 (D-393); the attribute `Frozen:` holds one goal, so G-V2's check reports them. They belong to the closed goal's history, not to G-V4.
 - `trace_check`: 553 errors at the tag of v0.2.1; WARN for deferral triggers without a date and deferrals not listed in the node verification reports (for example TD-90).
 - The lists in `goals/G-V2/remainder-for-next-goal.md` and the open items of `goals/G-V3/verification-report.md` (V2-1 to V2-3, V2-6, V2-8, V3-6, F-04, TD-82 to TD-90).
 
