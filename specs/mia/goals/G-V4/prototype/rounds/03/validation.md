@@ -40,7 +40,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-92 | not in this round's scope | result of round 02, unchanged by this round | met | – |
 | FR-93 | not in this round's scope | result of round 02, unchanged by this round | met | – |
 | FR-94 | not in this round's scope | result of round 02, unchanged by this round | met | – |
-| FR-95 | not in this round's scope | result of round 02, unchanged by this round | partly | – |
+| FR-95 | not in this round's scope | result of round 02, unchanged by this round | partly | FB-2 (round 02) |
 | NFR-10 | not in this round's scope | result of round 02, unchanged by this round | met | – |
 | NFR-11 | not in this round's scope | result of round 02, unchanged by this round | met | – |
 | NFR-12 | not in this round's scope | result of round 02, unchanged by this round | met | – |
