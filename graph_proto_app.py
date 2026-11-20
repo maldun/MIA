@@ -310,6 +310,43 @@ def create_app(backend, accounts_store, port=8801, live=None):
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named}), 422
         return jsonify({"version": saved.version, "changed": saved.version != current, **sync_graph(graph_id)})
 
+    @app.post("/api/v2/graphs/<path:graph_id>/copy-step")
+    def copy_step(graph_id):
+        """copies one step into another graph as an independent copy (FR-94): the same content under a name that is free there, no connections, saved as a new version of the other graph when every rule holds"""
+        denied = owner_only()
+        if denied:
+            return denied
+        body = request.get_json(silent=True) or {}
+        step_id, target_id = body.get("step"), body.get("target")
+        if not isinstance(step_id, str) or not isinstance(target_id, str):
+            return jsonify({"error": "invalid", "detail": "step and target"}), 422
+        if target_id == graph_id:
+            return jsonify({"error": "same_graph"}), 422
+        name = body.get("name") if body.get("name") not in (None, "") else step_id
+        try:
+            version = body.get("version") if isinstance(body.get("version"), int) and not isinstance(body.get("version"), bool) else None
+            source = wmodel.read_graph(graph_id, version)         # the version the owner is looking at
+            target = wmodel.read_graph(target_id)
+            current = max(e["version"] for e in wmodel.graph_versions(target_id))
+        except StorageError:
+            return jsonify({"error": "not_found"}), 404
+        step = next((n for n in source["nodes"] if n["id"] == step_id), None)
+        if step is None:
+            return jsonify({"error": "not_found", "detail": "step"}), 404
+        if not isinstance(name, str) or not name.strip() or "/" in name:
+            return jsonify({"error": "invalid", "detail": "name"}), 422
+        if any(n["id"] == name for n in target["nodes"]):
+            return jsonify({"error": "name_taken", "name": name}), 409
+        target["nodes"] = target["nodes"] + [{"id": name, "data": json.loads(json.dumps(step.get("data") or {}))}]   # a deep copy: a later change to either step never reaches the other
+        rules = graph_rules_proto.rule_report(target)
+        if rules:
+            return jsonify({"error": "rules_broken", "rules": rules}), 422
+        wmodel.author = g.account
+        saved = wmodel.save_graph(target)
+        if not saved.saved:
+            return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail}), 422
+        return jsonify({"graph": target_id, "step": name, "version": saved.version, "changed": saved.version != current, **sync_graph(target_id)})
+
     @app.get("/")
     def index():
         return send_from_directory(os.path.join(REPO, "graph_app_v2"), "index.html")

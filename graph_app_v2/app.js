@@ -11,6 +11,7 @@ import { addStep, removeStep, changeStep, addConnection, removeConnection, chang
 import { renderStepEditor, renderConnectionEditor } from './edit-panel.js';
 import * as hist from './undo-stack.js';
 import { storeNote, canEdit } from './store-note.js';
+import { renderCopyPanel, copyMessage } from './copy-panel.js';
 
 const $ = (id) => document.getElementById(id);
 let graphs = [];
@@ -124,9 +125,23 @@ function renderHistory() {
 $('prev').addEventListener('click', () => { const v = neighbour(versions, current.version, 'previous'); if (v !== null) open(chosen, v); });
 $('next').addEventListener('click', () => { const v = neighbour(versions, current.version, 'next'); if (v !== null) open(chosen, v); });
 
+// a selected step in the viewing mode: its fields, and for the owner the form that copies it into another graph (FR-94)
+function showStep(step, info) {
+  renderPanel(document, $('detail'), step, info);
+  if (!isOwner || editing || !step || info?.kind === 'missing' || step.data?.type === 'missing') return;
+  renderCopyPanel(document, $('detail'), step, graphs, chosen, {
+    onCopy: async ({ target, name }) => {
+      const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/copy-step`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: step.id, target, name, version: current.version }) });
+      const body = await res.json().catch(() => ({}));
+      $('status').textContent = copyMessage(res.status, body, step.id, target);
+      if (res.ok) { graphs = await (await api('/api/v2/graphs')).json(); renderList(); await loadStoreStatus(); $('sync').classList.toggle('attention', Boolean(storeStatus?.lag)); }
+    },
+  });
+}
+
 function pick(id) {
   const step = viewGraph().nodes.find((x) => x.id === id);
-  if (editing) showEditor(step); else renderPanel(document, $('detail'), step, infoOf(id));
+  if (editing) showEditor(step); else showStep(step, infoOf(id));
   network?.selectNodes([id]);
 }
 
@@ -155,7 +170,7 @@ function draw() {
   network = new vis.Network($('view'), { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) }, options);
   network.on('stabilizationIterationsDone', () => network.setOptions({ physics: { enabled: false } }));
   network.on('click', ({ nodes: [n], edges: [e] }) => {
-    if (n !== undefined) { const step = viewGraph().nodes.find((x) => x.id === n); if (editing && step) showEditor(step); else renderPanel(document, $('detail'), step ?? { id: n, data: { type: 'missing' } }, infoOf(n)); }
+    if (n !== undefined) { const step = viewGraph().nodes.find((x) => x.id === n); if (editing && step) showEditor(step); else if (step) showStep(step, infoOf(n)); else renderPanel(document, $('detail'), { id: n, data: { type: 'missing' } }, infoOf(n)); }
     else if (e !== undefined) { const link = viewGraph().edges[Number(e.slice(1))]; if (editing) showConnectionEditor(link); else renderPanel(document, $('detail'), link, null, true); }
     else renderPanel(document, $('detail'), null);
   });
@@ -180,16 +195,21 @@ $('physics').addEventListener('change', () => { settings.physics = $('physics').
 $('edges').addEventListener('change', () => { settings.edges = $('edges').value; saveSettings(storage, settings); network?.setOptions({ edges: { smooth: edgeSmooth(settings) } }); });
 $('layers').addEventListener('click', () => { mode = 'layers'; if (current) draw(); });
 $('use-saved').addEventListener('click', () => { mode = 'auto'; if (current) draw(); });
-$('save-arr').addEventListener('click', async () => {
+// the arrangement is saved from the settings menu and from the editor; it is not a version of the graph (FR-74)
+async function saveArrangement() {
   if (!current || !network) return;
   const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/arrangement`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ positions: positionsOf(network.getPositions()) }) });
-  if (res.status === 403) { $('arr-note').textContent = 'Only the owner can save an arrangement.'; return; }
-  if (!res.ok) { $('arr-note').textContent = `The arrangement was not saved (${res.status}).`; return; }
+  const say = (text) => { $('arr-note').textContent = text; $('edit-note').textContent = text; };
+  if (res.status === 403) { say('Only the owner can save an arrangement.'); return; }
+  if (!res.ok) { say(`The arrangement was not saved (${res.status}).`); return; }
+  const kept = await res.json();
   saved = await (await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/arrangement`)).json();
+  if (editing) livePositions = positionsOf(network.getPositions());
   mode = 'auto';
-  $('arr-note').textContent = arrangementNote(saved, mode);
-});
-
+  say(`${arrangementNote(saved, mode)} ${kept.saved} step place(s) saved; no new version of the graph.`);
+}
+$('save-arr').addEventListener('click', saveArrangement);
+$('save-arr-edit').addEventListener('click', saveArrangement);
 
 function refreshUndo() { $('undo').disabled = !hist.canUndo(history); $('redo').disabled = !hist.canRedo(history); $('undo-note').textContent = hist.note(history); }
 function stepHistory(fn) {

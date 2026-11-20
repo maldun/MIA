@@ -28,7 +28,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-71 | Given the kept change: the History list has version 5; version 4 is still there as it was | – | not tried | – |
 | FR-72 | Given two browser windows on the same graph: keep a change in one, then try to keep another in the other: it says the graph changed and writes nothing | – | not tried | – |
 | FR-73 | Given `cp2.multi` with several versions: open an earlier one in the History, `Restore this version`: a new version appears with that content, the versions before it are unchanged | – | not tried | – |
-| FR-74 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-74 | Given a graph, log in as owner, `Edit this graph`, drag two steps, `Save the arrangement`; log out, log in again (or open a second browser as another account) and open the graph: the steps are where you left them and the History list has no new version; move one step again and save: the last move counts | – | not tried | – |
 | FR-76 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-77 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-78 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
@@ -38,7 +38,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-91 | Given the editor: make three changes, `Undo` twice, `Redo` once (or Ctrl+Z / Ctrl+Y): the picture follows; nothing is kept until `Keep the change` | – | not tried | – |
 | FR-92 | Given a processing step selected while editing: a form with the tool; a data step: value and parameters; a loop-controlling step: stop limits; type something wrong and read the reason; other stored fields as JSON text | – | not tried | – |
 | FR-93 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-94 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-94 | Given a step selected while not editing (owner): under its fields "Copy ... into another graph": search a graph, choose it, `Copy the step`; open that graph: the step is there with the same content and a new version; change either step and keep: the other is unchanged; a name that is used there is refused with the reason | – | not tried | – |
 | FR-95 | Given the viewer started with `--store <copy> --live <live>`: keep a change (the live store gets it, the header says the copy is behind), `Sync the copy now`; then remove the live folder: the header says NOT REACHABLE, the edit button is disabled, looking still works | – | not tried | – |
 | NFR-10 | Given you have never used the viewer: from the login find `research.escalate@1`, open it and read the content of one step without instructions; note the time | – | not tried | – |
 | NFR-11 | Given `research.escalate@1` (54 steps): how long until the picture is usable, and do moving and selecting stay smooth? | – | not tried | – |
@@ -47,7 +47,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | NFR-14 | Given only the keyboard: Tab to the graph list and the step list, Enter selects; the settings button opens with Enter and closes with Escape; switch the system between light and dark | – | not tried | – |
 | NFR-15 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-16 | Given a graph with a cycle and an interrupted save, look at the demo output and at the checks 8 to 10 of `python proto_checks/cp1_check.py files` | – | not tried | – |
-| NFR-18 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| NFR-18 | Given you have not used the editor (or someone else tries it): change the tool of one step and keep it, without any instructions; note the time (the aim is under three minutes) and where you hesitated | – | not tried | – |
 | NFR-19 | Given a second account (not the owner): no `Edit this graph` button; the routes refuse it | – | not tried | – |
 | NFR-20 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 
