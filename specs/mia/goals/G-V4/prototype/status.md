@@ -2,7 +2,7 @@
 
 Single source for what the demonstrator can show (`dev-workflow/references/prototyping.md`). Updated with every checkpoint and at merges.
 
-Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 77a01ba3 (CP9), 2026-11-20
+Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: d8ac8011 (CP9), 2026-11-20
 
 | Part / feature | Requirement IDs | State (mock / working / real / not yet / retired) | Made real by task | Commit | Date | Notes |
 |---|---|---|---|---|---|---|
@@ -22,7 +22,7 @@ Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `pro
 | shared arrangement (settled, saved by the owner for everyone, reset to layers), history list with previous and next, any version shown | FR-52, FR-55 | working | – | 20574749 | 2026-11-20 | CP7: table `arrangements` (a draft addition to IF-302), `GET/PUT /api/v2/graphs/<id>/arrangement` (PUT owner only = the account made first), `arrangement.js`, `history.js`; the save button is in the settings menu for now, the editor takes over in CP10 (FR-74) |
 | editor: working copy, add, remove and change steps and connections, a form per kind plus text, rules after every change, keep as a new version, a conflict refused, owner only | FR-68, FR-69, FR-70, FR-71, FR-72, FR-92, NFR-19 | working | – | 897dc5b8 | 2026-11-20 | CP8: `edit-model.js`, `edit-panel.js`, `PUT /api/v2/graphs/<id>` (owner only, expected version, rules first); the side panel is resizable (FB-1: its final form is open) |
 | restore an earlier version as a new one, undo and redo of the session, changes written to the live store, the editor refused when the live store cannot be reached | FR-73, FR-91, FR-95 | working | – | 77a01ba3 | 2026-11-20 | CP9: `POST /api/v2/graphs/<id>/restore`, `undo-stack.js`, `--live` store beside the copy that is read, `GET /api/v2/status`, 503 `store_unreachable` for every change; keyboard shortcuts Ctrl+Z and Ctrl+Y |
-| first sync live store to copy (on command) | FR-93 | working | – | 77a01ba3 | 2026-11-20 | CP9: `POST /api/v2/sync` runs the whole move; what is left for CP3: automatic at start and stop, differing versions of the copy set aside, a lag report per graph |
+| sync live store to copy: on command (the whole store), and at once for the graph just changed by a keep or restore (owner's decision after CP9) | FR-93 | working | – | 77a01ba3 | 2026-11-20 | CP9: `POST /api/v2/sync` runs the whole move; what is left for CP3: automatic at start and stop, differing versions of the copy set aside, a lag report per graph |
 | arrangement saving from the editor, copy a step | FR-74, FR-94 | not yet | – | – | – | CP10 (the save itself exists since CP7) |
 | edit log | FR-76, FR-77, FR-80, FR-81 | not yet | – | – | – | CP11 |
 | playback and comparison | FR-78, FR-79, NFR-20 | not yet | – | – | – | CP12 |
