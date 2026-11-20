@@ -136,3 +136,12 @@ export function applyForm(step, values, otherText = '') {
   }
   return { data, errors };
 }
+
+/** the tools that match what was typed (every word in the id), for a loop-controlling step (controllers) or a processing step (the others); the order given */
+export function filterTools(tools, text, controller) {
+  const words = String(text ?? '').toLowerCase().split(/\s+/).filter(Boolean);
+  return (tools ?? []).filter((t) => t.controller === controller && words.every((w) => t.id.toLowerCase().includes(w)));
+}
+
+/** the line that names a tool in the list */
+export const toolLabel = (t) => `${t.id}  (${t.trust}, ${t.lifecycle})`;

@@ -72,21 +72,44 @@ test('FR-92: other fields as JSON text join the stored fields; a field the form 
   assert.equal(applyForm(base.nodes[1], { toolbox_id: 't' }, '[1]').errors.other, 'This must be a JSON object.');
 });
 
-test('FR-92: the tool is a list of the toolbox entries with trust and lifecycle; a stored tool that is not in the toolbox stays selectable, marked', () => {
+test('FR-92: the tool is chosen from a searchable list of the toolbox entries with trust and lifecycle, like the list of graphs; no dropdown', () => {
   const doc = fakeDoc2(), box = doc.createElement('div');
-  const tools = [{ id: 'check.number', trust: 'trusted', lifecycle: 'tested', controller: false }, { id: 'code.tally', trust: 'trusted', lifecycle: 'tested', controller: false },
-                 { id: 'control.loop', trust: 'trusted', lifecycle: 'tested', controller: true }];
+  const tools = [{ id: 'check.number', trust: 'trusted', lifecycle: 'tested', controller: false }, { id: 'check.date_claim', trust: 'trusted', lifecycle: 'tested', controller: false },
+                 { id: 'code.tally', trust: 'trusted', lifecycle: 'draft', controller: false }, { id: 'control.loop', trust: 'trusted', lifecycle: 'tested', controller: true }];
   const step = { id: 's', data: { type: 'transform', toolbox_id: 'tool.v4' } };
   const parts = renderStepEditor(doc, box, step, { onApply() {}, onRemove() {}, tools });
-  const options = parts.inputs.toolbox_id.children.map((o) => [o.value, o.textContent]);
-  assert.deepEqual(options, [['tool.v4', 'tool.v4  (not in the toolbox)'], ['check.number', 'check.number  (trusted, tested)'], ['code.tally', 'code.tally  (trusted, tested)']]);
-  assert.equal(parts.inputs.toolbox_id.value, 'tool.v4');
-  const master = renderStepEditor(doc, box, { id: 'm', data: { type: 'master', toolbox_id: 'control.loop', stop: { max_repetitions: 2 } } }, { onApply() {}, onRemove() {}, tools });
-  assert.deepEqual(master.inputs.toolbox_id.children.map((o) => o.value), ['control.loop']);                 // only the controllers for a loop-controlling step
-  const fresh = renderStepEditor(doc, box, { id: 'n', data: { type: 'transform', toolbox_id: '' } }, { onApply() {}, onRemove() {}, tools });
-  assert.deepEqual(fresh.inputs.toolbox_id.children.map((o) => o.value), ['', 'check.number', 'code.tally']);   // a new step asks to choose
-  fresh.inputs.toolbox_id.value = 'code.tally';
-  let got; renderStepEditor(doc, box, { id: 'n', data: { type: 'transform', toolbox_id: '' } }, { onApply(r) { got = r; }, onRemove() {}, tools });
+  const picker = parts.inputs.toolbox_id;
+  assert.ok(!all(box).some((e) => e.tag === 'select'));                                               // no dropdown anywhere
+  assert.equal(picker.search.attrs.type, 'search');
+  assert.deepEqual(picker.list.children.map((li) => li.textContent), ['tool.v4  (not in the toolbox)', 'check.number  (trusted, tested)', 'check.date_claim  (trusted, tested)', 'code.tally  (trusted, draft)']);
+  assert.ok(all(box).some((e) => e.textContent === 'Tool: tool.v4  (not in the toolbox)'));
+  assert.equal(picker.value, 'tool.v4');
+  picker.search.value = 'check'; picker.search.listeners.input();
+  assert.deepEqual(picker.list.children.map((li) => li.textContent.split('  ')[0]), ['check.number', 'check.date_claim']);
+  picker.search.value = 'date claim'.replace(' ', '_'); picker.search.listeners.input();
+  assert.deepEqual(picker.list.children.map((li) => li.textContent.split('  ')[0]), ['check.date_claim']);
+  picker.list.children[0].listeners.click();
+  assert.equal(picker.value, 'check.date_claim');
+  assert.ok(all(box).some((e) => e.textContent === 'Tool: check.date_claim  (trusted, tested)'));
+  picker.search.value = 'tally'; picker.search.listeners.input();
+  picker.list.children[0].listeners.keydown({ key: 'Enter', preventDefault() {} });
+  assert.equal(picker.value, 'code.tally');
+  picker.search.value = 'zzz'; picker.search.listeners.input();
+  assert.deepEqual(picker.list.children, []);
+});
+
+test('FR-92: a loop-controlling step is offered only the controllers; a new step starts with no tool and Apply refuses it', () => {
+  const doc = fakeDoc2(), box = doc.createElement('div'), got = [];
+  const tools = [{ id: 'check.number', trust: 'trusted', lifecycle: 'tested', controller: false }, { id: 'control.loop', trust: 'trusted', lifecycle: 'tested', controller: true }];
+  const m = renderStepEditor(doc, box, { id: 'm', data: { type: 'master', toolbox_id: 'control.loop', stop: { max_repetitions: 2 } } }, { onApply() {}, onRemove() {}, tools });
+  assert.deepEqual(m.inputs.toolbox_id.list.children.map((li) => li.textContent.split('  ')[0]), ['control.loop']);
+  const n = renderStepEditor(doc, box, { id: 'n', data: { type: 'transform', toolbox_id: '' } }, { onApply: (r) => got.push(r), onRemove() {}, tools });
+  assert.ok(all(box).some((e) => e.textContent === 'Tool: (none chosen yet)'));
+  n.apply.listeners.click();
+  assert.deepEqual(got[0].errors, { toolbox_id: 'A processing step needs a tool.' });
+  n.inputs.toolbox_id.list.children[0].listeners.click();
+  n.apply.listeners.click();
+  assert.deepEqual(got[1], { data: { type: 'transform', toolbox_id: 'check.number' }, errors: {} });
 });
 
 function fakeDoc2() {

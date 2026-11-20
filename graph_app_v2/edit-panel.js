@@ -1,5 +1,5 @@
 // PROTOTYPE CP8 (G-V4.EDIT): the editing panel, built only with createElement and textContent; inputs get their value through .value (never markup).
-import { formFor, applyForm, KINDS } from './edit-model.js';
+import { formFor, applyForm, KINDS, filterTools, toolLabel } from './edit-model.js';
 
 const el = (doc, tag, text) => { const e = doc.createElement(tag); if (text !== undefined) e.textContent = text; return e; };
 
@@ -11,20 +11,36 @@ function labelled(doc, labelText, input, error) {
 }
 
 /** the form of one step: its known fields, the rest as JSON text, and the buttons; `onApply(data)` gets the new content, `onRemove()` removes the step */
-/** the tools as a list: the entries of the toolbox with their trust and lifecycle (controllers for a loop-controlling step, the others for a processing step);
- *  a tool that is stored but not in the toolbox stays selectable at the top, marked */
-function toolSelect(doc, tools, current, controller) {
-  const select = el(doc, 'select');
-  select.setAttribute('aria-label', 'tool (toolbox entry)');
-  const list = (tools ?? []).filter((t) => t.controller === controller);
-  const known = new Set(list.map((t) => t.id));
-  const options = [];
-  if (!current) options.push({ id: '', label: '(choose a tool)' });
-  else if (!known.has(current)) options.push({ id: current, label: `${current}  (not in the toolbox)` });
-  options.push(...list.map((t) => ({ id: t.id, label: `${t.id}  (${t.trust}, ${t.lifecycle})` })));
-  for (const o of options) { const op = el(doc, 'option', o.label); op.value = o.id; select.append(op); }
-  select.value = current ?? '';
-  return select;
+/** the tool of a step: a search box over the entries of the toolbox with their trust and lifecycle (controllers for a loop-controlling step, the others for a
+ *  processing step), as a list like the list of graphs; a stored tool that is not in the toolbox stays choosable, marked. `value` is the tool chosen. */
+function toolPicker(doc, tools, current, controller) {
+  let chosen = current ?? '';
+  const wrap = el(doc, 'div');
+  const shown = el(doc, 'p');
+  const search = el(doc, 'input'); search.setAttribute('type', 'search'); search.setAttribute('aria-label', 'search tools'); search.setAttribute('placeholder', 'search tools by name');
+  const list = el(doc, 'ul'); list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', 'tools of the toolbox');
+  const label = (id) => { const t = (tools ?? []).find((x) => x.id === id); return id ? (t ? toolLabel(t) : `${id}  (not in the toolbox)`) : '(none chosen yet)'; };
+  const render = () => {
+    shown.textContent = `Tool: ${label(chosen)}`;
+    const matches = filterTools(tools, search.value, controller);
+    const words = String(search.value ?? '').toLowerCase().split(/\s+/).filter(Boolean);
+    const stored = current && !(tools ?? []).some((t) => t.id === current) && words.every((w) => current.toLowerCase().includes(w));   // a stored tool outside the toolbox is listed while it matches
+    const rows = [...(stored ? [{ id: current, text: `${current}  (not in the toolbox)` }] : []), ...matches.map((t) => ({ id: t.id, text: toolLabel(t) }))];
+    list.replaceChildren(...rows.map((r) => {
+      const li = el(doc, 'li', r.text);
+      li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', String(r.id === chosen));
+      li.tabIndex = 0;
+      const choose = () => { chosen = r.id; render(); };
+      li.addEventListener('click', choose);
+      li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault?.(); choose(); } });
+      return li;
+    }));
+  };
+  search.addEventListener('input', render);
+  render();
+  wrap.append(shown, search, list);
+  return { element: wrap, get value() { return chosen; }, set value(v) { chosen = v; render(); }, list, search };
 }
 
 export function renderStepEditor(doc, container, step, { onApply, onRemove, errors = {}, tools = null }) {
@@ -35,8 +51,15 @@ export function renderStepEditor(doc, container, step, { onApply, onRemove, erro
   const kind = el(doc, 'p', `kind: ${KINDS[(step.data ?? {}).type] ?? 'unknown'} (the kind cannot be changed; remove the step and add another)`);
   box.append(kind);
   for (const f of form.fields) {
-    const input = f.name === 'toolbox_id' && tools ? toolSelect(doc, tools, String(f.value), (step.data ?? {}).type === 'master') : el(doc, 'input');
-    if (!(f.name === 'toolbox_id' && tools)) { input.value = String(f.value); input.setAttribute('aria-label', f.label); }
+    if (f.name === 'toolbox_id' && tools) {
+      const picker = toolPicker(doc, tools, String(f.value), (step.data ?? {}).type === 'master');
+      inputs[f.name] = picker;
+      const wrap = el(doc, 'div'); wrap.append(el(doc, 'span', f.label), picker.element);
+      if (errors[f.name]) { const e = el(doc, 'p', errors[f.name]); e.setAttribute('role', 'alert'); e.className = 'field-error'; wrap.append(e); }
+      box.append(wrap);
+      continue;
+    }
+    const input = el(doc, 'input'); input.value = String(f.value); input.setAttribute('aria-label', f.label);
     if (f.kind === 'number') input.setAttribute('inputmode', 'decimal');
     inputs[f.name] = input;
     box.append(labelled(doc, f.label, input, errors[f.name]));
