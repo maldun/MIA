@@ -43,8 +43,8 @@ Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); editing 
 ### 3.2 Non-functional requirements
 - NFR-18 (Usability): A first change is possible without instructions.
   - Outcome: Given the owner has not used the editor before, when the owner wants to change one field of one step and keep it, then it is done in under three minutes without instructions.
-- NFR-19 (Security): Only the owner changes graphs, and changed code steps lose their trust.
-  - Outcome: Given any account other than the owner's, when it opens a graph, then it can look but not change or keep anything; given a trusted step whose code is changed, then it is untrusted afterwards (FR-67).
+- NFR-19 (Security): Only the owner changes graphs, and a step changed since it was trusted is marked.
+  - Outcome: Given any account other than the owner's, when it opens a graph, then it can look but not change or keep anything; given a trusted step that the owner changes, then it stays trusted and is marked as changed since it was trusted (FR-67 of G-V4.GRAPHAPI).
 ### 3.3 Given constraints
 | Constraint | Source | Why it cannot be changed |
 |---|---|---|

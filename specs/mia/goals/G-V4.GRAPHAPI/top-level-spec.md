@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph rules and the run of a stored graph (G-V4.GRAPHAPI)
 
-**Status:** Draft, for the owner's review
+**Status:** Reviewed; approved by the owner with the revised FR-67 (D-390), the owner's confirmation of the revision is open
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal GRAPHAPI of G-V4. Reviews how a graph is checked and run (item 2 of the owner's list). Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
 
@@ -21,10 +21,10 @@ Storing graphs (G-V4.GRAPHSTORE); drawing and editing (VIEW, EDIT); live trust, 
   - Outcome: Given a stored graph with a cycle, two writers of one piece of data, a connection to a missing step, two identical connections, or a step input that has no writer, no start value in the graph and no value given with the run, when the owner runs it, then no step runs, the run ends as refused and names each broken step, connection or input.
 - FR-65: The system shall run the steps of a stored graph one after the other in a fixed order in which every step runs after the steps it reads from.
   - Outcome: Given a stored graph, when it runs, then every step starts only after all the steps that supply its inputs have finished, no two steps run at the same time, and the same graph with the same inputs runs the same steps in the same order.
-- FR-66: The system shall run a piece of code that is stored in a graph only through a tool the owner has trusted for that step, never by itself.
-  - Outcome: Given a graph with a code step, when the owner has not trusted that step with its current code, then the run is refused before any step runs and names the step; when the owner has trusted the tool and that step with its current code, then it runs in the contained space of its tool and its output is treated as data like any other.
-- FR-67: The system shall drop a step back to untrusted when its content changes.
-  - Outcome: Given a trusted step whose code, tool or settings are changed, when the owner next runs the graph, then the step is untrusted until the owner trusts it again, and the run record names the version of the step that ran; a change of the step's position or of a reason text does not drop its trust.
+- FR-66: The system shall run a piece of code that is stored in a graph only through a tool and a step the owner has trusted, never by itself.
+  - Outcome: Given a graph with a code step, when the owner has not trusted that step, then the run is refused before any step runs and names the step; when the owner has trusted the tool and that step, then it runs in the contained space of its tool and its output is treated as data like any other; a step that arrives from outside (an import) starts untrusted.
+- FR-67: The system shall keep the trust of a step the owner changes, mark it as changed since it was trusted, and record which version of the step ran.
+  - Outcome: Given a trusted step that the owner changes in the editor, when the owner next runs the graph, then the step is still trusted and runs, it is marked as changed since it was trusted until the owner trusts it again, and the run record names the version of the step that ran; a change of the step's position or of a reason text does not set the mark.
 ### 3.2 Non-functional requirements
 - NFR-17 (Compatibility): Skills give the same results after the rework as before.
   - Outcome: Given every skill that was converted at the end of G-V2 and its cases, when it is run on its stored graph, then it gives the same results on those cases as before the rework, decided on the dev suites against the old-runner baselines with the agreed statistical rule and the pinned model; the same check is repeated on holdout cases as soon as the owner has labelled them (G-V5.LEFTOVER).

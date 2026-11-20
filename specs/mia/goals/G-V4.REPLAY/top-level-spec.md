@@ -1,6 +1,6 @@
 # Top-Level Specification: Edit log and playback (G-V4.REPLAY)
 
-**Status:** Draft, for the owner's review
+**Status:** Approved by the owner (maldun, 2026-11-20, D-390)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal REPLAY of G-V4. Records and plays back the changes made in the editor (item 3c of the owner's list). Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
 

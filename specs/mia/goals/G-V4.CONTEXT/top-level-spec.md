@@ -1,6 +1,6 @@
 # Top-Level Specification: Context graph editing (G-V4.CONTEXT)
 
-**Status:** Reviewed by the owner (D-379); approval box open
+**Status:** Approved by the owner (maldun, 2026-11-20, D-390)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal CONTEXT of G-V4 (decided by the owner 2026-11-20, D-369). Requirement IDs provisional (FR-75 moved from G-V4.EDIT, FR-97 new); Plan assigns it in `requirements.md`.
 

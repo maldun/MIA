@@ -1,6 +1,6 @@
 # Top-Level Specification: Context graph builder (G-V4.BUILDER)
 
-**Status:** Reviewed by the owner item by item (D-382 to D-384); approval box open
+**Status:** Approved by the owner (maldun, 2026-11-20, D-390)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal BUILDER of G-V4 (decided by the owner 2026-11-20, D-380). Requirement IDs are provisional (continuing after FR-97 and NFR-22); Plan assigns them in `requirements.md`. Refines FR-41 and FR-42 (their approved text stays, D-362).
 
