@@ -112,6 +112,26 @@ def check_graph(graph):
     return find_cycle(list(nodes), edges) or []
 
 
+MEMBER_TABLES = {"workflow": ("graph_nodes", "graph_edges"), "context": ("context_nodes", "context_edges")}
+
+
+def context_problems(graph):
+    """IDs a refusal names for a context graph (CP13, FR-57 for both kinds): a step ID used twice, a connection ID used twice, a connection to a step that is not there.
+    A context graph has no order, no kinds of steps and no stop limits: those are the rules of workflow graphs."""
+    ids = [n["id"] for n in graph.get("nodes", [])]
+    seen, bad = set(), []
+    for i in ids:
+        if i in seen:
+            bad.append(i)
+        seen.add(i)
+    known, used = set(ids), set()
+    for e in graph.get("edges", []):
+        if e["id"] in used or e["from"] not in known or e["to"] not in known:
+            bad.append(e["id"])
+        used.add(e["id"])
+    return list(dict.fromkeys(bad))
+
+
 def order_of(graph):
     """The node IDs of a graph dict in an order in which every edge points forward (also used by the run, N-2.4.1)."""
     waiting = {n["id"]: 0 for n in graph["nodes"]}
@@ -153,7 +173,10 @@ class GraphModel:
             raise
 
     def save_graph(self, graph):
-        named = check_graph(graph)
+        kind = graph.get("kind", "workflow")
+        if kind not in MEMBER_TABLES:
+            return SaveResult(False, None, [], "schema_break", "kind")
+        named = check_graph(graph) if kind == "workflow" else context_problems(graph)
         if named:
             return _refuse(named)
         if not self.real:
@@ -162,12 +185,13 @@ class GraphModel:
         nodes, edges = self._scoped(graph)
         # everything the storage would refuse is found BEFORE the first write, so a refused save leaves no unused version of any step (NFR-16)
         known = {n["id"]: [1] for n in nodes}
-        for table, records in (("graph_nodes", nodes), ("graph_edges", edges)):
+        node_table, edge_table = MEMBER_TABLES[kind]
+        for table, records in ((node_table, nodes), (edge_table, edges)):
             for record in records:
-                broken = graph_tables.check_record(table, record, record_id=record["id"], stored={"nodes": known} if table == "graph_edges" else None)
+                broken = graph_tables.check_record(table, record, record_id=record["id"], stored={("context_nodes" if kind == "context" else "nodes"): known} if table == edge_table else None)
                 if broken:
                     return SaveResult(False, None, [], broken["rule"], broken["detail"])
-        trial = {"kind": "workflow", "nodes": [{"id": n["id"], "version": 1} for n in nodes], "edges": [{"id": e["id"], "version": 1} for e in edges],
+        trial = {"kind": kind, "nodes": [{"id": n["id"], "version": 1} for n in nodes], "edges": [{"id": e["id"], "version": 1} for e in edges],
                  **{key: graph[key] for key in HEADER}}
         broken = graph_tables.check_record("graphs", {"id": gid, "data": trial}, record_id=gid)
         if broken:
@@ -175,13 +199,13 @@ class GraphModel:
         try:
             # a member is written as a new version only when it differs from its newest version: the history of a step lists real changes only
             pins = {}
-            for name, table, records in (("nodes", "graph_nodes", nodes), ("edges", "graph_edges", edges)):
+            for name, table, records in (("nodes", node_table, nodes), ("edges", edge_table, edges)):
                 pins[name] = []
                 for record in records:
                     latest = self._latest(table, record["id"])
                     version = latest["version"] if latest is not None and latest["doc"] == record else self.tables.put(table, record["id"], record, self.author)["version"]
                     pins[name].append({"id": record["id"], "version": version})
-            data = {"kind": "workflow", **pins, **{key: graph[key] for key in HEADER}}
+            data = {"kind": kind, **pins, **{key: graph[key] for key in HEADER}}
             head = self._latest("graphs", gid)
             if head is not None and head["doc"]["data"] == data:
                 return SaveResult(True, head["version"], [])        # nothing changed: no new version
@@ -197,13 +221,14 @@ class GraphModel:
             return self.tables.get(TABLE, graph_id, version)
         header = self.tables.get("graphs", graph_id, version)["doc"]
         data = header["data"]
+        node_table, edge_table = MEMBER_TABLES[data["kind"]]
         local = lambda rid: graph_tables.split_scoped(rid)[1]                                                    # noqa: E731
-        node = lambda m: {**self.tables.get("graph_nodes", m["id"], m["version"])["doc"], "id": local(m["id"])}  # noqa: E731
+        node = lambda m: {**self.tables.get(node_table, m["id"], m["version"])["doc"], "id": local(m["id"])}     # noqa: E731
 
         def edge(m):
-            doc = self.tables.get("graph_edges", m["id"], m["version"])["doc"]
+            doc = self.tables.get(edge_table, m["id"], m["version"])["doc"]
             return {**doc, "id": local(m["id"]), "from": local(doc["from"]), "to": local(doc["to"])}
-        return {"id": header["id"], **{key: data[key] for key in HEADER}, "nodes": [node(m) for m in data["nodes"]], "edges": [edge(m) for m in data["edges"]]}
+        return {"id": header["id"], **({"kind": "context"} if data["kind"] == "context" else {}), **{key: data[key] for key in HEADER}, "nodes": [node(m) for m in data["nodes"]], "edges": [edge(m) for m in data["edges"]]}
 
     def graph_versions(self, graph_id):
         """The versions of a stored graph, oldest first: [{"version", "author", "time"}]."""
@@ -215,7 +240,7 @@ class GraphModel:
         rid, seen, out = graph_tables.scoped(graph_id, local_id), set(), []
         for entry in self.tables.history("graphs", graph_id):
             header = self.tables.get("graphs", graph_id, entry["version"])["doc"]
-            for key, table in (("nodes", "graph_nodes"), ("edges", "graph_edges")):
+            for key, table in zip(("nodes", "edges"), MEMBER_TABLES[header["data"]["kind"]]):
                 for member in header["data"][key]:
                     if member["id"] == rid and member["version"] not in seen:
                         seen.add(member["version"])
