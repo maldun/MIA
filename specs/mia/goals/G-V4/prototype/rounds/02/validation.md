@@ -22,11 +22,11 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-60 | Given two graphs with a step named `step.write`, change it in `lookup` and look at the histories of both graphs (`cp1_demo.py`) | – | not tried | – |
 | FR-63 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-64 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-68 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-69 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-70 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-71 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-72 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-68 | Given the sample store, log in as owner, open `cp2.multi`, `Edit this graph`: add a step, add a connection, remove a connection, remove a step; the picture follows each change | – | not tried | – |
+| FR-69 | Given the working copy, connect `var.out` to `step.write`: the broken rule (a cycle) is named under the status line at once and `Keep the change` is disabled; remove the connection: the rule goes | – | not tried | – |
+| FR-70 | Given a change that keeps every rule, `Keep the change`: a new version appears in the history, by you; a change that breaks a rule cannot be kept | – | not tried | – |
+| FR-71 | Given the kept change: the History list has version 5; version 4 is still there as it was | – | not tried | – |
+| FR-72 | Given two browser windows on the same graph: keep a change in one, then try to keep another in the other: it says the graph changed and writes nothing | – | not tried | – |
 | FR-73 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-74 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-76 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
@@ -36,7 +36,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-80 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-81 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-91 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-92 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-92 | Given a processing step selected while editing: a form with the tool; a data step: value and parameters; a loop-controlling step: stop limits; type something wrong and read the reason; other stored fields as JSON text | – | not tried | – |
 | FR-93 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-94 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-95 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
@@ -48,7 +48,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | NFR-15 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-16 | Given a graph with a cycle and an interrupted save, look at the demo output and at the checks 8 to 10 of `python proto_checks/cp1_check.py files` | – | not tried | – |
 | NFR-18 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| NFR-19 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| NFR-19 | Given a second account (not the owner): no `Edit this graph` button; the routes refuse it | – | not tried | – |
 | NFR-20 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 
 ## Beyond the outcomes
