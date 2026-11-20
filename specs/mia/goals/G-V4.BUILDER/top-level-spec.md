@@ -23,14 +23,14 @@ Building from runs, reviews and web results (a later slice, D-381); categories a
   - Outcome: Given a proposed relation, when the owner looks at it, then the passage that states it is shown and both ends of the relation occur in that passage or in the sentences directly before or after it; a relation for which that does not hold is refused.
 - FR-101: The system shall let the owner confirm, change or reject each proposal, singly or in a selection, and let steps read only confirmed items.
   - Outcome: Given proposals from a document, when the owner confirms two, changes one and rejects all the others, singly or by selecting several together, then only the two confirmed and the changed item are part of the context graph, nothing confirms itself, and a step that reads the graph sees exactly those and never a proposal.
-- FR-102: The system shall let the owner add and change items by hand.
-  - Outcome: Given a context graph, when the owner adds an item or changes one, then it is part of the graph as confirmed, with the owner named as its source.
+- FR-102: The system shall let the owner add and change items by hand, each with a note of where it comes from.
+  - Outcome: Given a context graph, when the owner adds an item or changes one and gives a note of its source, then it is part of the graph as confirmed, with the owner and the note shown as its source; an entry without a note is not accepted.
 - FR-103: The system shall keep the limits of the builder as settings and stop at them.
   - Outcome: Given a limit on items and on seconds per document, when a document would exceed either, then the builder stops at the limit, keeps what it has proposed so far and tells the owner which limit it reached; the limits can be changed without changing the program.
-- FR-104: The system shall let a step read the confirmed part of its context graph within its token budget.
-  - Outcome: Given a skill that names a context graph and a budget for a step, when the step runs, then it receives only confirmed items, no more than fit its budget, the most relevant first, and the run records which graph and which version it read.
-- FR-105: The system shall let the owner see where each item of a context graph comes from and who confirmed it.
-  - Outcome: Given a confirmed item, when the owner opens it, then the document and passage it was proposed from, or the owner's manual entry, are shown with who confirmed it and when.
+- FR-104: The system shall let a step read the confirmed part of its context graph within its token budget, the items that match the step's question first.
+  - Outcome: Given a skill that names a context graph and a budget for a step, when the step runs, then it receives only confirmed items, no more than fit its budget, the items that match the step's question most closely first and items without a match last, and the run records which graph and which version it read.
+- FR-105: The system shall let the owner see where each item of a context graph comes from, who confirmed it and what the owner changed.
+  - Outcome: Given a confirmed item, when the owner opens it, then the document and passage it was proposed from, or the owner's manual entry with its note, are shown with who confirmed it and when; if the owner changed a proposal before confirming it, the original proposal and the owner's change are shown side by side.
 
 ### 3.2 Non-functional requirements
 - NFR-23 (Correctness of proposals): The builder rarely invents.
