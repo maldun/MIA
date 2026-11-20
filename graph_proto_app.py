@@ -20,6 +20,9 @@ from flask import Flask, g, jsonify, request, send_from_directory
 import accounts
 import accounts_api
 import graph_model
+import tempfile
+from toolbox import Toolbox, ToolboxError
+from workflow_library import WorkflowLibrary
 from api_sessions import SessionService
 from storage import Storage, StorageError
 from storage_files import FileBackend
@@ -48,10 +51,42 @@ def problems_of(graph):
     return found
 
 
+class _NoEvents:
+    def record(self, event):
+        return None
+
+
+def make_toolbox():
+    """the shipped transforms and the three controllers in a throw-away store: it answers what the trust and the lifecycle of a toolbox ID are (the viewer never changes it)"""
+    box = Toolbox(WorkflowLibrary(Storage(FileBackend(tempfile.mkdtemp(prefix="viewer-toolbox-")))), lambda account: True, _NoEvents())
+    box.seed_shipped(os.path.join(REPO, "library", "nodes"))
+    box.seed_controls()
+    return box
+
+
+def steps_info(graph, box):
+    """per step: its kind, for a processing or loop-controlling step the trust and lifecycle of its toolbox entry, and whether it holds code (an input connection with the role `code`)"""
+    code_targets = {e["to"] for e in graph["edges"] if (e.get("data") or {}).get("role") == "code"}
+    out = {}
+    for n in graph["nodes"]:
+        data, info = n.get("data") or {}, {"kind": (n.get("data") or {}).get("type", "unknown")}
+        if info["kind"] in ("transform", "master"):
+            try:
+                found = box.look_up(data.get("toolbox_id", ""))
+                info.update(trust=found["trust"], lifecycle=found["lifecycle"], reason=found["reason"])
+            except ToolboxError:
+                info.update(trust="untrusted", lifecycle=None, reason="it is not in the toolbox")
+            info["code"] = n["id"] in code_targets
+            info["changed_since_trusted"] = False       # CP6: nothing records the trusted content yet (FR-67 of GRAPHAPI.CODE); the page shows the mark when this is true
+        out[n["id"]] = info
+    return out
+
+
 def create_app(backend, accounts_store, port=8801):
     app = Flask(__name__, static_folder=None)
     model = graph_model.GraphModel(Storage(backend), author="viewer")
     service = SessionService(accounts_store)
+    box = make_toolbox()
     app.register_blueprint(accounts_api.create_accounts_blueprint(service))
     # a browser sends the Origin of the page with every login and change; the guard refuses every other one (bad_origin), so the pages of this host are allowed
     origins = ["http://127.0.0.1:%d" % port, "http://localhost:%d" % port]
@@ -84,7 +119,7 @@ def create_app(backend, accounts_store, port=8801):
         except StorageError:
             return jsonify({"error": "not_found"}), 404
         return jsonify({"graph": graph, "version": shown, "current": max(head), "author": head[shown]["author"], "time": head[shown]["time"],
-                        "problems": problems_of(graph)})
+                        "problems": problems_of(graph), "steps": steps_info(graph, box)})
 
     @app.get("/")
     def index():

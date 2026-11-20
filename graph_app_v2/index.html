@@ -1,11 +1,30 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MIA graph viewer (prototype)</title>
 <link rel="stylesheet" href="/page/graph.css"><script src="/page/vendor/vis-network.min.js"></script><script type="module" src="/page/app.js"></script>
-<style>.work{flex-wrap:nowrap;align-items:stretch}aside{flex:0 0 340px;order:-1}main{flex:1 1 auto;min-width:0}#list{max-height:30vh;overflow:auto;margin:6px 0;padding:0;list-style:none}#list li{padding:3px 6px;cursor:pointer;border-radius:4px}#list li[aria-selected=true]{background:var(--process)}#login{max-width:340px;margin:10vh auto;padding:16px}#login label{display:block;margin:8px 0}#problems{color:#b3261e;margin:4px 0;padding-left:16px}</style></head>
+<style>
+.work{flex-wrap:nowrap;align-items:stretch}aside{flex:0 0 340px;order:-1;overflow:auto;max-height:calc(100vh - 170px)}main{flex:1 1 auto;min-width:0}
+#list,#steps{max-height:22vh;overflow:auto;margin:6px 0;padding:0;list-style:none}#list li,#steps li{padding:3px 6px;cursor:pointer;border-radius:4px}#list li[aria-selected=true]{background:var(--process)}
+#list li:focus-visible,#steps li:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--fg);outline-offset:1px}
+#login{max-width:340px;margin:10vh auto;padding:16px}#login label{display:block;margin:8px 0}
+#status{margin:6px 16px;padding:6px 10px;font-weight:600;background:var(--panel);border-left:4px solid var(--line);border-radius:4px}
+#problems{color:#b3261e;margin:4px 0;padding-left:32px}
+dl{margin:0 0 8px;display:grid;grid-template-columns:max-content 1fr;gap:2px 10px}dt{font-weight:600}dd{margin:0;overflow-wrap:anywhere}
+.menu{position:relative}#settings{position:absolute;z-index:10;top:100%;left:0;margin-top:6px;min-width:250px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;gap:10px}#settings[hidden]{display:none}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.row.check{justify-content:flex-start}
+#legend{margin:0 16px 6px;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8125rem}#legend span{white-space:nowrap}
+</style></head>
 <body>
 <section id="login" hidden><h1>MIA graph viewer</h1><form id="login-form"><label>Name <input id="user" autocomplete="username"></label><label>Password <input id="password" type="password" autocomplete="current-password"></label><button type="submit">Log in</button></form><p id="login-error" role="alert"></p></section>
 <div id="viewer" hidden>
-<header><h1>Graph viewer</h1><span id="who"></span><button id="logout" type="button">Log out</button></header>
-<p id="status" role="status"></p><ul id="problems" aria-label="what cannot be drawn"></ul>
-<div class="work"><aside aria-label="graphs and selected step"><h2>Graphs</h2><input id="filter" type="search" placeholder="filter by name" aria-label="filter by name"><ul id="list" role="listbox" aria-label="stored graphs"></ul><h2>Selected</h2><pre id="detail">Click a step or a connection.</pre></aside><main id="view" aria-label="graph"></main></div>
+<header><h1>Graph viewer</h1><span id="who"></span>
+<span class="menu"><button id="settings-button" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="settings">Settings</button>
+<div id="settings" role="group" aria-label="Settings" hidden><h2>View</h2>
+<label class="row check"><input type="checkbox" id="physics"> Settle the arrangement by itself (physics)</label>
+<label class="row">Connections <select id="edges"><option value="rounded">rounded</option><option value="straight">straight</option></select></label>
+<button id="layers" type="button">Reset to layers (fixed)</button></div></span>
+<button id="logout" type="button">Log out</button></header>
+<p id="status" role="status" aria-live="polite">Opening ...</p><ul id="problems" aria-label="what cannot be drawn"></ul>
+<p id="legend" aria-label="legend"><span>ellipse: data step</span><span>box: processing step</span><span>hexagon: loop-controlling step</span><span>dashed box: missing step</span><span>UNTRUSTED / trusted and lifecycle under the name; "code" = the step holds code</span></p>
+<div class="work"><aside aria-label="graphs and selected step"><h2>Graphs</h2><input id="filter" type="search" placeholder="filter by name" aria-label="filter by name"><ul id="list" role="listbox" aria-label="stored graphs"></ul>
+<h2>Steps (keyboard: Tab, Enter)</h2><ul id="steps" role="listbox" aria-label="steps of the graph"></ul><h2>Selected</h2><div id="detail"><p>Click a step or a connection.</p></div></aside><main id="view" aria-label="graph"></main></div>
 </div>
 </body></html>
