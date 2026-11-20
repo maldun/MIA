@@ -41,7 +41,7 @@ Note on the first run in the main checkout: `test_expression_llm.ApiTest` (3) an
 | V3-2 | REQ-WFM-137, 139, 140, 141, REQ-CLV-043, 048 to 052 are still Draft; REQ-CLV-023 (retired) is Draft | low | Commit phase: set Verified once the owner gates; mark 023 as retired |
 | V3-3 | `G-V3.REPORT/goal.md` Phases still say Verify open and Commit open; the report exists and the code is merged | low | Commit phase paperwork |
 | V3-4 | T-06 and T-07 of REPORT (V-1 to V-4 fixes, `plain_modules`) were not re-checked by a second fresh reviewer; this run re-ran every test after them, all green, but did not read the diffs | low | owner: accept, or a small brief |
-| V3-5 | FB-08 hand check (`/lookup`, Report part, links, download) not done | gate | owner (VAL-012 / FB-08), guide given in the session |
+| V3-5 | FB-08 hand check (`/lookup`, Report part, links, download): done by the owner 2026-11-20, worked well | closed | FB-08 re-validated |
 | V3-6 | Not measured: calls and seconds of the end message with the short result; F-04 (status line not restored after reload, accepted D-344) | info | Validate |
 | V3-7 | Open from earlier: the 14 112-character `/review` end message is not yet a labelled eval case | info | owner labels |
 
@@ -49,4 +49,4 @@ Note on the first run in the main checkout: `test_expression_llm.ApiTest` (3) an
 No fresh holdout, no transcript review by a person (check F), no mutation testing of the REPORT code, no current-state deployment check. Budgets were not re-measured.
 
 ## 6. Verdict (proposal)
-All in-scope checks are green on a clean checkout. Verified with accepted deviations if the owner settles V3-1 and V3-4 and does the hand check (V3-5). Then Commit: statuses (V3-2, V3-3), CHANGELOG, tag v0.2.0 (the owner tags, together with G-V2).
+All in-scope checks are green on a clean checkout. Verified with accepted deviations if the owner settles V3-1 and V3-4. Then Commit: statuses (V3-2, V3-3), CHANGELOG, tag v0.2.0 (the owner tags, together with G-V2).
