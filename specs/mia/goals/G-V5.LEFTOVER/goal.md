@@ -1,4 +1,4 @@
-# Goal G-V5.LEFTOVER – Leftovers of G-V2 and G-V3
+# Goal G-V5.LEFTOVER – Leftovers of G-V2, G-V3 and G-V4
 
 Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no requirements or tests exist yet.
 

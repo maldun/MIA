@@ -1,4 +1,4 @@
-# Top-Level Specification: Leftovers of G-V2 and G-V3 (G-V5.LEFTOVER)
+# Top-Level Specification: Leftovers of G-V2, G-V3 and G-V4 (G-V5.LEFTOVER)
 
 **Status:** Draft, for the owner's review
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
