@@ -2,7 +2,7 @@
 
 Single source for what the demonstrator can show (`dev-workflow/references/prototyping.md`). Updated with every checkpoint and at merges.
 
-Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 897dc5b8 (CP8), 2026-11-20
+Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 77a01ba3 (CP9), 2026-11-20
 
 | Part / feature | Requirement IDs | State (mock / working / real / not yet / retired) | Made real by task | Commit | Date | Notes |
 |---|---|---|---|---|---|---|
@@ -13,7 +13,7 @@ Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `pro
 | save without half graphs, versions, authors, step history | FR-57, NFR-16 | working | – | 2f9312f8 | 2026-11-20 | CP1: everything checked before the first write; unchanged save = no version; interrupted save leaves nothing visible; `proto_checks/cp1_check.py` |
 | same behaviour in files and database | FR-58 | working | – | 70e9c2cb | 2026-11-20 | CP2: one sequence of operations gives the same answers on both (9 fields incl. five refusals) |
 | whole-store move files <-> database | FR-59 | working | – | 70e9c2cb | 2026-11-20 | CP2: `graph_store_move.py`; all or nothing, names the graph, repeatable, interrupted move can be run again; command line `python graph_store_move.py files:<dir> postgres:<url>` |
-| sync live store to copy | FR-93, NFR-15 | not yet | – | – | – | CP3 |
+| sync live store to copy: automatic at start and stop, set-aside of differing copy versions, per-graph lag, portability of the files | FR-93, NFR-15 | not yet | – | – | – | CP3 (a first sync exists since CP9) |
 | the eight rules in one fixed order, all broken rules named, the check route | FR-63 | working | – | 897dc5b8 | 2026-11-20 | pulled forward from CP4 because the editor needs it: `graph_rules_proto.py`, `POST /api/v2/graphs/<id>/check`; what is left for CP4: the refusal before a run (FR-64), the session setting rule, a run-time test |
 | refusal of a run before any step runs, missing inputs named | FR-64 | not yet | – | – | – | CP4 |
 | graph backend with login, list, graph and versions (IF-104 v2 read side draft) | FR-48, NFR-12 | working | – | 85efcc21 | 2026-11-20 | CP5: `graph_proto_app.py`, existing accounts and session cookie; `GET /api/v2/graphs`, `/api/v2/graphs/<id>[?version=n]`, `/versions`; the history list in the page comes in CP7 |
@@ -21,7 +21,8 @@ Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `pro
 | settings menu remembered per browser, legend, step list for the keyboard, clearer status line | FR-53, NFR-14 | working | – | 80bd08df | 2026-11-20 | CP6: `settings.js`; light and dark by the system setting (round 01 CSS); phone layout out of scope (D-389) |
 | shared arrangement (settled, saved by the owner for everyone, reset to layers), history list with previous and next, any version shown | FR-52, FR-55 | working | – | 20574749 | 2026-11-20 | CP7: table `arrangements` (a draft addition to IF-302), `GET/PUT /api/v2/graphs/<id>/arrangement` (PUT owner only = the account made first), `arrangement.js`, `history.js`; the save button is in the settings menu for now, the editor takes over in CP10 (FR-74) |
 | editor: working copy, add, remove and change steps and connections, a form per kind plus text, rules after every change, keep as a new version, a conflict refused, owner only | FR-68, FR-69, FR-70, FR-71, FR-72, FR-92, NFR-19 | working | – | 897dc5b8 | 2026-11-20 | CP8: `edit-model.js`, `edit-panel.js`, `PUT /api/v2/graphs/<id>` (owner only, expected version, rules first); the side panel is resizable (FB-1: its final form is open) |
-| editor: restore, undo and redo, read-only when the live store is unreachable | FR-73, FR-91, FR-95 | not yet | – | – | – | CP9 |
+| restore an earlier version as a new one, undo and redo of the session, changes written to the live store, the editor refused when the live store cannot be reached | FR-73, FR-91, FR-95 | working | – | 77a01ba3 | 2026-11-20 | CP9: `POST /api/v2/graphs/<id>/restore`, `undo-stack.js`, `--live` store beside the copy that is read, `GET /api/v2/status`, 503 `store_unreachable` for every change; keyboard shortcuts Ctrl+Z and Ctrl+Y |
+| first sync live store to copy (on command) | FR-93 | working | – | 77a01ba3 | 2026-11-20 | CP9: `POST /api/v2/sync` runs the whole move; what is left for CP3: automatic at start and stop, differing versions of the copy set aside, a lag report per graph |
 | arrangement saving from the editor, copy a step | FR-74, FR-94 | not yet | – | – | – | CP10 (the save itself exists since CP7) |
 | edit log | FR-76, FR-77, FR-80, FR-81 | not yet | – | – | – | CP11 |
 | playback and comparison | FR-78, FR-79, NFR-20 | not yet | – | – | – | CP12 |

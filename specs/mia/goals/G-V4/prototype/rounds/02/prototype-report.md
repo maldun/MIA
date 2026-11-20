@@ -47,6 +47,14 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 - The editor (owner only; button "Edit this graph" on the current version): a working copy that is drawn at once with the steps staying where they are; add a step (name and kind), add a connection (from, to, role), remove a step with its connections, remove a connection; click a step: a form with its known fields (tool; value and parameters as JSON; stop after repetitions or seconds) and the other stored fields as JSON text, with the reason shown next to a value that does not fit; click a connection: role and name. After every change the rules are asked and named under the status line; "Keep the change" is disabled while one is broken. The side panel can be widened by dragging its corner (FB-1: the final layout is still open).
 - Demonstration: open `cp2.multi`, "Edit this graph", add a step, connect `var.out` to `step.write` (a cycle): the rule is named and keeping is disabled; click that connection and remove it; change the tool of `step.write` and keep: version 5 by `owner`. Checks: `python proto_checks/cp8_check.py` (22 pass), `node --test proto_checks/cp8.test.mjs` (8 pass), and the whole flow run against the real backend with a stand-in browser.
 
+
+**CP9 (EDIT, second part), 2026-11-20, commit 77a01ba3.**
+- Live store and copy: `graph_proto_app.py --store <copy> --live <live store>` reads the copy and writes every change (keep, restore) to the live store; `GET /api/v2/status` tells whether the live store is reached and how many versions the copy is behind; `POST /api/v2/sync` (owner) brings the copy up to date with the whole move (all or nothing). Without `--live` the one store is both.
+- Restore (FR-73): "Restore this version" (shown when an earlier version is open, owner only) saves its content as a new version; nothing is deleted; restoring what is current changes nothing.
+- Undo and redo (FR-91): buttons and Ctrl+Z / Ctrl+Y in the editor over the working copies of the session; nothing is kept or recorded.
+- Live store not reachable (FR-95): the status says so, "Edit this graph", "Restore" are disabled, and every change route answers 503 `store_unreachable` and writes nothing; looking at the copy still works; a store that cannot be reached is an answer, not a crash. Conflicts are checked against the live store (FR-72): a change made on a copy that is behind is refused.
+- Demonstration: `python graph_store_move.py` a live folder into a copy folder, start the viewer with `--store <copy> --live <live>`; edit and keep (the copy stays behind), "Sync the copy now", restore an earlier version, stop the live store (remove its folder) and see the editor refused. Checks: `python proto_checks/cp9_check.py` (16 pass), `node --test proto_checks/cp9.test.mjs` (5 pass), the whole flow against the real backend with a stand-in browser.
+
 ## Findings
 - The 15 converted graphs give 154 step records for 107 distinct local names: with scoped IDs the 13 shared names (4 with different content) no longer share a history.
 - The new rule breaks existing tests that use plain IDs: `tests/test_graph_record_checks.py` (34 failures), `tests/acceptance/contract/test_if_301_v2_graph_tables.py` (28) and `tests/acceptance/test_graph_records.py` (14 errors), all with `unscoped_id`; `test_graph_model.py`, `test_graph_run.py`, `test_graph_tables.py` still pass. The amendment of A-92 / REQ-GTB-021 therefore has to rewrite those protected tests.
@@ -58,6 +66,8 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 - **Owner's remark after CP6 (2026-11-20):** for the editor the side panel will have to change, because the contents of steps are edited there and the current panel (a narrow column of read-only fields) does not look good for editing; the place, width and form of the editing panel are to be decided at CP8 (FB-1 in `rounds/02/validation.md`).
 - A processing step added without a tool passes the eight rules and can be kept with an empty tool; only the form refuses an empty tool. Candidate for the rule set in Plan (a processing step needs a tool).
 - The changes are drawn from the working copy only in the picture; the step list and the panel follow. The editing panel is the existing left column made resizable; FB-1 asks for something better for editing step contents and is still open.
+- The arrangement record is not part of the move tables, so it stays on the store that is read; with a separate live store it is not synced. To decide in Plan where the arrangement lives (FR-74).
+- The owner moved the review of the editing panel layout (FB-1) to the planning stage (2026-11-20).
 - Not examined: context graphs, a graph with a loop-controlling step (none among the 15), the `review` workflow (document form, migration is out of this run).
 
 ## Assumptions and choices the prototype made
@@ -69,6 +79,8 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 ## Prototype tests (run once here)
 | Question (requirement or top-level item) | Command (repeatable) | Result (value, unit, uncertainty, hardware, date; pass / fail / not_run) |
 |---|---|---|
+| FR-73, FR-95, FR-93 (first form), FR-72 against the live store: restore, writes to the live store, the editor refused when it cannot be reached, a first sync | `python proto_checks/cp9_check.py` | 16 pass, 2026-11-20, Fedora host |
+| FR-91, FR-95: undo and redo, what the owner is told | `node --test proto_checks/cp9.test.mjs` | 5 pass, 2026-11-20 |
 | FR-63, FR-69, FR-70, FR-71, FR-72, NFR-19: the eight rules, the check route, keeping, conflict, owner only | `python proto_checks/cp8_check.py` | 22 pass, 2026-11-20, Fedora host |
 | FR-68, FR-92: the working copy and the form | `node --test proto_checks/cp8.test.mjs` | 8 pass, 2026-11-20 |
 | FR-52, FR-55, NFR-11: the arrangement, the history list, a first look at speed | `python proto_checks/cp7_check.py`, `node --test proto_checks/cp7.test.mjs` | 14 and 7 pass, 2026-11-20, Fedora host |
