@@ -133,8 +133,8 @@ Merge order STORE, MODEL, TOOLBOX, CONVERT; reserved IDs per session and rules f
 | Plan | done | the plans of the five subgoals; G-V2.SNAPSHOT split out (A-159) |
 | Implement | done | STORE, MODEL, TOOLBOX, CONVERT and SNAPSHOT are in master |
 | Verify | done | `verification-report.md` (2026-11-20): Verified with accepted deviations (owner, 2026-11-20) |
-| Commit | in progress | `merge-request.md`, `release-notes.md`; all subgoals already in master, no `goal/v2` branch; tag `v0.2.0` is the owner's |
-| Deploy | open | |
+| Commit | done | merged into master before the tag; tag `v0.2.1` (2026-11-20) with G-V3; `v0.2.0` was pushed early on `4a3a74c9` (same code, no CHANGELOG); `merge-request.md`, `release-notes.md`, D-358 |
+| Deploy | open | hand-over: `handover-2026-11-20-deploy.md` |
 | Validate | open | |
 
 ## Joint amendments
