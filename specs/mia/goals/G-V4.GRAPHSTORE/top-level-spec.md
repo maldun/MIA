@@ -9,7 +9,7 @@ The owner wants every workflow graph and every context graph to have one stored 
 
 ## 2. Scope
 ### In scope
-One stored truth per graph, the two places, moving graphs between them, graphs that belong to one graph alone, migration of what exists, skills running from stored graphs, snapshots of graphs. Requirements FR-57 to FR-62, NFR-15, NFR-16.
+One stored truth per graph, the two places, moving graphs between them, graphs that belong to one graph alone, migration of what exists, skills running from stored graphs, snapshots of graphs. Requirements FR-57 to FR-62, FR-93 (sync, new number), NFR-15, NFR-16.
 ### Out of scope (non-goals)
 Drawing and editing (G-V4.VIEW, EDIT, REPLAY); how a run executes a graph (G-V4.GRAPHAPI); the contents of context graphs and their builder (goal C).
 
@@ -17,12 +17,14 @@ Drawing and editing (G-V4.VIEW, EDIT, REPLAY); how a run executes a graph (G-V4.
 ### 3.1 Functional requirements
 - FR-57: The system shall keep exactly one stored truth for every workflow graph and every context graph, with every change a new version and no version deleted.
   - Outcome: Given a graph that is saved, changed twice, read and listed, when the owner asks for it, then the newest state is returned, all three versions are listed with who stored each and when, and no version has disappeared.
-- FR-58: The system shall keep graphs in the live store or in a portable set of files with the same behaviour in both.
-  - Outcome: Given the same sequence of saving, changing, reading and listing graphs carried out once in the live store and once in a set of files, then every answer is the same in both, including versions, authors and refusals.
-- FR-59: The system shall move graphs between the live store and a set of files in both directions without loss.
-  - Outcome: Given graphs with several versions each, when the owner moves them from either place to the other, then every graph arrives with all its versions, authors and times unchanged and numbered as before; moving the same graphs again changes nothing; if one graph cannot be moved, nothing is moved and that graph is named.
+- FR-58: The system shall keep graphs in the live store, which holds everything, and in a copy as a portable set of files, with the same behaviour in both, so that MIA can run daily on the copy.
+  - Outcome: Given the same sequence of saving, changing, reading and listing graphs carried out once in the live store and once in a copy, then every answer is the same in both, including versions, authors and refusals.
+- FR-59: The system shall move the whole store between the live store and a set of files in both directions without loss.
+  - Outcome: Given graphs with several versions each, when the owner moves the whole store from either place to the other, then every graph arrives with all its versions, authors and times unchanged and numbered as before; moving again changes nothing; if one graph cannot be moved, nothing is moved and that graph is named.
 - FR-60: The system shall let every step and connection belong to exactly one graph.
   - Outcome: Given two graphs that both contain a step of the same local name but different content, when the owner changes that step in one graph, then the other graph and its history are untouched, and the step's history lists only the changes made in its own graph.
+- FR-93: The system shall keep the copy in sync with the live store, which is the master, and never lose a version that exists only on the copy.
+  - Outcome: Given a live store with new versions and a copy that lags behind, when the owner runs the sync or MIA starts or stops in an orderly way, then the copy receives the missing versions and equals the live store; MIA shows how far the copy lags before a sync; given graphs that got different new versions on the copy since the last sync, then the live store's history counts, and the copy's differing versions are saved aside and named to the owner, not discarded.
 - FR-61: The system shall move the graphs that exist today to the new stored form and let the owner check the result before anything old is removed.
   - Outcome: Given the graphs stored today, when the owner runs the move, then a report compares each old graph with its new one (steps, connections, versions) and shows no difference except the new names; the old graphs remain until the owner confirms.
 - FR-62: The system shall run each skill from its stored workflow graph.
@@ -59,6 +61,7 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 |---|---|---|
 | Context graphs may differ from workflow graphs (goal C overlap) | FR-57 may need a separate look | open question of the old record; decide in Plan; owner |
 | A graph with a step that controls loops (none today) may not move as a plain document | FR-59, FR-62 incomplete for it | include one in the cases; owner |
+| While MIA runs on a copy, edits made in the editor land on the copy and would be set aside at the next sync (the live store wins) | edits could seem lost | **open for the owner:** whether the editor writes to the live store directly, or whether edits on the copy are sent to the live store (the one-way decision of 2026-11-20 says no) |
 | Importing a skill creates the graph once; a later change of its definition | the two may drift apart | the stored graph is the truth after import (D-361); owner confirms the rule for re-import |
 
 ### Prototype decisions
@@ -69,4 +72,4 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 ## 7. References
 - Research and spike: `research.md`, `spikes.md`
 - Goal record: `goal.md`; parent `../G-V4/goal.md` (OC-6, OC-7, OC-10)
-- Decisions: D-361, D-368
+- Decisions: D-361, D-368, D-372

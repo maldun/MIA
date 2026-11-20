@@ -22,6 +22,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 | OC-4 | Given changes in an open editing session that are not yet kept, when the owner undoes and redoes them, then the picture follows and nothing is kept or recorded as a version | OC-8 of G-V4 (FR-22) |
 | OC-5 | Given a step of any kind, when the owner opens it for change, then its known fields are a checked form and any other field is editable text | OC-8 of G-V4 (FR-22) |
 | OC-6 | Given an account other than the owner's, when it opens a graph, then it can look and cannot change anything | OC-8 of G-V4 (FR-21, NFR-6) |
+| OC-7 | Given a step in one graph, when the owner copies it into another graph, then the other graph has an independent copy with its own history | OC-8 of G-V4 (FR-22) |
 
 ## Explore result (2026-11-20, D-363)
 `../G-V4.VIEW/research.md`. Decision: the graph rules are checked by a backend check route that the page asks before saving (one rule set after G-V4.GRAPHAPI; the route is an amendment of IF-104 in Plan); the backend still validates on save. Open for Plan: the protected mock of the graph interface for the JavaScript tests (A-36 drafts), conflict handling (`expected_version`).
