@@ -1,6 +1,6 @@
 # High-Level Specification: G-V4.GRAPHSTORE.CORE – one stored truth for graphs
 
-**Status:** Draft (step 1 of the Plan of this subgoal; nothing here is approved until the owner has gone through it item by item)
+**Status:** Approved by the owner (2026-11-21), HR-001 to HR-005 reviewed item by item (D-402)
 **Top-level spec:** `../G-V4.GRAPHSTORE/top-level-spec.md` (items FR-57, FR-60, NFR-16 are this subgoal's; FR-40 and FR-30 of the product spec, partly)   **Owner:** Stefan Reiterer   **Date:** 2026-11-21
 **Basis:** the validated prototype round 02 (`../G-V4/prototype/`, branch `prototype/g-v4`), the reuse map decision R1 `keep+tests` (D-400), the accepted cases AC-001 to AC-003 (`../G-V4/accepted-cases.md`).
 
@@ -41,7 +41,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Text: The system shall refuse a step or connection record whose ID is not of the form `<graph id>/<local id>`, with the rule name `unscoped_id`, and shall refuse a graph header that names a member of another graph.
 - Rationale: makes "every step belongs to exactly one graph" true by construction; the first `/` separates, a local ID may contain further slashes, a graph ID does not (ASM-1).
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-002 – Write order of a save
 - Kind: rule
@@ -49,7 +49,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Text: The system shall check the whole graph before the first write, write the steps and connections that changed, and write the header last, so that a graph appears only when all its members are stored.
 - Rationale: a refused save writes nothing; an interrupted save leaves at most step versions no graph names.
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-003 – Measure: one stored truth, every change a version (FR-57)
 - Kind: measure
@@ -60,7 +60,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Rationale: FR-57 is an outcome of the owner, "nothing disappears"; counting versions and comparing what is read with what was saved decides it on real graphs, not on toy cases.
 - Reference: Fedora host, Python 3.12, PostgreSQL 16 under podman.
 - Detail in: the test requirements of this subgoal (to be written in step 3).
-- Status: Draft
+- Status: Approved
 
 ### HR-004 – Measure: a step belongs to one graph (FR-60)
 - Kind: measure
@@ -71,7 +71,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Metric: 0 new record versions in the other graph; the history of the changed step has exactly the changes made in its graph.
 - Reference: as HR-003.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-005 – Measure: no half-stored graph (NFR-16)
 - Kind: measure
@@ -82,7 +82,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Metric: for every k and every case 0 graphs that are listed with a missing member, 0 counted versions for a refused save, 100 % of repeated saves reach the full graph. Pass only when all k pass; no sampling.
 - Reference: as HR-003.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ## 4. Split proposal
 ### Nodes (decomposition)
@@ -115,4 +115,4 @@ Decided by the owner in the HLS review of 2026-11-21 (D-402): the separator rule
 ## Approval
 Reviewed item by item with the owner on 2026-11-21 (review log: `review-log.md`). The approval of the whole document is the owner's: tick the box (in Emacs `C-c C-c` on the line) or say so in the chat; the agent then sets the status to Approved and never before.
 
-- [ ] Approved by Stefan Reiterer (owner). Date: ____-__-__
+- [x] Approved by Stefan Reiterer (owner). Date: 2026-11-21 (said in the chat, "approved")

@@ -1,6 +1,6 @@
 # Requirements: G-V4.GRAPHSTORE.CORE (low level, new and changed items)
 
-**Top-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE/top-level-spec.md`   **High-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE.CORE/high-level-spec.md`   **Status:** Draft   **Plan baseline:** plan-baseline
+**Top-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE/top-level-spec.md`   **High-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE.CORE/high-level-spec.md`   **Status:** Approved by the owner (2026-11-21)   **Plan baseline:** plan-baseline
 
 <!-- The requirements this subgoal adds. The 37 requirements already in force (graph tables REQ-GTB-001 to REQ-GTB-028 in
      `specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md`, the workflow rules REQ-WFM-043 to REQ-WFM-049, the storage layer
@@ -29,7 +29,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-01 (accepted case AC-002): a step written under `chat` is refused naming `unscoped_id`, under `lookup/chat` it is accepted (exact)
 - Verified by: TC-GTB-029
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-GTB-030 – Header names only its own members
@@ -42,7 +42,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-02: a header `g` naming `h/step` is refused naming `unscoped_id`; naming `g/step` it is accepted (exact)
 - Verified by: TC-GTB-030
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-GTB-031 – The first slash separates
@@ -55,7 +55,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-03: `lookup/a/b` is accepted as the local ID `a/b` of `lookup` and read back as `a/b` (exact)
 - Verified by: TC-GTB-031
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-160 – No slash in a graph ID
@@ -68,7 +68,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-21: a graph saved under the ID `look/up` is refused naming `unscoped_id` and nothing is stored (exact)
 - Verified by: TC-WFM-160
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-144 – Local IDs on reading
@@ -81,7 +81,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-04: a graph saved with local IDs is read back with the same local IDs, also for the ends of connections (exact)
 - Verified by: TC-WFM-144
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-145 – History of a step in its graph
@@ -94,7 +94,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-05 (accepted case AC-002): changing `step.write` in `lookup` adds one version to its history and none to the history of the other graph (exact)
 - Verified by: TC-WFM-145
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-146 – Whole graph checked first
@@ -107,7 +107,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-06: a graph with a broken connection at its last position leaves the record counts of every table as they were (exact)
 - Verified by: TC-WFM-146
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-147 – Header written last
@@ -120,7 +120,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-07 (accepted case AC-003): a save interrupted after each of its writes never lists a graph with a missing step or connection (every write position, files and database)
 - Verified by: TC-WFM-147
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-148 – Changed members only
@@ -133,7 +133,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-08 (accepted case AC-001): saving a graph with one changed step writes exactly one new step version and one new header version (exact)
 - Verified by: TC-WFM-148
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-149 – Unchanged graph, no version
@@ -146,7 +146,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-09 (accepted case AC-001): the same graph saved twice has one version; the second answer names it and no table grew (exact)
 - Verified by: TC-WFM-149
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-150 – Refused save writes nothing
@@ -159,7 +159,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-10 (accepted case AC-003): a graph with a cycle, two writers, an unknown kind of step or a context connection to a missing step is refused and no table grew (exact)
 - Verified by: TC-WFM-150
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-151 – An interrupted save is finished by repeating it
@@ -172,7 +172,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-11 (accepted case AC-003): for every write position the repeated save gives the full graph and one new header version (exact)
 - Verified by: TC-WFM-151
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-152 – Kind of a graph selects the tables
@@ -185,7 +185,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-12: a context graph's members are in `context_nodes` and `context_edges` under `<graph>/<local>`, none in `graph_nodes` (exact)
 - Verified by: TC-WFM-152
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-153 – No kind means workflow
@@ -198,7 +198,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-13: a graph saved without a kind is stored with the kind `workflow` (exact)
 - Verified by: TC-WFM-153
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-154 – Unknown kind refused
@@ -211,7 +211,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-14: kind `swarm` is refused naming `kind` and nothing is stored (exact)
 - Verified by: TC-WFM-154
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-155 – Identity and ends of a context graph
@@ -225,7 +225,7 @@
 - Acceptance criterion: AC-CORE-15: each of the three faults is refused naming the ID and writes nothing (exact)
 - Binding: open
 - Verified by: TC-WFM-155
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-156 – No workflow rules for a context graph
@@ -239,7 +239,7 @@
 - Acceptance criterion: AC-CORE-16: a context graph with two connected steps of the same category and a cycle is accepted by this check (exact; CONTEXT may add rules)
 - Binding: open
 - Verified by: TC-WFM-156
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-157 – Kind on reading
@@ -252,7 +252,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-17: a context graph read at any version carries the kind `context`; a workflow graph keeps the shape it had before (exact)
 - Verified by: TC-WFM-157
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-158 – Versions with who and when
@@ -265,7 +265,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-18 (accepted case AC-001): a graph saved by three accounts lists versions 1 to 3 with the three accounts and a time each (exact)
 - Verified by: TC-WFM-158
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-WFM-159 – A version as it was saved
@@ -278,7 +278,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-19 (accepted case AC-001): each of three saved versions reads back equal to what was saved, for a workflow graph and a context graph (exact)
 - Verified by: TC-WFM-159
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ### REQ-GTB-032 – Same refusals in both places
@@ -291,7 +291,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-20: the cases of AC-CORE-01 to AC-CORE-02, AC-CORE-06, AC-CORE-21, AC-CORE-14 and AC-CORE-15 give the same refusal on both backends (exact)
 - Verified by: TC-GTB-032
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
 ## Assumptions
@@ -299,12 +299,12 @@
 ### ASM-001 – A graph ID has no slash
 - Text: The caller never gives a graph an ID with a slash; the first slash of a record ID ends the graph ID.
 - Rationale: confirmed by the owner (D-402); a graph ID with a slash is refused (REQ-GTB-031), so the assumption is a rule, and validation only checks that no existing graph has such an ID (the 15 converted graphs have none).
-- Status: Draft
+- Status: Approved
 
 ### ASM-002 – Step versions of an interrupted save may stay
 - Text: A save interrupted after some writes may leave step or connection versions that no graph header names; they are harmless and not cleaned up.
 - Rationale: accepted by the owner (D-402); `step_history` ignores them and a repeated save pins them again when equal (REQ-WFM-145, REQ-WFM-151).
-- Status: Draft
+- Status: Approved
 
 ## Traceability
 | Requirement | Level | Parent | Subject (part) | Functions | Interfaces | Verified by | Status |
@@ -339,4 +339,4 @@
 ## Approval
 Reviewed item by item with the owner on 2026-11-21 (review log: `review-log.md`). The approval of the whole document is the owner's: tick the box (in Emacs `C-c C-c` on the line) or say so in the chat; the agent then sets the status to Approved and never before.
 
-- [ ] Approved by Stefan Reiterer (owner). Date: ____-__-__
+- [x] Approved by Stefan Reiterer (owner). Date: 2026-11-21 (said in the chat, "approved")
