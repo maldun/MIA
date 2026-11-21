@@ -12,7 +12,7 @@
              70 tests green, PostgreSQL not skipped.
      Step 3: the owner decides (below) and signs. -->
 
-Reviewed by: [ ] (the owner ticks; decisions given in the chat questionnaire of 2026-11-21, D-411)
+Reviewed by: [X] (the owner ticks; decisions given in the chat questionnaire of 2026-11-21, D-411)
 Date: 2026-11-21 (the owner's decisions, D-411)
 Iteration: 0 (plan gate)
 Share fixed: 19 of 22 LLS requirements, 86 %; Persistence 4 of 4, TaskRuntime 15 of 18. Above the 30 % warning of BD3: CORE is the storage boundary that every later subgoal builds on, and every item traces to a validated outcome.
