@@ -14,3 +14,9 @@
 | REQ-WFM-149 | requirement | f083e813d64b | Stefan Reiterer | 2026-11-21 | approved |  |
 | REQ-WFM-150 | requirement | 342de8732f47 | Stefan Reiterer | 2026-11-21 | approved |  |
 | REQ-WFM-151 | requirement | 870c62e41b11 | Stefan Reiterer | 2026-11-21 | approved |  |
+| REQ-WFM-152 | requirement | 467d962e7d3b | Stefan Reiterer | 2026-11-21 | approved |  |
+| REQ-WFM-153 | requirement | cfa4ed7de1b3 | Stefan Reiterer | 2026-11-21 | approved |  |
+| REQ-WFM-154 | requirement | 79bd5e9ae1ed | Stefan Reiterer | 2026-11-21 | approved |  |
+| REQ-WFM-155 | requirement | 74bc227c59bc | Stefan Reiterer | 2026-11-21 | approved |  |
+| REQ-WFM-156 | requirement | ad45cbca10f2 | Stefan Reiterer | 2026-11-21 | approved |  |
+| REQ-WFM-157 | requirement | bb151521583c | Stefan Reiterer | 2026-11-21 | approved |  |
