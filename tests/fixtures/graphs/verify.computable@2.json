@@ -1,0 +1,424 @@
+{
+ "context_graph_id": "ctx-verify.computable@2",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "data"
+   },
+   "from": "input.data",
+   "id": "input.data>step.shape",
+   "to": "step.shape"
+  },
+  {
+   "data": {
+    "as": "hint"
+   },
+   "from": "input.data_description",
+   "id": "input.data_description>step.shape",
+   "to": "step.shape"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.shape",
+   "id": "step.shape>var.described",
+   "to": "var.described"
+  },
+  {
+   "data": {
+    "as": "claim"
+   },
+   "from": "input.claim",
+   "id": "input.claim>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "data_description"
+   },
+   "from": "var.described",
+   "id": "var.described>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.write",
+   "id": "step.write>var.written",
+   "to": "var.written"
+  },
+  {
+   "data": {},
+   "from": "step.shape",
+   "id": "step.shape>order-step.shape",
+   "to": "order-step.shape"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.shape",
+   "id": "order-step.shape>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "value"
+   },
+   "from": "var.written",
+   "id": "var.written>pick.run.script",
+   "to": "pick.run.script"
+  },
+  {
+   "data": {
+    "role": "settings"
+   },
+   "from": "settings.pick.run.script",
+   "id": "settings.pick.run.script>pick.run.script",
+   "to": "pick.run.script"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "pick.run.script",
+   "id": "pick.run.script>var.pick.run.script",
+   "to": "var.pick.run.script"
+  },
+  {
+   "data": {},
+   "from": "step.write",
+   "id": "step.write>order-step.write",
+   "to": "order-step.write"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.write",
+   "id": "order-step.write>pick.run.script",
+   "to": "pick.run.script"
+  },
+  {
+   "data": {
+    "as": "script"
+   },
+   "from": "var.pick.run.script",
+   "id": "var.pick.run.script>step.run",
+   "to": "step.run"
+  },
+  {
+   "data": {
+    "as": "data"
+   },
+   "from": "input.data",
+   "id": "input.data>step.run",
+   "to": "step.run"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.run",
+   "id": "step.run>var.verdict",
+   "to": "var.verdict"
+  },
+  {
+   "data": {},
+   "from": "pick.run.script",
+   "id": "pick.run.script>order-pick.run.script",
+   "to": "order-pick.run.script"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-pick.run.script",
+   "id": "order-pick.run.script>step.run",
+   "to": "step.run"
+  },
+  {
+   "data": {
+    "as": "verdict"
+   },
+   "from": "var.verdict",
+   "id": "var.verdict>step.repair",
+   "to": "step.repair"
+  },
+  {
+   "data": {
+    "as": "input.claim"
+   },
+   "from": "input.claim",
+   "id": "input.claim>step.repair",
+   "to": "step.repair"
+  },
+  {
+   "data": {
+    "as": "described"
+   },
+   "from": "var.described",
+   "id": "var.described>step.repair",
+   "to": "step.repair"
+  },
+  {
+   "data": {
+    "as": "written"
+   },
+   "from": "var.written",
+   "id": "var.written>step.repair",
+   "to": "step.repair"
+  },
+  {
+   "data": {
+    "as": "input.data"
+   },
+   "from": "input.data",
+   "id": "input.data>step.repair",
+   "to": "step.repair"
+  },
+  {
+   "data": {
+    "role": "settings"
+   },
+   "from": "settings.repair",
+   "id": "settings.repair>step.repair",
+   "to": "step.repair"
+  },
+  {
+   "data": {
+    "as": "written"
+   },
+   "from": "step.repair",
+   "id": "step.repair>var.written#2",
+   "to": "var.written#2"
+  },
+  {
+   "data": {
+    "as": "verdict"
+   },
+   "from": "step.repair",
+   "id": "step.repair>var.verdict#2",
+   "to": "var.verdict#2"
+  },
+  {
+   "data": {},
+   "from": "step.run",
+   "id": "step.run>order-step.run",
+   "to": "order-step.run"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.run",
+   "id": "order-step.run>step.repair",
+   "to": "step.repair"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.write",
+   "to": "step.write"
+  }
+ ],
+ "id": "verify.computable@2",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "code.describe_data",
+    "type": "transform"
+   },
+   "id": "step.shape"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.data"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.data_description"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.described"
+  },
+  {
+   "data": {
+    "toolbox_id": "view.write_check_script",
+    "type": "transform"
+   },
+   "id": "step.write"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.claim"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.written"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.shape"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.pick_field",
+    "type": "transform"
+   },
+   "id": "pick.run.script"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "path": "script"
+    }
+   },
+   "id": "settings.pick.run.script"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.pick.run.script"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.write"
+  },
+  {
+   "data": {
+    "toolbox_id": "check.script",
+    "type": "transform"
+   },
+   "id": "step.run"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.verdict"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-pick.run.script"
+  },
+  {
+   "data": {
+    "stop": {
+     "max_repetitions": 2,
+     "max_seconds": 300
+    },
+    "toolbox_id": "control.branch",
+    "type": "master"
+   },
+   "id": "step.repair"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "construct": "branch",
+     "node": {
+      "id": "repair",
+      "if": {
+       "op": "==",
+       "ref": "verdict.status",
+       "value": "inconclusive"
+      },
+      "kind": "branch",
+      "plain": "the script did not give a verdict",
+      "then": [
+       {
+        "body": [
+         {
+          "id": "fix",
+          "output": "written",
+          "use": "view.fix_check_script@1",
+          "wire": {
+           "claim": "$input.claim",
+           "data_description": "$described",
+           "problem": "$verdict.detail",
+           "script": "$written.script"
+          }
+         },
+         {
+          "id": "rerun",
+          "output": "verdict",
+          "use": "check.script@1",
+          "wire": {
+           "data": "$input.data",
+           "script": "$written.script"
+          }
+         }
+        ],
+        "id": "again",
+        "kind": "loop",
+        "max": 2,
+        "plain": "repairing the script",
+        "until": {
+         "op": "!=",
+         "ref": "verdict.status",
+         "value": "inconclusive"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "id": "settings.repair"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.written#2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.verdict#2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.run"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {}
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

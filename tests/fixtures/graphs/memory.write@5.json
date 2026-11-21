@@ -1,0 +1,79 @@
+{
+ "context_graph_id": "ctx-memory.write@5",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "text"
+   },
+   "from": "input.text",
+   "id": "input.text>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "known"
+   },
+   "from": "input.known",
+   "id": "input.known>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.write",
+   "id": "step.write>var.answer",
+   "to": "var.answer"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.write",
+   "to": "step.write"
+  }
+ ],
+ "id": "memory.write@5",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "view.memory_write",
+    "type": "transform"
+   },
+   "id": "step.write"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.text"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.known"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {
+      "temperature": 0.2
+     }
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

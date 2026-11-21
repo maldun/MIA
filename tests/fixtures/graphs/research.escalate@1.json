@@ -1,0 +1,1188 @@
+{
+ "context_graph_id": "ctx-research.escalate@1",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "query"
+   },
+   "from": "input.question",
+   "id": "input.question>step.search",
+   "to": "step.search"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.search",
+   "id": "step.search>var.hits",
+   "to": "var.hits"
+  },
+  {
+   "data": {
+    "as": "hits"
+   },
+   "from": "var.hits",
+   "id": "var.hits>step.pick",
+   "to": "step.pick"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.pick",
+   "id": "step.pick>var.urls",
+   "to": "var.urls"
+  },
+  {
+   "data": {},
+   "from": "step.search",
+   "id": "step.search>order-step.search",
+   "to": "order-step.search"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.search",
+   "id": "order-step.search>step.pick",
+   "to": "step.pick"
+  },
+  {
+   "data": {
+    "as": "urls"
+   },
+   "from": "var.urls",
+   "id": "var.urls>step.read",
+   "to": "step.read"
+  },
+  {
+   "data": {
+    "role": "settings"
+   },
+   "from": "settings.read",
+   "id": "settings.read>step.read",
+   "to": "step.read"
+  },
+  {
+   "data": {
+    "as": "pages"
+   },
+   "from": "step.read",
+   "id": "step.read>var.pages",
+   "to": "var.pages"
+  },
+  {
+   "data": {
+    "as": "page"
+   },
+   "from": "step.read",
+   "id": "step.read>var.page",
+   "to": "var.page"
+  },
+  {
+   "data": {},
+   "from": "step.pick",
+   "id": "step.pick>order-step.pick",
+   "to": "order-step.pick"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.pick",
+   "id": "order-step.pick>step.read",
+   "to": "step.read"
+  },
+  {
+   "data": {
+    "as": "question"
+   },
+   "from": "input.question",
+   "id": "input.question>step.passages",
+   "to": "step.passages"
+  },
+  {
+   "data": {
+    "as": "pages"
+   },
+   "from": "var.pages",
+   "id": "var.pages>step.passages",
+   "to": "step.passages"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.passages",
+   "id": "step.passages>var.material",
+   "to": "var.material"
+  },
+  {
+   "data": {},
+   "from": "step.read",
+   "id": "step.read>order-step.read",
+   "to": "order-step.read"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.read",
+   "id": "order-step.read>step.passages",
+   "to": "step.passages"
+  },
+  {
+   "data": {
+    "as": "value"
+   },
+   "from": "var.material",
+   "id": "var.material>pick.write.context",
+   "to": "pick.write.context"
+  },
+  {
+   "data": {
+    "role": "settings"
+   },
+   "from": "settings.pick.write.context",
+   "id": "settings.pick.write.context>pick.write.context",
+   "to": "pick.write.context"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "pick.write.context",
+   "id": "pick.write.context>var.pick.write.context",
+   "to": "var.pick.write.context"
+  },
+  {
+   "data": {},
+   "from": "step.passages",
+   "id": "step.passages>order-step.passages",
+   "to": "order-step.passages"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.passages",
+   "id": "order-step.passages>pick.write.context",
+   "to": "pick.write.context"
+  },
+  {
+   "data": {
+    "as": "question"
+   },
+   "from": "input.question",
+   "id": "input.question>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "context"
+   },
+   "from": "var.pick.write.context",
+   "id": "var.pick.write.context>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.write",
+   "id": "step.write>var.draft",
+   "to": "var.draft"
+  },
+  {
+   "data": {},
+   "from": "pick.write.context",
+   "id": "pick.write.context>order-pick.write.context",
+   "to": "order-pick.write.context"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-pick.write.context",
+   "id": "order-pick.write.context>step.write",
+   "to": "step.write"
+  },
+  {
+   "data": {
+    "as": "value"
+   },
+   "from": "var.material",
+   "id": "var.material>pick.check.passages",
+   "to": "pick.check.passages"
+  },
+  {
+   "data": {
+    "role": "settings"
+   },
+   "from": "settings.pick.check.passages",
+   "id": "settings.pick.check.passages>pick.check.passages",
+   "to": "pick.check.passages"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "pick.check.passages",
+   "id": "pick.check.passages>var.pick.check.passages",
+   "to": "var.pick.check.passages"
+  },
+  {
+   "data": {},
+   "from": "step.write",
+   "id": "step.write>order-step.write",
+   "to": "order-step.write"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.write",
+   "id": "order-step.write>pick.check.passages",
+   "to": "pick.check.passages"
+  },
+  {
+   "data": {
+    "as": "answer"
+   },
+   "from": "var.draft",
+   "id": "var.draft>step.check",
+   "to": "step.check"
+  },
+  {
+   "data": {
+    "as": "passages"
+   },
+   "from": "var.pick.check.passages",
+   "id": "var.pick.check.passages>step.check",
+   "to": "step.check"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.check",
+   "id": "step.check>var.answer",
+   "to": "var.answer"
+  },
+  {
+   "data": {},
+   "from": "pick.check.passages",
+   "id": "pick.check.passages>order-pick.check.passages",
+   "to": "order-pick.check.passages"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-pick.check.passages",
+   "id": "order-pick.check.passages>step.check",
+   "to": "step.check"
+  },
+  {
+   "data": {
+    "as": "answer"
+   },
+   "from": "var.answer",
+   "id": "var.answer>step.escalate",
+   "to": "step.escalate"
+  },
+  {
+   "data": {
+    "as": "input.question"
+   },
+   "from": "input.question",
+   "id": "input.question>step.escalate",
+   "to": "step.escalate"
+  },
+  {
+   "data": {
+    "role": "settings"
+   },
+   "from": "settings.escalate",
+   "id": "settings.escalate>step.escalate",
+   "to": "step.escalate"
+  },
+  {
+   "data": {
+    "as": "rawplan"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.rawplan",
+   "to": "var.rawplan"
+  },
+  {
+   "data": {
+    "as": "plan"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.plan",
+   "to": "var.plan"
+  },
+  {
+   "data": {
+    "as": "results"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.results",
+   "to": "var.results"
+  },
+  {
+   "data": {
+    "as": "hits1"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.hits1",
+   "to": "var.hits1"
+  },
+  {
+   "data": {
+    "as": "urls1"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.urls1",
+   "to": "var.urls1"
+  },
+  {
+   "data": {
+    "as": "pages1"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.pages1",
+   "to": "var.pages1"
+  },
+  {
+   "data": {
+    "as": "page"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.page#2",
+   "to": "var.page#2"
+  },
+  {
+   "data": {
+    "as": "material1"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.material1",
+   "to": "var.material1"
+  },
+  {
+   "data": {
+    "as": "draft1"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.draft1",
+   "to": "var.draft1"
+  },
+  {
+   "data": {
+    "as": "attempt"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.attempt",
+   "to": "var.attempt"
+  },
+  {
+   "data": {
+    "as": "newquery"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.newquery",
+   "to": "var.newquery"
+  },
+  {
+   "data": {
+    "as": "hits2"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.hits2",
+   "to": "var.hits2"
+  },
+  {
+   "data": {
+    "as": "urls2"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.urls2",
+   "to": "var.urls2"
+  },
+  {
+   "data": {
+    "as": "pages2"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.pages2",
+   "to": "var.pages2"
+  },
+  {
+   "data": {
+    "as": "material2"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.material2",
+   "to": "var.material2"
+  },
+  {
+   "data": {
+    "as": "draft2"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.draft2",
+   "to": "var.draft2"
+  },
+  {
+   "data": {
+    "as": "table"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.table",
+   "to": "var.table"
+  },
+  {
+   "data": {
+    "as": "answer"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.answer#2",
+   "to": "var.answer#2"
+  },
+  {
+   "data": {
+    "as": "request"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.request",
+   "to": "var.request"
+  },
+  {
+   "data": {
+    "as": "calculation"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.calculation",
+   "to": "var.calculation"
+  },
+  {
+   "data": {
+    "as": "composed"
+   },
+   "from": "step.escalate",
+   "id": "step.escalate>var.composed",
+   "to": "var.composed"
+  },
+  {
+   "data": {},
+   "from": "step.check",
+   "id": "step.check>order-step.check",
+   "to": "order-step.check"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.check",
+   "id": "order-step.check>step.escalate",
+   "to": "step.escalate"
+  },
+  {
+   "data": {
+    "as": "tool"
+   },
+   "from": "descriptor.tool.web_search",
+   "id": "descriptor.tool.web_search>step.search",
+   "to": "step.search"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.write",
+   "to": "step.write"
+  }
+ ],
+ "id": "research.escalate@1",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "tool.web_search",
+    "type": "transform"
+   },
+   "id": "step.search"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.question"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.hits"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.top_urls",
+    "type": "transform"
+   },
+   "id": "step.pick"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.urls"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.search"
+  },
+  {
+   "data": {
+    "stop": {
+     "max_seconds": 300
+    },
+    "toolbox_id": "control.map",
+    "type": "master"
+   },
+   "id": "step.read"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "construct": "map",
+     "node": {
+      "as": "address",
+      "body": [
+       {
+        "id": "fetch",
+        "on_error": "skip",
+        "output": "page",
+        "plain": "reading {{address}}",
+        "use": "tool.fetch_page@1",
+        "wire": {
+         "url": "$address"
+        }
+       }
+      ],
+      "collect": "page",
+      "id": "read",
+      "kind": "map",
+      "output": "pages",
+      "over": "$urls",
+      "plain": "reading the pages",
+      "workers": 1
+     }
+    }
+   },
+   "id": "settings.read"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.pages"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.page"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.pick"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.collect_passages",
+    "type": "transform"
+   },
+   "id": "step.passages"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.material"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.read"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.pick_field",
+    "type": "transform"
+   },
+   "id": "pick.write.context"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "path": "context"
+    }
+   },
+   "id": "settings.pick.write.context"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.pick.write.context"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.passages"
+  },
+  {
+   "data": {
+    "toolbox_id": "view.answer_from_passages",
+    "type": "transform"
+   },
+   "id": "step.write"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.draft"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-pick.write.context"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.pick_field",
+    "type": "transform"
+   },
+   "id": "pick.check.passages"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "path": "passages"
+    }
+   },
+   "id": "settings.pick.check.passages"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.pick.check.passages"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.write"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.anchor_answer",
+    "type": "transform"
+   },
+   "id": "step.check"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-pick.check.passages"
+  },
+  {
+   "data": {
+    "stop": {
+     "max_seconds": 300
+    },
+    "toolbox_id": "control.branch",
+    "type": "master"
+   },
+   "id": "step.escalate"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "construct": "branch",
+     "node": {
+      "id": "escalate",
+      "if": {
+       "op": "!=",
+       "ref": "answer.status",
+       "value": "answered"
+      },
+      "kind": "branch",
+      "plain": "the first try found no supported answer: splitting the question",
+      "then": [
+       {
+        "id": "plan",
+        "output": "rawplan",
+        "use": "view.research_plan@1",
+        "wire": {
+         "question": "$input.question"
+        }
+       },
+       {
+        "id": "norm",
+        "output": "plan",
+        "use": "code.normalize_plan@1",
+        "wire": {
+         "plan": "$rawplan",
+         "question": "$input.question"
+        }
+       },
+       {
+        "as": "sub",
+        "body": [
+         {
+          "id": "search1",
+          "output": "hits1",
+          "plain": "searching for: {{sub.query}}",
+          "use": "tool.web_search@1",
+          "wire": {
+           "query": "$sub.query"
+          }
+         },
+         {
+          "id": "pick1",
+          "output": "urls1",
+          "use": "code.top_urls@2",
+          "wire": {
+           "hits": "$hits1"
+          }
+         },
+         {
+          "as": "address",
+          "body": [
+           {
+            "id": "fetch1",
+            "on_error": "skip",
+            "output": "page",
+            "plain": "reading {{address}}",
+            "use": "tool.fetch_page@1",
+            "wire": {
+             "url": "$address"
+            }
+           }
+          ],
+          "collect": "page",
+          "id": "read1",
+          "kind": "map",
+          "output": "pages1",
+          "over": "$urls1",
+          "plain": "reading the pages",
+          "workers": 1
+         },
+         {
+          "id": "passages1",
+          "output": "material1",
+          "use": "code.collect_passages@1",
+          "wire": {
+           "pages": "$pages1",
+           "question": "$sub.question"
+          }
+         },
+         {
+          "id": "write1",
+          "output": "draft1",
+          "use": "view.answer_from_passages@1",
+          "wire": {
+           "context": "$material1.context",
+           "question": "$sub.question"
+          }
+         },
+         {
+          "id": "check1",
+          "output": "attempt",
+          "use": "code.anchor_answer@1",
+          "wire": {
+           "answer": "$draft1",
+           "passages": "$material1.passages"
+          }
+         },
+         {
+          "id": "retry",
+          "if": {
+           "op": "!=",
+           "ref": "attempt.status",
+           "value": "answered"
+          },
+          "kind": "branch",
+          "plain": "the first search did not answer",
+          "then": [
+           {
+            "id": "requery",
+            "output": "newquery",
+            "use": "view.requery@1",
+            "wire": {
+             "note": "$attempt.answer",
+             "previous_query": "$sub.query",
+             "question": "$sub.question"
+            }
+           },
+           {
+            "id": "search2",
+            "output": "hits2",
+            "plain": "searching again for: {{newquery.query}}",
+            "use": "tool.web_search@1",
+            "wire": {
+             "query": "$newquery.query"
+            }
+           },
+           {
+            "id": "pick2",
+            "output": "urls2",
+            "use": "code.top_urls@2",
+            "wire": {
+             "exclude": "$urls1",
+             "hits": "$hits2"
+            }
+           },
+           {
+            "as": "address",
+            "body": [
+             {
+              "id": "fetch2",
+              "on_error": "skip",
+              "output": "page",
+              "plain": "reading {{address}}",
+              "use": "tool.fetch_page@1",
+              "wire": {
+               "url": "$address"
+              }
+             }
+            ],
+            "collect": "page",
+            "id": "read2",
+            "kind": "map",
+            "output": "pages2",
+            "over": "$urls2",
+            "plain": "reading the pages",
+            "workers": 1
+           },
+           {
+            "id": "passages2",
+            "output": "material2",
+            "use": "code.collect_passages@1",
+            "wire": {
+             "pages": "$pages2",
+             "question": "$sub.question"
+            }
+           },
+           {
+            "id": "write2",
+            "output": "draft2",
+            "use": "view.answer_from_passages@1",
+            "wire": {
+             "context": "$material2.context",
+             "question": "$sub.question"
+            }
+           },
+           {
+            "id": "check2",
+            "output": "attempt",
+            "use": "code.anchor_answer@1",
+            "wire": {
+             "answer": "$draft2",
+             "passages": "$material2.passages"
+            }
+           }
+          ]
+         }
+        ],
+        "collect": "attempt",
+        "id": "lookups",
+        "kind": "map",
+        "output": "results",
+        "over": "$plan.subquestions",
+        "plain": "looking up the sub-questions",
+        "workers": 1
+       },
+       {
+        "id": "facts",
+        "output": "table",
+        "use": "code.facts_table@1",
+        "wire": {
+         "results": "$results",
+         "subquestions": "$plan.subquestions"
+        }
+       },
+       {
+        "else": [
+         {
+          "else": [
+           {
+            "id": "no_calc",
+            "output": "calculation",
+            "use": "code.calculate@1",
+            "wire": {
+             "request": {
+              "op": "none"
+             }
+            }
+           }
+          ],
+          "id": "need",
+          "if": {
+           "op": "true",
+           "ref": "plan.needs_calculation"
+          },
+          "kind": "branch",
+          "plain": "does the answer need a calculation",
+          "then": [
+           {
+            "id": "ask_calc",
+            "output": "request",
+            "use": "view.calc_request@1",
+            "wire": {
+             "facts": "$table.context",
+             "question": "$input.question"
+            }
+           },
+           {
+            "id": "do_calc",
+            "output": "calculation",
+            "use": "code.calculate@1",
+            "wire": {
+             "request": "$request"
+            }
+           }
+          ]
+         },
+         {
+          "id": "compose",
+          "output": "composed",
+          "use": "view.compose_answer@1",
+          "wire": {
+           "calculation": "$calculation.text",
+           "facts": "$table.context",
+           "question": "$input.question"
+          }
+         },
+         {
+          "id": "anchor",
+          "output": "answer",
+          "use": "code.anchor_answer@1",
+          "wire": {
+           "answer": "$composed",
+           "passages": "$table.passages"
+          }
+         }
+        ],
+        "id": "finish",
+        "if": {
+         "all": [
+          {
+           "op": "true",
+           "ref": "plan.single"
+          },
+          {
+           "op": "false",
+           "ref": "plan.needs_calculation"
+          }
+         ]
+        },
+        "kind": "branch",
+        "plain": "composing the answer",
+        "then": [
+         {
+          "id": "only",
+          "output": "answer",
+          "use": "code.only_result@1",
+          "wire": {
+           "results": "$results"
+          }
+         }
+        ]
+       }
+      ]
+     }
+    }
+   },
+   "id": "settings.escalate"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.rawplan"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.plan"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.results"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.hits1"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.urls1"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.pages1"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.page#2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.material1"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.draft1"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.attempt"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.newquery"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.hits2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.urls2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.pages2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.material2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.draft2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.table"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer#2"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.request"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.calculation"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.composed"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.check"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "settings": {},
+     "tool": "web_search"
+    }
+   },
+   "id": "descriptor.tool.web_search"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {}
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

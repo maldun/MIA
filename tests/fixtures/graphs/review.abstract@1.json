@@ -1,0 +1,121 @@
+{
+ "context_graph_id": "ctx-review.abstract@1",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "question"
+   },
+   "from": "input.question",
+   "id": "input.question>step.step",
+   "to": "step.step"
+  },
+  {
+   "data": {
+    "as": "criteria"
+   },
+   "from": "input.criteria",
+   "id": "input.criteria>step.step",
+   "to": "step.step"
+  },
+  {
+   "data": {
+    "as": "title"
+   },
+   "from": "input.title",
+   "id": "input.title>step.step",
+   "to": "step.step"
+  },
+  {
+   "data": {
+    "as": "date"
+   },
+   "from": "input.date",
+   "id": "input.date>step.step",
+   "to": "step.step"
+  },
+  {
+   "data": {
+    "as": "abstract"
+   },
+   "from": "input.abstract",
+   "id": "input.abstract>step.step",
+   "to": "step.step"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.step",
+   "id": "step.step>var.answer",
+   "to": "var.answer"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.step",
+   "to": "step.step"
+  }
+ ],
+ "id": "review.abstract@1",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "view.review_abstract",
+    "type": "transform"
+   },
+   "id": "step.step"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.question"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.criteria"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.title"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.date"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.abstract"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {
+      "temperature": 0
+     }
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

@@ -1,0 +1,186 @@
+{
+ "context_graph_id": "ctx-extract.llm@1",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "text"
+   },
+   "from": "input.text",
+   "id": "input.text>step.ask",
+   "to": "step.ask"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.ask",
+   "id": "step.ask>var.raw",
+   "to": "var.raw"
+  },
+  {
+   "data": {
+    "as": "value"
+   },
+   "from": "var.raw",
+   "id": "var.raw>pick.anchor.claims",
+   "to": "pick.anchor.claims"
+  },
+  {
+   "data": {
+    "role": "settings"
+   },
+   "from": "settings.pick.anchor.claims",
+   "id": "settings.pick.anchor.claims>pick.anchor.claims",
+   "to": "pick.anchor.claims"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "pick.anchor.claims",
+   "id": "pick.anchor.claims>var.pick.anchor.claims",
+   "to": "var.pick.anchor.claims"
+  },
+  {
+   "data": {},
+   "from": "step.ask",
+   "id": "step.ask>order-step.ask",
+   "to": "order-step.ask"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.ask",
+   "id": "order-step.ask>pick.anchor.claims",
+   "to": "pick.anchor.claims"
+  },
+  {
+   "data": {
+    "as": "text"
+   },
+   "from": "input.text",
+   "id": "input.text>step.anchor",
+   "to": "step.anchor"
+  },
+  {
+   "data": {
+    "as": "claims"
+   },
+   "from": "var.pick.anchor.claims",
+   "id": "var.pick.anchor.claims>step.anchor",
+   "to": "step.anchor"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.anchor",
+   "id": "step.anchor>var.answer",
+   "to": "var.answer"
+  },
+  {
+   "data": {},
+   "from": "pick.anchor.claims",
+   "id": "pick.anchor.claims>order-pick.anchor.claims",
+   "to": "order-pick.anchor.claims"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-pick.anchor.claims",
+   "id": "order-pick.anchor.claims>step.anchor",
+   "to": "step.anchor"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.ask",
+   "to": "step.ask"
+  }
+ ],
+ "id": "extract.llm@1",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "view.extract_claims",
+    "type": "transform"
+   },
+   "id": "step.ask"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.text"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.raw"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.pick_field",
+    "type": "transform"
+   },
+   "id": "pick.anchor.claims"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "path": "claims"
+    }
+   },
+   "id": "settings.pick.anchor.claims"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.pick.anchor.claims"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.ask"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.anchor_claims",
+    "type": "transform"
+   },
+   "id": "step.anchor"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-pick.anchor.claims"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {}
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

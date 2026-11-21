@@ -1,0 +1,45 @@
+{
+ "context_graph_id": "ctx-extract.rules@1",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "text"
+   },
+   "from": "input.text",
+   "id": "input.text>step.rules",
+   "to": "step.rules"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.rules",
+   "id": "step.rules>var.answer",
+   "to": "var.answer"
+  }
+ ],
+ "id": "extract.rules@1",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "code.extract_claims_rules",
+    "type": "transform"
+   },
+   "id": "step.rules"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.text"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer"
+  }
+ ],
+ "testbench_id": ""
+}
