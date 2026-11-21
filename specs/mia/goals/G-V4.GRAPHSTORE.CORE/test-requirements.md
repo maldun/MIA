@@ -21,7 +21,7 @@
 - Rationale: HR-005 says "all k, no sampling": a save of a graph of five steps and four connections has ten writes, a context graph of three steps and two connections six, a changed save two to four; trying every position is cheap and the only way to show that no position leaves a half graph.
 - Credibility aspect: power and false-alarm rate
 - Verified by: mutation (the header written first must fail the check)
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-002 – The injector is shown to fire
 - Applies to: TC-WFM-147, TC-WFM-151
@@ -32,7 +32,7 @@
 - Rationale: a fault injector that never fires would let every position pass; the counted writes (ten, six, and the smaller numbers of a changed save) are the known answer that proves the injector fired at every k.
 - Credibility aspect: stand-in fidelity
 - Verified by: known answer (the write counts of the four saves)
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-003 – Both backends, skips visible
 - Applies to: TC-GTB-032, TC-WFM-147, TC-WFM-151, TC-WFM-159, SMOKE-CORE-001
@@ -43,7 +43,7 @@
 - Rationale: the same behaviour on both backends is the point of FR-57 and HR-003; the prototype ran on both (round 03); skipping must be visible so a missing podman is not read as success (CLAUDE.md: PostgreSQL tests skip, never weaken).
 - Credibility aspect: measurement conditions
 - Verified by: inspection of the test report
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-004 – Golden examples from the fixtures
 - Applies to: TC-WFM-145, TC-WFM-148, TC-WFM-149, TC-WFM-158, TC-WFM-159
@@ -54,7 +54,7 @@
 - Rationale: these graphs are the golden examples of HR-003 and HR-004: 13 of the 107 local step names are shared between graphs, 4 with different content, so the owner's case is the normal case.
 - Credibility aspect: reference accuracy
 - Verified by: inspection of the fixture list and the shared-name count
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-005 – Exact values
 - Applies to: TC-GTB-029, TC-GTB-030, TC-GTB-031, TC-WFM-144, TC-WFM-146, TC-WFM-150, TC-WFM-152, TC-WFM-153, TC-WFM-154, TC-WFM-155, TC-WFM-156, TC-WFM-157, TC-WFM-160
@@ -66,7 +66,7 @@
 - Credibility aspect: reference accuracy
 - Verified by: known answer
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-006 – Each check is shown able to fail
 - Applies to: TC-WFM-145, TC-WFM-146, TC-WFM-147, TC-WFM-148, TC-WFM-149, TC-WFM-150, TC-WFM-151
@@ -77,7 +77,7 @@
 - Rationale: a test written against existing code tends to confirm it (the code of CORE is the kept prototype, reuse map R1); the defects: header written first, every member written at each save, no check before the first write, step history read from the record instead of the header.
 - Credibility aspect: reviewer independence
 - Verified by: mutation
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-007 – Fresh IDs and stores
 - Applies to: TC-GTB-029, TC-GTB-030, TC-WFM-144, TC-WFM-145, TC-WFM-148, TC-WFM-149, TC-WFM-152, TC-WFM-160
@@ -89,7 +89,7 @@
 - Credibility aspect: measurement conditions
 - Verified by: review
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-008 – Times are not compared exactly
 - Applies to: TC-WFM-158, TC-WFM-159
@@ -101,16 +101,16 @@
 - Credibility aspect: measurement conditions
 - Verified by: review
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-CORE-009 – The smoke check never writes live data
 - Applies to: SMOKE-CORE-001
 - Requirement: REQ-WFM-158
 - Group: BK
 - Kind: setup
-- Text: The smoke check shall write only throw-away graph IDs to a store made for the check, remove them by name afterwards, and never write to the owner's live store.
-- Rationale: the check runs on the owner's host (Deploy); the live data of MIA is not a test fixture.
+- Text: The smoke check shall write only throw-away graph IDs, to a new files directory and to a new database `mia_smoke` on the owner's running PostgreSQL server, drop both by name afterwards, and never write to MIA's own database or files store.
+- Rationale: the check runs on the owner's host (Deploy) and proves that the running server works (owner's choice, review 2026-11-21); the live data of MIA is not a test fixture.
 - Credibility aspect: measurement conditions
 - Verified by: inspection
-- Status: Draft
+- Status: Approved
 

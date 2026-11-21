@@ -14,7 +14,7 @@
 |---|---|---|---|
 | 1 | SC | Steps belong to one graph: what a record ID says and what a step's history lists (FR-60) | REQ-GTB-029, REQ-GTB-030, REQ-GTB-031, REQ-WFM-160, REQ-WFM-144, REQ-WFM-145 |
 | 2 | SV | Saving a graph: order of writes, what is written, refused and interrupted saves (FR-57, NFR-16) | REQ-WFM-146, REQ-WFM-147, REQ-WFM-148, REQ-WFM-149, REQ-WFM-150, REQ-WFM-151 |
-| 3 | CG | Context graphs: the same save path for the second kind of graph (FR-57), the kind of a graph | REQ-WFM-152, REQ-WFM-153, REQ-WFM-154, REQ-WFM-155, REQ-WFM-156, REQ-WFM-157 |
+| 3 | CG | Context graphs: the same save path for the second kind of graph (FR-57), the kind of a graph | REQ-WFM-152, REQ-WFM-153, REQ-WFM-154, REQ-WFM-155, REQ-WFM-161, REQ-WFM-156, REQ-WFM-157 |
 | 4 | RD | Reading, history and both places: versions, who and when, a version as it was saved, the same refusals on files and database (FR-57) | REQ-WFM-158, REQ-WFM-159, REQ-GTB-032 |
 
 ## Requirements
@@ -227,6 +227,20 @@
 - Verified by: TC-WFM-155
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
+
+### REQ-WFM-161 – An empty context graph is stored
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: When a context graph without steps and connections is saved, the Workflow management shall store it as one header version.
+- Rationale: refines FR-57; a context graph is built up step by step, so an empty one is a valid start; the owner kept this case of TC-WFM-155 and asked for its requirement (review 2026-11-21)
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-22: an empty context graph is accepted and has exactly one header version and no member record (exact)
+- Binding: open
+- Verified by: TC-WFM-155
+- Status: Approved
+- History: G-V4.GRAPHSTORE.CORE Plan step 3, 2026-11-21, new (from the review of TC-WFM-155); approved by the owner in the group review of CG, 2026-11-21
 
 ### REQ-WFM-156 – No workflow rules for a context graph
 - Level: low   Subject: TaskRuntime

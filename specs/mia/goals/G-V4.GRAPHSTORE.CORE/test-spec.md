@@ -8,21 +8,21 @@ All checks are exact: every expected value is a name, an ID, a count or an equal
 | Test ID | Verifies | Level | Setup / inputs | Expected result | Limit / tolerance |
 |---|---|---|---|---|---|
 | TC-GTB-029 | REQ-GTB-029 | component | a step record and a connection record, each written under `chat`, `lookup/chat`, `/chat`, `lookup/` and an empty ID | `chat`, `/chat`, `lookup/` and the empty ID refused naming `unscoped_id`; `lookup/chat` accepted | exact rule name and field |
-| TC-GTB-030 | REQ-GTB-030 | component | a header `g` that pins `g/step`, a header `g` that pins `h/step`; both members exist | header with `h/step` refused naming `unscoped_id`; with `g/step` accepted | exact |
+| TC-GTB-030 | REQ-GTB-030 | component | headers `g` that pin `g/step`, `h/step`, `g/conn` and `h/conn`; all members exist | headers with `h/step` or `h/conn` refused naming `unscoped_id`; with `g/step` or `g/conn` accepted | exact |
 | TC-GTB-031 | REQ-GTB-031 | unit | the record IDs `lookup/a/b`, `lookup/a`, `g//`, `lookup/` | graph `lookup` and local ID `a/b`; `lookup`, `a`; `g`, `/`; no local ID (not scoped) | exact |
 | TC-GTB-032 | REQ-GTB-032 | contract | the refusal cases of TC-GTB-029, TC-GTB-030, TC-WFM-146, TC-WFM-154, TC-WFM-155, TC-WFM-160 on the files backend and on PostgreSQL 16 | the same refusal rule and detail on both | exact; the PostgreSQL half skips (never weakened) where podman, the image or psycopg 3 is missing |
 | TC-WFM-144 | REQ-WFM-144 | component | a graph with steps `a`, `a/b`, connection `e1` from `a` to `a/b` | read back with the same local IDs for steps, connections and their ends | exact |
 | TC-WFM-145 | REQ-WFM-145 | component | two graphs with a step `step.write` of different content; `step.write` changed once in the first | its history has the versions of its own graph, oldest first, with account and time; the other graph's step history is unchanged; versions left by an interrupted save are not listed | exact version numbers |
 | TC-WFM-146 | REQ-WFM-146 | component | a graph whose last connection leads to a missing step, a graph with a cycle, a graph with a broken step content | the save is refused; the number of versions of every record of every graph table is as before | exact counts |
 | TC-WFM-147 | REQ-WFM-147 | component (fault injection) | a first save and a changed save of a workflow graph and of a context graph, interrupted after each write k = 1..n | after each interruption the graph is not listed or is entirely as before; never listed with a missing member | every k; no sampling; files and PostgreSQL |
-| TC-WFM-148 | REQ-WFM-148 | component | a graph of five steps saved, one step changed, saved again | exactly one new version of that step and one new header version; the other records unchanged | exact counts |
+| TC-WFM-148 | REQ-WFM-148 | component | a graph of five steps saved, one step changed, saved again; then one connection changed, saved again | each save: exactly one new version of the changed step or connection and one new header version; the other records unchanged | exact counts |
 | TC-WFM-149 | REQ-WFM-149 | component | the same graph saved twice, then saved after a change of its description only | the second save writes no record and answers with the newest version; the changed description is a new header version | exact counts |
 | TC-WFM-150 | REQ-WFM-150 | component | a workflow graph with a cycle, one with two writers, one with an unknown kind of step, a context graph with a connection to a missing step | each refused naming the rule or IDs; no table grew; the version count of the stored graph is as before | exact counts |
 | TC-WFM-151 | REQ-WFM-151 | component (fault injection) | as TC-WFM-147, then the same save repeated | the repeated save gives the full graph and exactly one new header version, for every k | every k; no sampling; files and PostgreSQL |
 | TC-WFM-152 | REQ-WFM-152 | component | a context graph of three steps and two connections | members in `context_nodes` and `context_edges` under `<graph>/<local>`, none in `graph_nodes` or `graph_edges`; header kind `context` | exact IDs |
 | TC-WFM-153 | REQ-WFM-153 | component | a graph saved without a kind and the same graph with the kind `workflow` | both stored with the kind `workflow`; members in the workflow tables | exact |
 | TC-WFM-154 | REQ-WFM-154 | component | kinds `swarm`, the empty text and a number | each refused naming `kind`; nothing stored | exact |
-| TC-WFM-155 | REQ-WFM-155 | component | a context graph with a repeated step ID, one with a repeated connection ID, one with a connection to a missing step | each refused naming the ID; nothing written | exact |
+| TC-WFM-155 | REQ-WFM-155, REQ-WFM-161 | component | a context graph with a repeated step ID, one with a repeated connection ID, one with a connection to a missing step | each refused naming the ID; nothing written; an empty context graph accepted as one header version | exact |
 | TC-WFM-156 | REQ-WFM-156 | component | a context graph of two connected steps of the same category and a cycle | accepted (no order, alternation, writer or stop-limit rule applied) | exact |
 | TC-WFM-157 | REQ-WFM-157 | component | a context graph and a workflow graph, each read at every version | the context graph carries the kind `context`; the workflow graph has the shape it had before the kind existed | exact |
 | TC-WFM-158 | REQ-WFM-158 | component | a graph saved by three accounts | versions 1 to 3, oldest first, with the three accounts and a time each | exact |
@@ -38,7 +38,7 @@ All checks are exact: every expected value is a name, an ID, a count or an equal
 | REQ-WFM-160 and REQ-GTB-029 | a graph ID that is the prefix of another (`look` and `lookup`) | TC-WFM-145 | the two graphs' steps do not mix; `look/x` is never a member of `lookup` |
 | REQ-WFM-148 and REQ-WFM-149 | a step whose content is changed and changed back | TC-WFM-148 | two new step versions (the content is compared with the newest version only) |
 | REQ-WFM-147 and REQ-WFM-151 | an interruption after the last write (the header) | TC-WFM-147 | the graph is entirely new; the repeated save writes nothing |
-| REQ-WFM-152 and REQ-WFM-155 | a context graph with no steps and no connections | TC-WFM-155 | accepted; one header version |
+| REQ-WFM-152 and REQ-WFM-161 | a context graph with no steps and no connections | TC-WFM-155 | accepted; one header version |
 | REQ-WFM-154 and REQ-WFM-153 | the kind given as `workflow` explicitly and as missing | TC-WFM-153 | the same stored result |
 
 ## Statistical checks (M19)
@@ -50,7 +50,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 ## Smoke tests (run in Phase 6, target environment)
 | Test ID | Verifies | Target | Conditions | Expected result |
 |---|---|---|---|---|
-| SMOKE-CORE-001 | REQ-WFM-158, REQ-WFM-159, REQ-WFM-152 | the owner's host, a files store and a PostgreSQL store made for the test | one workflow graph and one context graph under throw-away IDs, saved, changed twice and read | three versions each with account and time, each read as saved, on both stores |
+| SMOKE-CORE-001 | REQ-WFM-158, REQ-WFM-159, REQ-WFM-152 | the owner's host, a new files directory and a new database `mia_smoke` on the owner's running PostgreSQL server, both made for the test | one workflow graph and one context graph under throw-away IDs, saved, changed twice and read | three versions each with account and time, each read as saved, on both stores |
 
 ## Validation criteria (checked in Phase 7)
 | ID | Criterion | How we check | Who | Agreement (if numeric): margin, mean or single values, method |
@@ -70,9 +70,9 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 
 ### TC-GTB-030 – A header names only its own members
 - Verifies: REQ-GTB-030
-- Given: a header for the graph `g` that pins a member `h/step`, and another that pins `g/step`; both members exist
+- Given: four headers for the graph `g`: one pins the step `h/step`, one the step `g/step`, one the connection `h/conn`, one the connection `g/conn`; all four members exist
 - When: each header is written
-- Then: the header with `h/step` is refused naming `unscoped_id`; the header with `g/step` is accepted
+- Then: the headers with `h/step` and with `h/conn` are refused, each naming `unscoped_id`; the headers with `g/step` and with `g/conn` are accepted
 - And: witnesses AC-002
 
 ### TC-GTB-031 – The first slash separates graph and local ID
@@ -121,6 +121,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 - Given: a workflow graph of five steps saved as version 1
 - When: one step is changed and the graph is saved again
 - Then: exactly one new version of that step and one new header version exist; the other four steps and all connections have no new version
+- And: when then one connection is changed and the graph saved, exactly one new version of that connection and one new header version exist; no step has a new version
 - And: a step changed and changed back gives two new step versions
 - And: witnesses AC-001
 
@@ -164,7 +165,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 - Then: each is refused naming the field `kind`; nothing is stored
 
 ### TC-WFM-155 – A context graph keeps identity and ends
-- Verifies: REQ-WFM-155
+- Verifies: REQ-WFM-155, REQ-WFM-161
 - Given: three context graphs: one with a repeated step ID, one with a repeated connection ID, one with a connection to a missing step
 - When: each is saved
 - Then: each is refused naming the repeated or missing ID; nothing is written
@@ -204,7 +205,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 
 ### SMOKE-CORE-001 – Both graph kinds work on the owner's two stores
 - Verifies: REQ-WFM-158, REQ-WFM-159, REQ-WFM-152
-- Given: the owner's host with its files store and its live PostgreSQL store, a store made for the smoke test; a workflow graph and a context graph under throw-away IDs
+- Given: the owner's host; a new files directory and a new database `mia_smoke` on the owner's running PostgreSQL server, both made for the smoke test; a workflow graph and a context graph under throw-away IDs
 - When: each is saved, changed twice and read, on both stores
 - Then: each shows three versions with account and time and reads back as saved on both stores
-- And: the throw-away graphs are removed from the test store by name; the owner's live store is not written
+- And: afterwards the files directory is removed and the database `mia_smoke` is dropped by name; MIA's own database and files store are not written
