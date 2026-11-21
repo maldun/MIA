@@ -28,6 +28,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-01 (accepted case AC-002): a step written under `chat` is refused naming `unscoped_id`, under `lookup/chat` it is accepted (exact)
+- Binding: fixed
 - Verified by: TC-GTB-033
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); text changed to 'a non-empty ID' (D-409), approved by the owner 2026-11-21
@@ -41,6 +42,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-02: a header `g` naming `h/step` is refused naming `unscoped_id`; naming `g/step` it is accepted (exact)
+- Binding: fixed
 - Verified by: TC-GTB-034
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -54,6 +56,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-03: `lookup/a/b` is accepted as the local ID `a/b` of `lookup` and read back as `a/b` (exact)
+- Binding: fixed
 - Verified by: TC-GTB-035
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -67,6 +70,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-21: a graph with steps saved under the ID `look/up` is refused naming `unscoped_id` and nothing is stored (exact); a graph without steps is not caught by this rule (D-410)
+- Binding: fixed
 - Verified by: TC-WFM-178
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); narrowed to graphs with steps, the slash caught through the steps as in the prototype (owner's choice D-410, Plan step 4, 2026-11-21)
@@ -80,6 +84,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-04: a graph saved with local IDs is read back with the same local IDs, also for the ends of connections (exact)
+- Binding: fixed
 - Verified by: TC-WFM-162
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -93,6 +98,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-05 (accepted case AC-002): changing `step.write` in `lookup` adds one version to its history and none to the history of the other graph (exact)
+- Binding: fixed
 - Verified by: TC-WFM-163
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -106,6 +112,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-06: a graph with a broken connection at its last position leaves the record counts of every table as they were (exact)
+- Binding: fixed
 - Verified by: TC-WFM-164
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -119,6 +126,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-07 (accepted case AC-003): a save interrupted after each of its writes never lists a graph with a missing step or connection (every write position, files and database)
+- Binding: fixed
 - Verified by: TC-WFM-165
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -132,6 +140,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-08 (accepted case AC-001): saving a graph with one changed step writes exactly one new step version and one new header version (exact)
+- Binding: fixed
 - Verified by: TC-WFM-166
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -145,6 +154,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-09 (accepted case AC-001): the same graph saved twice has one version; the second answer names it and no table grew (exact)
+- Binding: fixed
 - Verified by: TC-WFM-167
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -158,6 +168,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-10 (accepted case AC-003): a graph with a cycle, two writers, an unknown kind of step or a context connection to a missing step is refused and no table grew (exact)
+- Binding: fixed
 - Verified by: TC-WFM-168
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -171,6 +182,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-11 (accepted case AC-003): for every write position the repeated save gives the full graph and one new header version (exact)
+- Binding: fixed
 - Verified by: TC-WFM-169
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -184,6 +196,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-12: a context graph's members are in `context_nodes` and `context_edges` under `<graph>/<local>`, none in `graph_nodes` (exact)
+- Binding: fixed
 - Verified by: TC-WFM-170
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -197,6 +210,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-13: a graph saved without a kind is stored with the kind `workflow` (exact)
+- Binding: fixed
 - Verified by: TC-WFM-171
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -210,6 +224,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-14: kind `swarm` is refused naming `kind` and nothing is stored (exact)
+- Binding: fixed
 - Verified by: TC-WFM-172
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -265,6 +280,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-17: a context graph read at any version carries the kind `context`; a workflow graph keeps the shape it had before (exact)
+- Binding: fixed
 - Verified by: TC-WFM-175
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -278,6 +294,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-18 (accepted case AC-001): a graph saved by three accounts lists versions 1 to 3 with the three accounts and a time each (exact)
+- Binding: fixed
 - Verified by: TC-WFM-176
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -291,6 +308,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-19 (accepted case AC-001): each of three saved versions reads back equal to what was saved, for a workflow graph and a context graph (exact)
+- Binding: fixed
 - Verified by: TC-WFM-177
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
@@ -304,6 +322,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-20: the cases of AC-CORE-01 to AC-CORE-02, AC-CORE-06, AC-CORE-21, AC-CORE-14 and AC-CORE-15 give the same refusal on both backends (exact)
+- Binding: fixed
 - Verified by: TC-GTB-036
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
