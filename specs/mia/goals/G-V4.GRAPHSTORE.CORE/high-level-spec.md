@@ -111,3 +111,8 @@ Decided by the owner in the HLS review of 2026-11-21 (D-402): the separator rule
 | The files backend cannot make several records atomic | the order is the only protection | the fault-injection measure (HR-005) proves it for both backends; if PostgreSQL could do better (one transaction), say so in the requirements |
 | Rewriting the protected tests of A-92 | amendment effort | one amendment, joint with IF-301 v2 owners, listed in the plan |
 | No hard performance bound | none claimed | **decided:** none (owner); a budget, if any, comes with the requirements |
+
+## Approval
+Reviewed item by item with the owner on 2026-11-21 (review log: `review-log.md`). The approval of the whole document is the owner's: tick the box (in Emacs `C-c C-c` on the line) or say so in the chat; the agent then sets the status to Approved and never before.
+
+- [ ] Approved by Stefan Reiterer (owner). Date: ____-__-__

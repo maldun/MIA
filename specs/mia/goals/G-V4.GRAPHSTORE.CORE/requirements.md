@@ -335,3 +335,8 @@
 - A clean-up of unused step versions (owner, D-402).
 - The rule set of a context graph beyond identity and ends (CONTEXT, FR-75).
 - Moving, syncing and the same behaviour of files and database for whole stores (TRANSFER, FR-58, FR-59, FR-93).
+
+## Approval
+Reviewed item by item with the owner on 2026-11-21 (review log: `review-log.md`). The approval of the whole document is the owner's: tick the box (in Emacs `C-c C-c` on the line) or say so in the chat; the agent then sets the status to Approved and never before.
+
+- [ ] Approved by Stefan Reiterer (owner). Date: ____-__-__
