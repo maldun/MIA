@@ -1,6 +1,6 @@
 # Plan: G-V4.GRAPHSTORE.CORE (one stored truth, graph-scoped steps, atomic saves, both graph kinds)
 
-**Goal:** `specs/mia/goals/G-V4.GRAPHSTORE.CORE/goal.md`   **Requirements:** `requirements.md` of this folder (22 requirements, 2 assumptions; they move into N-3.2 and N-2.3 at the merge, D-408)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder   **Interface:** IF-301 v3 (`contracts/IF-301-graph-tables.md`, A-167 installed)   **Status:** Draft (for the owner's review)
+**Goal:** `specs/mia/goals/G-V4.GRAPHSTORE.CORE/goal.md`   **Requirements:** `requirements.md` of this folder (22 requirements, 2 assumptions; they move into N-3.2 and N-2.3 at the merge, D-408)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder   **Interface:** IF-301 v3 (`contracts/IF-301-graph-tables.md`, A-167 installed)   **Status:** Approved (owner, 2026-11-21: task cut and frame accepted in the chat questionnaire)
 
 Line of work `goal/v4`; supervised. Five small tasks, pure logic on the Storage layer: no model step, no prompt, no eval suite, no new dependency, no new part (the nodes N-3.1, N-3.2 and N-2.3 stay, high-level spec section 5).
 
