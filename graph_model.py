@@ -169,5 +169,13 @@ class GraphModel:
         return {"id": header["id"], **{key: data[key] for key in HEADER},
                 "nodes": pinned("graph_nodes", data["nodes"]), "edges": pinned("graph_edges", data["edges"])}
 
+    def graph_versions(self, graph_id):
+        """STUB (G-V4.GRAPHSTORE.CORE red tests): the versions of a graph, oldest first, [{"version", "author", "time"}]; task T-03 (REQ-WFM-158)."""
+        return []
+
+    def step_history(self, graph_id, local_id):
+        """STUB (G-V4.GRAPHSTORE.CORE red tests): the versions of one step of one graph as its headers pinned them; task T-03 (REQ-WFM-145)."""
+        return []
+
     def topological_order(self, graph_id):
         return order_of(self.read_graph(graph_id))

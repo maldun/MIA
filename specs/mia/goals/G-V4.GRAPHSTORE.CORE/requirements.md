@@ -61,15 +61,15 @@
 ### REQ-WFM-160 – No slash in a graph ID
 - Level: low   Subject: TaskRuntime
 - Group: SC
-- Text: If the ID of a graph contains a slash, then the Workflow management shall refuse the save and name the rule `unscoped_id`.
+- Text: If a graph with at least one step is saved under an ID that contains a slash, then the Workflow management shall refuse the save and name the rule `unscoped_id`.
 - Rationale: refines HR-001 and ASM-001; the record ID of its steps would name another graph; seen in the prototype: a graph `look/up` is refused naming `look/up/a`
 - Parent: FR-60
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-CORE-21: a graph saved under the ID `look/up` is refused naming `unscoped_id` and nothing is stored (exact)
+- Acceptance criterion: AC-CORE-21: a graph with steps saved under the ID `look/up` is refused naming `unscoped_id` and nothing is stored (exact); a graph without steps is not caught by this rule (D-410)
 - Verified by: TC-WFM-178
 - Status: Approved
-- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); narrowed to graphs with steps, the slash caught through the steps as in the prototype (owner's choice D-410, Plan step 4, 2026-11-21)
 
 ### REQ-WFM-144 – Local IDs on reading
 - Level: low   Subject: TaskRuntime

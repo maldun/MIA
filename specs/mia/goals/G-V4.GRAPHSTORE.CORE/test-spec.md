@@ -7,7 +7,7 @@ All checks are exact: every expected value is a name, an ID, a count or an equal
 ## Test cases
 | Test ID | Verifies | Level | Setup / inputs | Expected result | Limit / tolerance |
 |---|---|---|---|---|---|
-| TC-GTB-033 | REQ-GTB-029 | component | a step record and a connection record, each written under `chat`, `lookup/chat`, `/chat`, `lookup/` and an empty ID | `chat`, `/chat` and `lookup/` refused naming `unscoped_id`; the empty ID refused naming `record_identity` (`id`); `lookup/chat` accepted | exact rule name and field |
+| TC-GTB-033 | REQ-GTB-029 | component | a step record and a connection record, each written under `chat`, `lookup/chat`, `/chat`, `lookup/` and an empty ID | `chat`, `/chat` and `lookup/` refused naming `unscoped_id`; the empty ID refused naming `record_identity` (`id`); `lookup/chat` accepted (a step `lookup/end` stored first) | exact rule name and field |
 | TC-GTB-034 | REQ-GTB-030 | component | headers `g` that pin `g/step`, `h/step`, `g/conn` and `h/conn`; all members exist | headers with `h/step` or `h/conn` refused naming `unscoped_id`; with `g/step` or `g/conn` accepted | exact |
 | TC-GTB-035 | REQ-GTB-031 | unit | the record IDs `lookup/a/b`, `lookup/a`, `g//`, `lookup/` | graph `lookup` and local ID `a/b`; `lookup`, `a`; `g`, `/`; no local ID (not scoped) | exact |
 | TC-GTB-036 | REQ-GTB-032 | contract | the refusal cases of TC-GTB-033, TC-GTB-034, TC-WFM-164, TC-WFM-172, TC-WFM-173, TC-WFM-178 on the files backend and on PostgreSQL 16 | the same refusal rule and detail on both | exact; the PostgreSQL half skips (never weakened) where podman, the image or psycopg 3 is missing |
@@ -27,7 +27,7 @@ All checks are exact: every expected value is a name, an ID, a count or an equal
 | TC-WFM-175 | REQ-WFM-157 | component | a context graph and a workflow graph, each read at every version | the context graph carries the kind `context`; the workflow graph has the shape it had before the kind existed | exact |
 | TC-WFM-176 | REQ-WFM-158 | component | a graph saved by three accounts | versions 1 to 3, oldest first, with the three accounts and a time each | exact |
 | TC-WFM-177 | REQ-WFM-159 | component | three saved versions of a workflow graph (with a loop-controlling step) and of a context graph | each version reads back equal to what was saved at that version | exact equality |
-| TC-WFM-178 | REQ-WFM-160 | unit | graph IDs `look/up`, `lookup`, `/lookup`, the empty ID | `look/up` and `/lookup` refused naming `unscoped_id`, the empty ID naming `record_identity` (`id`); nothing stored; `lookup` accepted | exact |
+| TC-WFM-178 | REQ-WFM-160 | unit | a graph with steps under the IDs `look/up`, `lookup`, `/lookup`, the empty ID | `look/up`, `/lookup` and the empty ID refused naming `unscoped_id` and the breaking record ID; nothing stored; `lookup` accepted | exact |
 
 ## Edge inputs (per rule: zero, empty, missing, at and past the limit; per pair of rules acting on the same data)
 | Rule (REQ) | Edge or pair | Test ID | Expected result |
@@ -62,7 +62,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 
 ### TC-GTB-033 – A step or connection without a graph in its ID is refused
 - Verifies: REQ-GTB-029
-- Given: a step record and a connection record, each offered under four IDs: `chat`, `/chat`, `lookup/` and the empty ID, and once under `lookup/chat`
+- Given: a step record and a connection record, each offered under four IDs: `chat`, `/chat`, `lookup/` and the empty ID, and once under `lookup/chat`; a step `lookup/end` is stored first, so that every connection has stored ends (D-410)
 - When: each of the ten records is written
 - Then: the three unscoped IDs `chat`, `/chat` and `lookup/` of each table are refused, each naming the rule `unscoped_id`; the empty ID is refused naming `record_identity` with the field `id`, as before (D-409)
 - And: the records under `lookup/chat` are accepted and stored
@@ -93,6 +93,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 - Given: a workflow graph `g` with steps `a` and `a/b`, and a connection `e1` from `a` to `a/b`
 - When: it is saved and read back
 - Then: the step IDs are `a` and `a/b`, the connection ID is `e1`, and its ends are `a` and `a/b`; no ID carries the graph ID
+- And: the store holds them as `g/a`, `g/a/b` and `g/e1` (D-410)
 
 ### TC-WFM-163 – A step's history lists its own graph's changes
 - Verifies: REQ-WFM-145
@@ -114,6 +115,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 - When: the save is run once for every k from 1 to the number of writes of that save
 - Then: after each interruption the graph is not listed, or is entirely as before; it is never listed with a step or connection that is missing
 - And: the check runs for every k, on the files store and on the PostgreSQL store, and fails when one k fails
+- And: one more position after the last write (the header): the injector does not fire, all writes are counted, and the graph reads as the new one (D-410)
 - And: witnesses AC-003
 
 ### TC-WFM-166 – Only changed members get a new version
@@ -144,6 +146,7 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 - Given: the interrupted saves of TC-WFM-165, one for every k
 - When: the same save is repeated after each interruption
 - Then: the graph is complete and equals the saved one; it has exactly one new header version; no step is stored twice for equal content
+- And: after the position past the last write the repeat writes nothing (D-410)
 - And: witnesses AC-003
 
 ### TC-WFM-170 – A context graph is stored in the context tables
@@ -163,12 +166,14 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 - Given: graphs with the kind `swarm`, the empty text and the number 3
 - When: each is saved
 - Then: each is refused naming the field `kind`; nothing is stored
+- And: the rule is `schema_break` (D-410)
 
 ### TC-WFM-173 – A context graph keeps identity and ends
 - Verifies: REQ-WFM-155, REQ-WFM-161
 - Given: three context graphs: one with a repeated step ID, one with a repeated connection ID, one with a connection to a missing step
 - When: each is saved
 - Then: each is refused naming the repeated or missing ID; nothing is written
+- And: a connection to a missing step is named by the connection's ID (`e1`), not by the missing step (D-410)
 - And: an empty context graph is accepted as one header version
 
 ### TC-WFM-174 – Workflow rules do not apply to a context graph
@@ -199,9 +204,9 @@ None: the high-level spec has no hard bound (owner, D-402); a budget, if wanted 
 
 ### TC-WFM-178 – A graph ID with a slash is refused
 - Verifies: REQ-WFM-160
-- Given: the graph IDs `look/up`, `/lookup`, the empty ID and `lookup`
-- When: a graph is saved under each
-- Then: `look/up` and `/lookup` are refused naming `unscoped_id`, the empty ID naming `record_identity` with the field `id` (as before, D-409); nothing is stored for them; `lookup` is accepted
+- Given: a graph with steps, offered under the graph IDs `look/up`, `/lookup`, the empty ID and `lookup`
+- When: it is saved under each
+- Then: `look/up`, `/lookup` and the empty ID are refused naming `unscoped_id` and the record ID of the step or member that breaks it (`look/up/query`, `/lookup/query`, `/query`); nothing is stored for them; `lookup` is accepted (D-410: the slash is caught through the steps)
 
 ### SMOKE-CORE-001 – Both graph kinds work on the owner's two stores
 - Verifies: REQ-WFM-158, REQ-WFM-159, REQ-WFM-152

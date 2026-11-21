@@ -4911,7 +4911,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-GTB-029'> ScopedIDOfAStepOrConnection_Gtb029 {
         subject s : Persistence;
-        doc /* If a step or connection record is written under an ID not of the form `<graph id>/<local id>`, then the Graph tables shall refuse the record and name the rule `unscoped_id`. */
+        doc /* If a step or connection record is written under a non-empty ID not of the form `<graph id>/<local id>`, then the Graph tables shall refuse the record and name the rule `unscoped_id`. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-GTB-030'> HeaderNamesOnlyItsOwnMembers_Gtb030 {
@@ -4926,7 +4926,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-160'> NoSlashInAGraphID_Wfm160 {
         subject s : TaskRuntime;
-        doc /* If the ID of a graph contains a slash, then the Workflow management shall refuse the save and name the rule `unscoped_id`. */
+        doc /* If a graph with at least one step is saved under an ID that contains a slash, then the Workflow management shall refuse the save and name the rule `unscoped_id`. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-144'> LocalIDsOnReading_Wfm144 {

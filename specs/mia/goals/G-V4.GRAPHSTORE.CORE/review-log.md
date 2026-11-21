@@ -111,3 +111,11 @@
 | TC-GTB-033 | check | f67c00403b74 | Stefan Reiterer | 2026-11-21 | approved | was TC-GTB-029 / TC-WFM-160; empty ID now expects record_identity (id), the owner's choice in D-409 |
 | TC-WFM-178 | check | ef6887a326a2 | Stefan Reiterer | 2026-11-21 | approved | was TC-GTB-029 / TC-WFM-160; empty ID now expects record_identity (id), the owner's choice in D-409 |
 | REQ-GTB-029 | requirement | 03579128cb02 | Stefan Reiterer | 2026-11-21 | approved | new text 'a non-empty ID' (D-409) approved in the chat questionnaire |
+| REQ-WFM-160 | requirement | 61679b5a354a | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
+| TC-GTB-033 | check | af61a7db305e | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
+| TC-WFM-162 | check | 4216d8ba96b6 | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
+| TC-WFM-165 | check | 1302564ececb | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
+| TC-WFM-169 | check | 10b3606db2f7 | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
+| TC-WFM-172 | check | 6b4affccd5f1 | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
+| TC-WFM-173 | check | 1b2c56e0cb21 | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
+| TC-WFM-178 | check | fd61ef43942b | Stefan Reiterer | 2026-11-21 | approved | changed as the owner chose in D-410 (questionnaire, Plan step 4) |
