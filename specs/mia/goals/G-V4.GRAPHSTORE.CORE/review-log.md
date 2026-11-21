@@ -110,3 +110,4 @@
 | TC-WFM-177 | check | cd908d53dda3 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
 | TC-GTB-033 | check | f67c00403b74 | Stefan Reiterer | 2026-11-21 | approved | was TC-GTB-029 / TC-WFM-160; empty ID now expects record_identity (id), the owner's choice in D-409 |
 | TC-WFM-178 | check | ef6887a326a2 | Stefan Reiterer | 2026-11-21 | approved | was TC-GTB-029 / TC-WFM-160; empty ID now expects record_identity (id), the owner's choice in D-409 |
+| REQ-GTB-029 | requirement | 03579128cb02 | Stefan Reiterer | 2026-11-21 | approved | new text 'a non-empty ID' (D-409) approved in the chat questionnaire |

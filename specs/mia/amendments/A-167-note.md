@@ -31,6 +31,6 @@ Why this and not the alternatives: (1) scope the IDs in the Workflow management 
 
 ## To decide and to do
 1. **Owner:** read the v3 text (`bash tools/apply_amendment_a167.sh --report`), above all golden 22 and 23 and decision 17, and the three places of interpretation above.
-2. **Owner:** confirm the text change of REQ-GTB-029 ("a **non-empty** ID not of the form ..."), which follows from D-409 (the empty ID stays `record_identity`); it is the one CORE item marked changed since review.
+2. **Done (owner, 2026-11-21):** the text change of REQ-GTB-029 ("a **non-empty** ID not of the form ..."), which follows from D-409 (the empty ID stays `record_identity`); it is the one CORE item marked changed since review.
 3. **Owner:** `bash tools/apply_amendment_a167.sh --do` on `goal/v4`, then commit as `plan: A-167 installed`.
 4. **Plan of CORE (step 5, not yet written):** the first task implements REQ-GTB-029 to 031 in `graph_tables.py` (prototype lines 159 to 224 as the basis, reuse map R1) and turns the real side of TC-IF-301-25 and -26 green, with every other test unchanged.

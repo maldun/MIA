@@ -30,7 +30,7 @@
 - Acceptance criterion: AC-CORE-01 (accepted case AC-002): a step written under `chat` is refused naming `unscoped_id`, under `lookup/chat` it is accepted (exact)
 - Verified by: TC-GTB-033
 - Status: Approved
-- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); text changed to 'a non-empty ID' (D-409), approved by the owner 2026-11-21
 
 ### REQ-GTB-030 – Header names only its own members
 - Level: low   Subject: Persistence
