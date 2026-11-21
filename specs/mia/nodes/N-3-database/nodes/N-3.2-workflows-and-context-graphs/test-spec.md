@@ -4,6 +4,8 @@
 
 Tests of this part alone against the mocks of its neighbours: unit tests with plain data, no database. The interface IF-301 is tested by its contract suite against the mock and the real part. Stages (M27): 1 = commit gate, under 2 minutes; 2 = up to 10 minutes; 3 = up to 30 minutes.
 
+IDs of steps and connections (A-167, IF-301 v3): the IDs `n1`, `e1`, `c1`, ... named in the scenarios below are local IDs. Since IF-301 v3 (REQ-GTB-029) a step or connection is stored under `<graph id>/<local id>`, so the tests write the scoped form (`wf1/n1`, `g/e1`, `h1/c1`); the rules and the expected results are unchanged.
+
 ## Test cases
 
 | Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |

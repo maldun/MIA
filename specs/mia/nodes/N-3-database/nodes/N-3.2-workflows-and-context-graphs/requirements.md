@@ -4,6 +4,8 @@
 
 The tables of workflows and context graphs and the graph rules that every write of such a record must pass (the second line of defence for TB-edit). Provides IF-301. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
+IDs of steps and connections (A-167, IF-301 v3): the IDs `n1`, `e1`, `c1`, ... named in the acceptance criteria below are local IDs. Since IF-301 v3 (REQ-GTB-029) a step or connection is stored under `<graph id>/<local id>`, so the tests write the scoped form (`wf1/n1`, `g/e1`, `h1/c1`); the rules and the expected results are unchanged.
+
 ## Requirements
 
 ### REQ-GTB-001 – Shared state held

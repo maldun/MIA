@@ -167,6 +167,15 @@ def _check_context(table, record, data, categories, stored):
     return None
 
 
+SCOPED = ("graph_nodes", "graph_edges", "context_nodes", "context_edges")
+
+
+def _split_scoped(record_id):
+    """(graph ID, local ID) of `<graph id>/<local id>`, split at the first slash, or None (IF-301 v3, REQ-GTB-029, REQ-GTB-031)."""
+    graph, sep, local = str(record_id).partition("/")
+    return (graph, local) if sep and graph and local else None
+
+
 def _check(table, record, categories, stored, record_id=None):
     if not isinstance(record, dict):
         return {"rule": "record_identity", "detail": "record"}
@@ -174,6 +183,8 @@ def _check(table, record, categories, stored, record_id=None):
         return {"rule": "record_identity", "detail": "id"}
     if record_id is not None and record_id != record["id"]:      # the record is stored under the ID it carries (REQ-GTB-021)
         return {"rule": "record_identity", "detail": "id"}
+    if table in SCOPED and _split_scoped(record["id"]) is None:  # a step or connection names its graph (v3, REQ-GTB-029)
+        return {"rule": "unscoped_id", "detail": record["id"]}
     if _too_deep(record):                                        # cannot be checked (REQ-GTB-027)
         return {"rule": "schema_break", "detail": "data"}
     if table in ("graph_edges", "context_edges"):
@@ -214,12 +225,14 @@ def _check(table, record, categories, stored, record_id=None):
         for key in ("nodes", "edges"):
             if _dup(data[key]):
                 return {"rule": "record_identity", "detail": key}
-        if stored is not None:
-            for key in ("nodes", "edges"):
-                where = ("context_" + key) if data["kind"] == "context" else key        # a context header looks in the context tables (REQ-GTB-026)
-                for member in data[key]:
-                    if member["version"] not in stored.get(where, {}).get(member["id"], []):
-                        return {"rule": "unknown_member", "detail": member["id"]}
+        for key in ("nodes", "edges"):
+            where = ("context_" + key) if data["kind"] == "context" else key            # a context header looks in the context tables (REQ-GTB-026)
+            for member in data[key]:
+                parts = _split_scoped(member["id"])
+                if parts is None or parts[0] != record["id"]:                           # a member of another graph (v3, REQ-GTB-030)
+                    return {"rule": "unscoped_id", "detail": member["id"]}
+                if stored is not None and member["version"] not in stored.get(where, {}).get(member["id"], []):
+                    return {"rule": "unknown_member", "detail": member["id"]}
     return None
 
 

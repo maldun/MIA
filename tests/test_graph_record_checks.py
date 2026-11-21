@@ -17,7 +17,7 @@ from storage_files import FileBackend  # noqa: E402
 
 
 def master(**fields):
-    return {"id": "m1", "data": dict({"type": "master", "toolbox_id": "t"}, **fields)}
+    return {"id": "g/m1", "data": dict({"type": "master", "toolbox_id": "t"}, **fields)}
 
 
 class RecordCheckEdges(unittest.TestCase):
@@ -48,13 +48,13 @@ class RecordCheckEdges(unittest.TestCase):
     def test_a_malformed_header_is_named_and_never_raises(self):
         """A header whose members are not objects, or whose kind is unknown, is a schema_break naming the field, not an exception.
 
-        Example: nodes ["n1"] -> schema_break "nodes.0"; kind "x" -> schema_break "kind".
+        Example: nodes ["g/n1"] -> schema_break "nodes.0"; kind "x" -> schema_break "kind".
         """
         # Given: two broken headers and the empty store state
         base = {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d", "nodes": [], "edges": []}
         stored = {"nodes": {}, "edges": {}}
         # When/Then
-        self.assertEqual(graph_tables.check_record("graphs", {"id": "g", "data": dict(base, nodes=["n1"])}, stored=stored),
+        self.assertEqual(graph_tables.check_record("graphs", {"id": "g", "data": dict(base, nodes=["g/n1"])}, stored=stored),
                          {"rule": "schema_break", "detail": "nodes.0"})
         self.assertEqual(graph_tables.check_record("graphs", {"id": "g", "data": dict(base, kind="x")}, stored=stored),
                          {"rule": "schema_break", "detail": "kind"})
@@ -65,8 +65,8 @@ class RecordCheckEdges(unittest.TestCase):
         Example: {"type": ["x"]} -> unknown_type; an empty `categories` makes even "data" unknown (a context graph without that category).
         """
         # Given/When/Then
-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "a", "data": {"type": ["x"]}})["rule"], "unknown_type")
-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "a", "data": {"type": "data"}}, categories={}),
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/a", "data": {"type": ["x"]}})["rule"], "unknown_type")
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/a", "data": {"type": "data"}}, categories={}),
                          {"rule": "unknown_type", "detail": "data"})
 
 
@@ -81,7 +81,7 @@ class FixedFieldsOfANode(unittest.TestCase):
         # Given
         cases = {"foo": {"type": "data", "foo": 1}, "id": {"type": "data", "id": "x"}}
         for field, data in cases.items():
-            record = {"id": "n1", "data": data}
+            record = {"id": "g/n1", "data": data}
             # When/Then
             self.assertEqual(graph_tables.check_record("graph_nodes", record), {"rule": "schema_break", "detail": field})
             self.assertEqual(graph_tables.to_object(record), {"refused": {"rule": "schema_break", "detail": field}})
@@ -89,18 +89,18 @@ class FixedFieldsOfANode(unittest.TestCase):
     def test_several_extra_fields_name_the_first_in_sorted_order(self):
         """Example: {"type": "data", "zed": 1, "bar": 2} -> detail bar; a missing key is named before an extra field."""
         # Given/When/Then
-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "zed": 1, "bar": 2}})["detail"], "bar")
-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "transform", "foo": 1}})["detail"], "toolbox_id")
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "data", "zed": 1, "bar": 2}})["detail"], "bar")
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "transform", "foo": 1}})["detail"], "toolbox_id")
 
     def test_storage_put_refuses_an_extra_field_and_stores_nothing(self):
-        """Example: put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}) -> invalid, schema_break, foo; ids() is empty."""
+        """Example: put("graph_nodes", "g/n1", {"id": "g/n1", "data": {"type": "data", "foo": 1}}) -> invalid, schema_break, foo; ids() is empty."""
         # Given
         directory = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, directory)
         store = Storage(FileBackend(os.path.join(directory, "main")))
         # When
         with self.assertRaises(StorageError) as caught:
-            store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}, "anna")
+            store.put("graph_nodes", "g/n1", {"id": "g/n1", "data": {"type": "data", "foo": 1}}, "anna")
         # Then
         self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "foo"))
         self.assertEqual(list(store.ids("graph_nodes")), [])
@@ -117,7 +117,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
         # Given/When
         for _ in range(10000):
             categories = {"entity": {"type": "object", "properties": {"type": {}}}}
-            graph_tables.check_record("context_nodes", {"id": "c", "data": {"type": "entity"}}, categories=categories)
+            graph_tables.check_record("context_nodes", {"id": "g/c", "data": {"type": "entity"}}, categories=categories)
         # Then
         self.assertLess(len(graph_tables._validators), 256)
 
@@ -129,7 +129,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
         # Given
         schema = {"type": "object", "properties": {"type": {}}, "patternProperties": {"^x": {}}, "additionalProperties": False}
         # When/Then
-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "entity", "xa": 1, "zz": 2}}, categories={"entity": schema}),
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "entity", "xa": 1, "zz": 2}}, categories={"entity": schema}),
                          {"rule": "schema_break", "detail": "zz"})
 
     def test_a_record_nested_too_deep_is_a_schema_break_naming_data(self):
@@ -142,7 +142,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
             value = {}
             for _ in range(levels - 3):
                 value = {"k": value}
-            return {"id": "n", "data": {"type": "data", "value": value}}
+            return {"id": "g/n", "data": {"type": "data", "value": value}}
         deep = nested(250)
         refusal = {"rule": "schema_break", "detail": "data"}
         # When/Then
@@ -159,7 +159,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
         categories = {"entity": {"type": "nope"}}
         # When/Then
         for table in ("graph_nodes", "context_nodes"):
-            self.assertEqual(graph_tables.check_record(table, {"id": "n", "data": {"type": "entity"}}, categories=categories),
+            self.assertEqual(graph_tables.check_record(table, {"id": "g/n", "data": {"type": "entity"}}, categories=categories),
                              {"rule": "schema_break", "detail": "type"}, table)
 
 
@@ -168,7 +168,7 @@ def nested_record(levels):
     value = {}
     for _ in range(levels - 3):
         value = {"k": value}
-    return {"id": "n", "data": {"type": "data", "value": value}}
+    return {"id": "g/n", "data": {"type": "data", "value": value}}
 
 
 class RecordCheckBounds(unittest.TestCase):
@@ -187,7 +187,7 @@ class RecordCheckBounds(unittest.TestCase):
 
         Example: 20 000 categories {"t": {"type": "object", "title": str(i)}} -> len(_validators) <= _MAX_VALIDATORS; 1000 equal -> 1.
         """
-        record = {"id": "n", "data": {"type": "t"}}
+        record = {"id": "g/n", "data": {"type": "t"}}
         # Given/When: distinct schemas
         graph_tables._validators.clear()
         for i in range(20000):
@@ -212,7 +212,7 @@ class ScalarsAndTuplesAreLevels(unittest.TestCase):
             value = leaf
             for _ in range(levels - 3):
                 value = container(value)
-            return {"id": "n", "data": {"type": "data", "value": value}}
+            return {"id": "g/n", "data": {"type": "data", "value": value}}
         for name, leaf in (("empty object", {}), ("empty list", []), ("scalar", 7), ("empty tuple", ())):
             for container in (lambda v: {"k": v}, lambda v: [v], lambda v: (v,)):
                 # When / Then
@@ -235,7 +235,7 @@ class ScalarsAndTuplesAreLevels(unittest.TestCase):
             deep = (deep,)
         refusal = {"rule": "schema_break", "detail": "data"}
         for name, value in (("cyclic", loop), ("shared", shared), ("deep", deep)):
-            record = {"id": "n", "data": {"type": "data", "value": value}}
+            record = {"id": "g/n", "data": {"type": "data", "value": value}}
             for label, call, expected in (("check_record", lambda r=record: graph_tables.check_record("graph_nodes", r), refusal),
                                           ("to_object", lambda r=record: graph_tables.to_object(r), {"refused": refusal})):
                 outcome = []
@@ -259,8 +259,8 @@ class ScalarsAndTuplesAreLevels(unittest.TestCase):
         Example: data {"type": "data", "value": (1, float("nan"))} is refused with the same detail as the value [1, nan].
         """
         # Given / When
-        as_list = graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "value": [1, float("nan")]}})
-        as_tuple = graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "value": (1, float("nan"))}})
+        as_list = graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "data", "value": [1, float("nan")]}})
+        as_tuple = graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "data", "value": (1, float("nan"))}})
         # Then
         self.assertIsNotNone(as_list)
         self.assertEqual(as_tuple, as_list)
@@ -294,7 +294,7 @@ class RecordCheckRemoteReference(unittest.TestCase):
         categories = {"entity": {"type": "object", "properties": {"x": {"$ref": url}}}}
         graph_tables._validators.clear()
         # When/Then: both tables refuse and no request arrives
-        results = [graph_tables.check_record(table, {"id": "n", "data": {"type": "entity", "x": 1}}, categories=categories)
+        results = [graph_tables.check_record(table, {"id": "g/n", "data": {"type": "entity", "x": 1}}, categories=categories)
                    for table in ("graph_nodes", "context_nodes")]
         self.assertEqual(requests, [])
         self.assertEqual(results, [{"rule": "schema_break", "detail": "type"}] * 2)
@@ -310,7 +310,7 @@ class RecordCheckRemoteReference(unittest.TestCase):
         nested = 7
         for _ in range(190):
             nested = [nested]
-        record = {"id": "n", "data": {"type": "entity", "x": nested}}
+        record = {"id": "g/n", "data": {"type": "entity", "x": nested}}
         value = {"type": ["integer", "array"], "items": {"$ref": "#/$defs/v"}}
         categories = {"entity": {"type": "object", "$defs": {"v": value}, "properties": {"x": {"$ref": "#/$defs/v"}}}}
         cannot_check = {"rule": "schema_break", "detail": "data"}
@@ -355,9 +355,9 @@ class RecordCheckRemoteReference(unittest.TestCase):
         # Given: a category whose schema refers to its own `$defs`
         categories = {"entity": {"type": "object", "$defs": {"s": {"type": "string"}}, "properties": {"x": {"$ref": "#/$defs/s"}}}}
         # When / Then: the reference is followed, so a wrong x is named and a right x passes
-        self.assertEqual(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": 1}}, categories=categories),
+        self.assertEqual(graph_tables.check_record("context_nodes", {"id": "g/n", "data": {"type": "entity", "x": 1}}, categories=categories),
                          {"rule": "schema_break", "detail": "x"})
-        self.assertIsNone(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": "a"}}, categories=categories))
+        self.assertIsNone(graph_tables.check_record("context_nodes", {"id": "g/n", "data": {"type": "entity", "x": "a"}}, categories=categories))
 
 
 if __name__ == "__main__":
