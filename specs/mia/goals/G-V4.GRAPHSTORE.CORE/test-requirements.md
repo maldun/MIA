@@ -63,7 +63,7 @@
 - Kind: unit
 - Text: The expected values of these checks shall be written as exact values: rule names, field names, record IDs, kinds and counts, with no tolerance.
 - Rationale: every outcome here is a name, an ID, a count or an equality (test-spec, limit column), so any tolerance would hide a defect.
-- Credibility aspect: known answers
+- Credibility aspect: reference accuracy
 - Verified by: known answer
 - Sign-off: skimmed as a group
 - Status: Draft
