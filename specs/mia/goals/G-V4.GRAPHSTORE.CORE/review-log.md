@@ -60,3 +60,53 @@
 | TR-CORE-005 | test requirement | 907099895546 | Stefan Reiterer | 2026-11-21 | skimmed | group EX, unit kind, signed off as a group |
 | TR-CORE-007 | test requirement | 9c9f47a4bf67 | Stefan Reiterer | 2026-11-21 | skimmed | group EX, unit kind, signed off as a group |
 | TR-CORE-008 | test requirement | be2c51b5dfa7 | Stefan Reiterer | 2026-11-21 | skimmed | group EX, unit kind, signed off as a group |
+| REQ-GTB-030 | requirement | 09e264f3a7fc | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-GTB-031 | requirement | a90783254e1f | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-160 | requirement | 67d895f304a4 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-144 | requirement | 90654346b5bb | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-145 | requirement | 89a93adbdcf4 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-146 | requirement | c8c585910427 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-147 | requirement | a9d8399e3d96 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-148 | requirement | 01db61fb5e62 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-149 | requirement | 4f6aab28c4a5 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-150 | requirement | d6cfc3acce64 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-151 | requirement | 19c30f9fb053 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-152 | requirement | 14259daf7bd5 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-153 | requirement | 4b79c10f055f | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-154 | requirement | 8127aa7992c3 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-155 | requirement | cfb17f9c03fb | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-161 | requirement | cfb04a117d40 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-156 | requirement | 4735de21c3a2 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-157 | requirement | d83055645837 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-158 | requirement | bab48ef68abf | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-WFM-159 | requirement | e7c37dbb30c4 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| REQ-GTB-032 | requirement | 6952683aa413 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| TR-CORE-001 | test requirement | e2bcf6f990e5 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| TR-CORE-002 | test requirement | 9a8e9358a648 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| TR-CORE-003 | test requirement | 32b9ba7da128 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| TR-CORE-004 | test requirement | 92358312e8e6 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| TR-CORE-006 | test requirement | 92c0d24b5a03 | Stefan Reiterer | 2026-11-21 | approved | check IDs renumbered only (D-409, owner's choice 2026-11-21); content as approved |
+| TR-CORE-005 | test requirement | 6adc664bf209 | Stefan Reiterer | 2026-11-21 | skimmed | check IDs renumbered only (D-409) |
+| TR-CORE-007 | test requirement | 4b1104a01742 | Stefan Reiterer | 2026-11-21 | skimmed | check IDs renumbered only (D-409) |
+| TR-CORE-008 | test requirement | 2e5c91a9fc5a | Stefan Reiterer | 2026-11-21 | skimmed | check IDs renumbered only (D-409) |
+| TC-GTB-034 | check | 19c2b2cb1cf4 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-GTB-035 | check | 77f6795db0a1 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-GTB-036 | check | 92b278d7fa3a | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-162 | check | 1fa208a6854f | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-163 | check | 692bbe69de63 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-164 | check | 3b2c29af8487 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-165 | check | 2c0bd0004a7c | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-166 | check | f48f2258883c | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-167 | check | 62d0ac24e04e | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-168 | check | 3f5c0d779f9d | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-169 | check | dcad690ddd67 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-170 | check | 74d47789cbd5 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-171 | check | 34df76dc422d | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-172 | check | 129acd311063 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-173 | check | 90e168713035 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-174 | check | e92b71b250c2 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-175 | check | da29ad3db934 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-176 | check | 683ba21be3e9 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-WFM-177 | check | cd908d53dda3 | Stefan Reiterer | 2026-11-21 | approved | renumbered only (D-409): was TC-GTB-030..032, TC-WFM-144..159; content as approved |
+| TC-GTB-033 | check | f67c00403b74 | Stefan Reiterer | 2026-11-21 | approved | was TC-GTB-029 / TC-WFM-160; empty ID now expects record_identity (id), the owner's choice in D-409 |
+| TC-WFM-178 | check | ef6887a326a2 | Stefan Reiterer | 2026-11-21 | approved | was TC-GTB-029 / TC-WFM-160; empty ID now expects record_identity (id), the owner's choice in D-409 |

@@ -13,7 +13,7 @@
 | 4 | CR | Ability to fail: the checks are shown able to fail | TR-CORE-006 |
 
 ### TR-CORE-001 – Every write position is tried
-- Applies to: TC-WFM-147, TC-WFM-151
+- Applies to: TC-WFM-165, TC-WFM-169
 - Requirement: REQ-WFM-147
 - Group: FI
 - Kind: setup
@@ -24,7 +24,7 @@
 - Status: Approved
 
 ### TR-CORE-002 – The injector is shown to fire
-- Applies to: TC-WFM-147, TC-WFM-151
+- Applies to: TC-WFM-165, TC-WFM-169
 - Requirement: REQ-WFM-147
 - Group: FI
 - Kind: setup
@@ -35,7 +35,7 @@
 - Status: Approved
 
 ### TR-CORE-003 – Both backends, skips visible
-- Applies to: TC-GTB-032, TC-WFM-147, TC-WFM-151, TC-WFM-159, SMOKE-CORE-001
+- Applies to: TC-GTB-036, TC-WFM-165, TC-WFM-169, TC-WFM-177, SMOKE-CORE-001
 - Requirement: REQ-GTB-032
 - Group: BK
 - Kind: setup
@@ -46,7 +46,7 @@
 - Status: Approved
 
 ### TR-CORE-004 – Golden examples from the fixtures
-- Applies to: TC-WFM-145, TC-WFM-148, TC-WFM-149, TC-WFM-158, TC-WFM-159
+- Applies to: TC-WFM-163, TC-WFM-166, TC-WFM-167, TC-WFM-176, TC-WFM-177
 - Requirement: REQ-WFM-145
 - Group: BK
 - Kind: setup
@@ -57,7 +57,7 @@
 - Status: Approved
 
 ### TR-CORE-005 – Exact values
-- Applies to: TC-GTB-029, TC-GTB-030, TC-GTB-031, TC-WFM-144, TC-WFM-146, TC-WFM-150, TC-WFM-152, TC-WFM-153, TC-WFM-154, TC-WFM-155, TC-WFM-156, TC-WFM-157, TC-WFM-160
+- Applies to: TC-GTB-033, TC-GTB-034, TC-GTB-035, TC-WFM-162, TC-WFM-164, TC-WFM-168, TC-WFM-170, TC-WFM-171, TC-WFM-172, TC-WFM-173, TC-WFM-174, TC-WFM-175, TC-WFM-178
 - Requirement: REQ-GTB-029
 - Group: EX
 - Kind: unit
@@ -69,7 +69,7 @@
 - Status: Approved
 
 ### TR-CORE-006 – Each check is shown able to fail
-- Applies to: TC-WFM-145, TC-WFM-146, TC-WFM-147, TC-WFM-148, TC-WFM-149, TC-WFM-150, TC-WFM-151
+- Applies to: TC-WFM-163, TC-WFM-164, TC-WFM-165, TC-WFM-166, TC-WFM-167, TC-WFM-168, TC-WFM-169
 - Requirement: REQ-WFM-146
 - Group: CR
 - Kind: setup
@@ -80,7 +80,7 @@
 - Status: Approved
 
 ### TR-CORE-007 – Fresh IDs and stores
-- Applies to: TC-GTB-029, TC-GTB-030, TC-WFM-144, TC-WFM-145, TC-WFM-148, TC-WFM-149, TC-WFM-152, TC-WFM-160
+- Applies to: TC-GTB-033, TC-GTB-034, TC-WFM-162, TC-WFM-163, TC-WFM-166, TC-WFM-167, TC-WFM-170, TC-WFM-178
 - Requirement: REQ-GTB-029
 - Group: EX
 - Kind: unit
@@ -92,7 +92,7 @@
 - Status: Approved
 
 ### TR-CORE-008 – Times are not compared exactly
-- Applies to: TC-WFM-158, TC-WFM-159
+- Applies to: TC-WFM-176, TC-WFM-177
 - Requirement: REQ-WFM-158
 - Group: EX
 - Kind: unit

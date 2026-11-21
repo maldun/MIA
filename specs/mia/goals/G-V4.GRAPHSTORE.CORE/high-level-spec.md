@@ -86,12 +86,12 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 
 ## 4. Split proposal
 ### Nodes (decomposition)
-The existing nodes N-3.1, N-3.2 and N-2.3 stay as they are; CORE adds no node. The interface that changes is **IF-301 v2** (the tables of graphs, with the scoped IDs and the rule `unscoped_id`; the amendment of A-92 / REQ-GTB-021, whose protected tests have to be rewritten) and, only for REPLAY, a write-once record in IF-302.
+The existing nodes N-3.1, N-3.2 and N-2.3 stay as they are; CORE adds no node. The interface that changes is **IF-301 v3** (the tables of graphs, with the scoped IDs and the rule `unscoped_id`; the amendment of A-92 / REQ-GTB-021, whose protected tests have to be rewritten) and, only for REPLAY, a write-once record in IF-302.
 
 ### Goals and subgoals
 | Proposed goal / subgoal | Outcome it delivers | Top-level items | Why this cut | How it is checked |
 |---|---|---|---|---|
-| CORE (this) | one stored truth, graph-scoped steps, atomic saves, for both graph kinds | FR-57, FR-60, NFR-16 | first of the group, everything else stands on it; a few new requirements among many existing ones (the checker counts 37) | the three measures above, the contract suite IF-301 v2 |
+| CORE (this) | one stored truth, graph-scoped steps, atomic saves, for both graph kinds | FR-57, FR-60, NFR-16 | first of the group, everything else stands on it; a few new requirements among many existing ones (the checker counts 37) | the three measures above, the contract suite IF-301 v3 |
 Keep together: the 37 requirements come from the descendants of two or three items and most are verified in G-V1 and G-V2.
 
 ## 5. Integration with the existing system
@@ -109,7 +109,7 @@ Decided by the owner in the HLS review of 2026-11-21 (D-402): the separator rule
 | An interrupted save leaves step versions no graph names; they accumulate | storage growth, unused rows | **decided:** accepted for now, no clean-up (`step_history` ignores them); revisited when the amount matters |
 | The separator `/` is the first slash (ASM-1) | a graph ID with a slash is refused | **decided:** confirmed (HR-001) |
 | The files backend cannot make several records atomic | the order is the only protection | the fault-injection measure (HR-005) proves it for both backends; if PostgreSQL could do better (one transaction), say so in the requirements |
-| Rewriting the protected tests of A-92 | amendment effort | one amendment, joint with IF-301 v2 owners, listed in the plan |
+| Rewriting the protected tests of A-92 | amendment effort | one amendment, joint with IF-301 v3 owners, listed in the plan |
 | No hard performance bound | none claimed | **decided:** none (owner); a budget, if any, comes with the requirements |
 
 ## Approval

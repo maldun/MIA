@@ -22,13 +22,13 @@
 ### REQ-GTB-029 – Scoped ID of a step or connection
 - Level: low   Subject: Persistence
 - Group: SC
-- Text: If a step or connection record is written under an ID not of the form `<graph id>/<local id>`, then the Graph tables shall refuse the record and name the rule `unscoped_id`.
+- Text: If a step or connection record is written under a non-empty ID not of the form `<graph id>/<local id>`, then the Graph tables shall refuse the record and name the rule `unscoped_id`.
 - Rationale: refines FR-60 and HR-001; makes a step belong to exactly one graph by construction (D-368); amends the plain IDs of A-92 / REQ-GTB-021
 - Parent: FR-60
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-01 (accepted case AC-002): a step written under `chat` is refused naming `unscoped_id`, under `lookup/chat` it is accepted (exact)
-- Verified by: TC-GTB-029
+- Verified by: TC-GTB-033
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -41,7 +41,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-02: a header `g` naming `h/step` is refused naming `unscoped_id`; naming `g/step` it is accepted (exact)
-- Verified by: TC-GTB-030
+- Verified by: TC-GTB-034
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -54,7 +54,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-03: `lookup/a/b` is accepted as the local ID `a/b` of `lookup` and read back as `a/b` (exact)
-- Verified by: TC-GTB-031
+- Verified by: TC-GTB-035
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -67,7 +67,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-21: a graph saved under the ID `look/up` is refused naming `unscoped_id` and nothing is stored (exact)
-- Verified by: TC-WFM-160
+- Verified by: TC-WFM-178
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -80,7 +80,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-04: a graph saved with local IDs is read back with the same local IDs, also for the ends of connections (exact)
-- Verified by: TC-WFM-144
+- Verified by: TC-WFM-162
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -93,7 +93,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-05 (accepted case AC-002): changing `step.write` in `lookup` adds one version to its history and none to the history of the other graph (exact)
-- Verified by: TC-WFM-145
+- Verified by: TC-WFM-163
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -106,7 +106,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-06: a graph with a broken connection at its last position leaves the record counts of every table as they were (exact)
-- Verified by: TC-WFM-146
+- Verified by: TC-WFM-164
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -119,7 +119,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-07 (accepted case AC-003): a save interrupted after each of its writes never lists a graph with a missing step or connection (every write position, files and database)
-- Verified by: TC-WFM-147
+- Verified by: TC-WFM-165
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -132,7 +132,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-08 (accepted case AC-001): saving a graph with one changed step writes exactly one new step version and one new header version (exact)
-- Verified by: TC-WFM-148
+- Verified by: TC-WFM-166
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -145,7 +145,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-09 (accepted case AC-001): the same graph saved twice has one version; the second answer names it and no table grew (exact)
-- Verified by: TC-WFM-149
+- Verified by: TC-WFM-167
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -158,7 +158,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-10 (accepted case AC-003): a graph with a cycle, two writers, an unknown kind of step or a context connection to a missing step is refused and no table grew (exact)
-- Verified by: TC-WFM-150
+- Verified by: TC-WFM-168
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -171,7 +171,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-11 (accepted case AC-003): for every write position the repeated save gives the full graph and one new header version (exact)
-- Verified by: TC-WFM-151
+- Verified by: TC-WFM-169
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -184,7 +184,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-12: a context graph's members are in `context_nodes` and `context_edges` under `<graph>/<local>`, none in `graph_nodes` (exact)
-- Verified by: TC-WFM-152
+- Verified by: TC-WFM-170
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -197,7 +197,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-13: a graph saved without a kind is stored with the kind `workflow` (exact)
-- Verified by: TC-WFM-153
+- Verified by: TC-WFM-171
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -210,7 +210,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-14: kind `swarm` is refused naming `kind` and nothing is stored (exact)
-- Verified by: TC-WFM-154
+- Verified by: TC-WFM-172
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -224,7 +224,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-15: each of the three faults is refused naming the ID and writes nothing (exact)
 - Binding: open
-- Verified by: TC-WFM-155
+- Verified by: TC-WFM-173
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -232,15 +232,15 @@
 - Level: low   Subject: TaskRuntime
 - Group: CG
 - Text: When a context graph without steps and connections is saved, the Workflow management shall store it as one header version.
-- Rationale: refines FR-57; a context graph is built up step by step, so an empty one is a valid start; the owner kept this case of TC-WFM-155 and asked for its requirement (review 2026-11-21)
+- Rationale: refines FR-57; a context graph is built up step by step, so an empty one is a valid start; the owner kept this case of TC-WFM-173 and asked for its requirement (review 2026-11-21)
 - Parent: FR-57
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-22: an empty context graph is accepted and has exactly one header version and no member record (exact)
 - Binding: open
-- Verified by: TC-WFM-155
+- Verified by: TC-WFM-173
 - Status: Approved
-- History: G-V4.GRAPHSTORE.CORE Plan step 3, 2026-11-21, new (from the review of TC-WFM-155); approved by the owner in the group review of CG, 2026-11-21
+- History: G-V4.GRAPHSTORE.CORE Plan step 3, 2026-11-21, new (from the review of TC-WFM-173); approved by the owner in the group review of CG, 2026-11-21
 
 ### REQ-WFM-156 – No workflow rules for a context graph
 - Level: low   Subject: TaskRuntime
@@ -252,7 +252,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-16: a context graph with two connected steps of the same category and a cycle is accepted by this check (exact; CONTEXT may add rules)
 - Binding: open
-- Verified by: TC-WFM-156
+- Verified by: TC-WFM-174
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -265,7 +265,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-17: a context graph read at any version carries the kind `context`; a workflow graph keeps the shape it had before (exact)
-- Verified by: TC-WFM-157
+- Verified by: TC-WFM-175
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -278,7 +278,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-18 (accepted case AC-001): a graph saved by three accounts lists versions 1 to 3 with the three accounts and a time each (exact)
-- Verified by: TC-WFM-158
+- Verified by: TC-WFM-176
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -291,7 +291,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-19 (accepted case AC-001): each of three saved versions reads back equal to what was saved, for a workflow graph and a context graph (exact)
-- Verified by: TC-WFM-159
+- Verified by: TC-WFM-177
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -304,7 +304,7 @@
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-CORE-20: the cases of AC-CORE-01 to AC-CORE-02, AC-CORE-06, AC-CORE-21, AC-CORE-14 and AC-CORE-15 give the same refusal on both backends (exact)
-- Verified by: TC-GTB-032
+- Verified by: TC-GTB-036
 - Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03)
 
@@ -323,27 +323,28 @@
 ## Traceability
 | Requirement | Level | Parent | Subject (part) | Functions | Interfaces | Verified by | Status |
 |---|---|---|---|---|---|---|---|
-| REQ-GTB-029 | low | FR-60 | Persistence | – | IF-301 v2 | TC-GTB-029 | Draft |
-| REQ-GTB-030 | low | FR-60 | Persistence | – | IF-301 v2 | TC-GTB-030 | Draft |
-| REQ-GTB-031 | low | FR-60 | Persistence | – | IF-301 v2 | TC-GTB-031 | Draft |
-| REQ-WFM-160 | low | FR-60 | TaskRuntime | – | IF-301 v2 | TC-WFM-160 | Draft |
-| REQ-WFM-144 | low | FR-60 | TaskRuntime | – | IF-301 v2 | TC-WFM-144 | Draft |
-| REQ-WFM-145 | low | FR-60 | TaskRuntime | – | IF-301 v2 | TC-WFM-145 | Draft |
-| REQ-WFM-146 | low | NFR-16 | TaskRuntime | – | IF-301 v2 | TC-WFM-146 | Draft |
-| REQ-WFM-147 | low | NFR-16 | TaskRuntime | – | IF-301 v2 | TC-WFM-147 | Draft |
-| REQ-WFM-148 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-148 | Draft |
-| REQ-WFM-149 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-149 | Draft |
-| REQ-WFM-150 | low | NFR-16 | TaskRuntime | – | IF-301 v2 | TC-WFM-150 | Draft |
-| REQ-WFM-151 | low | NFR-16 | TaskRuntime | – | IF-301 v2 | TC-WFM-151 | Draft |
-| REQ-WFM-152 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-152 | Draft |
-| REQ-WFM-153 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-153 | Draft |
-| REQ-WFM-154 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-154 | Draft |
-| REQ-WFM-155 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-155 | Draft |
-| REQ-WFM-156 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-156 | Draft |
-| REQ-WFM-157 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-157 | Draft |
-| REQ-WFM-158 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-158 | Draft |
-| REQ-WFM-159 | low | FR-57 | TaskRuntime | – | IF-301 v2 | TC-WFM-159 | Draft |
-| REQ-GTB-032 | low | FR-57 | Persistence | – | IF-301 v2 | TC-GTB-032 | Draft |
+| REQ-GTB-029 | low | FR-60 | Persistence | – | IF-301 v3 | TC-GTB-033 | Approved |
+| REQ-GTB-030 | low | FR-60 | Persistence | – | IF-301 v3 | TC-GTB-034 | Approved |
+| REQ-GTB-031 | low | FR-60 | Persistence | – | IF-301 v3 | TC-GTB-035 | Approved |
+| REQ-WFM-160 | low | FR-60 | TaskRuntime | – | IF-301 v3 | TC-WFM-178 | Approved |
+| REQ-WFM-144 | low | FR-60 | TaskRuntime | – | IF-301 v3 | TC-WFM-162 | Approved |
+| REQ-WFM-145 | low | FR-60 | TaskRuntime | – | IF-301 v3 | TC-WFM-163 | Approved |
+| REQ-WFM-146 | low | NFR-16 | TaskRuntime | – | IF-301 v3 | TC-WFM-164 | Approved |
+| REQ-WFM-147 | low | NFR-16 | TaskRuntime | – | IF-301 v3 | TC-WFM-165 | Approved |
+| REQ-WFM-148 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-166 | Approved |
+| REQ-WFM-149 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-167 | Approved |
+| REQ-WFM-150 | low | NFR-16 | TaskRuntime | – | IF-301 v3 | TC-WFM-168 | Approved |
+| REQ-WFM-151 | low | NFR-16 | TaskRuntime | – | IF-301 v3 | TC-WFM-169 | Approved |
+| REQ-WFM-152 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-170 | Approved |
+| REQ-WFM-153 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-171 | Approved |
+| REQ-WFM-154 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-172 | Approved |
+| REQ-WFM-155 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-173 | Approved |
+| REQ-WFM-161 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-173 | Approved |
+| REQ-WFM-156 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-174 | Approved |
+| REQ-WFM-157 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-175 | Approved |
+| REQ-WFM-158 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-176 | Approved |
+| REQ-WFM-159 | low | FR-57 | TaskRuntime | – | IF-301 v3 | TC-WFM-177 | Approved |
+| REQ-GTB-032 | low | FR-57 | Persistence | – | IF-301 v3 | TC-GTB-036 | Approved |
 
 ## Won't (this time)
 - A clean-up of unused step versions (owner, D-402).
