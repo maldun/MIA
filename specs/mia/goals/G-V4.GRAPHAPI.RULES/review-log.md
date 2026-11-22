@@ -34,3 +34,7 @@
 | REQ-WFM-150 | requirement | d853ba780b90 | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
 | REQ-WFM-154 | requirement | 4afe4b358f7a | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
 | REQ-WFM-155 | requirement | 1dba0a6c875e | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
+| REQ-RUN-036 | requirement | d2be65d96d70 | Stefan Reiterer | 2026-11-22 | approved | group "RR" accepted in the questionnaire |
+| REQ-RUN-037 | requirement | 1cf729f19582 | Stefan Reiterer | 2026-11-22 | approved | group "RR" accepted in the questionnaire |
+| REQ-RUN-038 | requirement | 833d14a8acbd | Stefan Reiterer | 2026-11-22 | approved | group "RR" accepted in the questionnaire |
+| REQ-RUN-039 | requirement | 22222d13cdd0 | Stefan Reiterer | 2026-11-22 | approved | group "RR" accepted in the questionnaire |

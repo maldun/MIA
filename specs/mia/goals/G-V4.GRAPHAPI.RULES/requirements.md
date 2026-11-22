@@ -348,7 +348,7 @@
 - Verification method: Test
 - Acceptance criterion: for each refusal reason of HR-006 (cycle, two writers, missing step, two identical connections, unsupplied input, context graph, unknown kind) the run ends `refused` and the marker function of every step was called 0 times (exact)
 - Verified by: TC-RUN-036
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19)
 
 ### REQ-RUN-037 – A refused run names every part
@@ -361,7 +361,7 @@
 - Verification method: Test
 - Acceptance criterion: the graph `wf-cycle` is refused naming `D1, T1, D2, T2, D1`; the graph with the missing end `X8` names the connection `X8>T1`; the converted `chat` skill without values names `input.text` (exact)
 - Verified by: TC-RUN-037
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19; scratch run 2026-11-22)
 
 ### REQ-RUN-038 – Trust after the run check
@@ -374,7 +374,7 @@
 - Verification method: Test
 - Acceptance criterion: a graph with a cycle and an untrusted transform is refused naming the cycle, without the trust status; the same graph without the cycle is refused naming the untrusted transform and its status (exact)
 - Verified by: TC-RUN-038
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: D-416 (3))
 
 ### REQ-RUN-039 – Inputs a prepare function may give
@@ -387,7 +387,7 @@
 - Verification method: Test
 - Acceptance criterion: the TC-RUN-034 graph (`DB` read by a Stage `T` with a prepare function, no value anywhere) runs; the same graph with a plain function for `T` is refused naming `DB` and `T` is not called (exact)
 - Verified by: TC-RUN-039
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: scratch run 2026-11-22 of the protected run tests with the run check in front; owner's choice D-418 (1))
 
 ### REQ-GTB-052 – The document form keeps its five rules
