@@ -5,7 +5,7 @@
 <!-- Track A of D-432. Basis: IF-104 v2 (A-171, installed) and IF-302 v15 (A-172, installed), prototype round 02 (reuse map R5), decisions D-425, D-426, D-430, D-433 to D-436, D-460.
      Where they go at the merge: REQ-API into N-2.1 (`specs/mia/nodes/N-2-backend/nodes/N-2.1-api-and-accounts/requirements.md`), REQ-RTB into N-3.3, REQ-OPR into N-4.2.
      Requirements in force that stay: REQ-BE-076 and the IF-104 v1 routes (D-430 (3)); REQ-GA-005, REQ-GA-007 (the page side is Track B).
-     Track B (page) follows in its own groups. Count: 37 new requirements (above the 25 of the split hint; the owner keeps one goal with two tracks, D-432). -->
+     Track B (page): groups FL, LS, PI, AS, LC, QA, REQ-GA into N-5 at the merge. Count: 37 + 33 new requirements (above the 25 of the split hint; the owner keeps one goal with two tracks, D-432). -->
 
 ## Terms
 | Term | Meaning |
@@ -25,6 +25,12 @@
 | 4 | RC | The record of changes: derived, editor entries, written once, a lost record, the changes route (FR-76, FR-77, FR-80, FR-81 backend side) | REQ-API-037, REQ-API-038, REQ-API-051, REQ-API-039, REQ-API-040, REQ-API-042 |
 | 5 | AR | Arrangement and record tables (FR-52, FR-74, FR-80, HR-003) | REQ-API-043, REQ-API-044, REQ-RTB-010, REQ-RTB-011 |
 | 6 | AF | Access and failure: session, owner, origin, malformed input, unknown items, unreachable store (NFR-12, NFR-19, FR-95, HR-007) | REQ-API-045, REQ-API-046, REQ-API-047, REQ-API-048, REQ-API-049, REQ-API-050 |
+| 7 | FL | Frame and look: the owner's layout, the empty areas, the main app's tokens, light and dark, status bar, store shown (D-425, D-430, D-431, HR-009, NFR-14) | REQ-GA-012, REQ-GA-013, REQ-GA-014, REQ-GA-015, REQ-GA-016, REQ-GA-017, REQ-GA-018 |
+| 8 | LS | List and opening: list, filter, open, not logged in, store down (FR-48, NFR-12, AC-009, AC-035) | REQ-GA-019, REQ-GA-020, REQ-GA-021, REQ-GA-022, REQ-GA-023 |
+| 9 | PI | The picture: every step and connection, what cannot be drawn, kinds, marks, other kinds of graph, text stays text (FR-49, FR-50, FR-54, D-426, AC-010 to AC-012) | REQ-GA-024, REQ-GA-025, REQ-GA-026, REQ-GA-027, REQ-GA-028, REQ-GA-029 |
+| 10 | AS | Arrangement and settings: saved arrangement, fixed seed, moved step, layered reset, settings (FR-52, FR-53, HR-003, AC-014, AC-015) | REQ-GA-030, REQ-GA-031, REQ-GA-032, REQ-GA-033, REQ-GA-034, REQ-GA-035 |
+| 11 | LC | Left column and history: selection, trust in words, history list, earlier versions (FR-51, FR-55, AC-013, AC-016) | REQ-GA-036, REQ-GA-044, REQ-GA-037, REQ-GA-038, REQ-GA-039, REQ-GA-040 |
+| 12 | QA | Keyboard, nothing from outside, nothing written (NFR-13, NFR-14, HR-005) | REQ-GA-041, REQ-GA-042, REQ-GA-043 |
 
 ## Requirements
 
@@ -508,3 +514,432 @@
 - Verified by: TC-IF-104-15
 - Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track A; basis: IF-104 v2 A-171, IF-302 v15 A-172, prototype round 02 R5)
+
+### REQ-GA-012 – The whole frame
+- Level: low   Subject: GraphApp
+- Group: FL
+- Text: The Graph app shall show the seven areas of the owner's layout: graph list, search band, other things, left column, picture, actions row, history and replay row, status bar.
+- Rationale: the owner's layout (D-425, `../G-V4/layout.drawio`); VIEW builds the whole frame now
+- Parent: FR-51
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: in Firefox at 1280 × 800 each of the seven areas is present and visible by its label (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-013 – Areas of later subgoals
+- Level: low   Subject: GraphApp
+- Group: FL
+- Text: The Graph app shall show each area that a later subgoal fills as an empty area with one line naming that subgoal and with no control in it.
+- Rationale: D-430 (5): no dead buttons; the actions row (EDIT), the replay buttons and start-with-input (REPLAY, RUN), the search band (later slice, FR-96) and the chat
+- Parent: FR-51
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the actions row, the replay part, the start-with-input part and the search band each hold one line naming its subgoal and no button, field or link (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-014 – The main app's design tokens
+- Level: low   Subject: GraphApp
+- Group: FL
+- Text: The Graph app shall load a copy of the main app's design tokens file that is identical byte for byte to `templates/static/chat/tokens.css`.
+- Rationale: HR-009, D-431: the main app's look; a copy so the graph container starts alone (REQ-GA-011)
+- Parent: HR-009
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the copy and the main app's file have the same sha256 (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-015 – Styles only from the tokens
+- Level: low   Subject: GraphApp
+- Group: FL
+- Text: The Graph app's own styles shall take every colour, font, spacing, radius and shadow from the variables of the design tokens.
+- Rationale: HR-009: one look, no drift from the main app
+- Parent: HR-009
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the page's own style sheets contain no colour literal, font name or pixel radius outside `var(--…)` uses (exact, by a scan of the files)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-016 – Light and dark
+- Level: low   Subject: GraphApp
+- Group: FL
+- Text: The Graph app shall follow the system's light or dark setting through the themes of the design tokens, the picture included.
+- Rationale: NFR-14 and HR-009; the picture's colours are read from the tokens (D-431)
+- Parent: NFR-14
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: in Firefox with the colour scheme light and then dark, the page background and the step label colour equal the token values of that theme (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-017 – Graph status
+- Level: low   Subject: GraphApp
+- Group: FL
+- Text: The Graph app shall show in the status bar the shown graph's ID, the shown version, who stored it and when, and that it is read-only.
+- Rationale: D-425 layout: graph status; the rule report and unsaved changes come with EDIT
+- Parent: FR-55
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: opening cp2.multi shows `cp2.multi`, version 4, ben, its time and `read-only` in the status bar (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-018 – Which store is shown
+- Level: low   Subject: GraphApp
+- Group: FL
+- Text: The Graph app shall show under other things which store it reads and whether that store answers, read-only.
+- Rationale: D-430 (6): the store is chosen by configuration and only shown; IF-104 v2 route 2
+- Parent: FR-48
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: with the store route answering `files` and reachable the entry reads files and reachable, and it offers no control (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-019 – The list of graphs
+- Level: low   Subject: GraphApp
+- Group: LS
+- Text: The Graph app shall list every graph that IF-104 v2 names, each with its ID, kind, version and numbers of steps and connections.
+- Rationale: FR-48; the kind is named for every graph, also an unknown one
+- Parent: FR-48
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: on the JS mock with cp2.multi and sample.code both are listed with kind, version and counts (exact)
+- Verified by: AC-009; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-020 – Filter by name or description
+- Level: low   Subject: GraphApp
+- Group: LS
+- Text: When the owner types into the list filter, the Graph app shall show only the graphs whose ID or description contains every typed word, ignoring case.
+- Rationale: FR-48 and AC-009 (name or description)
+- Parent: FR-48
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: typing `chat` keeps the graphs whose ID or description holds chat; typing `CODE step` keeps sample.code (exact)
+- Verified by: AC-009; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-021 – Opening a graph
+- Level: low   Subject: GraphApp
+- Group: LS
+- Text: When the owner chooses a graph in the list, the Graph app shall draw its current version.
+- Rationale: FR-48
+- Parent: choosing cp2.multi draws version 4 (exact)
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-009; planned (test spec, Step 3)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-022 – Not logged in
+- Level: low   Subject: GraphApp
+- Group: LS
+- Text: If IF-104 v2 answers that no one is logged in, then the Graph app shall show no graph and ask the person to log in through the main app.
+- Rationale: NFR-12 and AC-035; one login is enough (the session cookie of the main app)
+- Parent: NFR-12
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: with the mock answering 401 the page shows no list and no picture and a link to the main app's login (exact)
+- Verified by: AC-035; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-023 – The store does not answer
+- Level: low   Subject: GraphApp
+- Group: LS
+- Text: If IF-104 v2 answers that the store cannot be reached, then the Graph app shall say so and keep what it already shows.
+- Rationale: FR-95 (page side for reading); IF-104 v2 503 `store_unreachable`
+- Parent: FR-48
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: with the mock unreachable after opening cp2.multi the picture stays and a line says the store does not answer (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-024 – Every step and connection
+- Level: low   Subject: GraphApp
+- Group: PI
+- Text: When a graph is opened, the Graph app shall draw every step and every connection of it, each connection with its direction.
+- Rationale: FR-49
+- Parent: sample.code is drawn with 7 steps and 6 arrows (exact)
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-010; planned (test spec, Step 3)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-025 – What cannot be drawn
+- Level: low   Subject: GraphApp
+- Group: PI
+- Text: When IF-104 v2 names a connection to a missing step, the Graph app shall draw that connection dashed to a marked missing step and name the problem beside the picture.
+- Rationale: FR-49 ("nothing is dropped silently") and AC-010
+- Parent: FR-49
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: sample.broken shows e2 dashed to a step marked missing step `var.gone` and the problem named in the left column (exact)
+- Verified by: AC-010; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-026 – Kinds of step at a glance
+- Level: low   Subject: GraphApp
+- Group: PI
+- Text: The Graph app shall draw data steps as ellipses, processing steps as boxes and loop-controlling steps as hexagons, each with its kind in words.
+- Rationale: FR-50 ("without relying on colour alone") and AC-011; prototype round 02 (step-marks.js)
+- Parent: FR-50
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: in sample.code var.in is an ellipse labelled data, step.check a box labelled processing, loop.review a hexagon labelled loop-controlling (exact)
+- Verified by: AC-011; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-027 – A mark only where attention is needed
+- Level: low   Subject: GraphApp
+- Group: PI
+- Text: The Graph app shall put a mark of at most one word on a processing or loop-controlling step that is untrusted, changed since trusted or holds code, and no mark on any other step.
+- Rationale: D-426: minimal marks in the picture, trusted steps plain; FR-50, AC-011
+- Parent: FR-50
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: in sample.code the hostile step carries the marks untrusted and code; step.check and loop.review (trusted) carry none (exact)
+- Verified by: AC-011; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-028 – A graph of another kind
+- Level: low   Subject: GraphApp
+- Group: PI
+- Text: When a graph is not a workflow graph, the Graph app shall draw its steps in one neutral shape with their type in words, without trust marks, read-only.
+- Rationale: D-425 C/D: context graphs drawn generically, an unknown kind plain; FR-48, FR-50
+- Parent: FR-50
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a context graph and a graph of kind `swarm` are drawn with boxes labelled by type, no marks, and their kind named in the status bar (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-029 – Stored text stays text
+- Level: low   Subject: GraphApp
+- Group: PI
+- Text: The Graph app shall show every ID, name and value of a graph as plain text and never as markup, a link or code it runs.
+- Rationale: FR-54, AC-012, THR-011; the page builds its elements with text only
+- Parent: FR-54
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: sample.code's step `<img src=x onerror=alert(1)> step "quoted" & more` appears as that text in the picture, the step list and the left column, no image element exists and no dialog opens (exact)
+- Verified by: AC-012; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-030 – The saved arrangement
+- Level: low   Subject: GraphApp
+- Group: AS
+- Text: When a graph with a saved arrangement is opened, the Graph app shall place its steps where the arrangement puts them.
+- Rationale: FR-52 and HR-003
+- Parent: FR-52
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: cp2.multi with var.in saved at 10, -3 opens with var.in at 10, -3 (exact)
+- Verified by: AC-014 (up to its save step); planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-031 – The same picture every time
+- Level: low   Subject: GraphApp
+- Group: AS
+- Text: When a graph without a saved arrangement is opened, the Graph app shall arrange it with one fixed solver and one fixed seed.
+- Rationale: HR-003 (D-436: replaces the "physics off" line of the old test); FR-52
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: opening sample.code twice gives the same place for every step (exact, rounded to whole pixels)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-032 – A moved step stays
+- Level: low   Subject: GraphApp
+- Group: AS
+- Text: When the owner drags a step, the Graph app shall keep it where it was dropped while the graph is open.
+- Rationale: FR-52; nothing is saved (saving the arrangement is EDIT's page side)
+- Parent: FR-52
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: after dragging step.check by 100 px it stays there and nothing is sent to IF-104 v2 (exact)
+- Verified by: AC-014; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-033 – The layered reset
+- Level: low   Subject: GraphApp
+- Group: AS
+- Text: When the owner asks for the layered arrangement, the Graph app shall place the steps in layers so that every connection points forward.
+- Rationale: FR-52 (the reproducible reset) and AC-014
+- Parent: FR-52
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: after the reset every connection of sample.code goes from a lower to a higher layer (exact)
+- Verified by: AC-014; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-034 – Settings in one place
+- Level: low   Subject: GraphApp
+- Group: AS
+- Text: When the owner changes the connection style (rounded or straight) or the automatic arrangement (on or off) in the one settings place, the Graph app shall redraw the picture at once.
+- Rationale: FR-53 and AC-015
+- Parent: FR-53
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: switching to straight and arrangement off changes the drawn connections and stops the movement without reloading; moved steps stay (exact)
+- Verified by: AC-015; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-035 – Settings remembered
+- Level: low   Subject: GraphApp
+- Group: AS
+- Text: The Graph app shall remember the settings on the device for the next visit and work with its defaults when they cannot be kept.
+- Rationale: FR-53 and AC-015; defaults rounded connections and arrangement on (prototype)
+- Parent: FR-53
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: after a reload the settings are still straight and off; with the storage blocked the page opens with rounded and on (exact)
+- Verified by: AC-015; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-036 – Content of the selection
+- Level: low   Subject: GraphApp
+- Group: LC
+- Text: When the owner selects a step or a connection, the Graph app shall show in the left column its known values as labelled read-only fields and its full stored text.
+- Rationale: FR-51 and AC-013
+- Parent: FR-51
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: selecting step.check shows its kind and toolbox ID as fields and its stored text; clicking empty space empties the column (exact)
+- Verified by: AC-013; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-044 – Nothing selected
+- Level: low   Subject: GraphApp
+- Group: LC
+- Text: When the owner selects nothing, the Graph app shall leave the left column empty.
+- Rationale: FR-51 ("selecting nothing clears it") and AC-013; split from REQ-GA-036
+- Parent: FR-51
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: after selecting step.check, a click on empty space empties the left column (exact)
+- Verified by: AC-013; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-037 – Trust and lifecycle in words
+- Level: low   Subject: GraphApp
+- Group: LC
+- Text: When the owner selects a processing or loop-controlling step, the Graph app shall show its trust, lifecycle, reason and whether it changed since trusted or holds code in the left column.
+- Rationale: D-426: the full trust and lifecycle text is in the left column; FR-50
+- Parent: FR-50
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: selecting the hostile step of sample.code shows untrusted, no lifecycle, "it is not in the toolbox", not changed, holds code (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-038 – The history list
+- Level: low   Subject: GraphApp
+- Group: LC
+- Text: When the owner opens the history of a graph, the Graph app shall list its versions newest first with who stored each and when, the current one marked.
+- Rationale: FR-55 and AC-016
+- Parent: FR-55
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: cp2.multi lists 4, 3, 2, 1 with ben, anna, ben, anna, version 4 marked current (exact)
+- Verified by: AC-016; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-039 – An earlier version
+- Level: low   Subject: GraphApp
+- Group: LC
+- Text: When the owner chooses an entry of the history, the Graph app shall draw that version read-only and name it with its time in the status bar.
+- Rationale: FR-55 and AC-016
+- Parent: FR-55
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: choosing version 2 draws the step naming t2 and the status bar reads version 2 with its time (exact)
+- Verified by: AC-016; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-040 – Previous and next
+- Level: low   Subject: GraphApp
+- Group: LC
+- Text: The Graph app shall let the owner step from the shown version to the next older and the next newer one, and offer no step beyond the oldest or the newest.
+- Rationale: FR-55 and AC-016
+- Parent: FR-55
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: from version 2, previous shows 1 and next shows 3; at version 1 previous is not offered (exact)
+- Verified by: AC-016; planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-041 – By keyboard
+- Level: low   Subject: GraphApp
+- Group: QA
+- Text: The Graph app shall let the owner pick a graph, move from step to step, select a step and open the settings with the keyboard alone.
+- Rationale: NFR-14; a step list beside the picture serves the keyboard (prototype round 02)
+- Parent: NFR-14
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: in Firefox with key presses only the owner opens sample.code, reaches step.check, selects it (its fields appear) and opens the settings (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-042 – Nothing from outside
+- Level: low   Subject: GraphApp
+- Group: QA
+- Text: The Graph app shall request nothing from an address other than its own origin.
+- Rationale: NFR-13 and REQ-GA-010; the vendored library and the copied tokens are served by the graph container
+- Parent: NFR-13
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: in Firefox, opening sample.code, selecting steps, opening the history and the settings makes no request to another origin (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
+
+### REQ-GA-043 – The page writes nothing
+- Level: low   Subject: GraphApp
+- Group: QA
+- Text: The Graph app shall send no request that changes a graph, an arrangement or a version.
+- Rationale: HR-005 and NFR-12; the write routes of IF-104 v2 are used from EDIT on
+- Parent: HR-005
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: during a session of opening, dragging, settings and history the page sends only GET requests to IF-104 v2 (exact)
+- Verified by: planned (test spec, Step 3)
+- Status: Draft
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
