@@ -153,7 +153,7 @@
 - Verification method: Test
 - Acceptance criterion: steps `a`, `a` and `` give `step_identity` naming `a` and `` ; a step `x/y` breaks no rule by its ID (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, finding 5)
 
 ### REQ-GTB-042 – Rule 2, kind of step
@@ -166,7 +166,7 @@
 - Verification method: Test
 - Acceptance criterion: a step of type `loop` gives `step_kind` naming it; steps of the three types give no item (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-GTB-043 – Rule 3, connection ends
@@ -179,7 +179,7 @@
 - Verification method: Test
 - Acceptance criterion: a connection `e2` from `a` to the missing step `z` gives `connection_endpoints` naming `e2` (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-GTB-044 – Rule 4, duplicate connection
@@ -192,7 +192,7 @@
 - Verification method: Test
 - Acceptance criterion: `e1` and `e2` both from `a` to `t` without role and name give `duplicate_connection` naming `e2`; two connections with the ID `e1` name `e1`; the same pair with `as` `x` and `y` gives no item (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, finding 6)
 
 ### REQ-GTB-045 – Rule 5, adjacency
@@ -205,7 +205,7 @@
 - Verification method: Test
 - Acceptance criterion: a connection from data `d1` to data `d2` and one from transform `t1` to master `m1` give `adjacency` naming both; a connection from `d1` to the missing `z` gives no `adjacency` item (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-GTB-046 – Rule 6, one writer
@@ -218,7 +218,7 @@
 - Verification method: Test
 - Acceptance criterion: transforms `t1` and `t2` both connected into data `d` give `single_writer` naming `d`; two connections from `t1` into `d` give no `single_writer` item (they are rule 4) (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, finding 6)
 
 ### REQ-GTB-047 – Rule 7, session setting and stop limit
@@ -231,7 +231,7 @@
 - Verification method: Test
 - Acceptance criterion: a master without `stop`, a data step with `session`, and a transform with two settings connections each give `stop_limit` naming that step; a master with `{"max_seconds": 1.0}` gives no item (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, CP18)
 
 ### REQ-GTB-048 – Rule 8, cycle
@@ -244,7 +244,7 @@
 - Verification method: Test
 - Acceptance criterion: `d1 → t1 → d1` gives `cycle` with the parts `d1, t1, d1`; the same graph plus a connection to a missing step gives `connection_endpoints` and no `cycle` (exact)
 - Verified by: TC-GTB-042
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, findings 3 and 8)
 
 ### REQ-GTB-049 – Refusal of a run: the kind first and alone

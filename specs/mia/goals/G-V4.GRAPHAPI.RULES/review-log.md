@@ -16,3 +16,11 @@
 | REQ-GTB-038 | requirement | 117bdffd9f4b | Stefan Reiterer | 2026-11-22 | approved | group "RS" accepted in the questionnaire |
 | REQ-GTB-039 | requirement | 8d06edf25405 | Stefan Reiterer | 2026-11-22 | approved | group "RS" accepted in the questionnaire |
 | REQ-GTB-040 | requirement | 6bac0c8abb53 | Stefan Reiterer | 2026-11-22 | approved | group "RS" accepted in the questionnaire |
+| REQ-GTB-041 | requirement | 34330181f2d2 | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-042 | requirement | 4eb8fa642a49 | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-043 | requirement | 3f381704998a | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-044 | requirement | 28b065de918b | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-045 | requirement | 68cbf0fa64c3 | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-046 | requirement | 3d5b39dd6fd2 | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-047 | requirement | 378bfc73371c | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-048 | requirement | 989c1c9394ae | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
