@@ -220,7 +220,8 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         sent = body.get("graph") if isinstance(body.get("graph"), dict) else {}
         if not isinstance(sent.get("nodes"), list) or not isinstance(sent.get("edges"), list):
             return None
-        return {"id": graph_id, "context_graph_id": stored["context_graph_id"], "testbench_id": stored["testbench_id"],
+        # round 04 CP19: the stored kind goes with the graph, so a context graph is checked and kept with its own rule set (it was dropped before)
+        return {"id": graph_id, **({"kind": stored["kind"]} if "kind" in stored else {}), "context_graph_id": stored["context_graph_id"], "testbench_id": stored["testbench_id"],
                 "description": sent.get("description", stored["description"]), "nodes": sent["nodes"], "edges": sent["edges"]}
 
     @app.post("/api/v2/graphs/<path:graph_id>/restore")
