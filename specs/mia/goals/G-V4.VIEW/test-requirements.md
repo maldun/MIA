@@ -1,6 +1,6 @@
 # Test requirements: G-V4.VIEW
 
-**Test spec:** `test-spec.md` (scenarios approved, D-441)   **Status:** Draft (agent, 2026-11-22), for the owner's review one check at a time (unit kind by group)
+**Test spec:** `test-spec.md` (scenarios approved, D-441)   **Status:** Approved by the owner by group (2026-11-22, D-442)
 
 <!-- Requirements on the checks, apart from the product requirements: under which conditions a verdict counts. Setup kind: the verdict depends on the setup; written out and reviewed in detail. Unit kind: exact expected values; grouped and signed off as a group. The repository has no shared test-requirement catalog (M43), so no item has a Source line. -->
 
@@ -24,7 +24,7 @@
 - Rationale: REQ-API-018 asks for the same answers on both stores; the PostgreSQL variant needs podman, the image and psycopg 3, which the venv `mia312` has and the system Python has not (CLAUDE.md); a hidden skip would read as success (as TR-CORE-003).
 - Credibility aspect: measurement conditions
 - Verified by: inspection of the test report (each case listed three times: mock, files, postgres)
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-002 – The fixture graphs
 - Applies to: TC-API-018, TC-API-020, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, SMOKE-VIEW-002
@@ -35,7 +35,7 @@
 - Rationale: the scenarios name these graphs and their counts; one source for the Python, the JS and the browser checks keeps their answers comparable, and the counts are the expected values of TC-GA-017 and TC-GA-022; the four added graphs are the cases R11 lacks (REQ-GA-020, 028, SMOKE-VIEW-002).
 - Credibility aspect: reference accuracy
 - Verified by: inspection of the fixture list against this text (IDs, versions, authors, counts)
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-003 – Fresh stores and accounts
 - Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039
@@ -46,7 +46,7 @@
 - Rationale: the owner is the first account (`accounts.owner_check`), so the order of making decides who may write; a store shared between checks would let an earlier save change a later count; one login per check is the case of NFR-12 ("one login is enough").
 - Credibility aspect: measurement conditions
 - Verified by: review of the test setup
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-004 – What the JS mock proves
 - Applies to: TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030
@@ -57,7 +57,7 @@
 - Rationale: the node checks prove the page's logic over the answers the contract fixes; the mock's fidelity limits (its header: three rules, no record checks, a fixed toolbox, half-up rounding, a counter for time) must not decide a verdict; that the page works with the real provider is shown by the Firefox checks (D-440 (2)).
 - Credibility aspect: stand-in fidelity
 - Verified by: inspection of the node checks against the mock's fidelity list; the JS contract suite in the same run
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-005 – What the fake DOM proves
 - Applies to: TC-GA-017, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030
@@ -68,7 +68,7 @@
 - Rationale: the fake DOM has no layout, no styles and no drawing; a node check that read a place would test the fake, not the page; vis-network draws what it is handed, so the handed data is the page's part of REQ-GA-024 to 027.
 - Credibility aspect: stand-in fidelity
 - Verified by: review of the node checks
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-006 – Fault wrappers are shown to fire
 - Applies to: TC-IF-104-26, TC-API-021, TC-API-023, TC-GA-020
@@ -79,7 +79,7 @@
 - Rationale: a wrapper that never fires makes a refusal check pass for the wrong reason; TC-API-023 needs the version write to succeed and only the record write to fail, else it shows a refused save, not a version without its record.
 - Credibility aspect: stand-in fidelity
 - Verified by: an assertion in each check that the fault was raised at least once (a call counter of the wrapper)
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-007 – The store setting is read as in production
 - Applies to: TC-API-018, TC-API-019, SMOKE-VIEW-001
@@ -90,7 +90,7 @@
 - Rationale: REQ-API-019 and 020 are about the configuration as the owner writes it; a check that hands in a backend object would skip the part that can go wrong (the key, the default folder, the message).
 - Credibility aspect: validity domain
 - Verified by: review of the test setup
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-008 – Firefox as the reference browser
 - Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, SMOKE-VIEW-002
@@ -101,7 +101,7 @@
 - Rationale: the owner's choice of browser and size (D-430, REQ-GA-012 "1280 × 800"); one pinned build keeps pixel places and colours comparable between runs (REQ-GA-031); a new context per check has no storage, cookies or cache of an earlier check.
 - Credibility aspect: measurement conditions
 - Verified by: inspection of the test report (browser name and version printed once per run)
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-009 – One origin with the real provider
 - Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039
@@ -112,7 +112,7 @@
 - Rationale: D-440 (2); in production Caddy gives page and API one origin (DEP-9), and the session cookie and the "nothing from outside" check depend on it; the real provider removes the mock's fidelity limits from the browser verdicts.
 - Credibility aspect: validity domain
 - Verified by: inspection of the server helper
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-010 – When the picture counts as settled
 - Applies to: TC-GA-036, TC-GA-037, SMOKE-VIEW-002
@@ -123,7 +123,7 @@
 - Rationale: places read during the movement differ from run to run and would make REQ-GA-031 flaky or meaningless; rounding to whole pixels is the tolerance of the scenario; a bound on the wait keeps a never-settling picture from hanging the run.
 - Credibility aspect: numerical settings
 - Verified by: review; the check prints the time to settle
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-011 – Every request is recorded
 - Applies to: TC-GA-037, TC-GA-039
@@ -134,7 +134,7 @@
 - Rationale: a record taken only from the page's own fetch calls would miss a font or script from outside (NFR-13) and a write sent by the drawing library; the browser's events see everything that leaves the page.
 - Credibility aspect: measurement conditions
 - Verified by: a planted request to `https://example.invalid/x.css` in a copy of the page fails TC-GA-039 (see TR-VIEW-021)
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-012 – Keyboard only
 - Applies to: TC-GA-038
@@ -145,7 +145,7 @@
 - Rationale: one mouse click hidden in the setup would let a page that cannot be reached by keyboard pass; asserting the focus shows each step was reached, not only the end state.
 - Credibility aspect: validity domain
 - Verified by: review of the check
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-013 – Colours compared with the browser's token values
 - Applies to: TC-GA-034
@@ -156,7 +156,7 @@
 - Rationale: hard-coded hex values in the test would copy the tokens and break with any change of `tokens.css`; the browser's own resolution of the variable is the reference the requirement means ("equal the token values of that theme").
 - Credibility aspect: reference accuracy
 - Verified by: the two themes give different values in the same run (the check can fail)
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-014 – Checks that wait for RULES
 - Applies to: TC-API-025, TC-IF-104-22, TC-IF-104-23
@@ -167,7 +167,7 @@
 - Rationale: REQ-API-031 and 035 ask for the IF-301 v4 rule report, which only RULES provides (handover, section 4); a pass on CORE's rules would not show HR-008.
 - Credibility aspect: validity domain
 - Verified by: inspection of the branch state in the verification report
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-015 – Installed contract suites unchanged
 - Applies to: TC-IF-104-17, TC-IF-104-18, TC-IF-104-19, TC-IF-104-20, TC-IF-104-21, TC-IF-104-22, TC-IF-104-23, TC-IF-104-24, TC-IF-104-25, TC-IF-104-26, TC-IF-104-27, TC-IF-302-13, TC-IF-302-14, TC-API-020
@@ -178,7 +178,7 @@
 - Rationale: the suites are the frozen interface shared with EDIT, REPLAY and CONTEXT (D-368, D-425 A); REQ-API-030 keeps v1 unchanged beside v2.
 - Credibility aspect: reviewer independence
 - Verified by: `git diff --stat` of the suite files against the installing commits in the verification report
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-016 – The image smoke check writes nothing
 - Applies to: SMOKE-VIEW-001
@@ -189,7 +189,7 @@
 - Rationale: the check proves the image can open the owner's database (REQ-OPR-011); the live graphs are not test data (as TR-CORE-009).
 - Credibility aspect: measurement conditions
 - Verified by: inspection of the smoke script
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-017 – The opening time is measured, not judged
 - Applies to: SMOKE-VIEW-002
@@ -200,7 +200,7 @@
 - Rationale: NFR-11 has no hard bound (D-425 E-H); the number is for the owner to read with VAL-VIEW-01; a warm-up keeps the first load of the vendored library out of the figure; the live store is not written.
 - Credibility aspect: repetitions and seeds
 - Verified by: the deployment record holds the five times, the median and the range
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-018 – Exact values
 - Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-OPR-011, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-031, TC-GA-033, TC-GA-035, TC-GA-038, TC-GA-039, TC-IF-104-17, TC-IF-104-18, TC-IF-104-19, TC-IF-104-20, TC-IF-104-21, TC-IF-104-22, TC-IF-104-23, TC-IF-104-24, TC-IF-104-25, TC-IF-104-26, TC-IF-104-27, TC-IF-302-13, TC-IF-302-14
@@ -212,7 +212,7 @@
 - Credibility aspect: reference accuracy
 - Verified by: known answer
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-019 – Times are not compared exactly
 - Applies to: TC-GA-021, TC-GA-030, TC-IF-104-17, TC-IF-104-25
@@ -224,7 +224,7 @@
 - Credibility aspect: measurement conditions
 - Verified by: review
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-020 – What the file checks read
 - Applies to: TC-GA-031, TC-GA-032, TC-OPR-011
@@ -236,7 +236,7 @@
 - Credibility aspect: validity domain
 - Verified by: known answer (TR-VIEW-021's planted literal)
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-VIEW-021 – Each new check is shown able to fail
 - Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-OPR-011, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-031, TC-GA-032, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039
@@ -247,4 +247,4 @@
 - Rationale: the page logic comes from the prototype (R6 keep+tests), and a check written against existing code tends to confirm it; the red state before the code is not enough where a stub could pass by accident (as TR-CORE-006).
 - Credibility aspect: reviewer independence
 - Verified by: mutation (each listed defect makes its check fail; recorded in the implementation log)
-- Status: Draft
+- Status: Approved
