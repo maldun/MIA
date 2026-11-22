@@ -143,22 +143,62 @@ class GraphModel:
             return _refuse(named)
         if not self.real:
             return SaveResult(True, self.tables.put(TABLE, graph["id"], graph), [])
-        # A record the record checks refuse is a refused result like a broken graph rule; other errors raise. Members written before the refusal stay as
-        # unused versions of their records (the header, which makes them a graph, is not written).
-        for node in graph["nodes"]:     # a broken node is found before anything is written
-            broken = graph_tables.check_record("graph_nodes", node, record_id=node["id"])
-            if broken:
-                return SaveResult(False, None, [], broken["rule"], broken["detail"])
+        nodes, edges = self._scoped(graph)
+        refused = self._first_refusal(graph, nodes, edges)
+        if refused:
+            return refused
         try:
-            members = {name: [{"id": m["id"], "version": self.tables.put(table, m["id"], m, self.author)["version"]} for m in graph[name]]
-                       for name, table in (("nodes", "graph_nodes"), ("edges", "graph_edges"))}
-            data = {"kind": "workflow", **members, **{key: graph[key] for key in HEADER}}
-            version = self.tables.put("graphs", graph["id"], {"id": graph["id"], "data": data}, self.author)["version"]
-        except StorageError as refusal:
+            return self._write(graph, nodes, edges)
+        except StorageError as refusal:     # a record the Storage layer refuses after all is a refused result; other errors raise
             if refusal.code != "invalid":
                 raise
             return SaveResult(False, None, [], refusal.rule, refusal.detail)
-        return SaveResult(True, version, [])
+
+    def _scoped(self, graph):
+        """The record form of the steps and connections: every ID, and the ends of a connection, as `<graph id>/<local id>` (REQ-WFM-144, REQ-GTB-029)."""
+        scoped = lambda local: graph_tables.scoped(graph["id"], local)      # noqa: E731
+        nodes = [{**n, "id": scoped(n["id"])} for n in graph["nodes"]]
+        edges = [{**e, "id": scoped(e["id"]), "from": scoped(e["from"]), "to": scoped(e["to"])} for e in graph["edges"]]
+        return nodes, edges
+
+    def _first_refusal(self, graph, nodes, edges):
+        """The refused result for the first record the Storage layer would refuse, or None, found before anything is written (REQ-WFM-146, REQ-WFM-150).
+        The header is tried with every member at version 1: that catches a graph ID with a slash through its steps (REQ-WFM-160)."""
+        stored = {"nodes": {n["id"]: [1] for n in nodes}}
+        checks = [("graph_nodes", n, None) for n in nodes] + [("graph_edges", e, stored) for e in edges]
+        trial = {"kind": "workflow", "nodes": [{"id": n["id"], "version": 1} for n in nodes], "edges": [{"id": e["id"], "version": 1} for e in edges],
+                 **{key: graph[key] for key in HEADER}}
+        checks.append(("graphs", {"id": graph["id"], "data": trial}, None))
+        for table, record, known in checks:
+            broken = graph_tables.check_record(table, record, record_id=record["id"], stored=known)
+            if broken:
+                return SaveResult(False, None, [], broken["rule"], broken["detail"])
+        return None
+
+    def _write(self, graph, nodes, edges):
+        """Members first, each only when it differs from its newest version (REQ-WFM-148), the header last (REQ-WFM-147); an unchanged graph writes
+        nothing (REQ-WFM-149). Repeating an interrupted save finds the members already written and adds the one header version (REQ-WFM-151)."""
+        pins = {}
+        for key, table, records in (("nodes", "graph_nodes", nodes), ("edges", "graph_edges", edges)):
+            pins[key] = []
+            for record in records:
+                latest = self._latest(table, record["id"])
+                same = latest is not None and latest["doc"] == record
+                pins[key].append({"id": record["id"], "version": latest["version"] if same else self.tables.put(table, record["id"], record, self.author)["version"]})
+        data = {"kind": "workflow", **pins, **{key: graph[key] for key in HEADER}}
+        head = self._latest("graphs", graph["id"])
+        if head is not None and head["doc"]["data"] == data:
+            return SaveResult(True, head["version"], [])
+        return SaveResult(True, self.tables.put("graphs", graph["id"], {"id": graph["id"], "data": data}, self.author)["version"], [])
+
+    def _latest(self, table, record_id):
+        """The newest version of a record, or None when it is not stored."""
+        try:
+            return self.tables.get(table, record_id)
+        except StorageError as err:
+            if err.code == "not_found":
+                return None
+            raise
 
     def read_graph(self, graph_id, version=None):
         if not self.real:
