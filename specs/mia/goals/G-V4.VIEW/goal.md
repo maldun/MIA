@@ -88,7 +88,7 @@ Thirteen top-level items in scope (FR-48 to FR-55, NFR-10 to NFR-14) plus the IF
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
-| Plan | open | |
+| Plan | open | goal, high-level spec, A-171, A-172 installed, 70 requirements approved (D-430 to D-438); next: architecture, test spec, test requirements, red tests, plan (`../../handover-2026-11-22-g-v4-view-requirements-done.md`) |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
