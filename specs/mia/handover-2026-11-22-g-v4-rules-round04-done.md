@@ -1,4 +1,4 @@
-# Handover: G-V4.GRAPHAPI.RULES, prototype round 04 built and validated; next the high-level spec (2026-11-22)
+# Handover: G-V4.GRAPHAPI.RULES, prototype round 04 validated, high-level spec approved; next the requirements (2026-11-22)
 
 Read first: this file, `CLAUDE.md`, the previous handover `handover-2026-11-22-g-v4-rules-plan-next.md` (sections 5 and 7 still hold), skills `dev-workflow`, `plan-phase`, `agent-app`. The owner (Stefan Reiterer, maldun) decides every gate.
 
@@ -7,7 +7,7 @@ Read first: this file, `CLAUDE.md`, the previous handover `handover-2026-11-22-g
 |---|---|
 | Line of work | **`goal/v4.graphapi.rules`**, cut from `goal/v4` @ `e7847ba5` (D-415 (1)), worktree `/home/maldun/prog/Python/MIA-goal-v4-rules`; merges into `goal/v4` at Commit. Not pushed |
 | Prototype round 04 | authorized (D-415 (2)), built (CP17 to CP19), **validated by the owner 2026-11-22** (FR-63, FR-64, AC-017, AC-018 met; `3a8f782b`); decisions Q-1 to Q-7 taken (D-415); carry-over decided by the owner, all as proposed (`d087cc5b`) |
-| Plan of RULES | high-level spec drafted, open questions decided (D-416), HR-001 to HR-006 approved by group (`145e447a`); **the owner's tick of the whole HLS is open**; next: requirements (step 1b) |
+| Plan of RULES | high-level spec drafted, open questions decided (D-416), high-level spec **approved by the owner** (ticked, `f1a0ab00`; D-416, D-417); next: requirements (step 1b) and the text of A-170 (IF-301 v4) |
 
 ## 2. Round 04 in short (`/home/maldun/prog/Python/MIA-prototype-g-v4/specs/mia/goals/G-V4/prototype/rounds/04/`)
 - Branch `prototype/g-v4` @ `d087cc5b`; `goal/v4` merged in first (`3faa9404`, `graph_model.py` and `graph_tables.py` from `goal/v4`).
@@ -16,7 +16,7 @@ Read first: this file, `CLAUDE.md`, the previous handover `handover-2026-11-22-g
 
 ## 3. Next steps
 1. Done: the owner validated round 04 and decided its carry-over, all as proposed (2026-11-22, `d087cc5b`).
-2. Done except the tick: high-level spec `specs/mia/goals/G-V4.GRAPHAPI.RULES/high-level-spec.md` (registry in a new `graph_rule_set.py`, offered through IF-301 v4 by amendment A-170; check route against a mock; refusal order kind, rules, inputs, trust; no bound; D-416, D-417).
+2. Done (approved, ticked 2026-11-22): high-level spec `specs/mia/goals/G-V4.GRAPHAPI.RULES/high-level-spec.md` (registry in a new `graph_rule_set.py`, offered through IF-301 v4 by amendment A-170; check route against a mock; refusal order kind, rules, inputs, trust; no bound; D-416, D-417).
 3. Requirements (EARS, grouped, batches of 5 to 7), architecture entries, test spec with scenarios, test requirements, red tests, `plan.md`, binding map; witnesses for AC-017, AC-018.
 4. Notes for other subgoals: CODE takes the known-tool check (Q-2); TRANSFER or MIGRATION the read-only listing of an unknown kind (Q-7); MIGRATION retires the document form and its five rule names (Q-6).
 
