@@ -46,7 +46,8 @@ def _open_postgres(url):
 
 def _parser():
     parser = argparse.ArgumentParser(prog="migrate", description=__doc__.split("\n\n")[0])
-    parser.add_argument("command", choices=("files-to-db", "db-to-files", "library-export", "library-seed"))
+    parser.add_argument("command", choices=("files-to-db", "db-to-files", "library-export", "library-seed", "lag", "sync"))
+    parser.add_argument("--copy", help="the copy folder (lag, sync; G-V4.GRAPHSTORE.TRANSFER, REQ-SLY-039)")
     parser.add_argument("--data", required=True, help="the data folder of the file storage")
     parser.add_argument("--database-url", help="the PostgreSQL address (files-to-db, db-to-files)")
     parser.add_argument("--folder", help="the library folder (library-export, library-seed)")
@@ -57,6 +58,9 @@ def _parser():
 def main(argv=None, open_db=_open_postgres):
     parser = _parser()
     args = parser.parse_args(argv)
+    if args.command in ("lag", "sync"):            # STUB of Plan step 4: built in T-03 (REQ-SLY-039)
+        print("%s: not built yet" % args.command)
+        return 1
     needs = "folder" if args.command.startswith("library") else "database_url"
     if not getattr(args, needs):
         parser.error("%s needs --%s" % (args.command, needs.replace("_", "-")))

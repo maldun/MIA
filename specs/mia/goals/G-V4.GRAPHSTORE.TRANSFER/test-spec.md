@@ -35,7 +35,7 @@ Protected tests in force: TC-SLY-007 and TC-SLY-009 (`tests/test_migrate.py`, `t
 | TC-SLY-033 | REQ-SLY-033 | component | a set written by today's code without a marker (scoped graphs and `workflows` documents) | moved and synced like a format-1 set; the move result equals that of TC-SLY-016 for those records | exact |
 | TC-SLY-034 | REQ-SLY-034 | component | a set without a marker holding `graph_nodes/n1` (no slash) | move and sync refused naming `graph_nodes`, `n1` and MIGRATION's conversion step; nothing written | exact |
 | TC-SLY-035 | REQ-SLY-035 | component | a set with `mia-store.json` = `{"format": 2}` | opening it is refused naming 2 and 1; no file in it changes (byte compare) | exact |
-| TC-SLY-037 | REQ-SLY-037, HR-008 | component | the sample store in a folder with a unique name under a temporary folder; moved to another folder, synced with an aside file, the copy folder copied elsewhere | no file of the target, the copy or the copied folder contains the source folder's absolute path or the home folder; the copied folder lists the same graphs and versions | exact |
+| TC-SLY-037 | REQ-SLY-037, HR-008 | component | the sample store in a folder with a unique name under a temporary folder; moved to another folder, synced with an aside file, the copy folder copied elsewhere | no file of the target, the copy or the copied folder contains the source folder's absolute path or the home folder; the copied folder lists the same graphs and versions as the folder it was copied from | exact |
 | TC-SLY-039 | REQ-SLY-039 | component | AC-006 on files; `python -m MIA.migrate lag --copy DIR`, then `sync --copy DIR`, then `sync` while a helper holds the lock | `lag` prints the line of `cp2.multi` (live 6, copy 4, behind), exit 0; `sync` reports the records added, exit 0; the locked sync is one line, exit 1 | exact |
 | TC-SLY-009 | REQ-SLY-009, REQ-GA-008 | component | the sample store; `library-export` to a new folder, `library-seed` into an empty store | every library entry and every graph-group record arrives identical; in the seed's write log members come before headers | exact |
 | TC-API-060 | REQ-API-060 | component | the backend app with `store` files (live) and `copy` set to a folder holding a different version of `cp2.multi` | `GET` of `cp2.multi` through IF-104 v2 answers the copy's version | exact |
@@ -227,7 +227,7 @@ None: no hard bound and no time budget (high-level spec section 3).
 - Given: the sample store in a folder with a unique name under a temporary folder
 - When: it is moved to a second folder, that folder is used as a copy and synced with one aside file, and the copy is copied to a third place
 - Then: no file of the three folders contains the first folder's absolute path or the home folder
-- And: the third folder lists the same graphs and versions as the source
+- And: the third folder lists the same graphs and versions as the folder it was copied from
 
 ### TC-SLY-039 – Lag and sync are commands
 - Verifies: REQ-SLY-039
