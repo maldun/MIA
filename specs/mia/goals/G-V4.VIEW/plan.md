@@ -150,4 +150,4 @@ Twelve tasks are above the size signal of about eight; the owner kept one goal a
 - Notes for other subgoals: TRANSFER (carries `arrangements` and `graph_changes`; makes the store route's live/copy fields real), EDIT (the page side of the write routes, the arrangement save button), CODE (`changed_since_trusted` real).
 
 ## Plan gate
-- [ ] Plan package approved by the owner: goal, high-level spec, requirements, checks and test code (red tests `82327296`, tag `plan-baseline-g-v4-view`), this plan. Date:
+- [X] Plan package approved by the owner: goal, high-level spec, requirements, checks and test code (red tests `82327296`, tag `plan-baseline-g-v4-view`), this plan. Date:
