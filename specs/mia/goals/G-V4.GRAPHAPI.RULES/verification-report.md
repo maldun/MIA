@@ -157,3 +157,5 @@ V-1 (only if the owner chooses not to fix it now; then REQ-GTB-040 needs its def
 | V-4 | accept as stated | – |
 | V-5 | correct the counts | 28 new, 3 changed (31 items) in `requirements.md`, `binding-map.md`, `goal.md`, the handover; `plan.md` follows |
 | V-3, V-6, V-7 | noted | – |
+
+Regression re-run after the V-1 fix (2026-11-22): unit suite OK (2551 tests, 5 skipped, 2 expected failures); every acceptance script green except the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
