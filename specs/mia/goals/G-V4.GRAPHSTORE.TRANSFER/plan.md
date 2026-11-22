@@ -96,4 +96,4 @@ Regression set: after every task the unit suite (`discover -s tests`) and every 
 - G-V4 `goal.md` Frozen table, row IF-102: the reason "(scoped record IDs, sync)" is overtaken (no IF-102 change but A-186's text); the owner decides at G-V4's gate.
 
 ## Plan gate
-- [ ] Plan package approved by maldun (owner): goal, high-level spec, requirements, checks and test code (red tests staged in `red-tests/`, A-186 staged). Date:
+- [X] Plan package approved by maldun (owner): goal, high-level spec, requirements, checks and test code (red tests staged in `red-tests/`, A-186 staged). Date:

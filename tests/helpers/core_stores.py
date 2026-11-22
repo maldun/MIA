@@ -3,8 +3,10 @@
 - fresh_backend(kind): a backend no other check has written to (TR-CORE-007): a new folder for `files`, a new database in one throw-away
   postgres:16 container per test process for `postgres` (TR-CORE-003). The image is never pulled; where podman, the image or psycopg 3 is
   missing the check is skipped with the reason (unittest.SkipTest), never passed.
-- FailingBackend(backend, fail_at): counts the writes (`append`) and raises Interrupted instead of the write number `fail_at` (TR-CORE-001);
+- FailingBackend(backend, fail_at): counts the writes and raises Interrupted instead of the write number `fail_at` (TR-CORE-001);
   `writes` is the number of writes done, so a check can show that the injector fired (TR-CORE-002). fail_at=None counts only.
+  A write is an `append`, and since G-V4.GRAPHSTORE.TRANSFER also a `remove`, a `cut` (a record cut back to a version) and a `put_file`
+  (a file such as an aside file written into the root of a set) (TR-TRANSFER-004); a save of CORE only appends, so CORE's counts are unchanged.
 - fixture_graph(name): a graph of tests/fixtures/graphs/ as the caller of the Workflow management sees it (TR-CORE-004).
 Call stop_database() in tearDownModule."""
 import copy
@@ -123,12 +125,24 @@ class FailingBackend:
         self.writes = 0
         self.fired = False
 
-    def append(self, table, record_id, entry):
+    def _write(self, what, name, call):
         if self.fail_at is not None and self.writes + 1 == self.fail_at:
             self.fired = True
-            raise Interrupted("injected fault at write %d (%s %s)" % (self.fail_at, table, record_id))
+            raise Interrupted("injected fault at write %d (%s %s)" % (self.fail_at, what, name))
         self.writes += 1
-        return self.backend.append(table, record_id, entry)
+        return call()
+
+    def append(self, table, record_id, entry):
+        return self._write(table, record_id, lambda: self.backend.append(table, record_id, entry))
+
+    def remove(self, table, record_id):
+        return self._write("remove " + table, record_id, lambda: self.backend.remove(table, record_id))
+
+    def cut(self, table, record_id, version):
+        return self._write("cut " + table, record_id, lambda: self.backend.cut(table, record_id, version))
+
+    def put_file(self, path, text):
+        return self._write("file", path, lambda: self.backend.put_file(path, text))
 
     def __getattr__(self, name):
         return getattr(self.backend, name)
