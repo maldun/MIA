@@ -9,7 +9,7 @@
 
 V-1 is a real gap. `rule_report`, `run_check`, `check_graph`, the save and the run raise `TypeError` when a connection's `from`, `to`, `id`, `role` or `as` is a list or an object. REQ-GTB-040 says a check never raises, and its own definition of malformed includes "a non-text ID or end". goal/v4 raised in the same way, so this is not a regression, but RULES promised to fix it. The other findings are a contract sentence the code contradicts (V-2), unspecified behaviour (V-3, V-4) and record nits (V-5 to V-7).
 
-- [ ] Verified by Stefan Reiterer (owner). Date:
+- [X] Verified by maldun (owner). Date:
 
 ## Automated checks (all run by me; Python 3.12 venv `mia312`)
 | Check | Result |
