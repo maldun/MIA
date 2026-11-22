@@ -32,6 +32,7 @@ Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`). The new requirem
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+| cut again (the draft requirements: 28 new, 3 changed, above the hint of 25; count corrected from 27, Verify V-5) | keep together (owner, D-418 (3)) | eight of them are one-line rule definitions reviewed as one group; four tasks as in the high-level spec (rule set module, save path, runner, check route against the mock) | 2026-11-22 |
 
 ## Source
 Group spec FR-63, FR-64; decision D-375; the two existing rule sets (`../G-V4.GRAPHAPI/research.md`, F3).
@@ -52,9 +53,9 @@ Group spec FR-63, FR-64; decision D-375; the two existing rule sets (`../G-V4.GR
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
-| Plan | open | |
-| Implement | open | |
-| Verify | open | |
-| Commit | open | |
-| Deploy | open | |
-| Validate | open | the first test run, G-V5 (parked, D-386) |
+| Plan | done | plan package approved by the owner (plan gate ticked 2026-11-22); red tests installed `71523f7a`, tag `plan-baseline-g-v4-rules`; A-170 installed `fdbf2377` |
+| Implement | done | T-01 `5722f4d7` (+ follow-up `ae7eea41`), T-02 `5a238e9f`, T-03 `811d7850`, A-170b `d99fc6e9`, T-04 (no product change); every RULES check green, regression clean except the two known reds (2026-11-22); `implementation-log.md` |
+| Verify | done | `verification-report.md` (`49e77265`), verified with accepted deviations, verdict ticked by the owner (`f4cc31ae`); V-1 fixed (`f478e040`), V-2 by A-185 (`fb3b72eb`), V-4 accepted (D-461); regression re-run after the fix clean except the two known reds |
+| Commit | done | merged into `goal/v4` by the owner (`ae34260a`, 2026-11-22; `merge-request.md`); test requirements installed (`154a4110`); after the merge: trace check 549 (none about RULES), model checks OK, RULES checks and smoke green |
+| Deploy | deferred | no user surface of its own; SMOKE-RULES-001 (`tests/smoke/smoke_rules.py`, writes nothing) runs on the owner's host with the next deployable G-V4 build (VIEW or TRANSFER), owner decision D-462 |
+| Validate | deferred | VAL-RULES-01 (the owner repeats AC-017 and AC-018 on the deployed version) joins the first test run of G-V5, as CORE's (D-386, D-462) |

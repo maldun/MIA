@@ -755,3 +755,57 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - When: each is saved, changed twice and read, on both stores
 - Then: each shows three versions with account and time and reads back as saved on both stores
 - And: afterwards the files directory is removed and the database `mia_smoke` is dropped by name; MIA's own database and files store are not written
+
+## Test cases of G-V4.GRAPHAPI.RULES (moved at the merge 2026-11-22; test requirements TR-RULES-001 to 009)
+All checks of RULES are exact (rule names, IDs, orders, counts, equalities): no statistical check, no benchmark (no hard bound, D-416 (4)). Accepted cases (`specs/mia/goals/G-V4/accepted-cases.md`): AC-017 is witnessed by TC-GTB-046 and TC-WFM-180, AC-018 by TC-RUN-036, TC-RUN-037 and TC-GTB-044. The validation criterion VAL-RULES-01 stays in the goal record `specs/mia/goals/G-V4.GRAPHAPI.RULES/test-spec.md`.
+
+| Test ID | Verifies | Level | Setup / inputs | Expected result | Limit / tolerance |
+|---|---|---|---|---|---|
+| TC-WFM-179 | REQ-WFM-162 | component | a workflow graph with two identical connections | the save is refused naming `duplicate_connection`; the items equal `rule_report` of the same graph; nothing stored | exact |
+| TC-WFM-180 | REQ-WFM-163, REQ-WFM-150 | component | the AC-017 graph | the save is refused; the refusal carries the rule report equal to `rule_report`, `single_writer` then `cycle`; the named IDs are the parts of both rules in order; no table grew | exact |
+| TC-WFM-181 | REQ-WFM-164 | unit | a sound graph, `d1 → t1 → d1`, the AC-017 graph | `check_graph` gives `[]`, `["d1", "t1", "d1"]`, the parts of `single_writer` and then those of `cycle` | exact |
+| TC-WFM-182 | REQ-WFM-165 | component | an empty store; the graph ID `never` | `graph_versions("never")` and `step_history("never", "a")` each fail with `not_found`; nothing is stored | exact |
+| TC-WFM-183 | REQ-WFM-154 | component | a graph with `"kind": None` | refused naming `kind`; nothing stored | exact |
+| TC-WFM-184 | REQ-WFM-155 | component | a context graph with two identical connections under different IDs; one with an empty step ID | each refused naming the rule (`duplicate_connection`, `step_identity`) and its parts; nothing written | exact |
+
+## Scenarios (G-V4.GRAPHAPI.RULES, approved by the owner 2026-11-22, D-422)
+
+### TC-WFM-179 – A save uses the rule set of the kind
+- Verifies: REQ-WFM-162
+- Given: a files store; a workflow graph with two identical connections `e1`, `e2` (a rule the five older rules lack)
+- When: it is saved
+- Then: the save is refused naming `duplicate_connection` with `e2`
+- And: the items equal the rule report of the same graph; nothing is stored
+
+### TC-WFM-180 – A refused save carries every broken rule
+- Verifies: REQ-WFM-163, REQ-WFM-150
+- Given: a files store; the AC-017 graph (a cycle `d1 → t1 → d1` and a second writer `t2 → d1`)
+- When: it is saved
+- Then: the save is refused and carries the rule report: `single_writer` naming `d1`, then `cycle` naming `d1, t1, d1`, equal to the rule report of the same graph
+- And: the named IDs are the parts of both rules in that order, repeats kept; no table grew
+- And: witnesses AC-017
+
+### TC-WFM-181 – `check_graph` stays the flat list
+- Verifies: REQ-WFM-164
+- Given: a sound workflow graph; `d1 → t1 → d1`; the AC-017 graph
+- When: each is checked with `check_graph`
+- Then: the answers are `[]`, `["d1", "t1", "d1"]`, and `["d1", "d1", "t1", "d1"]` (the parts of `single_writer`, then those of `cycle`)
+
+### TC-WFM-182 – A graph that was never stored has no history
+- Verifies: REQ-WFM-165
+- Given: an empty files store
+- When: the versions of the graph `never` and the history of its step `a` are asked
+- Then: each fails with the reason `not_found`
+- And: the store is still empty (CORE V-3, D-414)
+
+### TC-WFM-183 – An empty kind is refused
+- Verifies: REQ-WFM-154
+- Given: a files store; a graph with `"kind": None`
+- When: it is saved
+- Then: the save is refused naming the field `kind` and nothing is stored (CORE V-2, D-414)
+
+### TC-WFM-184 – A context graph is saved with the rules of its kind
+- Verifies: REQ-WFM-155
+- Given: a files store; a context graph with two identical connections under different IDs; a context graph with an empty step ID
+- When: each is saved
+- Then: the first is refused naming `duplicate_connection` and the second ID; the second is refused naming `step_identity`; nothing is written (Q-3, finding 7)

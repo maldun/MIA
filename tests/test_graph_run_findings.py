@@ -171,7 +171,9 @@ class GraphRunFindings(unittest.TestCase):
         # Then: the self-loop is the cycle, the run is refused naming it without asking the trust callback
         self.assertEqual(find_cycle(["a", "b", "c"], [{"from": "c", "to": "c"}]), ["c", "c"])
         self.assertEqual(find_cycle(["a", "b", "c"], [{"from": "a", "to": "b"}, {"from": "b", "to": "c"}]), None)
-        self.assertEqual((result.status, result.named, result.named_status), ("refused", ["T1", "T1"], None))
+        # G-V4.GRAPHAPI.RULES T-03: the run check names every broken rule; a transform connected to itself also breaks adjacency (REQ-GTB-045),
+        # so its connection T1>T1 comes before the cycle (REQ-RUN-037)
+        self.assertEqual((result.status, result.named, result.named_status), ("refused", ["T1>T1", "T1", "T1"], None))
         self.assertEqual((asked, self.script.marker_exists("T1")), ([], False))
 
     @mark.req("REQ-RUN-016")
