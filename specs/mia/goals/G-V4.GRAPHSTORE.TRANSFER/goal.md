@@ -68,7 +68,7 @@ Group spec FR-58, FR-59, FR-93, NFR-15, NFR-16 (D-389, D-406); decisions D-372 t
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
-| Plan | open | started 2026-11-22 on the agent's recommendations (D-423); `goal/v4` merged in (`ceb7097a`); high-level spec approved; requirements, checks and test requirements approved (D-466 to D-468); red tests staged and `plan.md` drafted (D-469); waiting for the owner's install scripts and the plan gate |
+| Plan | done | plan gate ticked by the owner (2026-11-23); high-level spec approved; requirements, checks and test requirements approved (D-466 to D-468); A-186 installed (`fbce1924`); red tests installed (`eb0030d9`, tag `plan-baseline-g-v4-transfer`); seam with VIEW agreed (D-470); the Agreement row of 2026-11-22 above still waits for the owner's tick |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
