@@ -1,6 +1,6 @@
 # Requirements: G-V4.VIEW Track A – interface and backend (low level, new items)
 
-**Top-level spec:** `top-level-spec.md` of this folder (FR-48 to FR-55, NFR-10 to NFR-14) and, for the backend side taken over by D-430 (7), `../G-V4.EDIT/top-level-spec.md` (FR-69 to FR-74, FR-95, NFR-19) and `../G-V4.REPLAY/top-level-spec.md` (FR-76, FR-77, FR-80, FR-81)   **High-level spec:** `high-level-spec.md` (HR-001 to HR-009, approved 2026-11-22, D-432)   **Status:** Track A approved by the owner group by group (SA, RD, WR, RC, AR, AF; 2026-11-22, D-437)   **Plan baseline:** –
+**Top-level spec:** `top-level-spec.md` of this folder (FR-48 to FR-55, NFR-10 to NFR-14) and, for the backend side taken over by D-430 (7), `../G-V4.EDIT/top-level-spec.md` (FR-69 to FR-74, FR-95, NFR-19) and `../G-V4.REPLAY/top-level-spec.md` (FR-76, FR-77, FR-80, FR-81)   **High-level spec:** `high-level-spec.md` (HR-001 to HR-009, approved 2026-11-22, D-432)   **Status:** Track A approved by the owner group by group (SA, RD, WR, RC, AR, AF; 2026-11-22, D-437); Track B approved group by group (FL, LS, PI, AS, LC, QA; 2026-11-22, D-438)   **Plan baseline:** –
 
 <!-- Track A of D-432. Basis: IF-104 v2 (A-171, installed) and IF-302 v15 (A-172, installed), prototype round 02 (reuse map R5), decisions D-425, D-426, D-430, D-433 to D-436, D-460.
      Where they go at the merge: REQ-API into N-2.1 (`specs/mia/nodes/N-2-backend/nodes/N-2.1-api-and-accounts/requirements.md`), REQ-RTB into N-3.3, REQ-OPR into N-4.2.
@@ -525,7 +525,7 @@
 - Verification method: Test
 - Acceptance criterion: in Firefox at 1280 × 800 each of the seven areas is present and visible by its label (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-013 – Areas of later subgoals
@@ -538,7 +538,7 @@
 - Verification method: Test
 - Acceptance criterion: the actions row, the replay part, the start-with-input part and the search band each hold one line naming its subgoal and no button, field or link (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-014 – The main app's design tokens
@@ -551,7 +551,7 @@
 - Verification method: Test
 - Acceptance criterion: the copy and the main app's file have the same sha256 (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-015 – Styles only from the tokens
@@ -564,7 +564,7 @@
 - Verification method: Test
 - Acceptance criterion: the page's own style sheets contain no colour literal, font name or pixel radius outside `var(--…)` uses (exact, by a scan of the files)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-016 – Light and dark
@@ -577,7 +577,7 @@
 - Verification method: Test
 - Acceptance criterion: in Firefox with the colour scheme light and then dark, the page background and the step label colour equal the token values of that theme (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-017 – Graph status
@@ -590,7 +590,7 @@
 - Verification method: Test
 - Acceptance criterion: opening cp2.multi shows `cp2.multi`, version 4, ben, its time and `read-only` in the status bar (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-018 – Which store is shown
@@ -603,7 +603,7 @@
 - Verification method: Test
 - Acceptance criterion: with the store route answering `files` and reachable the entry reads files and reachable, and it offers no control (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-019 – The list of graphs
@@ -616,7 +616,7 @@
 - Verification method: Test
 - Acceptance criterion: on the JS mock with cp2.multi and sample.code both are listed with kind, version and counts (exact)
 - Verified by: AC-009; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-020 – Filter by name or description
@@ -629,7 +629,7 @@
 - Verification method: Test
 - Acceptance criterion: typing `chat` keeps the graphs whose ID or description holds chat; typing `CODE step` keeps sample.code (exact)
 - Verified by: AC-009; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-021 – Opening a graph
@@ -642,7 +642,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-009; planned (test spec, Step 3)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-022 – Not logged in
@@ -655,7 +655,7 @@
 - Verification method: Test
 - Acceptance criterion: with the mock answering 401 the page shows no list and no picture and a link to the main app's login (exact)
 - Verified by: AC-035; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-023 – The store does not answer
@@ -668,7 +668,7 @@
 - Verification method: Test
 - Acceptance criterion: with the mock unreachable after opening cp2.multi the picture stays and a line says the store does not answer (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-024 – Every step and connection
@@ -681,7 +681,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-010; planned (test spec, Step 3)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-025 – What cannot be drawn
@@ -694,7 +694,7 @@
 - Verification method: Test
 - Acceptance criterion: sample.broken shows e2 dashed to a step marked missing step `var.gone` and the problem named in the left column (exact)
 - Verified by: AC-010; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-026 – Kinds of step at a glance
@@ -707,7 +707,7 @@
 - Verification method: Test
 - Acceptance criterion: in sample.code var.in is an ellipse labelled data, step.check a box labelled processing, loop.review a hexagon labelled loop-controlling (exact)
 - Verified by: AC-011; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-027 – A mark only where attention is needed
@@ -720,7 +720,7 @@
 - Verification method: Test
 - Acceptance criterion: in sample.code the hostile step carries the marks untrusted and code; step.check and loop.review (trusted) carry none (exact)
 - Verified by: AC-011; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-028 – A graph of another kind
@@ -733,7 +733,7 @@
 - Verification method: Test
 - Acceptance criterion: a context graph and a graph of kind `swarm` are drawn with boxes labelled by type, no marks, and their kind named in the status bar (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-029 – Stored text stays text
@@ -746,7 +746,7 @@
 - Verification method: Test
 - Acceptance criterion: sample.code's step `<img src=x onerror=alert(1)> step "quoted" & more` appears as that text in the picture, the step list and the left column, no image element exists and no dialog opens (exact)
 - Verified by: AC-012; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-030 – The saved arrangement
@@ -759,7 +759,7 @@
 - Verification method: Test
 - Acceptance criterion: cp2.multi with var.in saved at 10, -3 opens with var.in at 10, -3 (exact)
 - Verified by: AC-014 (up to its save step); planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-031 – The same picture every time
@@ -772,7 +772,7 @@
 - Verification method: Test
 - Acceptance criterion: opening sample.code twice gives the same place for every step (exact, rounded to whole pixels)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-032 – A moved step stays
@@ -785,7 +785,7 @@
 - Verification method: Test
 - Acceptance criterion: after dragging step.check by 100 px it stays there and nothing is sent to IF-104 v2 (exact)
 - Verified by: AC-014; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-033 – The layered reset
@@ -798,7 +798,7 @@
 - Verification method: Test
 - Acceptance criterion: after the reset every connection of sample.code goes from a lower to a higher layer (exact)
 - Verified by: AC-014; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-034 – Settings in one place
@@ -811,7 +811,7 @@
 - Verification method: Test
 - Acceptance criterion: switching to straight and arrangement off changes the drawn connections and stops the movement without reloading; moved steps stay (exact)
 - Verified by: AC-015; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-035 – Settings remembered
@@ -824,7 +824,7 @@
 - Verification method: Test
 - Acceptance criterion: after a reload the settings are still straight and off; with the storage blocked the page opens with rounded and on (exact)
 - Verified by: AC-015; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-036 – Content of the selection
@@ -837,7 +837,7 @@
 - Verification method: Test
 - Acceptance criterion: selecting step.check shows its kind and toolbox ID as fields and its stored text; clicking empty space empties the column (exact)
 - Verified by: AC-013; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-044 – Nothing selected
@@ -850,7 +850,7 @@
 - Verification method: Test
 - Acceptance criterion: after selecting step.check, a click on empty space empties the left column (exact)
 - Verified by: AC-013; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-037 – Trust and lifecycle in words
@@ -863,7 +863,7 @@
 - Verification method: Test
 - Acceptance criterion: selecting the hostile step of sample.code shows untrusted, no lifecycle, "it is not in the toolbox", not changed, holds code (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-038 – The history list
@@ -876,7 +876,7 @@
 - Verification method: Test
 - Acceptance criterion: cp2.multi lists 4, 3, 2, 1 with ben, anna, ben, anna, version 4 marked current (exact)
 - Verified by: AC-016; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-039 – An earlier version
@@ -889,7 +889,7 @@
 - Verification method: Test
 - Acceptance criterion: choosing version 2 draws the step naming t2 and the status bar reads version 2 with its time (exact)
 - Verified by: AC-016; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-040 – Previous and next
@@ -902,7 +902,7 @@
 - Verification method: Test
 - Acceptance criterion: from version 2, previous shows 1 and next shows 3; at version 1 previous is not offered (exact)
 - Verified by: AC-016; planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-041 – By keyboard
@@ -915,7 +915,7 @@
 - Verification method: Test
 - Acceptance criterion: in Firefox with key presses only the owner opens sample.code, reaches step.check, selects it (its fields appear) and opens the settings (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-042 – Nothing from outside
@@ -928,7 +928,7 @@
 - Verification method: Test
 - Acceptance criterion: in Firefox, opening sample.code, selecting steps, opening the history and the settings makes no request to another origin (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-043 – The page writes nothing
@@ -941,5 +941,5 @@
 - Verification method: Test
 - Acceptance criterion: during a session of opening, dragging, settings and history the page sends only GET requests to IF-104 v2 (exact)
 - Verified by: planned (test spec, Step 3)
-- Status: Draft
+- Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
