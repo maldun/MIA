@@ -30,7 +30,7 @@ What RULES is (goal record): one set of **eight graph rules** in **one fixed ord
 
 Steps, in the pattern of CORE (handover of 2026-11-21, sections 1 and 5):
 1. **Line of work first** (one question to the owner): `goal.md` says `goal/v4.graphapi.rules`; CORE worked on `goal/v4` (D-414). Recommend `goal/v4` again, or cut the branch.
-2. **Prototype round 04** (D-401): write `specs/mia/goals/G-V4/prototype/rounds/04/run.md` (checkpoints of R3: the eight rules in order, the session-setting definition of ASM-3, the refusal before a run, the rule set by kind of D-404), and have the owner **authorize it before any prototype code**. Then build, run `cp4_check.py` and the new checks, validation sheet, report.
+2. **Prototype round 04** (D-401): write `specs/mia/goals/G-V4/prototype/rounds/04/run.md` **in the prototype worktree** (`/home/maldun/prog/Python/MIA-prototype-g-v4`; the round files live on `prototype/g-v4`, the folder on `goal/v4` is empty) (checkpoints of R3: the eight rules in order, the session-setting definition of ASM-3, the refusal before a run, the rule set by kind of D-404), and have the owner **authorize it before any prototype code**. Then build, run `cp4_check.py` and the new checks, validation sheet, report.
 3. **High-level spec** of RULES (`G-V4.GRAPHAPI.RULES/high-level-spec.md`): the rule set per kind (registry of kinds, D-404), where the check sits (save path in `graph_model.py`, editor check route, runner), hard bounds only if there are any.
 4. **Requirements** (`requirements.md`, EARS, grouped, reviewed one by one in batches), then architecture entries, test spec with scenarios, test requirements, red tests, protected-test amendments where today's tests assume five rules, `plan.md`, binding map; batched review with `req_review.py`.
 
@@ -47,7 +47,7 @@ Things CORE leaves for RULES:
 
 ## 6. Open items for the owner
 1. The date next to the verdict tick in `G-V4.GRAPHSTORE.CORE/verification-report.md`.
-2. Round 03 sign-off: `Validated by:` in `G-V4/prototype/rounds/03/validation.md`, `Decided by:` in `rounds/03/prototype-report.md` (prototype worktree).
+2. Round 03 sign-off, in the prototype worktree: `Validated by:` in `/home/maldun/prog/Python/MIA-prototype-g-v4/specs/mia/goals/G-V4/prototype/rounds/03/validation.md`, `Decided by:` in `.../rounds/03/prototype-report.md`.
 3. CORE V-4 (REQ-WFM-145's "only pinned versions" witnessed by a unit test only) and V-6 (ASM-001 cites REQ-GTB-031 instead of REQ-WFM-160): binding map iteration 1 / next amendment.
 4. The brief `specs/mia/briefs/requirement-mode-sign-off.md` still waits for the owner.
 
