@@ -20,13 +20,13 @@ How the checks reach the code: the acceptance tests write through the real Stora
 | Task | Implements | Green when | Depends on |
 |---|---|---|---|
 | T-01 Scoped IDs in the Graph tables | REQ-GTB-029, REQ-GTB-030, REQ-GTB-031 | TC-GTB-033, TC-GTB-034, TC-GTB-035; real side of TC-IF-301-25, -26 | red tests installed |
-| T-01b Scoped IDs in the unprotected unit tests (A-168) | none (test data follows REQ-GTB-029) | the unit suite, except the four `graph_model` checks of `test_skill_record_storage.py` per backend | T-01 |
+| T-01b Scoped IDs in the unprotected unit tests (A-168) | none (test data follows REQ-GTB-029) | the unit suite, except the seven `graph_model` checks of `test_skill_record_storage.py` per backend | T-01 |
 | T-02 The save path: checked first, header last, changed members only | REQ-WFM-146, 147, 148, 149, 150, 151, 160 | TC-WFM-164 to TC-WFM-169, TC-WFM-178 | T-01b |
 | T-03 Reading with local IDs, versions and step history | REQ-WFM-144, 145, 158, 159 | TC-WFM-162, TC-WFM-163, TC-WFM-176, TC-WFM-177 (workflow half) | T-02 |
 | T-04 Context graphs on the same path | REQ-WFM-152, 153, 154, 155, 156, 157, 161 | TC-WFM-170 to TC-WFM-175, TC-WFM-177 (context half) | T-03 |
 | T-05 Both stores, and the smoke check | REQ-GTB-032; REQ-WFM-152, 158, 159 on the owner's stores | TC-GTB-036 on files and PostgreSQL; SMOKE-CORE-001 green against a throw-away server | T-04 |
 
-Regression set (A-168, replaces "all other tests unchanged"): after every task the unit suite (`discover -s tests`) and every acceptance script are green, except the CORE checks of later tasks and the known reds below. Known reds: the four protected scripts `test_graph_context_tables.py`, `test_graph_document_size.py`, `test_graph_node_fields.py`, `test_graph_record_identity.py` from T-01 until A-168 is installed; the unprotected unit modules of T-01b from T-01 until T-01b; the four `graph_model` checks of `tests/test_skill_record_storage.py` per backend until T-03 at the latest (each task logs which it turned green). Measured against a clean checkout of the task's start, never on the changed files only.
+Regression set (A-168, replaces "all other tests unchanged"): after every task the unit suite (`discover -s tests`) and every acceptance script are green, except the CORE checks of later tasks and the known reds below. Known reds: the four protected scripts `test_graph_context_tables.py`, `test_graph_document_size.py`, `test_graph_node_fields.py`, `test_graph_record_identity.py` from T-01 until A-168 is installed; the unprotected unit modules of T-01b from T-01 until T-01b; the seven `graph_model` checks of `tests/test_skill_record_storage.py` per backend until T-03 at the latest (each task logs which it turned green). Measured against a clean checkout of the task's start, never on the changed files only.
 
 In particular after every task: the IF-301 v1 and v2 suites, `tests/acceptance/test_graph_records.py`, `test_graph_model.py`, `test_graph_run.py`, `test_graph_run_stages.py`, `test_graph_order.py`, `test_pipeline_graph.py`, `test_skill_binding.py`, `tests/test_graph_record_checks.py`, `tests/test_graph_tables.py`, `tests/test_graph_run_findings.py`, `tests/test_skill_record_storage.py` (from T-03 on) and the IF-102 suite stay green.
 
@@ -50,11 +50,11 @@ See `specs/mia/amendments/A-168-note.md`. In short: T-01 stays; a new task **T-0
 
 ### T-01b: Scoped IDs in the unprotected unit tests (A-168)
 - Implements: no requirement; the test data follows REQ-GTB-029 (IF-301 v3)
-- Tests to turn green: the T-01 reds of `tests/test_storage.py`, `tests/test_storage_postgres.py`, `tests/test_storage_copy_semantics.py`, `tests/test_graph_record_objects.py`, and the six direct-record checks per backend of `tests/test_skill_record_storage.py`
+- Tests to turn green: the T-01 reds of `tests/test_storage.py`, `tests/test_storage_postgres.py`, `tests/test_storage_copy_semantics.py`, `tests/test_graph_record_objects.py`, and the direct-record checks of `tests/test_skill_record_storage.py`
 - Touches: only these five test files: record IDs of steps and connections and header members scoped (`g/<local>`, in a header `<header id>/<local>`); the assertions, rules and expected values stay
 - Must not touch: protected material; every product file
 - Depends on: T-01
-- Done when: the unit suite has no failure except the four `graph_model` checks of `test_skill_record_storage.py` per backend; every changed test still fails when the rule it checks is broken (one mutant per file, logged)
+- Done when: the unit suite has no failure except the seven `graph_model` checks of `test_skill_record_storage.py` per backend; every changed test still fails when the rule it checks is broken (one mutant per file, logged)
 - Notes: where an ID is the subject of the check (a depth limit counted on the ID, a detail naming the ID), the expected detail follows the scoped ID; anything beyond renaming IDs is a stop.
 
 ### T-02: The save path: checked first, header last, changed members only
