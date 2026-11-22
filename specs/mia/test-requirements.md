@@ -16,6 +16,10 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 | 2 | Conversion stand-ins | the fake model server of the same-calls check | TR-CONVERT-006 |
 | 3 | Conversion exact values | hand-checked expected values of the deterministic conversion and snapshot tests | TR-CONVERT-007 |
 | 4 | Conversion component checks | The unit and component checks of the converter, the toolbox entries and the descriptors | TR-CONVERT-008 |
+| 5 | FI | Fault injection: what makes the interruption checks credible | TR-CORE-001, TR-CORE-002 |
+| 6 | BK | Backends and data: the stores and the graphs the checks run on | TR-CORE-003, TR-CORE-004, TR-CORE-009 |
+| 7 | EX | Exact values: expected names, IDs and counts, signed off as a group | TR-CORE-005, TR-CORE-007, TR-CORE-008 |
+| 8 | CR | Ability to fail: the checks are shown able to fail | TR-CORE-006 |
 
 ### TR-CONVERT-001 – Equivalence runs use the pinned model
 - Applies to: EV-research, EV-plans, EV-verdicts, EV-computable, EV-extraction, TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114
@@ -499,14 +503,6 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 ## G-V4.GRAPHSTORE.CORE (Plan step 3, 2026-11-21; prefix TR-CORE-; moved at the merge 2026-11-22, D-408)
 
 Test requirements of the checks TC-GTB-033 to 036, TC-WFM-162 to 178 and SMOKE-CORE-001, unchanged from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/test-requirements.md`.
-
-#### Groups of G-V4.GRAPHSTORE.CORE
-| Order | Group | What it covers | Test requirements |
-|---|---|---|---|
-| 1 | FI | Fault injection: what makes the interruption checks credible | TR-CORE-001, TR-CORE-002 |
-| 2 | BK | Backends and data: the stores and the graphs the checks run on | TR-CORE-003, TR-CORE-004, TR-CORE-009 |
-| 3 | EX | Exact values: expected names, IDs and counts, signed off as a group | TR-CORE-005, TR-CORE-007, TR-CORE-008 |
-| 4 | CR | Ability to fail: the checks are shown able to fail | TR-CORE-006 |
 
 ### TR-CORE-001 – Every write position is tried
 - Applies to: TC-WFM-165, TC-WFM-169

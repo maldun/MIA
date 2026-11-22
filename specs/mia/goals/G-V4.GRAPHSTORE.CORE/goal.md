@@ -57,6 +57,6 @@ Group spec FR-57, FR-60, NFR-16; `../G-V4.GRAPHSTORE/research.md`, `spikes.md` (
 | Plan | done | approved by the owner 2026-11-21 (`plan.md`, review log); amended by A-168, A-169 |
 | Implement | done | T-01 to T-05 and T-01b, 2026-11-22; `implementation-log.md` (A-168, A-169) |
 | Verify | done | `verification-report.md`: verified with accepted deviations V-1, V-2, V-3 (D-414); verdict ticked by the owner 2026-11-22 |
-| Commit | open | no branch merge (line of work `goal/v4`, D-414); requirements, checks and scenarios moved into N-3.2 and N-2.3, model regenerated, witnesses of AC-001 to AC-003 filled (2026-11-22); waits for the owner's `bash tools/apply_merge_g_v4_core.sh --do` (TR-CORE into `specs/mia/test-requirements.md`) |
+| Commit | done | no branch merge (line of work `goal/v4`, D-414); requirements, checks, scenarios and the smoke row moved into N-3.2 and N-2.3, model regenerated, witnesses of AC-001 to AC-003 filled; TR-CORE-001 to 009 installed by the owner (`tools/apply_merge_g_v4_core.sh`), 2026-11-22; trace check back to 549 errors, none about CORE |
 | Deploy | open | |
 | Validate | open | the first test run, G-V5 (parked, D-386) |
