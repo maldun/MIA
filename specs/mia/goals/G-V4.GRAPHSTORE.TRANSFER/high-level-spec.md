@@ -1,6 +1,6 @@
 # High-Level Specification: G-V4.GRAPHSTORE.TRANSFER – files and database interchangeable, move and sync
 
-**Status:** Draft (2026-11-22), written by the agent on its own recommendations (D-423); decisions by delegation D-460 (survey points) and D-463 (this spec)
+**Status:** Draft (2026-11-22), written by the agent on its own recommendations (D-423); decisions by delegation D-460 (survey points) and D-463 (this spec); owner D-464 (A-186)
 **Top-level spec:** `../G-V4.GRAPHSTORE/top-level-spec.md` (items FR-58, FR-59, FR-93, NFR-15 and the move and sync part of NFR-16 are this subgoal's; NFR-8 and REQ-GA-008 of the product spec)   **Owner:** Stefan Reiterer   **Date:** 2026-11-22
 **Basis:** prototype rounds 02 (CP2, CP3, CP9) and 03 (CP13 to CP15) on `prototype/g-v4` (`graph_store_move.py`, `graph_store_sync.py`); the accepted cases AC-004 to AC-008, AC-027, AC-033 (`../G-V4/accepted-cases.md`); CORE and RULES as merged into `goal/v4` (`ceb7097a`); VIEW's IF-104 v2 store route (A-171) and IF-302 v15 side tables (A-172) on `goal/v4.view`; the read-only survey of 2026-11-22.
 
@@ -135,7 +135,7 @@ No new node, no new interface version. Within N-3.1 one new module. N-2.1 consum
 Expected cut into tasks (six, step 5): T-01 move integrity (the two defects, test first); T-02 the same answers on files and PostgreSQL, fsync; T-03 lag, one-way sync, aside, rerun after an interruption; T-04 side records and the one-graph move; T-05 portability and the format marker; T-06 copy setting, AutoSync, lock, unknown kind, real store route, SMOKE-TRANSFER-001.
 
 ## 5. Integration with the existing system
-- New: `graph_store_transfer.py` (move, one-graph move, lag, sync, aside, format marker; about 300 lines from the prototype). Changed: `storage_copy.py` (`copy_records` checks with the stored versions of the source, writes members first), `migrate.py` (calls the transfer for the graph group, table order), `storage_files.py` (fsync), `__main__.py` and `web_app.py` (copy setting, AutoSync, store route values). Unchanged contracts: IF-102 v8, IF-301 v4, IF-302 v15, IF-104 v2.
+- New: `graph_store_transfer.py` (move, one-graph move, lag, sync, aside, format marker; about 300 lines from the prototype). Changed: `storage_copy.py` (`copy_records` checks with the stored versions of the source, writes members first), `migrate.py` (calls the transfer for the graph group, table order), `storage_files.py` (fsync), `__main__.py` and `web_app.py` (copy setting, AutoSync, store route values). Contracts: IF-102 v9 by A-186, text only (the table list names the IF-301 record tables; no operation, behaviour or suite change; D-464); unchanged: IF-301 v4, IF-302 v15, IF-104 v2.
 - Protected tests: `tests/acceptance/contract/test_if_102_storage.py` stays green unchanged; TC-SLY-007 and TC-SLY-009 (`test_migrate.py`, `test_storage_copy.py`) are checked in step 1b: a test that expects the old order or the per-record check needs an amendment.
 - Requirement amendments expected: REQ-SLY-007/009 (the move checks graphs as a whole, members first); REQ-GA-008 re-parented to FR-59.
 - PostgreSQL tests and smoke name the database `mia_smoke` and refuse any other target (as TR-CORE-009); the owner's database is started only with his yes and never removed (CORE Deploy lessons).
@@ -144,7 +144,7 @@ Expected cut into tasks (six, step 5): T-01 move integrity (the two defects, tes
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
 | VIEW's store setting, store route and side tables are not merged yet (contracts only on `goal/v4.view`) | T-04 and T-06 cannot run against real code | tests that need them skip while the tables or the route are missing; TRANSFER writes the backend choice from `MIA_DATABASE_URL` itself if VIEW has not (agreed with VIEW by message) |
-| IF-102 v8's table list does not name the graph tables (`graphs`, `graph_nodes`, …) although `table_definitions()` has them | the contract under-describes what is moved | a text-only amendment proposed for the owner (A-186), no behaviour change; not needed for TRANSFER's tests |
+| IF-102 v8's table list does not name the graph tables (`graphs`, `graph_nodes`, …) although `table_definitions()` has them | the contract under-describes what is moved | **decided (D-464):** text-only amendment A-186 to IF-102 v9 (draft `specs/mia/amendments/A-186/`, owner script `tools/apply_amendment_a186.sh`); no behaviour change, not needed for TRANSFER's tests |
 | TC-SLY-007/009 may expect today's order | a protected test may need an amendment | checked in step 1b; amendment by the owner's script if needed |
 | An interrupted multi-version catch-up stops at an earlier complete version (prototype ASM-6) | the copy is behind, not broken | accepted by the D-406 wording of NFR-16; the rerun finishes it (HR-007) |
 | AutoSync at start against a slow or unreachable database | slow start | off by default; an unreachable live store is a report; a time budget in the low-level spec |
