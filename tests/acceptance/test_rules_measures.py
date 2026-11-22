@@ -50,7 +50,7 @@ class RulesMeasuresAcceptance(unittest.TestCase):
         names their parts in the same order, five times in a row.
 
         Example: AC-017 plus a second d1 -> t1 gives [duplicate_connection ["e4"], single_writer ["d1"], cycle ["d1", "t1", "d1"]]; the run names
-        ["e4", "d1", "d1", "t1", "d1"].
+        ["e4", "d1", "d1", "t1", "d1"]. The second graph is run with a value for d1 (A-170b, D-428), so the run names its three rule items only.
         """
         # Given: the AC-017 graph plus an identical connection, and a graph with a missing start, an identical connection and a data step with session
         first = ac017()
@@ -62,6 +62,9 @@ class RulesMeasuresAcceptance(unittest.TestCase):
         script = Script()
         self.addCleanup(shutil.rmtree, script.folder, True)
         runner = GraphRunner(lambda node_id: "trusted")
+        # the second graph is run with d1 given: d1 has no value and no writer, so without it the run check rightly adds an unsupplied input
+        # (REQ-GTB-051) and the run would name one part more than the rule report (A-170b, D-428)
+        run_values = {"first": {}, "second": {"d1": "x"}}
         for label, g in (("first", first), ("second", second)):
             for repeat in range(REPEATS):
                 with self.subTest(graph=label, repeat=repeat):
@@ -69,7 +72,7 @@ class RulesMeasuresAcceptance(unittest.TestCase):
                     report = rule_report(g)
                     saved = GraphModel(Storage(fresh_backend("files", self)), author="ann").save_graph(g)
                     routed = check_route(g)
-                    ran = runner.run(g, {i["id"]: script.marker_node(i["id"]) for i in g["nodes"] if i["data"]["type"] != "data"}, {})
+                    ran = runner.run(g, {i["id"]: script.marker_node(i["id"]) for i in g["nodes"] if i["data"]["type"] != "data"}, dict(run_values[label]))
                     # Then: the rule report is the three broken rules of the graph
                     self.assertEqual(report, expected[label])
                     # And: the save and the check route give the same items, the run names the same parts in the same order (0 differences)
