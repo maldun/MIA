@@ -1359,16 +1359,16 @@ Requirements of the subgoal G-V4.GRAPHSTORE.CORE (goal record `specs/mia/goals/G
 ### REQ-WFM-150 – Refused save writes nothing
 - Level: low   Subject: TaskRuntime
 - Group: SV
-- Text: If a save is refused, then the Workflow management shall write no record, count no version and name the broken rule or the IDs.
-- Rationale: refines NFR-16 and HR-005; the refusals are those of the graph rules and the record checks
+- Text: If a save is refused, then the Workflow management shall write no record, count no version and name every broken rule in registry order with its parts.
+- Rationale: refines NFR-16 and HR-004; finding 2: with the rule set a refused save names every broken rule, not the first group; the CORE text ("names") already allows it, the change makes it checkable (OC-1). TC-WFM-168 stays as it is (prototype CP17); the new case goes to TC-WFM-180
 - Parent: NFR-16
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-CORE-10 (accepted case AC-003): a graph with a cycle, two writers, an unknown kind of step or a context connection to a missing step is refused and no table grew (exact)
+- Acceptance criterion: AC-CORE-10 (accepted case AC-003) unchanged, plus: the AC-017 graph (a cycle and a second writer) names `single_writer` and then `cycle`, each with its parts, and no table grew (exact)
 - Binding: fixed
-- Verified by: TC-WFM-168
+- Verified by: TC-WFM-168, TC-WFM-180
 - Status: Verified
-- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408); text and acceptance criterion changed by G-V4.GRAPHAPI.RULES (Plan step 1b, 2026-11-22, approved by the owner 2026-11-22; basis: prototype round 04, finding 2); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and changed here at the merge (plan.md, "At the merge").
 
 ### REQ-WFM-151 – An interrupted save is finished by repeating it
 - Level: low   Subject: TaskRuntime
@@ -1415,30 +1415,30 @@ Requirements of the subgoal G-V4.GRAPHSTORE.CORE (goal record `specs/mia/goals/G
 ### REQ-WFM-154 – Unknown kind refused
 - Level: low   Subject: TaskRuntime
 - Group: CG
-- Text: If the kind of a graph is neither `workflow` nor `context`, then the Workflow management shall refuse the save and name the field `kind`.
-- Rationale: refines FR-57 and D-404; the registry of kinds is the list of accepted kinds, today two
+- Text: If a graph names a kind that is neither `workflow` nor `context`, including an empty kind (`null`), then the Workflow management shall refuse the save and name the field `kind`.
+- Rationale: refines FR-57; states CORE's V-2 as implemented and accepted (D-414); REQ-WFM-153 ("no kind means workflow") then covers only a graph without the field `kind`
 - Parent: FR-57
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-CORE-14: kind `swarm` is refused naming `kind` and nothing is stored (exact)
+- Acceptance criterion: AC-CORE-14 unchanged (kind `swarm` refused naming `kind`, nothing stored), plus: `"kind": None` is refused naming `kind` and nothing is stored (exact)
 - Binding: fixed
-- Verified by: TC-WFM-172
+- Verified by: TC-WFM-172, TC-WFM-183
 - Status: Verified
-- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408); text and acceptance criterion changed by G-V4.GRAPHAPI.RULES (Plan step 1b, 2026-11-22, approved by the owner 2026-11-22): states CORE's V-2 as implemented and accepted (D-414); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and changed here at the merge (plan.md, "At the merge").
 
-### REQ-WFM-155 – Identity and ends of a context graph
+### REQ-WFM-155 – Rules of a context graph on save
 - Level: low   Subject: TaskRuntime
 - Group: CG
-- Text: When a context graph is saved, the Workflow management shall refuse a repeated step ID, a repeated connection ID or a connection to a missing step, and name the IDs.
-- Rationale: refines FR-57; the rule set of the context kind is CONTEXT's decision (FR-75, ASM-4); until then identity and ends only
+- Text: When a context graph is saved, the Workflow management shall refuse it if it breaks a rule of the kind `context`, naming the broken rules with their parts.
+- Rationale: refines FR-57 and HR-001; Q-3 (rule 4 in full) and finding 7: the same definitions refuse an empty step ID and two identical connections, which CORE's `context_problems` accepts; the rules come from the registry (D-404), CONTEXT may add rules by amendment (FR-75, ASM-4)
 - Parent: FR-57
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-CORE-15: each of the three faults is refused naming the ID and writes nothing (exact)
-- Binding: open
-- Verified by: TC-WFM-173
+- Acceptance criterion: AC-CORE-15 unchanged (each of the three faults refused naming the ID, nothing written), plus: two identical connections with different IDs and an empty step ID are each refused naming the rule (exact)
+- Binding: fixed
+- Verified by: TC-WFM-173, TC-WFM-184
 - Status: Verified
-- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408); text, title and acceptance criterion changed by G-V4.GRAPHAPI.RULES (Plan step 1b, 2026-11-22, approved by the owner 2026-11-22; basis: prototype round 04, finding 7, Q-3); binding open → fixed (RULES binding map: the context rule set is now the registry's, CONTEXT changes it by amendment); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and changed here at the merge (plan.md, "At the merge").
 
 ### REQ-WFM-156 – No workflow rules for a context graph
 - Level: low   Subject: TaskRuntime
@@ -1523,3 +1523,69 @@ Requirements of the subgoal G-V4.GRAPHSTORE.CORE (goal record `specs/mia/goals/G
 - Verified by: TC-WFM-173
 - Status: Verified
 - History: G-V4.GRAPHSTORE.CORE Plan step 3, 2026-11-21, new (from the review of TC-WFM-173); approved by the owner in the group review of CG, 2026-11-21; verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+## Iteration 4 (goal G-V4.GRAPHAPI.RULES, one rule set for graphs; moved at the merge 2026-11-22)
+Requirements of the subgoal G-V4.GRAPHAPI.RULES (goal record `specs/mia/goals/G-V4.GRAPHAPI.RULES/`: plan, test requirements TR-RULES-001 to 009, verification report). Verified 2026-11-22 (verdict ticked by the owner); Verify findings decided in D-461: V-1 fixed (`f478e040`), V-2 corrected in the contract (A-185), V-4 accepted as stated, V-3, V-6, V-7 noted. The rule set is offered through IF-301 v4 (`contracts/IF-301-graph-tables.md`, A-170, A-185).
+
+Terms (kind, rule report, run check): see the section "Terms of G-V4.GRAPHAPI.RULES" in `specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md`. The three changed requirements REQ-WFM-150, REQ-WFM-154 and REQ-WFM-155 keep their place in the section of G-V4.GRAPHSTORE.CORE above, with the new texts.
+
+## Groups of G-V4.GRAPHAPI.RULES
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 4 | SV | Saving with the rule set: the save path of the Workflow management, and V-2, V-3 of CORE (FR-63, HR-004) | REQ-WFM-162, REQ-WFM-163, REQ-WFM-164, REQ-WFM-165; changed in place above: REQ-WFM-150 (group SV of CORE), REQ-WFM-154, REQ-WFM-155 (group CG of CORE) |
+
+### REQ-WFM-162 – Save with the rule set of the graph's kind
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: When a graph is saved, the Workflow management shall check it with the rule report of IF-301 for the graph's kind.
+- Rationale: refines HR-001 and HR-004; replaces CORE's `check_graph` (five rules, first broken group) and `context_problems` in the save path (prototype CP17: TC-WFM-164 and TC-WFM-168 stay green, finding 2)
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a workflow graph with two identical connections (a rule the five older rules lack) is refused on save naming `duplicate_connection`; the same graph checked through IF-301 gives the same items (exact)
+- Binding: fixed
+- Verified by: TC-WFM-179
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-WFM-163 – A refused save carries the rule report
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: If a save is refused for broken rules, then the Workflow management shall return the rule report with the refusal.
+- Rationale: refines HR-002 and HR-004; the editor shows rules with their sentences, the IDs alone lose the rule names (ASM-8, `SaveResult.rules`)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the graph of AC-017 (a cycle and a second writer) saved gives a refusal whose rule report equals the report of IF-301 for the same graph, item by item (exact)
+- Binding: fixed
+- Verified by: TC-WFM-180
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, ASM-8); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-WFM-164 – The flat list of named IDs
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: The Workflow management shall offer the check of a workflow graph as a flat list of the parts of every broken rule, in the registry's order, keeping repeated IDs.
+- Rationale: refines HR-002; `check_graph` stays (HLS section 1): three protected acceptance tests call `check_graph(graph) == []`; repeats are kept so a cycle keeps its first step at the end (finding 3)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a sound graph gives `[]`; `d1 → t1 → d1` gives `["d1", "t1", "d1"]`; the AC-017 graph gives the parts of `single_writer` before those of `cycle` (exact)
+- Binding: fixed
+- Verified by: TC-WFM-181
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 3); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-WFM-165 – History of a graph that was never stored
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: If the versions of a graph or the history of one of its steps are asked for a graph ID that was never stored, then the Workflow management shall answer `not_found`.
+- Rationale: states CORE's V-3 as implemented and accepted (D-414: "to be stated by the next amendment that touches the CORE requirements")
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: `graph_versions("never")` and `step_history("never", "a")` each fail with the reason `not_found` and store nothing (exact)
+- Binding: fixed
+- Verified by: TC-WFM-182
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: CORE verification report V-3, D-414); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").

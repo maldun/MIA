@@ -463,3 +463,307 @@ Requirements of the subgoal G-V4.GRAPHSTORE.CORE (goal record `specs/mia/goals/G
 - Verified by: TC-GTB-036
 - Status: Verified
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+## Iteration 4 (goal G-V4.GRAPHAPI.RULES, one rule set for graphs; moved at the merge 2026-11-22)
+Requirements of the subgoal G-V4.GRAPHAPI.RULES (goal record `specs/mia/goals/G-V4.GRAPHAPI.RULES/`: plan, test requirements TR-RULES-001 to 009, verification report). Verified 2026-11-22 (verdict ticked by the owner); Verify findings decided in D-461: V-1 fixed (`f478e040`), V-2 corrected in the contract (A-185), V-4 accepted as stated, V-3, V-6, V-7 noted. The rule set is offered through IF-301 v4 (`contracts/IF-301-graph-tables.md`, A-170, A-185).
+
+## Terms of G-V4.GRAPHAPI.RULES
+| Term | Meaning |
+|---|---|
+| kind (of a graph) | the header field `kind`: `workflow` or `context` today (D-404); a graph that names no kind is a workflow graph (REQ-WFM-153) |
+| registry of kinds | the one table that names, per kind, its rules in their fixed order and its run flag (D-404, HR-001) |
+| run flag | yes when a graph of the kind may be run, no when it may not (FR-64 "a kind that cannot run") |
+| rule report | the answer of a check: a list with one item per broken rule, in the registry's order, each `{"rule", "parts", "text"}`; an empty list when every rule is kept (HR-002) |
+| parts (of a broken rule) | the local IDs of the steps or connections the rule concerns, in the order the rule finds them |
+| refusal (of a run) | the answer of the run check: `{"status": "refused" or "ready", "broken": [...]}`, each item of `broken` a broken rule, an unsupplied input or the kind (HR-003) |
+| unsupplied input | an input connection of a processing or loop-controlling step from a data step that has no writer, no start value in the graph and no value given with the run; settings and order connections are not inputs here |
+| session setting | the `stop` or `session` field of a step, and the settings connection (`role: "settings"`) into a step (ASM-3, Q-1) |
+| stored form | a graph as `{"kind"?, "nodes": [{"id", "data"}], "edges": [{"id", "from", "to", "data"}]}` with local IDs, as the Workflow management saves and reads it (CORE) |
+
+## Groups of G-V4.GRAPHAPI.RULES
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | RS | The rule set by kind: one registry, the rules of each kind in order, the rule report (FR-63, HR-001, HR-002) | REQ-GTB-033, REQ-GTB-034, REQ-GTB-035, REQ-GTB-036, REQ-GTB-037, REQ-GTB-038, REQ-GTB-039, REQ-GTB-040 |
+| 2 | RD | The eight rules: what each one finds and which parts it names (FR-63, D-375, Q-1, Q-4, Q-5) | REQ-GTB-041, REQ-GTB-042, REQ-GTB-043, REQ-GTB-044, REQ-GTB-045, REQ-GTB-046, REQ-GTB-047, REQ-GTB-048 |
+| 3 | RF | The refusal of a run as a report: kind, broken rules, unsupplied inputs (FR-64, HR-003) | REQ-GTB-049, REQ-GTB-050, REQ-GTB-051 |
+| 6 | DF | The document form stays as it is until MIGRATION (Q-6) | REQ-GTB-052 |
+
+### REQ-GTB-033 – One registry of kinds
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: The Graph tables shall offer through IF-301 one registry of kinds that names, for each kind of graph, its rules in their fixed order and its run flag.
+- Rationale: refines HR-001 and FR-63 "written in one place, chosen by the kind" (D-404, D-417); the prototype found three rule implementations today (finding 1)
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the registry read through IF-301 lists exactly the kinds `workflow` and `context`, each with a list of rule names and a yes/no for running (exact)
+- Binding: fixed
+- Verified by: TC-GTB-037
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-034 – The eight workflow rules in order
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: The Graph tables shall list in the registry of kinds for the kind `workflow` the rules `step_identity`, `step_kind`, `connection_endpoints`, `duplicate_connection`, `adjacency`, `single_writer`, `stop_limit` and `cycle`, in this order.
+- Rationale: refines HR-001; D-375: local facts first, the cycle last; no ninth rule (Q-2: the known-tool check goes to G-V4.GRAPHAPI.CODE)
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the rules of `workflow` are exactly these eight names in this order (exact)
+- Binding: fixed
+- Verified by: TC-GTB-037
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-035 – The rules of a context graph
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: The Graph tables shall list in the registry of kinds for the kind `context` the rules `step_identity`, `connection_endpoints` and `duplicate_connection`, in this order, with the definitions used for `workflow`.
+- Rationale: refines HR-001; one definition per rule keeps the context set from drifting (D-404); rule 4 in full, so two identical connections with different IDs are refused (Q-3); CONTEXT may add rules by amendment (FR-75, ASM-4)
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the rules of `context` are exactly these three names in this order; a context graph with two identical connections under different IDs is reported with `duplicate_connection` naming the second ID (exact)
+- Binding: fixed
+- Verified by: TC-GTB-037, TC-GTB-038
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 7); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-036 – Which kinds can run
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: The Graph tables shall set the run flag of the kind `workflow` to yes and the run flag of the kind `context` to no.
+- Rationale: refines HR-001 and FR-64 "a kind that cannot run"; context steps are categories, not data and processing steps (D-404)
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: `workflow` can run, `context` cannot (exact)
+- Binding: fixed
+- Verified by: TC-GTB-037
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-037 – The rule report
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: When a graph in stored form is checked, the Graph tables shall return one item per broken rule of the graph's kind, in registry order, each with rule name, parts and sentence.
+- Rationale: refines HR-002 and OC-1 "the same broken rules in the same order, each with its steps or connections"; the sentence is what the editor and a refused run show; a graph that keeps every rule gives an empty list
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a workflow graph with a missing connection end and two writers of one data step gives exactly two items, `connection_endpoints` before `single_writer`, each with its parts and a non-empty sentence; a sound graph gives `[]` (exact)
+- Binding: fixed
+- Verified by: TC-GTB-039
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, CP19); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-038 – No kind means workflow, for the check
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: Where a graph in stored form names no kind, the Graph tables shall check it with the rules of the kind `workflow`.
+- Rationale: refines HR-001; the same default as the save path (REQ-WFM-153), so a check and a save of the same graph agree
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a graph without the field `kind` and the same graph with `"kind": "workflow"` give the same rule report (exact)
+- Binding: fixed
+- Verified by: TC-GTB-039
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-039 – Unknown kind in a check
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: If the kind of a checked graph is not in the registry of kinds, then the Graph tables shall return a rule report with the single item `unknown_kind`, naming the kind as its part.
+- Rationale: refines HR-001 and D-404 (the reason `unknown kind`); the rules of an unknown kind are not known, so nothing else can be said (Q-7); the save keeps CORE's `schema_break` / `kind` (REQ-WFM-154)
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a graph of kind `swarm` with a cycle gives exactly `[{"rule": "unknown_kind", "parts": ["swarm"], ...}]` (exact)
+- Binding: fixed
+- Verified by: TC-GTB-040
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 10); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-040 – A check never raises
+- Level: low   Subject: Persistence
+- Group: RS
+- Text: If a checked graph is malformed, then the Graph tables shall return a rule report instead of raising an exception.
+- Rationale: refines HR-002; the same contract as the record checks of IF-301 (A-60); the prototype raised on connection data that is not an object and on steps without IDs (finding 4). Malformed: a step or connection that is not an object, data that is not an object, a missing or non-text ID or end
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: each of five malformed graphs (a step that is a number, connection data that is a list, a step without `id`, a connection without `from`, `nodes` that is not a list) returns a list; no exception escapes (exact)
+- Binding: fixed
+- Verified by: TC-GTB-041
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 4); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge"). Verify V-1 (connections whose `from`, `to`, `id`, `role` or `as` is a list or an object raised) fixed in `f478e040` (D-461).
+
+### REQ-GTB-041 – Rule 1, step identity
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall report the rule `step_identity` for every step whose ID is not a non-empty text or repeats the ID of an earlier step, naming those IDs.
+- Rationale: refines HR-002 and D-375 (whitespace and repeated IDs); a slash inside a step ID is allowed, as in CORE (Q-4, REQ-GTB-029: the graph ID ends at the first slash)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: steps `a`, `a` and `` give `step_identity` naming `a` and `` ; a step `x/y` breaks no rule by its ID (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, finding 5); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-042 – Rule 2, kind of step
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall report the rule `step_kind` for every step whose type is none of `data`, `transform` and `master`, naming those steps.
+- Rationale: refines HR-002; the rule of REQ-WFM-043 under its name in the registry
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a step of type `loop` gives `step_kind` naming it; steps of the three types give no item (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-043 – Rule 3, connection ends
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall report the rule `connection_endpoints` for every connection whose start or end names no step of the graph, naming those connections.
+- Rationale: refines HR-002; today's runner refuses the same before a run (REQ-RUN-016, `graph_run.py`)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a connection `e2` from `a` to the missing step `z` gives `connection_endpoints` naming `e2` (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-044 – Rule 4, duplicate connection
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall report the rule `duplicate_connection` for every connection that repeats the ID, or the start, end, role and name, of an earlier connection, naming those connections.
+- Rationale: refines HR-002 and D-375 (duplicate connections, new against the five older rules); role is the field `role`, name the field `as` of the connection's data; two connections that differ only in `as` hand over two names and are not duplicates
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: `e1` and `e2` both from `a` to `t` without role and name give `duplicate_connection` naming `e2`; two connections with the ID `e1` name `e1`; the same pair with `as` `x` and `y` gives no item (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, finding 6); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-045 – Rule 5, adjacency
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall report the rule `adjacency` for every connection between two existing steps that are both data steps or both not data steps, naming those connections.
+- Rationale: refines HR-002; the rule of REQ-WFM-045 under its name; a connection with a missing end is rule 3, not rule 5; a transform connected to itself breaks this rule and the cycle (seen on the scratch run of 2026-11-22: `T1>T1` is named by both)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a connection from data `d1` to data `d2` and one from transform `t1` to master `m1` give `adjacency` naming both; a connection from `d1` to the missing `z` gives no `adjacency` item (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-046 – Rule 6, one writer
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall report the rule `single_writer` for every data step that connections from more than one existing step lead into, naming those data steps.
+- Rationale: refines HR-002; the rule of REQ-WFM-046 under its name
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: transforms `t1` and `t2` both connected into data `d` give `single_writer` naming `d`; two connections from `t1` into `d` give no `single_writer` item (they are rule 4) (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, finding 6); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-047 – Rule 7, session setting and stop limit
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall report the rule `stop_limit` for every loop-controlling step without a valid stop limit, data step holding `stop` or `session`, and step with more than one settings connection, naming those steps.
+- Rationale: refines HR-002; Q-1 confirms ASM-3; a valid stop limit is that of REQ-WFM-048 (a positive maximum number of repetitions or a positive maximum time), so `max_seconds: 1.0` stays valid (finding 6); none of the 17 graphs the prototype stores breaks it (finding 11)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a master without `stop`, a data step with `session`, and a transform with two settings connections each give `stop_limit` naming that step; a master with `{"max_seconds": 1.0}` gives no item (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, CP18); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-048 – Rule 8, cycle
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: While `step_identity` and `connection_endpoints` are kept, the Graph tables shall report `cycle` for a graph whose steps cannot be ordered, naming the cycle with its first step repeated at the end.
+- Rationale: refines HR-002 and REQ-WFM-047 (the cycle is named, its first step repeated at the end; finding 3); an order needs known, unique steps (Q-5), so the owner sees the cycle once identity and ends are fixed
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: `d1 → t1 → d1` gives `cycle` with the parts `d1, t1, d1`; the same graph plus a connection to a missing step gives `connection_endpoints` and no `cycle` (exact)
+- Binding: fixed
+- Verified by: TC-GTB-042
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, findings 3 and 8); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-049 – Refusal of a run: the kind first and alone
+- Level: low   Subject: Persistence
+- Group: RF
+- Text: If a graph's kind is not in the registry or has the run flag no, then the run check of the Graph tables shall answer refused with one item naming the kind: `unknown_kind` or `kind_cannot_run`.
+- Rationale: refines HR-003 and FR-64 "of a kind that cannot run"; the rules of such a kind say nothing about a run (ASM-7); refusal order kind, rules, inputs (D-416 (3))
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a context graph gives refused with exactly one item `kind_cannot_run` naming `context`; a graph of kind `swarm` with a cycle gives exactly one item `unknown_kind` naming `swarm` (exact)
+- Binding: fixed
+- Verified by: TC-GTB-043
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-050 – Refusal of a run: rules, then inputs
+- Level: low   Subject: Persistence
+- Group: RF
+- Text: When a graph whose kind has the run flag yes is checked for a run, the Graph tables shall answer refused, listing every broken rule in registry order, then every unsupplied input, else ready.
+- Rationale: refines HR-003 and D-416 (3); the trust check follows in the runner (REQ-RUN-038); the given values of the run are part of the question, so the same graph can be refused without values and ready with them (AC-018)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a workflow graph with two writers and an unsupplied input gives refused with `single_writer` first and the input second; the converted `chat` skill gives ready with `{"input.text": "hello"}` (exact)
+- Binding: fixed
+- Verified by: TC-GTB-043
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-051 – Unsupplied input
+- Level: low   Subject: Persistence
+- Group: RF
+- Text: The run check of the Graph tables shall report every unsupplied input as one item naming the processing or loop-controlling step and the data step it reads.
+- Rationale: refines HR-003 and D-375 (a step input nobody supplies); the term is defined above: no writer, no start value in the graph, no value given with the run; settings and order connections are not inputs here (a step gets `{}` without settings, REQ-RUN-030, an order connection hands over nothing, REQ-RUN-035); the inputs of a Stage with a prepare function count as given (REQ-RUN-039, D-418 (1))
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the converted `chat` skill without values names the step `step.converse` and the data step `input.text`; a data step with a graph value, or one written by another step, is not named (exact)
+- Binding: fixed
+- Verified by: TC-GTB-044
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-GTB-052 – The document form keeps its five rules
+- Level: low   Subject: Persistence
+- Group: DF
+- Text: The Graph tables shall keep the check of the document form (IF-301 `validate`) and its five rules unchanged in IF-301 v4.
+- Rationale: Q-6: the document form (IF-301 `validate`, IF-102, IF-104 v1, IF-203) keeps REQ-GTB-002 until G-V4.MIGRATION retires it; RULES covers every check of the stored form; the v1 to v3 contract suites stay unchanged
+- Parent: HR-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the contract suites of IF-301 v1, v2 and v3 and the suites of IF-102, IF-104 v1 and IF-203 pass unchanged against the v4 code (exact)
+- Binding: fixed
+- Verified by: TC-GTB-045
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: Q-6, prototype round 04, finding 1); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").

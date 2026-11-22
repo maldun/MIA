@@ -1,5 +1,7 @@
 # Requirements: G-V4.GRAPHAPI.RULES (low level, new and changed items)
 
+**Moved at the merge (2026-11-22, plan.md "At the merge"):** the 28 new requirements are now in `specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md` (REQ-GTB-033 to 052), `specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md` (REQ-WFM-162 to 165) and `specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md` (REQ-RUN-036 to 039), section "Iteration 4 (goal G-V4.GRAPHAPI.RULES ...)", with the status Verified; the approved texts of the three changed requirements REQ-WFM-150, 154 and 155 replace the CORE texts in place in the N-2.3 file. The node files are the source from now on (they win over this file for the same ID); this file stays as the record of the goal.
+
 **Top-level spec:** `specs/mia/goals/G-V4.GRAPHAPI/top-level-spec.md` (FR-63, FR-64)   **High-level spec:** `specs/mia/goals/G-V4.GRAPHAPI.RULES/high-level-spec.md` (HR-001 to HR-006, approved 2026-11-22)   **Status:** Approved by the owner group by group (RS, RD, RF, SV, RR, DF; 2026-11-22, review-log.md)   **Plan baseline:** –
 
 <!-- The requirements this subgoal adds, and the proposed wording changes of requirements in force.
