@@ -1,6 +1,6 @@
 # High-Level Specification: G-V4.GRAPHAPI.RULES – one rule set for graphs
 
-**Status:** Draft (2026-11-22); open decisions taken by the owner (D-416, points 1 and 5 superseded by D-417); HR-001 to HR-006 approved by group (review-log.md); the approval of the whole document is the owner's tick below
+**Status:** Approved by the owner (2026-11-22, ticked); decisions D-416 and D-417; HR-001 to HR-006 approved by group (review-log.md)
 **Top-level spec:** `../G-V4.GRAPHAPI/top-level-spec.md` (items FR-63, FR-64 are this subgoal's; FR-7 of the product spec)   **Owner:** Stefan Reiterer   **Date:** 2026-11-22
 **Basis:** the validated prototype round 04 (`../G-V4/prototype/rounds/04/`, branch `prototype/g-v4`, carry-over decided all as proposed), the reuse map row R3, the owner's decisions D-375, D-404 and D-415 (Q-1 to Q-7), the accepted cases AC-017 and AC-018 (`../G-V4/accepted-cases.md`), CORE as verified (D-414).
 
@@ -131,4 +131,4 @@ Decided by the owner in the HLS questionnaire of 2026-11-22 (D-416, as recommend
 ## Approval
 Reviewed item by item with the owner (review log: `review-log.md`). The approval of the whole document is the owner's: tick the box (in Emacs `C-c C-c` on the line) or say so in the chat; the agent then sets the status to Approved and never before.
 
-- [ ] Approved by Stefan Reiterer (owner). Date:
+- [X] Approved by maldun (owner). Date: 22-11-2026
