@@ -15,6 +15,8 @@
       "Edit(specs/mia/plausibility.yaml)",
       "Edit(specs/mia/deferred.md)",
       "Edit(specs/mia/decomposition.yaml)",
+      "Edit(tests/fixtures/graph_view/**)",
+      "Edit(specs/mia/goals/*/test-requirements.md)",
       "Read(eval/suites/*.holdout/**)",
       "Bash(ollama pull:*)",
       "Bash(ollama rm:*)",
