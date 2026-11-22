@@ -20,7 +20,7 @@ Read first: this file, `CLAUDE.md`, the previous handovers `handover-2026-11-22-
 ## 3. Next steps
 1. Done: requirements reviewed and approved **by group** (memory: accept / waiver / discuss per group), order RS, RD, RF, SV, RR, DF: `python ~/.claude-work/skills/plan-phase/scripts/req_review.py --spec-dir specs/mia/goals/G-V4.GRAPHAPI.RULES --tests-dir tests next --group RS`, then `mark ... --by "Stefan Reiterer"` with how he said it.
 2. Done: A-170 text approved in three parts (D-419).
-3. Done: architecture entries (D-420; FR-63, FR-64 in the model, the 27 requirements generated with their links; `check_sysml.sh` 0 errors, `check_sysml_model.py` OK). Next: test spec with scenarios (TC-GTB-037 to 045, TC-WFM-179 to 184, TC-RUN-036 to 039, TC-IF-301-27 on), test requirements (HR-004 to HR-006 in detail), red tests, the A-170 suite and mock, `plan.md`, binding map, witnesses for AC-017 and AC-018.
+3. Done: architecture entries (D-420; FR-63, FR-64 in the model, the 27 requirements generated with their links; `check_sysml.sh` 0 errors, `check_sysml_model.py` OK). Drafted: `test-spec.md` (22 checks, 8 contract cases, scenarios for each, SMOKE-RULES-001, VAL-RULES-01) and `test-requirements.md` (TR-RULES-001 to 009); trace check on a symlinked folder: no finding on RULES items. Next: their review, then test spec with scenarios (TC-GTB-037 to 045, TC-WFM-179 to 184, TC-RUN-036 to 039, TC-IF-301-27 on), test requirements (HR-004 to HR-006 in detail), red tests, the A-170 suite and mock, `plan.md`, binding map, witnesses for AC-017 and AC-018.
 
 ## 4. Numbers
 Next free (checked on all four branches 2026-11-22): D-422, A-171, REQ-WFM-166, REQ-GTB-053, REQ-RUN-040, TC-WFM-185, TC-GTB-046, TC-RUN-040, TC-IF-301-27, AC-41, ASM-9.
