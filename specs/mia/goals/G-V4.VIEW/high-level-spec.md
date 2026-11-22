@@ -129,7 +129,7 @@ No new node. Changed: N-5 (page), N-2.1 (all routes of IF-104 v2), N-3.1 (tables
 |---|---|---|
 | A-171 | IF-104 v2: text from the prototype's `/api/v2` routes (read side, check, save, restore, arrangement, changes), the field "changed since trusted", the role `code`; Python and JS mocks; contract suite | `contracts/IF-104-graph-api.md` (a v2 section, v1 unchanged), `tests/helpers/mocks/` (new v2 mocks), `tests/acceptance/contract/` (new v2 suite) |
 | A-172 | IF-302: the record tables `arrangements` (one record per graph, no version) and `graph_changes` (written once, append-only, moves with the graph) | `contracts/IF-302-record-tables.md`, its contract suite |
-| A-173 | REQ-GA-001: "physics off" replaced by the fixed solver and seed (HR-003) | none: `tests/js/graph-view.test.mjs:69` (`physics == false`) is not deny-protected; it changes with the requirement in the same task |
+| ~~A-173~~ | dropped (D-436): REQ-GA-001's approved text never said "physics off"; only the unprotected test line `tests/js/graph-view.test.mjs:69` did. HR-003 enters as a new requirement of Track B, and the page task changes that test line with it | none |
 
 ## 5. Open points (questionnaire)
 Decided 2026-11-22 (D-430): P-1 all IF-104 v2 routes real in VIEW; P-2 a blueprint in the MIA backend; P-3 `requirements-db.txt` in the release image with a store setting. Look and feel: D-431. No point open.
