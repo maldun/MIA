@@ -1,29 +1,32 @@
-# Handover: G-V4.GRAPHAPI.RULES, requirements drafted, IF-301 v4 text staged; next the review by group (2026-11-22)
+# Handover: G-V4.GRAPHAPI.RULES, plan package complete; next the owner's install and plan gate, then Implement (2026-11-22)
 
-Read first: this file, `CLAUDE.md`, the previous handovers `handover-2026-11-22-g-v4-rules-round04-done.md` and `handover-2026-11-22-g-v4-rules-plan-next.md` (sections 5 and 7 still hold), skills `dev-workflow`, `plan-phase`, `agent-app`. The owner (Stefan Reiterer, maldun) decides every gate.
+Read first: this file, `CLAUDE.md`, skills `dev-workflow`, `plan-phase` (or `implement-phase` once the gate is ticked), `agent-app`. The owner (Stefan Reiterer, maldun) decides every gate. Since D-423 the agent finishes RULES and TRANSFER on its own recommendations (recorded as taken by delegation) and asks the owner again at RUN, VIEW, EDIT and CONTEXT. No plausibility records (D-421). Older handovers: `handover-2026-11-22-g-v4-rules-round04-done.md`, `handover-2026-11-22-g-v4-rules-plan-next.md` (sections 5 and 7 still hold).
 
 ## 1. Where we are
 | Item | State |
 |---|---|
 | Line of work | `goal/v4.graphapi.rules`, worktree `/home/maldun/prog/Python/MIA-goal-v4-rules`, not pushed |
-| High-level spec | approved (ticked, `f1a0ab00`) |
-| Requirements | **drafted**: `/home/maldun/prog/Python/MIA-goal-v4-rules/specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md`, 27 new (REQ-GTB-033 to 052, REQ-WFM-162 to 165, REQ-RUN-036 to 039) and 3 changed (REQ-WFM-150, 154 with V-2, 155), six groups RS, RD, RF, SV, RR, DF; lint 0 errors, 0 warnings; **all 31 approved by the owner group by group** (2026-11-22, `goals/G-V4.GRAPHAPI.RULES/review-log.md`) |
-| IF-301 v4 (A-170) | staging text `/home/maldun/prog/Python/MIA-goal-v4-rules/specs/mia/amendments/A-170/IF-301-graph-tables.md` (v3 plus `kinds()`, `rule_report(graph)`, `run_check(graph, given)`, rules in detail, golden 24 to 31, decision 18); suite, mock and the owner's apply script still to write |
-| Decisions | D-418 (questionnaire, all as recommended): (1) inputs of a Stage with a prepare function count as given (REQ-RUN-039), REQ-RUN-034 unchanged; (2) malformed input reported by the eight rules as staged; (3) RULES kept together |
+| High-level spec | approved (`f1a0ab00`) |
+| Requirements | 27 new (REQ-GTB-033 to 052, REQ-WFM-162 to 165, REQ-RUN-036 to 039) and 3 changed (REQ-WFM-150, 154, 155), **all approved by group** (`/home/maldun/prog/Python/MIA-goal-v4-rules/specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md`) |
+| IF-301 v4 (A-170) | text approved in three parts (D-419); suite `test_if_301_v4_rule_set.py` (TC-IF-301-27 to 34) and mock `if_301_graph_tables_v4.py` staged in `specs/mia/amendments/A-170/tests/`; the mock passes the suite and every pure RULES check |
+| Architecture | FR-63, FR-64 in the model; the 27 requirements generated with links to FR-63/64 (D-420); `check_sysml.sh` 0 errors, `check_sysml_model.py` OK |
+| Test spec, test requirements | approved (D-422; TC-GTB-046, TC-GTB-047 and TR-RULES-003 corrected by delegation, D-424) |
+| Red tests | staged in `specs/mia/goals/G-V4.GRAPHAPI.RULES/red-tests/` (4 acceptance files, helper `rules_graphs.py`, `smoke_rules.py`); stub `graph_rule_set.py` in the branch; on a scratch install every check fails by assertion, except those listed in `plan.md` "State at the red commit"; `test_doc_check.py` 0 findings |
+| Plan | `plan.md` (T-01 rule set module, T-02 save path, T-03 runner, T-04 entry points and smoke) and `binding-map.md` (30 of 30 fixed), by delegation; the plan-gate box in `plan.md` and `Reviewed by` in `binding-map.md` are the owner's |
 
-## 2. Findings of this session (evidence for the test spec)
-- Scratch run (copy of the worktree in the job folder, prototype rule set put in front of `GraphRunner.run`): protected TC-RUN-016, 017, 033, 034 (with REQ-RUN-039), `test_graph_order.py`, `test_skill_binding.py`, `test_run_converted.py` pass unchanged. Two lessons, both now requirements: the refused run must keep repeated IDs (REQ-RUN-037; the prototype's `run_guarded` removed them), and a transform connected to itself now also names `adjacency` (REQ-GTB-045): the unit check `tests/test_graph_run_findings.py` (self-loop) changes in Implement.
-- Four files fail the same way with and without the run check (`test_convert_verify_fixes.py`, `test_conversion_record.py`, `test_harness_converted.py`, `test_skill_conversion.py` on the scratch copy): likely the copy's layout, not RULES; check them in the real worktree before the red commit.
-- Goldens 26 to 29 of A-170 were checked against the prototype module and match; golden 31 (malformed input) is new behaviour (D-418 (2)).
-- HLS section 5 names REQ-RUN-016 for the refusal change; the refusal is the new group RR instead, REQ-RUN-016 keeps its text (noted in the requirements file).
+## 2. Next steps
+1. The owner, on this branch: `bash tools/apply_amendment_a170.sh --do`, commit "plan: A-170 installed"; `bash tools/apply_rules_red_tests.sh --do`, commit "test: RULES acceptance tests (red)", tag `plan-baseline-g-v4-rules`; tick the plan gate in `plan.md`.
+2. Implement T-01 to T-04 in a fresh session (`implement-phase`), one commit per task; the defects of TR-RULES-008 logged per task.
+3. Then Verify, Commit (merge into `goal/v4` with the moves listed in `plan.md`), Deploy (SMOKE-RULES-001), Validate (VAL-RULES-01).
+4. After RULES: TRANSFER on the agent's recommendations (D-423), in its own worktree; at RUN, VIEW, EDIT, CONTEXT ask the owner (VIEW/EDIT: design questions first; CONTEXT: purpose and use first).
 
-## 3. Next steps
-1. Done: requirements reviewed and approved **by group** (memory: accept / waiver / discuss per group), order RS, RD, RF, SV, RR, DF: `python ~/.claude-work/skills/plan-phase/scripts/req_review.py --spec-dir specs/mia/goals/G-V4.GRAPHAPI.RULES --tests-dir tests next --group RS`, then `mark ... --by "Stefan Reiterer"` with how he said it.
-2. Done: A-170 text approved in three parts (D-419).
-3. Done: architecture entries (D-420; FR-63, FR-64 in the model, the 27 requirements generated with their links; `check_sysml.sh` 0 errors, `check_sysml_model.py` OK). Drafted: `test-spec.md` (22 checks, 8 contract cases, scenarios for each, SMOKE-RULES-001, VAL-RULES-01) and `test-requirements.md` (TR-RULES-001 to 009); trace check on a symlinked folder: no finding on RULES items. Approved (D-422: the owner accepted the backend proposals and moved the focus to the viewer/editor and context graphs). Still open for RULES, agent work: red tests, the IF-301 v4 suite and mock, the A-170 apply script, `plan.md`, binding map, witnesses AC-017/018. Then test spec with scenarios (TC-GTB-037 to 045, TC-WFM-179 to 184, TC-RUN-036 to 039, TC-IF-301-27 on), test requirements (HR-004 to HR-006 in detail), red tests, the A-170 suite and mock, `plan.md`, binding map, witnesses for AC-017 and AC-018.
+## 3. Findings of this session (kept for Implement and Verify)
+- The run check in front of the runner keeps every protected run test green when the inputs of a Stage with a prepare function count as given (D-418 (1)); the refusal must keep repeated IDs; the self-loop unit case of `tests/test_graph_run_findings.py` changes in T-03 (adds `adjacency`).
+- `graph_tables.from_document` keeps a session as a transform: never use it to compare the old and new rules (D-424).
+- HR ids repeat from goal to goal; the model generator resolves them (D-420).
 
 ## 4. Numbers
-Next free (checked on all four branches 2026-11-22): D-423, A-171, REQ-WFM-166, REQ-GTB-053, REQ-RUN-040, TC-WFM-185, TC-GTB-046, TC-RUN-040, TC-IF-301-27, AC-41, ASM-9.
+Next free (checked 2026-11-22): D-425, A-171, REQ-WFM-166, REQ-GTB-053, REQ-RUN-040, TC-WFM-185, TC-GTB-048, TC-RUN-041, TC-IF-301-35, AC-41, ASM-9.
 
 ## Start prompt for the next session
-> Continue G-V4.GRAPHAPI.RULES. Read `CLAUDE.md` and `specs/mia/handover-2026-11-22-g-v4-rules-requirements-drafted.md`, load `dev-workflow`, `plan-phase` and `agent-app`, work in `/home/maldun/prog/Python/MIA-goal-v4-rules`. The requirements and the A-170 text are approved; the architecture entries are in (D-420); continue with the test spec (Plan step 3). No plausibility records (D-421).
+> Continue G-V4.GRAPHAPI.RULES. Read `CLAUDE.md` and `specs/mia/handover-2026-11-22-g-v4-rules-requirements-drafted.md`, work in `/home/maldun/prog/Python/MIA-goal-v4-rules`. If the red tests are installed and the plan gate is ticked, load `implement-phase` and start T-01.
