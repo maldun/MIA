@@ -1,6 +1,6 @@
 # Plan: G-V4.GRAPHAPI.RULES (one rule set for graphs, the same list everywhere, refusal before a run)
 
-**Goal:** `specs/mia/goals/G-V4.GRAPHAPI.RULES/goal.md`   **Requirements:** `requirements.md` of this folder (27 new, 3 changed; approved 2026-11-22; they move into N-3.2, N-2.3 and N-2.4.1 at the merge)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder (approved, D-422, D-424)   **Interface:** IF-301 v4 (`specs/mia/amendments/A-170/IF-301-graph-tables.md`, D-419)   **Status:** Draft (written by the agent by delegation, D-423; the owner's plan-gate box below)
+**Goal:** `specs/mia/goals/G-V4.GRAPHAPI.RULES/goal.md`   **Requirements:** `requirements.md` of this folder (27 new, 3 changed; approved 2026-11-22; they move into N-3.2, N-2.3 and N-2.4.1 at the merge)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder (approved, D-422, D-424)   **Interface:** IF-301 v4 (`specs/mia/amendments/A-170/IF-301-graph-tables.md`, D-419)   **Status:** Approved by the owner (plan gate ticked 2026-11-22; written by the agent by delegation, D-423)
 
 Line of work `goal/v4.graphapi.rules` (worktree `../MIA-goal-v4-rules`), merges into `goal/v4`; supervised. Four tasks as in the high-level spec, pure logic: no model step, no prompt, no eval suite, no new dependency, no new part (one new module `graph_rule_set.py` in N-3.2, D-417).
 
@@ -77,4 +77,4 @@ Regression set: after every task the unit suite (`discover -s tests`, about 8 mi
 - Notes for other subgoals stay as written in `requirements.md`: CODE (known-tool check, Q-2), TRANSFER or MIGRATION (read-only listing of an unknown kind, Q-7), MIGRATION (document form, Q-6), EDIT (every entry point checks with the stored kind, finding 9).
 
 ## Plan gate
-- [ ] Plan package approved by Stefan Reiterer (owner): goal, high-level spec, requirements, checks and test code (red tests staged in `red-tests/`, A-170 staged). Date:
+- [X] Plan package approved by maldun (owner): goal, high-level spec, requirements, checks and test code (red tests staged in `red-tests/`, A-170 staged). Date:

@@ -1,4 +1,4 @@
-# Handover: G-V4.GRAPHAPI.RULES, plan package complete; next the owner's install and plan gate, then Implement (2026-11-22)
+# Handover: G-V4.GRAPHAPI.RULES, Plan done (gate ticked); next Implement T-01 (2026-11-22)
 
 Read first: this file, `CLAUDE.md`, skills `dev-workflow`, `plan-phase` (or `implement-phase` once the gate is ticked), `agent-app`. The owner (Stefan Reiterer, maldun) decides every gate. Since D-423 the agent finishes RULES and TRANSFER on its own recommendations (recorded as taken by delegation) and asks the owner again at RUN, VIEW, EDIT and CONTEXT. No plausibility records (D-421). Older handovers: `handover-2026-11-22-g-v4-rules-round04-done.md`, `handover-2026-11-22-g-v4-rules-plan-next.md` (sections 5 and 7 still hold).
 
@@ -15,7 +15,7 @@ Read first: this file, `CLAUDE.md`, skills `dev-workflow`, `plan-phase` (or `imp
 | Plan | `plan.md` (T-01 rule set module, T-02 save path, T-03 runner, T-04 entry points and smoke) and `binding-map.md` (30 of 30 fixed), by delegation; the plan-gate box in `plan.md` and `Reviewed by` in `binding-map.md` are the owner's |
 
 ## 2. Next steps
-1. The owner, on this branch: `bash tools/apply_amendment_a170.sh --do`, commit "plan: A-170 installed"; `bash tools/apply_rules_red_tests.sh --do`, commit "test: RULES acceptance tests (red)", tag `plan-baseline-g-v4-rules`; tick the plan gate in `plan.md`.
+1. Done 2026-11-22: A-170 installed (`fdbf2377`), red tests installed (`71523f7a`, tag `plan-baseline-g-v4-rules`), plan gate ticked by the owner (date field still empty, his). Plan phase done.
 2. Implement T-01 to T-04 in a fresh session (`implement-phase`), one commit per task; the defects of TR-RULES-008 logged per task.
 3. Then Verify, Commit (merge into `goal/v4` with the moves listed in `plan.md`), Deploy (SMOKE-RULES-001), Validate (VAL-RULES-01).
 4. After RULES: TRANSFER on the agent's recommendations (D-423), in its own worktree; at RUN, VIEW, EDIT, CONTEXT ask the owner (VIEW/EDIT: design questions first; CONTEXT: purpose and use first).
