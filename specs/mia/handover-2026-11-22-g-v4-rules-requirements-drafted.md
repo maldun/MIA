@@ -19,11 +19,11 @@ Read first: this file, `CLAUDE.md`, the previous handovers `handover-2026-11-22-
 
 ## 3. Next steps
 1. Done: requirements reviewed and approved **by group** (memory: accept / waiver / discuss per group), order RS, RD, RF, SV, RR, DF: `python ~/.claude-work/skills/plan-phase/scripts/req_review.py --spec-dir specs/mia/goals/G-V4.GRAPHAPI.RULES --tests-dir tests next --group RS`, then `mark ... --by "Stefan Reiterer"` with how he said it.
-2. Review the A-170 text with the owner (the three new operations, the rules table, golden 24 to 31).
+2. Done: A-170 text approved in three parts (D-419).
 3. Architecture entries (`specs/mia/architecture.sysml`: IF-301 v4 operations, `satisfy` for the new requirements; `bash tools/check_sysml.sh`, `python3 -I tools/check_sysml_model.py .`), plausibility records, test spec with scenarios (TC-GTB-037 to 045, TC-WFM-179 to 184, TC-RUN-036 to 039, TC-IF-301-27 on), test requirements (HR-004 to HR-006 in detail), red tests, the A-170 suite and mock, `plan.md`, binding map, witnesses for AC-017 and AC-018.
 
 ## 4. Numbers
-Next free (checked on all four branches 2026-11-22): D-419, A-171, REQ-WFM-166, REQ-GTB-053, REQ-RUN-040, TC-WFM-185, TC-GTB-046, TC-RUN-040, TC-IF-301-27, AC-41, ASM-9.
+Next free (checked on all four branches 2026-11-22): D-420, A-171, REQ-WFM-166, REQ-GTB-053, REQ-RUN-040, TC-WFM-185, TC-GTB-046, TC-RUN-040, TC-IF-301-27, AC-41, ASM-9.
 
 ## Start prompt for the next session
-> Continue G-V4.GRAPHAPI.RULES. Read `CLAUDE.md` and `specs/mia/handover-2026-11-22-g-v4-rules-requirements-drafted.md`, load `dev-workflow`, `plan-phase` and `agent-app`, work in `/home/maldun/prog/Python/MIA-goal-v4-rules`. The requirements are approved; review the A-170 text with me, then the architecture entries.
+> Continue G-V4.GRAPHAPI.RULES. Read `CLAUDE.md` and `specs/mia/handover-2026-11-22-g-v4-rules-requirements-drafted.md`, load `dev-workflow`, `plan-phase` and `agent-app`, work in `/home/maldun/prog/Python/MIA-goal-v4-rules`. The requirements and the A-170 text are approved; continue with the architecture entries (Plan step 2).
