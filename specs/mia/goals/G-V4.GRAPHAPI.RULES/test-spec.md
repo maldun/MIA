@@ -1,6 +1,6 @@
 # Test specification: G-V4.GRAPHAPI.RULES
 
-**Requirements:** `requirements.md` (REQ-GTB-033 to 052, REQ-WFM-162 to 165, REQ-RUN-036 to 039; changes of REQ-WFM-150, 154, 155; all approved 2026-11-22)   **High-level spec:** HR-004 to HR-006 (measures)   **Contract:** IF-301 v4 (`specs/mia/amendments/A-170/IF-301-graph-tables.md`, D-419)   **Status:** Draft (scenarios for the owner's review, Plan step 3)
+**Requirements:** `requirements.md` (REQ-GTB-033 to 052, REQ-WFM-162 to 165, REQ-RUN-036 to 039; changes of REQ-WFM-150, 154, 155; all approved 2026-11-22)   **High-level spec:** HR-004 to HR-006 (measures)   **Contract:** IF-301 v4 (`specs/mia/amendments/A-170/IF-301-graph-tables.md`, D-419)   **Status:** Approved by the owner (scenarios by group, 2026-11-22, D-422)
 
 All checks are exact: every expected value is a rule name, an ID, an order, a count or an equality, so no statistical check is needed; the high-level spec has no hard bound (D-416 (4)), so no benchmark. The accepted cases (`specs/mia/goals/G-V4/accepted-cases.md`) are witnessed by TC-GTB-046 and TC-WFM-180 (AC-017) and by TC-RUN-036, TC-RUN-037 and TC-GTB-044 (AC-018). The rule set is pure, so its checks need no store; the save checks run on the files backend (HR-004 reference): a refusal happens before the first write (REQ-WFM-146), and CORE's TC-GTB-036 already shows both backends refuse alike.
 

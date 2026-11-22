@@ -1,6 +1,6 @@
 # Test requirements: G-V4.GRAPHAPI.RULES
 
-**Test spec:** `test-spec.md`   **Status:** Draft (for the owner's review, Plan step 3)
+**Test spec:** `test-spec.md`   **Status:** Approved by the owner (2026-11-22, D-422)
 
 <!-- Requirements on the checks, apart from the product requirements: under which conditions a measurement counts. Setup kind: the verdict depends on the setup; written out and reviewed in detail. Unit kind: exact expected values; grouped and signed off as a group. -->
 
@@ -22,7 +22,7 @@
 - Credibility aspect: reference accuracy
 - Verified by: known answer
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-002 – Small graphs written out in the check
 - Applies to: TC-GTB-038, TC-GTB-039, TC-GTB-040, TC-GTB-041, TC-GTB-042, TC-GTB-043, TC-GTB-046, TC-WFM-179, TC-WFM-180, TC-WFM-181, TC-WFM-183, TC-WFM-184, TC-RUN-036, TC-RUN-037, TC-RUN-038, TC-RUN-039
@@ -33,7 +33,7 @@
 - Rationale: a reader sees at a glance which rule a graph breaks; the twin shows that the item comes from the one difference and not from something else in the graph (the prototype's rule 1 once refused a slash for no reason, finding 5).
 - Credibility aspect: validity domain
 - Verified by: inspection
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-003 – The corpus of the old refusals
 - Applies to: TC-GTB-047
@@ -44,7 +44,7 @@
 - Rationale: HR-005 fixes this corpus; the seed range is fixed in Plan and never changed to make the check pass; the one known exception (`max_seconds: 1.0`, valid under REQ-WFM-048) is named in the check, not filtered by a broad rule; the counts of newly refused graphs are printed for the record (prototype: 57, 42 and 15), not asserted, so a better rule does not fail the check.
 - Credibility aspect: validity domain
 - Verified by: known answer (the prototype's counts of `cp17_check.py`)
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-004 – The converted skills
 - Applies to: TC-RUN-040, TC-GTB-043, TC-GTB-044, TC-RUN-037, TC-IF-301-28, TC-IF-301-33, SMOKE-RULES-001
@@ -55,7 +55,7 @@
 - Rationale: DEP-2; built, not copied, so a change of a skill shows up in the check; the count guards against a silent loss of skills (a check over zero graphs passes); `chat` is the converted `chat` skill named in AC-018.
 - Credibility aspect: reference accuracy
 - Verified by: known answer (15 skills on 2026-11-22)
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-005 – No step ran, shown by markers that can fire
 - Applies to: TC-RUN-036, TC-RUN-039, SMOKE-RULES-001
@@ -66,7 +66,7 @@
 - Rationale: a count of zero proves nothing if the markers cannot be called; the twin shows they can (as TC-RUN-017 shows the marker side effect).
 - Credibility aspect: power and false-alarm rate
 - Verified by: mutation (a runner that runs the first step before asking the run check must fail TC-RUN-036)
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-006 – Every entry point, five times
 - Applies to: TC-GTB-046
@@ -77,7 +77,7 @@
 - Rationale: HR-004 fixes four entry points and five repeats; "kept" in HR-004 is the save of a working copy, the same call as the save (the page is a stand-in, D-416 (2)); a fresh store per save, so an earlier refusal cannot change a later one.
 - Credibility aspect: validity domain
 - Verified by: inspection
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-007 – What the stand-ins prove
 - Applies to: TC-GTB-046, TC-IF-301-27, TC-IF-301-28, TC-IF-301-29, TC-IF-301-30, TC-IF-301-31, TC-IF-301-32, TC-IF-301-33, TC-IF-301-34
@@ -88,7 +88,7 @@
 - Rationale: the consumers (save, runner, later EDIT and CONTEXT) test against the mock, so it must agree with the real side on every golden example; the IF-104 v2 mock answers with the rule report, so TC-GTB-046 shows the route passes the kind and the report through, not that a real route does (D-416 (2)); the real route is checked when IF-104 v2 is written or in EDIT.
 - Credibility aspect: stand-in fidelity
 - Verified by: contract suite on both sides
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-008 – Each check is shown able to fail
 - Applies to: TC-GTB-037, TC-GTB-039, TC-GTB-042, TC-GTB-043, TC-GTB-046, TC-WFM-179, TC-WFM-180, TC-RUN-036, TC-RUN-037, TC-RUN-038, TC-RUN-039
@@ -99,7 +99,7 @@
 - Rationale: the code is adapted from the validated prototype, so a test written against it tends to confirm it; the defects: two rules swapped in the registry, the first broken rule only, the cycle asked while rule 3 is broken, the save path on `check_graph`, repeats removed from a refused run (seen on the scratch run of 2026-11-22), trust checked before the run check, prepare inputs not counted as given.
 - Credibility aspect: reviewer independence
 - Verified by: mutation
-- Status: Draft
+- Status: Approved
 
 ### TR-RULES-009 – The older suites stay untouched
 - Applies to: TC-GTB-045
@@ -110,4 +110,4 @@
 - Rationale: Q-6 keeps the document form as it is; a suite that was edited to pass would hide a change of it; the protected suites change only through an amendment, and none is planned in RULES.
 - Credibility aspect: reference accuracy
 - Verified by: inspection (git diff)
-- Status: Draft
+- Status: Approved
