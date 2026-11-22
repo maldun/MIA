@@ -60,3 +60,20 @@
 - Mutants (scratch worktree): workflow rules applied to a context graph: killed (unit 7, acceptance 7); `context_problems` finding nothing: killed (unit 3, acceptance 3).
 - Regression set (feedback): `unittest discover -s tests` 2526 tests, OK. Acceptance scripts: all OK except `test_decide_guard.py` and `test_judge_calibration.py` (no unittest result, as on HEAD).
 - Open for Phase 4 (unspecified behaviour, P25): an explicit `"kind": None` is refused as an unknown kind (as the prototype does); REQ-WFM-153 says only "no kind". The tests fix it in `test_an_unknown_kind_is_refused_naming_kind`; the owner may want it worded in REQ-WFM-153 or REQ-WFM-154.
+
+## T-05: Both stores, and the smoke check
+- Status: done (own runs, feedback and not verification); no code change: TC-GTB-036 found no difference between the backends, so `storage_postgres.py` and `storage_files.py` stay as they are (the plan's "else nothing")
+- Requirements: REQ-GTB-032; REQ-WFM-152, 158, 159 on two stores
+- TC-GTB-036 (`tests/acceptance/test_core_both_stores.py`): 6 of 6 green with the PostgreSQL half running (verbose run after the T-04 commit, not skipped; its own `postgres:16` container per process).
+- SMOKE-CORE-001 (`tests/smoke/smoke_core_graphs.py --server <url>`) against a throw-away `postgres:16` container started for it (`mia-core-smoke-<pid>`, data on tmpfs, port on 127.0.0.1 only, image local, never pulled), removed by its name afterwards: green, exit 0. Files and PostgreSQL, workflow (`sample.code`) and context (`context.cp13`): three versions by smoke-ann, smoke-bob, smoke-cy, each read as saved; the temporary folder removed and `mia_smoke` dropped by name. The owner's containers were not touched. The run on the owner's own server belongs to Deploy.
+- Regression set: as after T-04 (no file changed since): `unittest discover -s tests` 2526 tests OK; every acceptance script OK except the two without a unittest result (as on HEAD). No known reds left.
+
+## Hand-over to Verify (Phase 4)
+- Tasks: T-01, T-01b, T-02, T-03, T-04, T-05 done; amendments A-168 (D-412, count corrected) and A-169 (D-413) approved and installed.
+- Commits on `goal/v4`: f2531cc8 (T-01), cf95f544 / f65548ba / dbab43a2 / c50e6bee (A-168), 3f699b70 (T-01b), ea6fad71 (T-02), 677f8ce4 (A-169), 5a2a5f47 (T-03), 4147b044 (T-04), and the T-05 log commit.
+- Open questions:
+  1. An explicit `"kind": None` is refused as an unknown kind (as the prototype); REQ-WFM-153 says only "no kind" (T-04).
+  2. REQ-WFM-145's clause "only the versions the headers pin" has a unit witness now (`tests/test_graph_model_read.py::test_a_steps_history_lists_only_what_its_graphs_headers_pin`); TC-WFM-163 does not see it (mutant, T-03). Binding map iteration 1 may fix the clause with it.
+  3. The versions of an unknown graph raise the Storage layer's `not_found` (as before and in the prototype); no requirement says otherwise.
+  4. Lesson from A-167/A-168: impact of an amendment that changes a check is measured on the whole suite against a clean checkout.
+- Not done here: the round 03 signatures (owner), the merge steps of `plan.md` (Commit phase), the smoke run on the owner's server (Deploy).

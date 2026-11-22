@@ -55,7 +55,7 @@ Group spec FR-57, FR-60, NFR-16; `../G-V4.GRAPHSTORE/research.md`, `spikes.md` (
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
 | Plan | open | |
-| Implement | open | |
+| Implement | done | T-01 to T-05 and T-01b, 2026-11-22; `implementation-log.md` (A-168, A-169) |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
