@@ -59,8 +59,14 @@ def read(root):
             methods = [HOW[m.strip().lower()] for m in field("Verification method").split(",") if m.strip().lower() in HOW] or ["test"]
             subject = re.search(r"Subject: (\w+)", block)
             parents = [p.strip() for p in field("Parent").split(",") if p.strip()]
-            if path in goals:   # HR ids repeat from goal to goal, so an HR parent stands here for its own parents in that goal's high-level spec (D-420)
-                hr = high_level_parents(path.parent)
+            # HR ids repeat from goal to goal, so an HR parent stands here for its own parents in that goal's high-level spec (D-420);
+            # after the merge moved an item into a node file, its goal is the first one its History names
+            goal_dir = path.parent if path in goals else None
+            named = re.search(r"^- History: (G-[A-Z0-9.]+)\b", block, re.M)
+            if goal_dir is None and named and any(p.startswith("HR-") for p in parents):
+                goal_dir = root / "specs/mia/goals" / named.group(1)
+            if goal_dir is not None:
+                hr = high_level_parents(goal_dir)
                 parents = list(dict.fromkeys(q for p in parents for q in hr.get(p, [p])))
             out.append(dict(id=head[4:].split(" ")[0], title=head.split(" – ", 1)[1], text=field("Text"), parent=parents,
                             methods=methods, subject=subject.group(1) if subject else "MiaSystem"))
@@ -111,4 +117,5 @@ def main(root):
     print(len(reqs), "node requirements written")
 
 
-main(sys.argv[1])
+if __name__ == "__main__":
+    main(sys.argv[1])
