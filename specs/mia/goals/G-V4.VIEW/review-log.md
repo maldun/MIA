@@ -211,3 +211,5 @@
 | REQ-API-036 | requirement | c7cf2f696c1e | Stefan Reiterer | 2026-11-22 | approved | example changed to the extra field colour (D-444) |
 | TC-API-021 | check | ebf68941e815 | Stefan Reiterer | 2026-11-22 | approved | example changed to the extra field colour (D-444) |
 | TR-VIEW-006 | test requirement | 385b8e2a7184 | Stefan Reiterer | 2026-11-22 | approved | example changed to the extra field colour (D-444) |
+| TC-API-021 | check | fb280687e993 | Stefan Reiterer | 2026-11-22 | approved | clean version 6 named in the scenario (D-445) |
+| TC-API-025 | check | c4cc3b4d167f | Stefan Reiterer | 2026-11-22 | approved | clean version 6 named in the scenario (D-445) |

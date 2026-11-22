@@ -1,6 +1,6 @@
 # Interface note: the graph viewer page for the node and browser checks (proposal for Plan step 4, G-V4.VIEW)
 
-Status: **approved** by the owner (2026-11-22, D-443), with the fake DOM imported from `tests/js/fake-dom.mjs`. Drafted 2026-11-22. Inside the node N-5 (page code and test hooks); no contract in `contracts/`. It fixes the names the red tests TC-GA-017 to 039 use; a change after approval is a plan amendment. Pattern: `goals/G-V3.PANEL/skill-run-view-interface-note.md`.
+Status: **approved** by the owner (2026-11-22, D-443; the additions marked "added while writing" confirmed by D-445), with the fake DOM imported from `tests/js/fake-dom.mjs`. Drafted 2026-11-22. Inside the node N-5 (page code and test hooks); no contract in `contracts/`. It fixes the names the red tests TC-GA-017 to 039 use; a change after approval is a plan amendment. Pattern: `goals/G-V3.PANEL/skill-run-view-interface-note.md`.
 
 ## Why
 The scenarios say what the page shows; the checks need to know which module a node test calls, how it hands the page a stand-in API and a stand-in drawing, and which elements a check reads. TR-VIEW-005: node checks read DOM text and the data handed to the drawing library, never pixels; TR-VIEW-010: the browser checks read places through a read-only hook.

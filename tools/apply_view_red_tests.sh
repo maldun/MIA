@@ -12,6 +12,7 @@ cd "$(dirname "$0")/.."
 . tools/amendment_lib.sh
 amendment_args "$@"
 R=specs/mia/goals/G-V4.VIEW/red-tests
+[ "$do_it" = 1 ] && mkdir -p tests/fixtures/graph_view
 
 copy "$R/fixtures/graph_view/graphs.json" tests/fixtures/graph_view/graphs.json
 copy "$R/helpers/graph_view_data.py" tests/helpers/graph_view_data.py
