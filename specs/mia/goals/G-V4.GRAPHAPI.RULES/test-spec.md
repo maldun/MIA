@@ -154,7 +154,7 @@ None: no hard bound and no time budget (D-416 (4)); the prototype measured 1.4 m
 ### TC-GTB-046 – The same list at every entry point
 - Verifies: REQ-GTB-037, REQ-WFM-163, REQ-RUN-037, HR-004
 - Given: two graphs that each break three rules: the AC-017 graph (a cycle and a second writer into one data step) plus a second, identical connection `d1 → t1` (`duplicate_connection`, `single_writer`, `cycle`; an empty step name would hide the cycle, Q-5) and a graph with a connection to a missing step, two identical connections and a data step holding `session`; a files store; the check route of IF-104 v2 as a mock that answers with the rule report (D-416 (2))
-- When: each graph is checked through the rule report, saved, sent to the check route and run, five times in a row each
+- When: each graph is checked through the rule report, saved, sent to the check route and run, five times in a row each; the second graph is run with a value for `d1`, which has no value and no writer (A-170b, D-428)
 - Then: the rule report, the save and the check route give the same items, rule by rule, with the same parts in the same order and the same sentences, and the run names the parts of those items in the same order (a run result carries the parts only, REQ-RUN-037), in all five repeats (0 differences)
 - And: witnesses AC-017
 

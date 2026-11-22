@@ -111,3 +111,6 @@ None.
 ## Open questions for Phase 4
 - None open from T-01 (both settled 2026-11-22, see Findings).
 - T-03: TC-GTB-046 graph `second` against REQ-RUN-037 / IF-301 v4 `run_check` (see Findings); the owner decides before T-04.
+
+## Plan amendment A-170b (2026-11-22, D-428)
+TC-GTB-046, second graph: run with `{"d1": "x"}` (the owner's choice) because `d1` has no value and no writer and the run check rightly reports it as an unsupplied input (REQ-GTB-051, REQ-RUN-037). Staged in `specs/mia/amendments/A-170b/`; on a scratch install `test_rules_measures.py` is OK (TC-GTB-046 both graphs, TC-GTB-047, TC-RUN-040). Installed by the owner with `tools/apply_amendment_a170b.sh --do`.

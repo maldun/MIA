@@ -82,3 +82,4 @@
 | TC-GTB-047 | check | 341d99426447 | agent by delegation (D-423) | 2026-11-22 | approved | D-424: mapping of the old documents corrected (not from_document) |
 | TR-RULES-003 | test requirement | ecc87cac5935 | agent by delegation (D-423) | 2026-11-22 | approved | D-424: mapping of the old documents corrected (not from_document) |
 | TC-GTB-046 | check | 73d733c9e30d | agent by delegation (D-423) | 2026-11-22 | approved | D-424: the run compared by its named parts |
+| TC-GTB-046 | check | 883b1bd867c0 | Stefan Reiterer | 2026-11-22 | approved | A-170b: the second graph run with d1 given (questionnaire, D-428) |
