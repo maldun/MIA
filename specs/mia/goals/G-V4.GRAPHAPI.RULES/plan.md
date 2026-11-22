@@ -1,6 +1,6 @@
 # Plan: G-V4.GRAPHAPI.RULES (one rule set for graphs, the same list everywhere, refusal before a run)
 
-**Goal:** `specs/mia/goals/G-V4.GRAPHAPI.RULES/goal.md`   **Requirements:** `requirements.md` of this folder (27 new, 3 changed; approved 2026-11-22; they move into N-3.2, N-2.3 and N-2.4.1 at the merge)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder (approved, D-422, D-424)   **Interface:** IF-301 v4 (`specs/mia/amendments/A-170/IF-301-graph-tables.md`, D-419)   **Status:** Approved by the owner (plan gate ticked 2026-11-22; written by the agent by delegation, D-423)
+**Goal:** `specs/mia/goals/G-V4.GRAPHAPI.RULES/goal.md`   **Requirements:** `requirements.md` of this folder (28 new, 3 changed (count corrected from 27, Verify V-5); approved 2026-11-22; they move into N-3.2, N-2.3 and N-2.4.1 at the merge)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder (approved, D-422, D-424)   **Interface:** IF-301 v4 (`specs/mia/amendments/A-170/IF-301-graph-tables.md`, D-419)   **Status:** Approved by the owner (plan gate ticked 2026-11-22; written by the agent by delegation, D-423)
 
 Line of work `goal/v4.graphapi.rules` (worktree `../MIA-goal-v4-rules`), merges into `goal/v4`; supervised. Four tasks as in the high-level spec, pure logic: no model step, no prompt, no eval suite, no new dependency, no new part (one new module `graph_rule_set.py` in N-3.2, D-417).
 
@@ -44,6 +44,7 @@ Regression set: after every task the unit suite (`discover -s tests`, about 8 mi
 - Done when: the listed tests green, the regression set holds; each of the defects of TR-RULES-008 makes its check fail (logged): two rules swapped (TC-GTB-037), the first broken rule only (TC-GTB-039), the cycle asked while rule 3 is broken (TC-GTB-042), inputs listed before rules or a kind that cannot run also listing its rules (TC-GTB-043; the first three do not reach the run check, T-01 finding, settled by delegation D-423)
 - Notes: the module must not import `graph_model` (it would tie N-3.2 to N-2.3); `find_cycle` and the stop limit move with it or are copied (as the mock does).
 
+
 ### T-02: The save path on the rule set
 - Implements: REQ-WFM-162, REQ-WFM-163, REQ-WFM-164, REQ-WFM-165; the changes of REQ-WFM-150, REQ-WFM-154, REQ-WFM-155
 - Tests to turn green: TC-WFM-179 to 184 (`tests/acceptance/test_rules_save.py`)
@@ -72,7 +73,7 @@ Regression set: after every task the unit suite (`discover -s tests`, about 8 mi
 - Done when: every RULES check green, the regression set holds with no known red of RULES left
 
 ## At the merge (Commit phase, not a task)
-- Move the 27 new requirements into the node files: REQ-GTB-033 to 052 into N-3.2, REQ-WFM-162 to 165 into N-2.3, REQ-RUN-036 to 039 into N-2.4.1; replace the texts of REQ-WFM-150, 154, 155 in N-2.3 with the approved changes; checks, scenarios and smoke rows into the node test specs; TR-RULES-001 to 009 into `specs/mia/test-requirements.md` through an owner-run script (groups as rows of its one `## Groups` table); regenerate the model.
+- Move the 28 new requirements into the node files: REQ-GTB-033 to 052 into N-3.2, REQ-WFM-162 to 165 into N-2.3, REQ-RUN-036 to 039 into N-2.4.1; replace the texts of REQ-WFM-150, 154, 155 in N-2.3 with the approved changes; checks, scenarios and smoke rows into the node test specs; TR-RULES-001 to 009 into `specs/mia/test-requirements.md` through an owner-run script (groups as rows of its one `## Groups` table); regenerate the model.
 - Fill the Witness column of AC-017 (TC-GTB-046, TC-WFM-180) and AC-018 (TC-RUN-036, TC-RUN-037, TC-GTB-044) in `specs/mia/goals/G-V4/accepted-cases.md`.
 - Notes for other subgoals stay as written in `requirements.md`: CODE (known-tool check, Q-2), TRANSFER or MIGRATION (read-only listing of an unknown kind, Q-7), MIGRATION (document form, Q-6), EDIT (every entry point checks with the stored kind, finding 9).
 
