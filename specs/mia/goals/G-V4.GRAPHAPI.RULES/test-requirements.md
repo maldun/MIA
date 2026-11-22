@@ -40,8 +40,8 @@
 - Requirement: HR-005
 - Group: DA
 - Kind: setup
-- Text: The check shall use every case of TC-GTB-002 and the generator of TC-GTB-003 with the seeds 1 to 1000 as they are at `goal/v4`, turn each document into the stored form with `from_document`, and fail on the first graph refused by the five older rules and accepted by the eight.
-- Rationale: HR-005 fixes this corpus; the seed range is fixed in Plan and never changed to make the check pass; the one known exception (`max_seconds: 1.0`, valid under REQ-WFM-048) is named in the check, not filtered by a broad rule; the counts of newly refused graphs are printed for the record (prototype: 57, 42 and 15), not asserted, so a better rule does not fail the check.
+- Text: The check shall use every case of TC-GTB-002 and the generator of TC-GTB-003 with the seeds 1 to 1000 as they are at `goal/v4`, turn each document into the stored form with the mapping of the prototype (a session processing step becomes a loop-controlling step, `max_cycles` becomes `max_repetitions`), and fail on the first graph refused by the five older rules and accepted by the eight.
+- Rationale: HR-005 fixes this corpus; `from_document` is not used because it keeps a session as a transform, so rule 7 would never see it and old refusals would look lost (D-424); the seed range is fixed in Plan and never changed to make the check pass; the one known exception (`max_seconds: 1.0`, valid under REQ-WFM-048) is named in the check, not filtered by a broad rule; the counts of newly refused graphs are printed for the record (prototype: 57, 42 and 15), not asserted, so a better rule does not fail the check.
 - Credibility aspect: validity domain
 - Verified by: known answer (the prototype's counts of `cp17_check.py`)
 - Status: Approved

@@ -79,3 +79,6 @@
 | TR-RULES-007 | test requirement | 6e6646d615c9 | Stefan Reiterer | 2026-11-22 | approved | owner: "I accept your suggestions for the backend" (questionnaire, run checks group), covers the remaining RULES checks and test requirements |
 | TR-RULES-008 | test requirement | 53c6b45b8d77 | Stefan Reiterer | 2026-11-22 | approved | owner: "I accept your suggestions for the backend" (questionnaire, run checks group), covers the remaining RULES checks and test requirements |
 | TR-RULES-009 | test requirement | 0ef2ab55e70e | Stefan Reiterer | 2026-11-22 | approved | owner: "I accept your suggestions for the backend" (questionnaire, run checks group), covers the remaining RULES checks and test requirements |
+| TC-GTB-047 | check | 341d99426447 | agent by delegation (D-423) | 2026-11-22 | approved | D-424: mapping of the old documents corrected (not from_document) |
+| TR-RULES-003 | test requirement | ecc87cac5935 | agent by delegation (D-423) | 2026-11-22 | approved | D-424: mapping of the old documents corrected (not from_document) |
+| TC-GTB-046 | check | 73d733c9e30d | agent by delegation (D-423) | 2026-11-22 | approved | D-424: the run compared by its named parts |
