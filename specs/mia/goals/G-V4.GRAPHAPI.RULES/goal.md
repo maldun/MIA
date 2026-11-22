@@ -32,6 +32,7 @@ Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`). The new requirem
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+| cut again (the draft requirements: 27 new, 3 changed, above the hint of 25) | keep together (owner, D-418 (3)) | eight of them are one-line rule definitions reviewed as one group; four tasks as in the high-level spec (rule set module, save path, runner, check route against the mock) | 2026-11-22 |
 
 ## Source
 Group spec FR-63, FR-64; decision D-375; the two existing rule sets (`../G-V4.GRAPHAPI/research.md`, F3).

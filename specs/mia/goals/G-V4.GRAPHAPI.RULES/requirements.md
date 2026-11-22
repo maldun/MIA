@@ -4,7 +4,7 @@
 
 <!-- The requirements this subgoal adds, and the proposed wording changes of requirements in force.
      Basis: the validated prototype round 04 (`specs/mia/goals/G-V4/prototype/rounds/04/` on `prototype/g-v4`, findings 1 to 13, carry-over all as proposed),
-     the owner's decisions D-375, D-404, D-414 (V-2, V-3), D-415 (Q-1 to Q-7), D-416 (2) to (4) and D-417.
+     the owner's decisions D-375, D-404, D-414 (V-2, V-3), D-415 (Q-1 to Q-7), D-416 (2) to (4), D-417 and D-418.
      Where the requirements go at the merge: the rule set (groups RS, RD, RF, DF) into N-3.2
      (`specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md`), offered through IF-301 v4 (amendment A-170);
      the save path (group SV) into N-2.3; the run (group RR) into N-2.4.1.
@@ -12,7 +12,7 @@
      REQ-WFM-146 (whole graph checked first), REQ-WFM-153, REQ-WFM-156 (no workflow rules for a context graph: the context set below has none of them),
      REQ-GTB-002 (the document form keeps its five rules, Q-6), REQ-RUN-016, 017, 033.
      Accepted cases: AC-017 (FR-63) and AC-018 (FR-64), `specs/mia/goals/G-V4/accepted-cases.md`; their Witness column is filled when the checks exist.
-     27 new requirements and 3 changed ones: more than the 25 of the split hint; the goal's split check (keep together) is asked again at the plan review. -->
+     27 new requirements and 3 changed ones: more than the 25 of the split hint; kept together by the owner (D-418 (3), goal.md split check). -->
 
 ## Terms
 | Term | Meaning |
@@ -277,7 +277,7 @@
 - Level: low   Subject: Persistence
 - Group: RF
 - Text: The run check of the Graph tables shall report every unsupplied input as one item naming the processing or loop-controlling step and the data step it reads.
-- Rationale: refines HR-003 and D-375 (a step input nobody supplies); the term is defined above: no writer, no start value in the graph, no value given with the run; settings and order connections are not inputs here (a step gets `{}` without settings, REQ-RUN-030, an order connection hands over nothing, REQ-RUN-035). See the open question on REQ-RUN-039
+- Rationale: refines HR-003 and D-375 (a step input nobody supplies); the term is defined above: no writer, no start value in the graph, no value given with the run; settings and order connections are not inputs here (a step gets `{}` without settings, REQ-RUN-030, an order connection hands over nothing, REQ-RUN-035). the inputs of a Stage with a prepare function count as given (REQ-RUN-039, D-418 (1))
 - Parent: HR-003
 - Priority: Must
 - Verification method: Test
@@ -377,18 +377,18 @@
 - Status: Draft
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: D-416 (3))
 
-### REQ-RUN-039 – Inputs a prepare function may give (open: D-418)
+### REQ-RUN-039 – Inputs a prepare function may give
 - Level: low-2   Subject: TaskRuntime
 - Group: RR
 - Text: When the Pipeline runner asks the run check, it shall count every input of a step whose function has a prepare function as a given value.
-- Rationale: refines HR-003 and keeps REQ-RUN-034 (D-250) as it is: a prepare function may give a default input, which the run check cannot see in the graph, and "else nothing" stays for such an input. Without this the protected TC-RUN-034 is refused in two cases (scratch run 2026-11-22); with it every protected run test passes unchanged. It narrows FR-64 a little (a prepare function that gives nothing leaves the input empty instead of refused), so **it waits for the owner's decision D-418**
+- Rationale: refines HR-003 and keeps REQ-RUN-034 (D-250) as it is: a prepare function may give a default input, which the run check cannot see in the graph, and "else nothing" stays for such an input. Without this the protected TC-RUN-034 is refused in two cases (scratch run 2026-11-22); with it every protected run test passes unchanged. It narrows FR-64 a little (a prepare function that gives nothing leaves the input empty instead of refused); chosen by the owner (D-418 (1))
 - Parent: HR-003
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: the TC-RUN-034 graph (`DB` read by a Stage `T` with a prepare function, no value anywhere) runs; the same graph with a plain function for `T` is refused naming `DB` and `T` is not called (exact)
 - Verified by: TC-RUN-039
 - Status: Draft
-- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new, proposed (basis: scratch run 2026-11-22 of the protected run tests with the run check in front)
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: scratch run 2026-11-22 of the protected run tests with the run check in front; owner's choice D-418 (1))
 
 ### REQ-GTB-052 – The document form keeps its five rules
 - Level: low   Subject: Persistence
@@ -451,6 +451,6 @@
 - EDIT and the check route (IF-104 v2, G-V4 level): every entry point checks a working copy with the kind stored for the graph; the prototype's page lost it (finding 9). RULES tests the check route against a mock returning the rule report (D-416 (2)).
 - CODE: the known-tool check (Q-2). TRANSFER or MIGRATION: the read-only listing of an unknown kind (Q-7). MIGRATION: retires the document form and REQ-GTB-052 with it (Q-6).
 - HLS section 5 names REQ-RUN-016 for the refusal change; REQ-RUN-016 (order) keeps its text, the refusal is the new group RR. Its protected TC-RUN-016 passes with the run check in front (scratch run 2026-11-22).
-- REQ-RUN-034 keeps its text if D-418 takes REQ-RUN-039: "else nothing" stays reachable for outputs and for the inputs of a Stage with a prepare function. Without REQ-RUN-039 it and the protected TC-RUN-034 need an amendment (A-171).
+- REQ-RUN-034 keeps its text (D-418 (1)): "else nothing" stays reachable for outputs and for the inputs of a Stage with a prepare function; TC-RUN-034 passes unchanged.
 - The unit check `tests/test_graph_run_findings.py` (self-loop) expects only the cycle; a transform connected to itself now also names `adjacency` (REQ-GTB-045). Unit checks are changed in Implement, with this requirement as the reason.
 - REQ-RUN-033 (more than one settings connection) overlaps rule 7: the run check refuses such a graph first and names the same step; TC-RUN-033 passes (scratch run 2026-11-22).
