@@ -413,7 +413,7 @@ package MIA_Architecture {
                    tools/sync_workflows.py writes one library workflow per skill (D-112). */
             @Implementation {
                 :>> status = ImplementationStatus::built;
-                :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py", "run_workflow.py", "tools/sync_workflows.py");
+                :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py", "run_workflow.py", "tools/sync_workflows.py", "graph_run.py");
             }
         }
         part libraryStore {
@@ -426,7 +426,7 @@ package MIA_Architecture {
         }
         part workflowGraph {
             doc /* Target: workflows and agent sessions stored as process graphs and generated into runner configuration. */
-            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("context_graph.py"); }
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("context_graph.py", "graph_model.py"); }
         }
         part scheduler {
             doc /* Target: from the graph and the measured node costs (a session node: its limits times the cost of one cycle) computes order, overlap, critical path and the estimate of time, calls and tokens; refuses a run that exceeds its budget (FR-33). */
@@ -661,7 +661,8 @@ package MIA_Architecture {
         part graphRecords {
             doc /* Target (iteration 2, FR-40, overlaps TD-21): workflow and context graphs as node and edge records (ID plus JSON
                    with a fixed type) in PostgreSQL through the storage layer; data classes rebuilt from a type ID, types as JSON
-                   schemas, versions never deleted. Today a graph is one versioned document (graph_tables.py). */
+                   schemas, versions never deleted. Today a graph is one versioned document (graph_tables.py).
+                   G-V4.GRAPHAPI.RULES: the registry of kinds, the rule report and the run check of IF-301 v4 (A-170), in graph_rule_set.py (planned). */
             @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_tables.py", "graph_rules.py"); }
             @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
@@ -1706,6 +1707,19 @@ package MIA_Requirements {
         doc /* A refused or interrupted save, move or sync never leaves a half-stored graph. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    /* G-V4.GRAPHAPI.RULES: items of the G-V4.GRAPHAPI top-level spec (specs/mia/goals/G-V4.GRAPHAPI/top-level-spec.md, approved, amended
+       2026-11-21, D-403 to D-405) that the requirements of G-V4.GRAPHAPI.RULES refine; their parents HR-001 to HR-003 (RULES high-level spec) are goal-local
+       ids and appear here as their own parents FR-63 and FR-64 (D-420, tools/gen_node_requirements_model.py). */
+    requirement def <'FR-63'> OneRuleSetPerKind {
+        subject mia : MiaSystem;
+        doc /* The system shall apply one set of graph rules for the kind of the graph wherever it is checked, in the same fixed order, and name every broken rule. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-64'> RefuseARunThatCannotWork {
+        subject mia : MiaSystem;
+        doc /* The system shall refuse to run a graph that breaks the rules, has a step input that nobody supplies or is of a kind that cannot run, and name the broken part before any step has run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
 
     // ================================================================ the requirement tree
 
@@ -1774,6 +1788,8 @@ package MIA_Requirements {
     requirement fr57 : OneStoredTruthPerGraph;
     requirement fr60 : StepInOneGraph;
     requirement nfr16 : NoHalfStoredGraph;
+    requirement fr63 : OneRuleSetPerKind;
+    requirement fr64 : RefuseARunThatCannotWork;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
@@ -1866,6 +1882,8 @@ package MIA_Allocation {
     satisfy fr57 by mia;
     satisfy fr60 by mia;
     satisfy nfr16 by mia;
+    satisfy fr63 by mia;
+    satisfy fr64 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
@@ -2072,6 +2090,10 @@ package MIA_Allocation {
     allocate fr60 to mia.persistence.graphRecords;
     allocate nfr16 to mia.persistence.graphRecords;
     allocate nfr16 to mia.persistence.storageLayer;
+    allocate fr63 to mia.persistence.graphRecords;
+    allocate fr63 to mia.taskRuntime.workflowGraph;
+    allocate fr64 to mia.persistence.graphRecords;
+    allocate fr64 to mia.taskRuntime.pipelineRunner;
     allocate fr40 to mia.persistence.typeRegistry;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
@@ -5019,6 +5041,146 @@ package MIA_NodeRequirements {
         doc /* The Graph app shall start as its own container alone and by the compose stack. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-033'> OneRegistryOfKinds_Gtb033 {
+        subject s : Persistence;
+        doc /* The Graph tables shall offer through IF-301 one registry of kinds that names, for each kind of graph, its rules in their fixed order and its run flag. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-034'> TheEightWorkflowRulesInOrder_Gtb034 {
+        subject s : Persistence;
+        doc /* The Graph tables shall list in the registry of kinds for the kind `workflow` the rules `step_identity`, `step_kind`, `connection_endpoints`, `duplicate_connection`, `adjacency`, `single_writer`, `stop_limit` and `cycle`, in this order. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-035'> TheRulesOfAContextGraph_Gtb035 {
+        subject s : Persistence;
+        doc /* The Graph tables shall list in the registry of kinds for the kind `context` the rules `step_identity`, `connection_endpoints` and `duplicate_connection`, in this order, with the definitions used for `workflow`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-036'> WhichKindsCanRun_Gtb036 {
+        subject s : Persistence;
+        doc /* The Graph tables shall set the run flag of the kind `workflow` to yes and the run flag of the kind `context` to no. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-037'> TheRuleReport_Gtb037 {
+        subject s : Persistence;
+        doc /* When a graph in stored form is checked, the Graph tables shall return one item per broken rule of the graph's kind, in registry order, each with rule name, parts and sentence. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-038'> NoKindMeansWorkflowForTheCheck_Gtb038 {
+        subject s : Persistence;
+        doc /* Where a graph in stored form names no kind, the Graph tables shall check it with the rules of the kind `workflow`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-039'> UnknownKindInACheck_Gtb039 {
+        subject s : Persistence;
+        doc /* If the kind of a checked graph is not in the registry of kinds, then the Graph tables shall return a rule report with the single item `unknown_kind`, naming the kind as its part. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-040'> ACheckNeverRaises_Gtb040 {
+        subject s : Persistence;
+        doc /* If a checked graph is malformed, then the Graph tables shall return a rule report instead of raising an exception. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-041'> Rule1StepIdentity_Gtb041 {
+        subject s : Persistence;
+        doc /* The Graph tables shall report the rule `step_identity` for every step whose ID is not a non-empty text or repeats the ID of an earlier step, naming those IDs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-042'> Rule2KindOfStep_Gtb042 {
+        subject s : Persistence;
+        doc /* The Graph tables shall report the rule `step_kind` for every step whose type is none of `data`, `transform` and `master`, naming those steps. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-043'> Rule3ConnectionEnds_Gtb043 {
+        subject s : Persistence;
+        doc /* The Graph tables shall report the rule `connection_endpoints` for every connection whose start or end names no step of the graph, naming those connections. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-044'> Rule4DuplicateConnection_Gtb044 {
+        subject s : Persistence;
+        doc /* The Graph tables shall report the rule `duplicate_connection` for every connection that repeats the ID, or the start, end, role and name, of an earlier connection, naming those connections. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-045'> Rule5Adjacency_Gtb045 {
+        subject s : Persistence;
+        doc /* The Graph tables shall report the rule `adjacency` for every connection between two existing steps that are both data steps or both not data steps, naming those connections. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-046'> Rule6OneWriter_Gtb046 {
+        subject s : Persistence;
+        doc /* The Graph tables shall report the rule `single_writer` for every data step that connections from more than one existing step lead into, naming those data steps. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-047'> Rule7SessionSettingAndStopLimit_Gtb047 {
+        subject s : Persistence;
+        doc /* The Graph tables shall report the rule `stop_limit` for every loop-controlling step without a valid stop limit, data step holding `stop` or `session`, and step with more than one settings connection, naming those steps. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-048'> Rule8Cycle_Gtb048 {
+        subject s : Persistence;
+        doc /* While `step_identity` and `connection_endpoints` are kept, the Graph tables shall report `cycle` for a graph whose steps cannot be ordered, naming the cycle with its first step repeated at the end. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-049'> RefusalOfARunTheKindFirstAndAlone_Gtb049 {
+        subject s : Persistence;
+        doc /* If a graph's kind is not in the registry or has the run flag no, then the run check of the Graph tables shall answer refused with one item naming the kind: `unknown_kind` or `kind_cannot_run`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-050'> RefusalOfARunRulesThenInputs_Gtb050 {
+        subject s : Persistence;
+        doc /* When a graph whose kind has the run flag yes is checked for a run, the Graph tables shall answer refused, listing every broken rule in registry order, then every unsupplied input, else ready. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-051'> UnsuppliedInput_Gtb051 {
+        subject s : Persistence;
+        doc /* The run check of the Graph tables shall report every unsupplied input as one item naming the processing or loop-controlling step and the data step it reads. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-162'> SaveWithTheRuleSetOfTheGraphSKind_Wfm162 {
+        subject s : TaskRuntime;
+        doc /* When a graph is saved, the Workflow management shall check it with the rule report of IF-301 for the graph's kind. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-163'> ARefusedSaveCarriesTheRuleReport_Wfm163 {
+        subject s : TaskRuntime;
+        doc /* If a save is refused for broken rules, then the Workflow management shall return the rule report with the refusal. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-164'> TheFlatListOfNamedIDs_Wfm164 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall offer the check of a workflow graph as a flat list of the parts of every broken rule, in the registry's order, keeping repeated IDs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-165'> HistoryOfAGraphThatWasNeverStored_Wfm165 {
+        subject s : TaskRuntime;
+        doc /* If the versions of a graph or the history of one of its steps are asked for a graph ID that was never stored, then the Workflow management shall answer `not_found`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-036'> RunCheckBeforeTheFirstStep_Run036 {
+        subject s : TaskRuntime;
+        doc /* When a graph is run, the Pipeline runner shall ask the run check of IF-301 with the given values before the first step runs, and run no step when it answers refused. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-037'> ARefusedRunNamesEveryPart_Run037 {
+        subject s : TaskRuntime;
+        doc /* If the run check answers refused, then the Pipeline runner shall end the run refused, naming the parts of every item in the check's order and keeping repeated IDs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-038'> TrustAfterTheRunCheck_Run038 {
+        subject s : TaskRuntime;
+        doc /* While the run check answers ready, the Pipeline runner shall check the trust of the steps as REQ-RUN-017 says. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-039'> InputsAPrepareFunctionMayGive_Run039 {
+        subject s : TaskRuntime;
+        doc /* When the Pipeline runner asks the run check, it shall count every input of a step whose function has a prepare function as a given value. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-052'> TheDocumentFormKeepsItsFiveRules_Gtb052 {
+        subject s : Persistence;
+        doc /* The Graph tables shall keep the check of the document form (IF-301 `validate`) and its five rules unchanged in IF-301 v4. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
 
     requirement r_req_clv_001 : ChatViewWithSenderAndStreaming_Clv001;
     requirement r_req_clv_002 : StopAndQueuePosition_Clv002;
@@ -5589,6 +5751,34 @@ package MIA_NodeRequirements {
     requirement r_req_ga_009 : PlainStackWithAVendoredLibrary_Ga009;
     requirement r_req_ga_010 : NoOutsideRequest_Ga010;
     requirement r_req_ga_011 : OwnContainer_Ga011;
+    requirement r_req_gtb_033 : OneRegistryOfKinds_Gtb033;
+    requirement r_req_gtb_034 : TheEightWorkflowRulesInOrder_Gtb034;
+    requirement r_req_gtb_035 : TheRulesOfAContextGraph_Gtb035;
+    requirement r_req_gtb_036 : WhichKindsCanRun_Gtb036;
+    requirement r_req_gtb_037 : TheRuleReport_Gtb037;
+    requirement r_req_gtb_038 : NoKindMeansWorkflowForTheCheck_Gtb038;
+    requirement r_req_gtb_039 : UnknownKindInACheck_Gtb039;
+    requirement r_req_gtb_040 : ACheckNeverRaises_Gtb040;
+    requirement r_req_gtb_041 : Rule1StepIdentity_Gtb041;
+    requirement r_req_gtb_042 : Rule2KindOfStep_Gtb042;
+    requirement r_req_gtb_043 : Rule3ConnectionEnds_Gtb043;
+    requirement r_req_gtb_044 : Rule4DuplicateConnection_Gtb044;
+    requirement r_req_gtb_045 : Rule5Adjacency_Gtb045;
+    requirement r_req_gtb_046 : Rule6OneWriter_Gtb046;
+    requirement r_req_gtb_047 : Rule7SessionSettingAndStopLimit_Gtb047;
+    requirement r_req_gtb_048 : Rule8Cycle_Gtb048;
+    requirement r_req_gtb_049 : RefusalOfARunTheKindFirstAndAlone_Gtb049;
+    requirement r_req_gtb_050 : RefusalOfARunRulesThenInputs_Gtb050;
+    requirement r_req_gtb_051 : UnsuppliedInput_Gtb051;
+    requirement r_req_wfm_162 : SaveWithTheRuleSetOfTheGraphSKind_Wfm162;
+    requirement r_req_wfm_163 : ARefusedSaveCarriesTheRuleReport_Wfm163;
+    requirement r_req_wfm_164 : TheFlatListOfNamedIDs_Wfm164;
+    requirement r_req_wfm_165 : HistoryOfAGraphThatWasNeverStored_Wfm165;
+    requirement r_req_run_036 : RunCheckBeforeTheFirstStep_Run036;
+    requirement r_req_run_037 : ARefusedRunNamesEveryPart_Run037;
+    requirement r_req_run_038 : TrustAfterTheRunCheck_Run038;
+    requirement r_req_run_039 : InputsAPrepareFunctionMayGive_Run039;
+    requirement r_req_gtb_052 : TheDocumentFormKeepsItsFiveRules_Gtb052;
 
     satisfy r_req_clv_001 by mia.frontEnd;
     satisfy r_req_clv_002 by mia.frontEnd;
@@ -6159,6 +6349,34 @@ package MIA_NodeRequirements {
     satisfy r_req_ga_009 by mia.graphApp;
     satisfy r_req_ga_010 by mia.graphApp;
     satisfy r_req_ga_011 by mia.graphApp;
+    satisfy r_req_gtb_033 by mia.persistence;
+    satisfy r_req_gtb_034 by mia.persistence;
+    satisfy r_req_gtb_035 by mia.persistence;
+    satisfy r_req_gtb_036 by mia.persistence;
+    satisfy r_req_gtb_037 by mia.persistence;
+    satisfy r_req_gtb_038 by mia.persistence;
+    satisfy r_req_gtb_039 by mia.persistence;
+    satisfy r_req_gtb_040 by mia.persistence;
+    satisfy r_req_gtb_041 by mia.persistence;
+    satisfy r_req_gtb_042 by mia.persistence;
+    satisfy r_req_gtb_043 by mia.persistence;
+    satisfy r_req_gtb_044 by mia.persistence;
+    satisfy r_req_gtb_045 by mia.persistence;
+    satisfy r_req_gtb_046 by mia.persistence;
+    satisfy r_req_gtb_047 by mia.persistence;
+    satisfy r_req_gtb_048 by mia.persistence;
+    satisfy r_req_gtb_049 by mia.persistence;
+    satisfy r_req_gtb_050 by mia.persistence;
+    satisfy r_req_gtb_051 by mia.persistence;
+    satisfy r_req_wfm_162 by mia.taskRuntime;
+    satisfy r_req_wfm_163 by mia.taskRuntime;
+    satisfy r_req_wfm_164 by mia.taskRuntime;
+    satisfy r_req_wfm_165 by mia.taskRuntime;
+    satisfy r_req_run_036 by mia.taskRuntime;
+    satisfy r_req_run_037 by mia.taskRuntime;
+    satisfy r_req_run_038 by mia.taskRuntime;
+    satisfy r_req_run_039 by mia.taskRuntime;
+    satisfy r_req_gtb_052 by mia.persistence;
     allocate r_req_clv_001 to mia.frontEnd;
     allocate r_req_clv_002 to mia.frontEnd;
     allocate r_req_clv_003 to mia.frontEnd;
@@ -6728,6 +6946,34 @@ package MIA_NodeRequirements {
     allocate r_req_ga_009 to mia.graphApp;
     allocate r_req_ga_010 to mia.graphApp;
     allocate r_req_ga_011 to mia.graphApp;
+    allocate r_req_gtb_033 to mia.persistence;
+    allocate r_req_gtb_034 to mia.persistence;
+    allocate r_req_gtb_035 to mia.persistence;
+    allocate r_req_gtb_036 to mia.persistence;
+    allocate r_req_gtb_037 to mia.persistence;
+    allocate r_req_gtb_038 to mia.persistence;
+    allocate r_req_gtb_039 to mia.persistence;
+    allocate r_req_gtb_040 to mia.persistence;
+    allocate r_req_gtb_041 to mia.persistence;
+    allocate r_req_gtb_042 to mia.persistence;
+    allocate r_req_gtb_043 to mia.persistence;
+    allocate r_req_gtb_044 to mia.persistence;
+    allocate r_req_gtb_045 to mia.persistence;
+    allocate r_req_gtb_046 to mia.persistence;
+    allocate r_req_gtb_047 to mia.persistence;
+    allocate r_req_gtb_048 to mia.persistence;
+    allocate r_req_gtb_049 to mia.persistence;
+    allocate r_req_gtb_050 to mia.persistence;
+    allocate r_req_gtb_051 to mia.persistence;
+    allocate r_req_wfm_162 to mia.taskRuntime;
+    allocate r_req_wfm_163 to mia.taskRuntime;
+    allocate r_req_wfm_164 to mia.taskRuntime;
+    allocate r_req_wfm_165 to mia.taskRuntime;
+    allocate r_req_run_036 to mia.taskRuntime;
+    allocate r_req_run_037 to mia.taskRuntime;
+    allocate r_req_run_038 to mia.taskRuntime;
+    allocate r_req_run_039 to mia.taskRuntime;
+    allocate r_req_gtb_052 to mia.persistence;
 
     dependency from r_req_clv_001 to r_req_fe_001;
     dependency from r_req_clv_002 to r_req_fe_002;
@@ -7355,5 +7601,33 @@ package MIA_NodeRequirements {
     dependency from r_req_ga_009 to fr22;
     dependency from r_req_ga_010 to nfr5;
     dependency from r_req_ga_011 to nfr9;
+    dependency from r_req_gtb_033 to fr63;
+    dependency from r_req_gtb_034 to fr63;
+    dependency from r_req_gtb_035 to fr63;
+    dependency from r_req_gtb_036 to fr63;
+    dependency from r_req_gtb_037 to fr63;
+    dependency from r_req_gtb_038 to fr63;
+    dependency from r_req_gtb_039 to fr63;
+    dependency from r_req_gtb_040 to fr63;
+    dependency from r_req_gtb_041 to fr63;
+    dependency from r_req_gtb_042 to fr63;
+    dependency from r_req_gtb_043 to fr63;
+    dependency from r_req_gtb_044 to fr63;
+    dependency from r_req_gtb_045 to fr63;
+    dependency from r_req_gtb_046 to fr63;
+    dependency from r_req_gtb_047 to fr63;
+    dependency from r_req_gtb_048 to fr63;
+    dependency from r_req_gtb_049 to fr64;
+    dependency from r_req_gtb_050 to fr64;
+    dependency from r_req_gtb_051 to fr64;
+    dependency from r_req_wfm_162 to fr63;
+    dependency from r_req_wfm_163 to fr63;
+    dependency from r_req_wfm_164 to fr63;
+    dependency from r_req_wfm_165 to fr57;
+    dependency from r_req_run_036 to fr64;
+    dependency from r_req_run_037 to fr64;
+    dependency from r_req_run_038 to fr64;
+    dependency from r_req_run_039 to fr64;
+    dependency from r_req_gtb_052 to fr63;
 }
 // END GENERATED: node requirements
