@@ -45,19 +45,19 @@ All checks are exact: every expected value is a status, a code, an ID, a count, 
 | TC-GA-039 | REQ-GA-042, REQ-GA-043 | end-to-end (browser) | 2 | a session: open the list, sample.code and cp2.multi, select steps, drag one, open the history and an earlier version, change the settings | no request to another origin; every request to `/api/v2` is a GET | exact |
 
 ### Contract suite IF-104 v2 (`tests/acceptance/contract/test_if_104_v2_graph_api.py` mock, files, postgres; `.test.mjs` JS mock)
-| Test ID | Before A-174 | Golden | Verifies | Expected result |
-|---|---|---|---|---|
-| TC-IF-104-17 | TC-IF-104-06 | 1 | REQ-API-018, REQ-API-023, REQ-API-024, REQ-API-025, REQ-API-030 | list sorted by ID with kind, version, author, time, description, counts; version 2 of cp2.multi with current 4; versions oldest first |
-| TC-IF-104-18 | TC-IF-104-07 | 2 | REQ-API-026 | one `missing_step` problem for e2 to var.gone at `to`; nothing dropped |
-| TC-IF-104-19 | TC-IF-104-08 | 3 | REQ-API-027, REQ-API-028, REQ-API-029 | the hostile step `transform`, `untrusted`, no lifecycle, code, not changed; data steps carry only their kind; texts as stored |
-| TC-IF-104-20 | TC-IF-104-09 | 4 | REQ-API-032, REQ-API-033, REQ-API-037, REQ-API-042 | version 5 by anna with a `derived` record of one `change_step`; the same graph again is no version |
-| TC-IF-104-21 | TC-IF-104-10 | – | REQ-API-038, REQ-API-051 | a matching `add_step` kept as `editor`, reason trimmed; a list that does not give the graph is 422 `changes_do_not_match` |
-| TC-IF-104-22 | TC-IF-104-11 | 5 | REQ-API-034, REQ-API-035, REQ-API-046, REQ-API-048, REQ-API-049 | `not_owner`, `conflict` with current 4, `rules_broken` ending in `cycle`, `invalid` naming `graph`, `not_found`; still 4 versions |
-| TC-IF-104-23 | TC-IF-104-12 | – | REQ-API-031, REQ-API-046 | `rules: []` for the current graph; `cycle` last for the cyclic copy; ben `not_owner`; nothing stored |
-| TC-IF-104-24 | TC-IF-104-13 | 6 | REQ-API-041, REQ-API-049 | version 5 naming t1, versions 1 to 5, a `restore` record from 4; version 99 `not_found` |
-| TC-IF-104-25 | TC-IF-104-14 | 7 | REQ-API-043, REQ-API-044, REQ-API-046, REQ-API-048 | `positions` null, then var.in at 10, -3 by anna; `invalid` naming var.in; ben `not_owner`; still 4 versions |
-| TC-IF-104-26 | TC-IF-104-15 | 8 | REQ-API-021, REQ-API-022, REQ-API-050 | store, reachable, `shown` live, `live_reachable`, `lag` 0 / null; 503 `store_unreachable` while `me` answers ben |
-| TC-IF-104-27 | TC-IF-104-16 | – | REQ-API-045 | all eleven routes with a made-up session 401 `unauthenticated`; nothing changed; `me` names anna as owner |
+| Test ID | Golden | Verifies | Expected result |
+|---|---|---|---|
+| TC-IF-104-17 | 1 | REQ-API-018, REQ-API-023, REQ-API-024, REQ-API-025, REQ-API-030 | list sorted by ID with kind, version, author, time, description, counts; version 2 of cp2.multi with current 4; versions oldest first |
+| TC-IF-104-18 | 2 | REQ-API-026 | one `missing_step` problem for e2 to var.gone at `to`; nothing dropped |
+| TC-IF-104-19 | 3 | REQ-API-027, REQ-API-028, REQ-API-029 | the hostile step `transform`, `untrusted`, no lifecycle, code, not changed; data steps carry only their kind; texts as stored |
+| TC-IF-104-20 | 4 | REQ-API-032, REQ-API-033, REQ-API-037, REQ-API-042 | version 5 by anna with a `derived` record of one `change_step`; the same graph again is no version |
+| TC-IF-104-21 | – | REQ-API-038, REQ-API-051 | a matching `add_step` kept as `editor`, reason trimmed; a list that does not give the graph is 422 `changes_do_not_match` |
+| TC-IF-104-22 | 5 | REQ-API-034, REQ-API-035, REQ-API-046, REQ-API-048, REQ-API-049 | `not_owner`, `conflict` with current 4, `rules_broken` ending in `cycle`, `invalid` naming `graph`, `not_found`; still 4 versions |
+| TC-IF-104-23 | – | REQ-API-031, REQ-API-046 | `rules: []` for the current graph; `cycle` last for the cyclic copy; ben `not_owner`; nothing stored |
+| TC-IF-104-24 | 6 | REQ-API-041, REQ-API-049 | version 5 naming t1, versions 1 to 5, a `restore` record from 4; version 99 `not_found` |
+| TC-IF-104-25 | 7 | REQ-API-043, REQ-API-044, REQ-API-046, REQ-API-048 | `positions` null, then var.in at 10, -3 by anna; `invalid` naming var.in; ben `not_owner`; still 4 versions |
+| TC-IF-104-26 | 8 | REQ-API-021, REQ-API-022, REQ-API-050 | store, reachable, `shown` live, `live_reachable`, `lag` 0 / null; 503 `store_unreachable` while `me` answers ben |
+| TC-IF-104-27 | – | REQ-API-045 | all eleven routes with a made-up session 401 `unauthenticated`; nothing changed; `me` names anna as owner |
 
 ### Contract suite IF-302 v15 (`tests/acceptance/contract/test_if_302_record_tables.py`, real side and mock)
 | Test ID | Verifies | Expected result |
@@ -86,13 +86,13 @@ None: no hard bound (D-425 E-H). The opening time is a smoke number (SMOKE-VIEW-
 
 ## Smoke tests (run in Phase 6, target environment)
 | Test ID | Verifies | Target | Conditions | Expected result |
-|---|---|---|---|---|
+|---|---|---|---|
 | SMOKE-VIEW-001 | REQ-OPR-011 | the owner's host, the release image built by `deploy/` | the stack with the store setting pointing at the owner's PostgreSQL | `import psycopg` succeeds in the image; `GET /api/v2/store` answers `database`, reachable |
 | SMOKE-VIEW-002 | NFR-11 (measured, no bound) | the owner's host, Firefox, the installed release | a graph of about fifty steps in the store; opened five times from the list | the time from choosing to the settled picture, median and spread of the five, written to the deployment record |
 
 ## Validation criteria (checked in Phase 7)
 | ID | Criterion | How we check | Who | Agreement (if numeric): margin, mean or single values, method |
-|---|---|---|---|---|
+|---|---|---|---|
 | VAL-VIEW-01 | OC-1 to OC-8 hold on the deployed version, from the files and from the database | the owner repeats AC-009 to AC-016 and AC-035 in the web app on the owner's host, once per store, and compares the graph app with the main app in light and dark (OC-8) | Stefan Reiterer (owner) | single values: every line passes |
 
 ## Scenarios
