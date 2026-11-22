@@ -49,7 +49,7 @@
 - Verification method: Test
 - Acceptance criterion: the registry read through IF-301 lists exactly the kinds `workflow` and `context`, each with a list of rule names and a yes/no for running (exact)
 - Verified by: TC-GTB-037
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-GTB-034 – The eight workflow rules in order
@@ -62,7 +62,7 @@
 - Verification method: Test
 - Acceptance criterion: the rules of `workflow` are exactly these eight names in this order (exact)
 - Verified by: TC-GTB-037
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-GTB-035 – The rules of a context graph
@@ -75,7 +75,7 @@
 - Verification method: Test
 - Acceptance criterion: the rules of `context` are exactly these three names in this order; a context graph with two identical connections under different IDs is reported with `duplicate_connection` naming the second ID (exact)
 - Verified by: TC-GTB-037, TC-GTB-038
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 7)
 
 ### REQ-GTB-036 – Which kinds can run
@@ -88,7 +88,7 @@
 - Verification method: Test
 - Acceptance criterion: `workflow` can run, `context` cannot (exact)
 - Verified by: TC-GTB-037
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-GTB-037 – The rule report
@@ -101,7 +101,7 @@
 - Verification method: Test
 - Acceptance criterion: a workflow graph with a missing connection end and two writers of one data step gives exactly two items, `connection_endpoints` before `single_writer`, each with its parts and a non-empty sentence; a sound graph gives `[]` (exact)
 - Verified by: TC-GTB-039
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, CP19)
 
 ### REQ-GTB-038 – No kind means workflow, for the check
@@ -114,7 +114,7 @@
 - Verification method: Test
 - Acceptance criterion: a graph without the field `kind` and the same graph with `"kind": "workflow"` give the same rule report (exact)
 - Verified by: TC-GTB-039
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-GTB-039 – Unknown kind in a check
@@ -127,7 +127,7 @@
 - Verification method: Test
 - Acceptance criterion: a graph of kind `swarm` with a cycle gives exactly `[{"rule": "unknown_kind", "parts": ["swarm"], ...}]` (exact)
 - Verified by: TC-GTB-040
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 10)
 
 ### REQ-GTB-040 – A check never raises
@@ -140,7 +140,7 @@
 - Verification method: Test
 - Acceptance criterion: each of five malformed graphs (a step that is a number, connection data that is a list, a step without `id`, a connection without `from`, `nodes` that is not a list) returns a list; no exception escapes (exact)
 - Verified by: TC-GTB-041
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 4)
 
 ### REQ-GTB-041 – Rule 1, step identity
