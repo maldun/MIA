@@ -248,6 +248,16 @@ def _unsupplied(graph, given):
     return found
 
 
+def _given_ids(given):
+    """The data step IDs a run gives values for: the keys of a mapping, the items of a list or set. Anything else, and any item that cannot be an ID,
+    counts as nothing given, so run_check never raises on the caller's argument either (IF-301 v4: "never raises"; T-01 finding, D-423)."""
+    try:
+        items = list(given or ())
+    except TypeError:
+        return set()
+    return {i for i in items if isinstance(i, str)}
+
+
 def run_check(graph, given=None):
     """What stops a run before its first step, in the order kind, rules, inputs (REQ-GTB-049 to 051, D-416 (3)).
     A kind that is unknown or cannot run is the only item; `given` counts by its keys, so a value of None counts as given."""
@@ -258,5 +268,5 @@ def run_check(graph, given=None):
             return {"status": "refused", "broken": [{"kind": "kind", **_item(rule, [_text(graph.get("kind"))])}]}
     broken = [{"kind": "rule", **r} for r in rule_report(graph)]
     if isinstance(graph, dict):
-        broken += _unsupplied(graph, set(given or ()))
+        broken += _unsupplied(graph, _given_ids(given))
     return {"status": "refused" if broken else "ready", "broken": broken}

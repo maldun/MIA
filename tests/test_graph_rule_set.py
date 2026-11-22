@@ -137,6 +137,21 @@ class RuleSetUnit(unittest.TestCase):
         # And: a value for another step does not supply q
         self.assertEqual([b["input"] for b in run_check(g, {"other": "x"})["broken"]], ["q"])
 
+    @mark.req("REQ-GTB-040", "REQ-GTB-051")
+    def test_a_malformed_given_counts_as_no_values_and_never_raises(self):
+        """IF-301 v4: run_check never raises; a `given` that is not a list of IDs counts as no values given (T-01 finding, settled by delegation D-423).
+
+        Example: run_check(g, 5) == run_check(g) == refused, naming q as an unsupplied input.
+        """
+        # Given: a step t reading q, which nothing supplies
+        g = graph([data("q"), transform("t"), data("out")], [connection("e1", "q", "t"), connection("e2", "t", "out")])
+        for given in (5, object(), [["q"]], 2.5):
+            with self.subTest(given=given):
+                # When: the run is checked with a malformed `given`
+                said = run_check(g, given)
+                # Then: no exception, and q is named as if nothing were given
+                self.assertEqual([b["input"] for b in said["broken"]], ["q"])
+
     @mark.req("REQ-GTB-051")
     def test_a_master_input_is_named_and_repeats_are_kept(self):
         """An input of a master counts too, and a data step read by two steps is named once per connection, in connection order.

@@ -41,7 +41,7 @@ Regression set: after every task the unit suite (`discover -s tests`, about 8 mi
 - Reuses: prototype `graph_rules_proto.py` (R3, adapt): `KINDS`, the eight rule functions, `check`, `missing_inputs`, `refusal`; adapted to the contract: the names `kinds`, `rule_report`, `run_check`, the field `rule` on every run-check item, malformed input as IF-301 v4 says (D-418 (2)), `given` counted by its keys
 - Must not touch: protected material; `graph_rules.py` (document form, Q-6), `graph_tables.py`, `graph_model.py` (T-02), `graph_run.py` (T-03)
 - Demonstrator after this task: `python -c "import graph_rule_set as r; print(r.rule_report(...))"` names every broken rule in order
-- Done when: the listed tests green, the regression set holds; each of the defects of TR-RULES-008 for TC-GTB-037, 039, 042, 043 (two rules swapped, the first broken rule only, the cycle asked while rule 3 is broken) makes its check fail (logged)
+- Done when: the listed tests green, the regression set holds; each of the defects of TR-RULES-008 makes its check fail (logged): two rules swapped (TC-GTB-037), the first broken rule only (TC-GTB-039), the cycle asked while rule 3 is broken (TC-GTB-042), inputs listed before rules or a kind that cannot run also listing its rules (TC-GTB-043; the first three do not reach the run check, T-01 finding, settled by delegation D-423)
 - Notes: the module must not import `graph_model` (it would tie N-3.2 to N-2.3); `find_cycle` and the stop limit move with it or are copied (as the mock does).
 
 ### T-02: The save path on the rule set

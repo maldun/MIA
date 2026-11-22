@@ -37,7 +37,8 @@ TC-GTB-043 passes under each of (a), (b) and (c): none of the three named defect
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
-| TR-RULES-008 lists TC-GTB-043 among the checks to be shown able to fail, but none of its three rule-set defects (swap, first only, cycle with rule 3 broken) makes TC-GTB-043 fail; two run-check defects (inputs before rules, kind not alone) do. Proposal for Verify: name a run-check defect for TC-GTB-043 in TR-RULES-008 (a text change of a protected file, so the owner's decision). | T-01 | TC-GTB-043 with defects (d), (e) |
+| TR-RULES-008 lists TC-GTB-043 among the checks to be shown able to fail, but none of its three rule-set defects (swap, first only, cycle with rule 3 broken) makes TC-GTB-043 fail; two run-check defects (inputs before rules, kind not alone) do. Proposal for Verify: name a run-check defect for TC-GTB-043 in TR-RULES-008 (a text change of a protected file, so the owner's decision). | T-01 | TC-GTB-043 with defects (d), (e); settled 2026-11-22 by delegation (D-423): `plan.md` T-01 names (d) and (e) for TC-GTB-043; TR-RULES-008's text (protected) needs no change, it lists the defects without mapping them to checks |
+| `run_check` raised `TypeError` on a `given` that is not a list of IDs, against IF-301 v4 "never raises". Settled 2026-11-22 by delegation (D-423): a malformed `given`, or an item that is not text, counts as nothing given (`_given_ids`) | T-01 follow-up | `tests/test_graph_rule_set.py` `test_a_malformed_given_counts_as_no_values_and_never_raises` (red first: TypeError on 5, object(), [["q"]], 2.5; then green) |
 
 ## Plan amendments
 None.
@@ -49,8 +50,7 @@ None.
 | Decision | Where in code | Proposed requirement or amendment |
 |---|---|---|
 | Interpretations the protected mock fixes where IF-301 v4 is short are followed: rule 2 asks only existing, first-occurring steps; a non-text connection ID is named by `str()`; rule 7 in three passes; the cycle is the first one a depth-first walk finds in listed order; an explicit `"kind": None` is `unknown_kind` naming `"None"` | `graph_rule_set.py` `_steps`, `_step_kind`, `_stop_limit`, `_find_cycle`, `_graph_kind` | none needed: stated in the mock header, which the contract suite holds to |
-| `given` that is not iterable (e.g. the number 5) raises `TypeError`; IF-301 v4 says `run_check` never raises, but `given` is the caller's list of IDs, not untrusted graph input | `run_check` | open question for Phase 4 |
+| `given` that is not a list of IDs counts as nothing given (was: `TypeError`) | `run_check`, `_given_ids` | settled by delegation (D-423), see Findings |
 
 ## Open questions for Phase 4
-- Should `run_check` also tolerate a malformed `given` (not iterable), or is "never raises" meant for the graph only?
-- TR-RULES-008 and TC-GTB-043: see Findings.
+- None open from T-01 (both settled 2026-11-22, see Findings).
