@@ -6,7 +6,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
 
-from graph_tables import definitions, validate  # noqa: E402
+from graph_tables import check_record, definitions, scoped, split_scoped, validate  # noqa: E402
 from markers import mark                        # noqa: E402
 
 GOOD = {"nodes": [{"id": "q", "kind": "data"}, {"id": "p", "kind": "process"}, {"id": "a", "kind": "data"}],
@@ -40,6 +40,76 @@ class GraphTables(unittest.TestCase):
         for table in ("memory", "votes", "", None):
             with self.subTest(table=table), self.assertRaises(ValueError):
                 validate(table, GOOD)
+
+
+def header(graph_id, nodes):
+    return {"id": graph_id, "data": {"kind": "workflow", "context_graph_id": "", "testbench_id": "", "description": "d",
+                                     "nodes": [{"id": i, "version": 1} for i in nodes], "edges": []}}
+
+
+class ScopedIds(unittest.TestCase):
+    """G-V4.GRAPHSTORE.CORE T-01: the record ID of a step or connection is `<graph id>/<local id>`."""
+
+    @mark.req("REQ-GTB-031")
+    def test_the_first_slash_splits_graph_and_local_id(self):
+        """scoped joins with a slash; split_scoped cuts at the first slash and rejects an empty part.
+
+        Example: split_scoped("a/b/c") -> ("a", "b/c"); split_scoped("a/") -> None.
+        """
+        # Given / When / Then
+        self.assertEqual(scoped("wf1", "n1"), "wf1/n1")
+        self.assertEqual(split_scoped("a/b/c"), ("a", "b/c"))
+        for bad in ("chat", "/chat", "lookup/", "", "/"):
+            with self.subTest(record_id=bad):
+                self.assertIsNone(split_scoped(bad))
+
+    @mark.req("REQ-GTB-029")
+    def test_a_step_or_connection_with_a_plain_id_is_unscoped(self):
+        """A record of the four step and connection tables needs a scoped ID; graphs and skills do not.
+
+        Example: check_record("graph_nodes", {"id": "chat", ...}) -> unscoped_id naming chat.
+        """
+        # Given: a valid step, connection and context step under a plain ID
+        records = {"graph_nodes": {"id": "chat", "data": {"type": "data"}},
+                   "graph_edges": {"id": "e1", "from": "g/a", "to": "g/b", "data": {}},
+                   "context_nodes": {"id": "c1", "data": {"type": "entity"}},
+                   "context_edges": {"id": "ce", "from": "g/a", "to": "g/b", "data": {}}}
+        for table, record in records.items():
+            with self.subTest(table=table):
+                # When / Then
+                self.assertEqual(check_record(table, record), {"rule": "unscoped_id", "detail": record["id"]})
+                self.assertIsNone(check_record(table, dict(record, id="g/" + record["id"])))
+        self.assertIsNone(check_record("graphs", header("wf1", [])))
+
+    @mark.req("REQ-GTB-029")
+    def test_the_empty_id_stays_record_identity(self):
+        """D-409: an empty ID is record_identity, and a differing record_id is checked before the scope.
+
+        Example: check_record("graph_nodes", {"id": ""}) -> record_identity naming id.
+        """
+        # Given / When / Then
+        self.assertEqual(check_record("graph_nodes", {"id": "", "data": {"type": "data"}}), {"rule": "record_identity", "detail": "id"})
+        self.assertEqual(check_record("graph_nodes", {"id": "chat", "data": {"type": "data"}}, record_id="g/chat"),
+                         {"rule": "record_identity", "detail": "id"})
+
+    @mark.req("REQ-GTB-030")
+    def test_a_header_names_only_its_own_members(self):
+        """A member of another graph or with a plain ID is unscoped_id, checked before unknown_member, with and without stored.
+
+        Example: header wf1 naming wf2/n1 -> unscoped_id naming wf2/n1.
+        """
+        # Given: what is stored holds every member, so only the scope can refuse
+        stored = {"nodes": {"wf1/n1": [1], "wf2/n1": [1], "n1": [1]}, "edges": {}}
+        for member in ("wf2/n1", "n1", "wf10/n1"):
+            with self.subTest(member=member):
+                # When / Then
+                self.assertEqual(check_record("graphs", header("wf1", [member]), stored=stored), {"rule": "unscoped_id", "detail": member})
+                self.assertEqual(check_record("graphs", header("wf1", [member])), {"rule": "unscoped_id", "detail": member})
+        self.assertEqual(check_record("graphs", header("wf1", ["wf2/x"]), stored={"nodes": {}, "edges": {}}),
+                         {"rule": "unscoped_id", "detail": "wf2/x"})
+        self.assertEqual(check_record("graphs", header("wf1", ["wf1/x"]), stored={"nodes": {}, "edges": {}}),
+                         {"rule": "unknown_member", "detail": "wf1/x"})
+        self.assertIsNone(check_record("graphs", header("wf1", ["wf1/n1"]), stored=stored))
 
 
 if __name__ == "__main__":
