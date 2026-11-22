@@ -1,6 +1,6 @@
 # High-Level Specification: G-V4.GRAPHAPI.RULES – one rule set for graphs
 
-**Status:** Draft (2026-11-22); open decisions taken by the owner (D-416); HR-001 to HR-006 wait for the review by group
+**Status:** Draft (2026-11-22); open decisions taken by the owner (D-416); HR-001 to HR-006 approved by group (review-log.md); the approval of the whole document is the owner's tick below
 **Top-level spec:** `../G-V4.GRAPHAPI/top-level-spec.md` (items FR-63, FR-64 are this subgoal's; FR-7 of the product spec)   **Owner:** Stefan Reiterer   **Date:** 2026-11-22
 **Basis:** the validated prototype round 04 (`../G-V4/prototype/rounds/04/`, branch `prototype/g-v4`, carry-over decided all as proposed), the reuse map row R3, the owner's decisions D-375, D-404 and D-415 (Q-1 to Q-7), the accepted cases AC-017 and AC-018 (`../G-V4/accepted-cases.md`), CORE as verified (D-414).
 
@@ -49,7 +49,7 @@ The kinds `rule` and `measure` follow CORE's approved high-level spec; `spec_che
 - Text: The system shall keep the rules of every kind of graph, their order and whether a graph of the kind can run in one registry, and every check of a stored-form graph shall take its rules from it by the kind of the graph.
 - Rationale: FR-63 "written in one place, chosen by the kind"; the prototype found three implementations today and a page that lost the kind (findings 1, 9).
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-002 – The rule report
 - Kind: rule
@@ -57,7 +57,7 @@ The kinds `rule` and `measure` follow CORE's approved high-level spec; `spec_che
 - Text: A check shall report every broken rule of the graph's kind in the registry's order, each with its name, the IDs of the steps or connections it concerns and a sentence for people, and shall report an empty list for a graph that keeps every rule.
 - Rationale: OC-1 lists the same broken rules in the same order "each with its steps or connections"; the sentence is what the editor and the run show.
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-003 – Refusal before a run
 - Kind: rule
@@ -65,7 +65,7 @@ The kinds `rule` and `measure` follow CORE's approved high-level spec; `spec_che
 - Text: Before the first step runs, the Pipeline runner shall refuse a graph whose kind is unknown or cannot run, that breaks a rule, or that has a step input with no writer, no start value and no value given with the run, naming each.
 - Rationale: FR-64 and OC-2; today the runner refuses only a missing end and a cycle (REQ-RUN-016).
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-004 – Measure: the same list everywhere (OC-1)
 - Kind: measure
@@ -76,7 +76,7 @@ The kinds `rule` and `measure` follow CORE's approved high-level spec; `spec_che
 - Rationale: the owner's outcome OC-1, decided on the entry points people use.
 - Reference: Fedora host, Python 3.12.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-005 – Measure: no old refusal is lost (FR-63)
 - Kind: measure
@@ -87,7 +87,7 @@ The kinds `rule` and `measure` follow CORE's approved high-level spec; `spec_che
 - Rationale: the eight rules replace the five in the save path; a graph that was refused must not become storable (prototype: 0 of 1000 lost, 57 newly refused).
 - Reference: as HR-004.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-006 – Measure: refused before any step, ready when sound (OC-2)
 - Kind: measure
@@ -98,7 +98,7 @@ The kinds `rule` and `measure` follow CORE's approved high-level spec; `spec_che
 - Rationale: OC-2, plus the regression that the stricter rules do not stop today's skills.
 - Reference: as HR-004.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ## 4. Split proposal
 ### Nodes (decomposition)
