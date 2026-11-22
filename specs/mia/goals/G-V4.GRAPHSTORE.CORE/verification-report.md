@@ -7,7 +7,7 @@
 ## Verdict
 **Proposal: verified with accepted deviations**, on condition that the owner decides V-1 (medium). Every one of the 22 requirements in scope has a green check that ran under its test requirements; protected material is unchanged except the four A-168 scripts, which are byte-identical to the approved staging copies; nothing outside `graph_tables.py`, `graph_model.py` and tests was touched. V-1 is a real gap: an **unchanged** save after an interrupted save writes a new step version and a new graph version (against REQ-WFM-149). It comes from a word in REQ-WFM-148 that can be read two ways. V-2 to V-4 are the implementer's open questions, now confirmed by probes; they are unspecified behaviour, not defects.
 
-- [ ] Verdict decided by Stefan Reiterer (owner). Date:
+- [X] Verdict decided by Stefan Reiterer (owner). Date:
 
 ## Automated checks (all run by me in `/home/maldun/prog/Python/MIA-goal-v4`, Python 3.12 venv `mia312` with psycopg 3)
 | Check | Result |
