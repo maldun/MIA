@@ -652,11 +652,12 @@ package MIA_Architecture {
             doc /* The one door to the shared state (IF-102, N-3.1): versions, validation by the table definitions, notices, a file backend and a
                    PostgreSQL backend, accounts, the copy between backends (library export and seed, migration). Partly: the old file stores are
                    not behind it yet (N-2 tasks, D-67, D-105).
-                   G-V4.GRAPHSTORE.TRANSFER (planned): the whole-store move checked per graph with members before headers, the lag, the one-way
-                   sync with the aside folder and the cut back, the one-graph move, the format marker, durable file writes, in graph_store_transfer.py
-                   (REQ-SLY-016 to 039). */
+                   G-V4.GRAPHSTORE.TRANSFER, in graph_store_transfer.py (REQ-SLY-016 to 039): built (T-01) the whole-store move checked per
+                   graph with members before headers; planned the lag, the one-way sync with the aside folder and the cut back, the one-graph
+                   move, the format marker, durable file writes. */
             @Implementation { :>> status = ImplementationStatus::partly;
-                              :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py"); }
+                              :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py",
+                                             "graph_store_transfer.py"); }
         }
         part typeRegistry {
             doc /* Target (iteration 2, FR-40, G-V2): the registry of data classes by type ID with the JSON schema of each type; rebuilds a node's class from the stored type ID, refuses an unknown type ID, no pickle. */
