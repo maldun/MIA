@@ -56,6 +56,6 @@ Group spec FR-63, FR-64; decision D-375; the two existing rule sets (`../G-V4.GR
 | Plan | done | plan package approved by the owner (plan gate ticked 2026-11-22); red tests installed `71523f7a`, tag `plan-baseline-g-v4-rules`; A-170 installed `fdbf2377` |
 | Implement | done | T-01 `5722f4d7` (+ follow-up `ae7eea41`), T-02 `5a238e9f`, T-03 `811d7850`, A-170b `d99fc6e9`, T-04 (no product change); every RULES check green, regression clean except the two known reds (2026-11-22); `implementation-log.md` |
 | Verify | done | `verification-report.md` (`49e77265`), verified with accepted deviations, verdict ticked by the owner (`f4cc31ae`); V-1 fixed (`f478e040`), V-2 by A-185 (`fb3b72eb`), V-4 accepted (D-461); regression re-run after the fix clean except the two known reds |
-| Commit | open | |
+| Commit | open | merge prepared (`merge-request.md`), waits for the owner's script and merge |
 | Deploy | open | |
 | Validate | open | the first test run, G-V5 (parked, D-386) |

@@ -16,9 +16,10 @@ Read first: this file, `CLAUDE.md`, skills `dev-workflow`, `plan-phase` (or `imp
 
 ## 2. Next steps
 1. Done 2026-11-22: A-170 installed (`fdbf2377`), red tests installed (`71523f7a`, tag `plan-baseline-g-v4-rules`), plan gate ticked by the owner (date field still empty, his). Plan phase done.
-2. Implement T-01 to T-04 in a fresh session (`implement-phase`), one commit per task; the defects of TR-RULES-008 logged per task.
-3. Then Verify, Commit (merge into `goal/v4` with the moves listed in `plan.md`), Deploy (SMOKE-RULES-001), Validate (VAL-RULES-01).
-4. After RULES: TRANSFER on the agent's recommendations (D-423), in its own worktree; at RUN, VIEW, EDIT, CONTEXT ask the owner (VIEW/EDIT: design questions first; CONTEXT: purpose and use first).
+2. (Done, see 3.) Implement T-01 to T-04 in a fresh session (`implement-phase`), one commit per task; the defects of TR-RULES-008 logged per task.
+3. Done 2026-11-22: Implement (T-01 to T-04) and Verify (verdict ticked by the owner, D-461; V-1 fixed `f478e040`, A-185 installed `fb3b72eb`).
+4. Commit prepared 2026-11-22 (`goals/G-V4.GRAPHAPI.RULES/merge-request.md`): requirements and checks moved into N-3.2, N-2.3 and N-2.4.1 (`5cb4c87b`), the model regenerated, the witnesses of AC-017 and AC-018 filled, and TR-RULES-001 to 009 staged (`5ff3eb22`). The owner now runs `bash tools/apply_merge_g_v4_rules.sh --do`, commits "plan: RULES test requirements installed", then runs `git merge --no-ff goal/v4.graphapi.rules` on `goal/v4` in `/home/maldun/prog/Python/MIA-goal-v4`, and records the merge commit in `goal.md`. After that: Deploy (SMOKE-RULES-001 on the owner's host) and Validate (VAL-RULES-01, G-V5).
+5. After RULES: TRANSFER on the agent's recommendations (D-423), in its own worktree; at RUN, VIEW, EDIT, CONTEXT ask the owner (VIEW/EDIT: design questions first; CONTEXT: purpose and use first).
 
 ## 3. Findings of this session (kept for Implement and Verify)
 - The run check in front of the runner keeps every protected run test green when the inputs of a Stage with a prepare function count as given (D-418 (1)); the refusal must keep repeated IDs; the self-loop unit case of `tests/test_graph_run_findings.py` changes in T-03 (adds `adjacency`).
