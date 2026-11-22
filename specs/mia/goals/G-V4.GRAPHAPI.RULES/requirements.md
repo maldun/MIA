@@ -296,7 +296,7 @@
 - Verification method: Test
 - Acceptance criterion: a workflow graph with two identical connections (a rule the five older rules lack) is refused on save naming `duplicate_connection`; the same graph checked through IF-301 gives the same items (exact)
 - Verified by: TC-WFM-179
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17)
 
 ### REQ-WFM-163 – A refused save carries the rule report
@@ -309,7 +309,7 @@
 - Verification method: Test
 - Acceptance criterion: the graph of AC-017 (a cycle and a second writer) saved gives a refusal whose rule report equals the report of IF-301 for the same graph, item by item (exact)
 - Verified by: TC-WFM-180
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17, ASM-8)
 
 ### REQ-WFM-164 – The flat list of named IDs
@@ -322,7 +322,7 @@
 - Verification method: Test
 - Acceptance criterion: a sound graph gives `[]`; `d1 → t1 → d1` gives `["d1", "t1", "d1"]`; the AC-017 graph gives the parts of `single_writer` before those of `cycle` (exact)
 - Verified by: TC-WFM-181
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, finding 3)
 
 ### REQ-WFM-165 – History of a graph that was never stored
@@ -335,7 +335,7 @@
 - Verification method: Test
 - Acceptance criterion: `graph_versions("never")` and `step_history("never", "a")` each fail with the reason `not_found` and store nothing (exact)
 - Verified by: TC-WFM-182
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: CORE verification report V-3, D-414)
 
 ### REQ-RUN-036 – Run check before the first step
@@ -416,7 +416,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-10 (accepted case AC-003) unchanged, plus: the AC-017 graph (a cycle and a second writer) names `single_writer` and then `cycle`, each with its parts, and no table grew (exact)
 - Verified by: TC-WFM-168, TC-WFM-180
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new; verified 2026-11-22 (D-414); G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, change proposed (basis: prototype round 04, finding 2)
 
 ### REQ-WFM-154 – Unknown kind refused
@@ -430,7 +430,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-14 unchanged (kind `swarm` refused naming `kind`, nothing stored), plus: `"kind": None` is refused naming `kind` and nothing is stored (exact)
 - Verified by: TC-WFM-172, TC-WFM-183
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new; verified 2026-11-22 (D-414); G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, change proposed (basis: CORE verification report V-2, D-414)
 
 ### REQ-WFM-155 – Rules of a context graph on save
@@ -444,7 +444,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-CORE-15 unchanged (each of the three faults refused naming the ID, nothing written), plus: two identical connections with different IDs and an empty step ID are each refused naming the rule (exact)
 - Verified by: TC-WFM-173, TC-WFM-184
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new; verified 2026-11-22 (D-414); G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, change proposed (basis: prototype round 04, finding 7, Q-3)
 
 ## Notes for other subgoals (not requirements of RULES)

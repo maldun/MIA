@@ -27,3 +27,10 @@
 | REQ-GTB-049 | requirement | ed6329e98705 | Stefan Reiterer | 2026-11-22 | approved | group "RF" accepted in the questionnaire |
 | REQ-GTB-050 | requirement | ac6e0a5f7c0c | Stefan Reiterer | 2026-11-22 | approved | group "RF" accepted in the questionnaire |
 | REQ-GTB-051 | requirement | a760a876337c | Stefan Reiterer | 2026-11-22 | approved | group "RF" accepted in the questionnaire |
+| REQ-WFM-162 | requirement | 356ce03b27aa | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
+| REQ-WFM-163 | requirement | 0509e714a124 | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
+| REQ-WFM-164 | requirement | 2304f59f03d5 | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
+| REQ-WFM-165 | requirement | 492f6f62f8d2 | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
+| REQ-WFM-150 | requirement | d853ba780b90 | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
+| REQ-WFM-154 | requirement | 4afe4b358f7a | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
+| REQ-WFM-155 | requirement | 1dba0a6c875e | Stefan Reiterer | 2026-11-22 | approved | group "SV" accepted in the questionnaire |
