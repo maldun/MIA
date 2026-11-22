@@ -1,6 +1,6 @@
 # Requirements: G-V4.GRAPHAPI.RULES (low level, new and changed items)
 
-**Top-level spec:** `specs/mia/goals/G-V4.GRAPHAPI/top-level-spec.md` (FR-63, FR-64)   **High-level spec:** `specs/mia/goals/G-V4.GRAPHAPI.RULES/high-level-spec.md` (HR-001 to HR-006, approved 2026-11-22)   **Status:** Draft (Plan step 1b, 2026-11-22), for review group by group   **Plan baseline:** –
+**Top-level spec:** `specs/mia/goals/G-V4.GRAPHAPI/top-level-spec.md` (FR-63, FR-64)   **High-level spec:** `specs/mia/goals/G-V4.GRAPHAPI.RULES/high-level-spec.md` (HR-001 to HR-006, approved 2026-11-22)   **Status:** Approved by the owner group by group (RS, RD, RF, SV, RR, DF; 2026-11-22, review-log.md)   **Plan baseline:** –
 
 <!-- The requirements this subgoal adds, and the proposed wording changes of requirements in force.
      Basis: the validated prototype round 04 (`specs/mia/goals/G-V4/prototype/rounds/04/` on `prototype/g-v4`, findings 1 to 13, carry-over all as proposed),
@@ -400,7 +400,7 @@
 - Verification method: Test
 - Acceptance criterion: the contract suites of IF-301 v1, v2 and v3 and the suites of IF-102, IF-104 v1 and IF-203 pass unchanged against the v4 code (exact)
 - Verified by: TC-GTB-045
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: Q-6, prototype round 04, finding 1)
 
 ## Changed requirements (proposed; the approved text in `In force:` stays in force until the owner approves the change, M8)

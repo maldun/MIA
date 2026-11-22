@@ -38,3 +38,4 @@
 | REQ-RUN-037 | requirement | 1cf729f19582 | Stefan Reiterer | 2026-11-22 | approved | group "RR" accepted in the questionnaire |
 | REQ-RUN-038 | requirement | 833d14a8acbd | Stefan Reiterer | 2026-11-22 | approved | group "RR" accepted in the questionnaire |
 | REQ-RUN-039 | requirement | 22222d13cdd0 | Stefan Reiterer | 2026-11-22 | approved | group "RR" accepted in the questionnaire |
+| REQ-GTB-052 | requirement | 6c3c4382a1f7 | Stefan Reiterer | 2026-11-22 | approved | group "DF" accepted in the questionnaire |
