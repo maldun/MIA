@@ -6,7 +6,7 @@ For a new session in the worktree `/home/maldun/prog/Python/MIA-goal-v4-transfer
 - Plan done: plan gate ticked by the owner; `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/plan.md` holds the six tasks and the interface the red tests fix. Requirements, checks and test requirements approved (D-466 to D-468), red tests and stubs D-469, seam with VIEW D-470 (all in `specs/mia/review-log.md`).
 - A-186 installed (`fbce1924`, IF-102 v9, text only). Red tests installed (`eb0030d9`, tag `plan-baseline-g-v4-transfer`): `tests/acceptance/test_transfer_{move,sync,interrupt,sets}.py`, helpers `tests/helpers/transfer_stores.py` and the extended `core_stores.py`, smoke `tests/smoke/smoke_transfer.py`.
 - Red as expected: move 7 failures, sync 9 failures + 1 skipped (TC-SLY-030, until VIEW), interrupt 8, sets 6; TC-SLY-022 green from the start; CORE's save checks green.
-- Open owner item: the Agreement row "update of 2026-11-22" in `goal.md` (line 65) is not ticked yet.
+- The goal update of 2026-11-22 is agreed by the owner (`42924f98`); no owner item is open before T-01.
 
 ## Next
 1. T-01 Move integrity and order (`plan.md`), test first, one commit, `implementation-log.md` (new file in the goal folder).
