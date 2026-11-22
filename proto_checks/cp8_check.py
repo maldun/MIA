@@ -18,7 +18,7 @@ def names(g): return [r["rule"] for r in graph_rules_proto.rule_report(g)]
 base = small("r", "x")           # var.in -> step.write -> var.out
 check("FR-63 a graph that keeps every rule has an empty report", names(base) == [])
 bad = copy.deepcopy(base); bad["nodes"].append({"id": "var.in", "data": {"type": "data"}})
-check("rule 1: a step name used twice, an empty name and a name with a slash", names(bad) == ["step_identity"] and graph_rules_proto.rule_report({"nodes": [{"id": "", "data": {"type": "data"}}, {"id": "a/b", "data": {"type": "data"}}], "edges": []})[0]["parts"] == ["", "a/b"])
+check("rule 1: a step name used twice and an empty name; a name with a slash is allowed (round 04 CP17, as CORE: REQ-GTB-029)", names(bad) == ["step_identity"] and graph_rules_proto.rule_report({"nodes": [{"id": "", "data": {"type": "data"}}, {"id": "a/b", "data": {"type": "data"}}], "edges": []})[0]["parts"] == [""])
 bad = copy.deepcopy(base); bad["nodes"][1]["data"]["type"] = "wizard"
 check("rule 2: a step of an unknown kind", "step_kind" in names(bad))
 bad = copy.deepcopy(base); bad["edges"].append({"id": "e9", "from": "step.write", "to": "var.gone", "data": {}})

@@ -353,7 +353,7 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         wmodel.author = g.account                         # the version names the account that kept it (the prototype serves one request at a time)
         saved = wmodel.save_graph(graph)
         if not saved.saved:
-            return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named}), 422
+            return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named, "rules": saved.rules}), 422
         logged = None
         if saved.version != current:
             logged = record_changes(graph_id, current, saved.version, entries, kind)

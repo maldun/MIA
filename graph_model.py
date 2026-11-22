@@ -20,7 +20,7 @@ except ImportError:  # used as plain script / in tests
     from storage import StorageError
 
 # `rule` and `detail` are those of a StorageError("invalid") of the record checks (as StoreResult of skill_record.py); None for a refusal of the graph rules.
-SaveResult = namedtuple("SaveResult", "saved version named rule detail", defaults=(None, None))
+SaveResult = namedtuple("SaveResult", "saved version named rule detail rules", defaults=(None, None, None))   # PROTOTYPE CP17: `rules` = the broken rules of graph_rules_proto.check
 
 TABLE = "workflow_graphs"      # the table of the fake; the real Storage keeps the graph as records
 HEADER = ("context_graph_id", "testbench_id", "description")
@@ -164,9 +164,15 @@ class GraphModel:
         kind = _kind(graph)
         if kind is None:
             return SaveResult(False, None, [], "schema_break", "kind")
-        named = check_graph(graph) if kind == "workflow" else context_problems(graph)
-        if named:
-            return _refuse(named)
+        # PROTOTYPE round 04 CP17: the one rule set chosen by kind (graph_rules_proto.KINDS) instead of check_graph / context_problems;
+        # imported here because graph_rules_proto imports find_cycle and stop_is_valid from this module
+        try:
+            from .graph_rules_proto import check
+        except ImportError:
+            from graph_rules_proto import check
+        rules = check(graph)
+        if rules:
+            return SaveResult(False, None, [p for r in rules for p in r["parts"]], None, None, rules)
         if not self.real:
             return SaveResult(True, self.tables.put(TABLE, graph["id"], graph), [])
         nodes, edges = self._scoped(graph)

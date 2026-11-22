@@ -30,7 +30,7 @@ def attempt(graph, given=None):
 # ---- the eight rules, one fixed order ----
 two = G([D("a", value=1), T("s1"), T("s2"), D("w"), D("w")], [E("e1", "a", "s1"), E("e1", "a", "s1"), E("e3", "s1", "w"), E("e4", "s2", "w")])
 rules = lambda g: [r["rule"] for r in R.rule_report(g)]
-check("FR-63 the eight rules are one list in one place, in the order ids, kind, missing connection, duplicate, adjacency, one writer, session setting and stop limit, cycle", list(R.TEXTS) == ["step_identity", "step_kind", "connection_endpoints", "duplicate_connection", "adjacency", "single_writer", "stop_limit", "cycle"])
+check("FR-63 the eight rules are one list in one place, in the order ids, kind, missing connection, duplicate, adjacency, one writer, session setting and stop limit, cycle", list(R.KINDS["workflow"]["rules"]) == ["step_identity", "step_kind", "connection_endpoints", "duplicate_connection", "adjacency", "single_writer", "stop_limit", "cycle"])
 check("FR-63 a graph that breaks two rules lists them in that order, with their parts, every time", rules(two) == ["step_identity", "duplicate_connection", "single_writer"] and [r["parts"] for r in R.rule_report(two)] == [["w"], ["e1"], ["w"]] and all(rules(two) == rules(copy.deepcopy(two)) for _ in range(5)), json.dumps(rules(two)))
 # session setting and stop limit
 check("FR-63 a loop-controlling step without a valid stop limit breaks the rule", rules(G([D("a", value=1), M("m"), D("o")], [E("e1", "a", "m"), E("e2", "m", "o")])) == ["stop_limit"])
