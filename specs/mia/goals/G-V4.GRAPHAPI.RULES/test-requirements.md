@@ -1,5 +1,7 @@
 # Test requirements: G-V4.GRAPHAPI.RULES
 
+**Moved at the merge (2026-11-22):** TR-RULES-001 to 009 go unchanged into the protected `specs/mia/test-requirements.md` (new section at the end, groups as rows of its one `## Groups` table) when the owner runs `bash tools/apply_merge_g_v4_rules.sh --do` (staging copy `specs/mia/amendments/merge-g-v4-rules/specs/mia/test-requirements.md`). This file stays as the record of the goal.
+
 **Test spec:** `test-spec.md`   **Status:** Approved by the owner (2026-11-22, D-422)
 
 <!-- Requirements on the checks, apart from the product requirements: under which conditions a measurement counts. Setup kind: the verdict depends on the setup; written out and reviewed in detail. Unit kind: exact expected values; grouped and signed off as a group. -->
