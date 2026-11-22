@@ -1,8 +1,10 @@
 # Test specification: G-V4.GRAPHSTORE.TRANSFER
 
-**Requirements:** `requirements.md` (REQ-SLY-016 to 039, REQ-API-060 to 064; changes of REQ-SLY-009 and REQ-GA-008; all approved 2026-11-22, D-466, D-467)   **High-level spec:** HR-004 to HR-008 (measures)   **Status:** Draft (2026-11-22, agent by delegation D-423; the owner reviews the scenarios)
+**Requirements:** `requirements.md` (REQ-SLY-016 to 039, REQ-API-060 to 064; changes of REQ-SLY-009 and REQ-GA-008; all approved 2026-11-22, D-466, D-467)   **High-level spec:** HR-004 to HR-008 (measures)   **Status:** Approved (2026-11-22): scenario groups Move, Same behaviour, Sync, Side records by the owner; Portability, Commands and backend, Smoke by the agent on the owner's delegation (D-468); review-log.md
 
 All checks are exact: every expected value is a record history, an ID, a state, a count, an order of calls or an equality, so no statistical check is needed; the high-level spec has no hard bound, so no benchmark. The accepted cases (`specs/mia/goals/G-V4/accepted-cases.md`) are witnessed by TC-SLY-022 (AC-004), TC-SLY-016, TC-SLY-018, TC-SLY-020 (AC-005), TC-SLY-024, TC-SLY-025 (AC-006), TC-SLY-026, TC-SLY-027 (AC-007), TC-SLY-037 (AC-008), TC-SLY-030 (AC-033) and TC-SLY-031 (the mechanism of AC-027).
+
+The small store (TC-SLY-029, TC-SLY-036; owner, scenario review): `cp2.multi`, `sample.code` and `context.cp13` of the sample store; the full store stopped at every write would take some 90 000 writes per backend, the small one covers every kind of graph in about 60 positions.
 
 Stores: every check that names "both backends" runs on a new files folder and on a new database in a throw-away `postgres:16` container, as CORE's `tests/helpers/core_stores.py` does (TR-TRANSFER-002). The sample store (TR-TRANSFER-003) is the 15 converted skill graphs, `cp2.multi` with four versions by four authors, `sample.code` (a code step, a loop-controlling step, hostile names) and the context graph `context.cp13`, all from `tests/fixtures/graphs/`. "Live" and "copy" in a scenario are two such stores; the copy is always a files folder.
 
@@ -24,7 +26,7 @@ Protected tests in force: TC-SLY-007 and TC-SLY-009 (`tests/test_migrate.py`, `t
 | TC-SLY-026 | REQ-SLY-026, HR-003 | component | AC-007; once plain, once with a fault after the aside file is written and before the first removal or cut | the aside file holds the copy's version 2 of `sample.code` and its members with author and time; after the fault the copy still holds version 2 and the aside file is complete JSON | exact |
 | TC-SLY-027 | REQ-SLY-027 | component | AC-007, sync | the answer's `set_aside` is exactly `{"sample.code": {"versions": [2], "file": "aside/sample.code__<stamp>.json", ...}}`; the path is relative and the file exists | exact |
 | TC-SLY-028 | REQ-SLY-028 | component | a copy; process A holds its lock (a helper process that takes the lock and waits); process B runs a sync; then A is killed and B runs again | B's first sync is refused naming `sync.lock` and the copy is unchanged; after A is killed B's sync runs | exact |
-| TC-SLY-029 | REQ-SLY-029, HR-007 | component | a move of the sample store, a one-graph move of `cp2.multi` and the sync of AC-006 plus AC-007, each interrupted at every write position; both backends | after every stop no header in the target names a missing member | 0 positions failing |
+| TC-SLY-029 | REQ-SLY-029, HR-007 | component | a move of the small store (`cp2.multi`, `sample.code`, `context.cp13`), a one-graph move of `cp2.multi` and the sync of AC-006 plus AC-007, each interrupted at every write position; both backends | after every stop no header in the target names a missing member | 0 positions failing |
 | TC-SLY-036 | REQ-SLY-036, HR-007 | component | every stopped run of TC-SLY-029, run again | the target equals, record by record, the target of an uninterrupted run (aside files may be two) | 0 differences |
 | TC-SLY-038 | REQ-SLY-038, HR-007 | component | the sync of AC-007 interrupted at every write position; both backends for the live side | after each stop `sample.code` is listed on the copy at the shared version 1, at the copy's version 2 or at the live version 2, never missing; every header names only existing members | 0 positions failing |
 | TC-SLY-030 | REQ-SLY-030 | component | a graph with two `graph_changes` records, a version kept without one and an `arrangements` record; move, one-graph move and sync (skipped while the tables are missing) | the destination has the same side records; the version without a record has none | exact |
@@ -161,7 +163,7 @@ None: no hard bound and no time budget (high-level spec section 3).
 
 ### TC-SLY-029 – A stop at any write leaves complete graphs
 - Verifies: REQ-SLY-029, HR-007
-- Given: a move of the sample store, a one-graph move of `cp2.multi` and the sync of AC-006 plus AC-007; the target on files and on the database
+- Given: a move of the small store (`cp2.multi` with its versions, `sample.code` with its loop step, the context graph `context.cp13`: every kind of graph, about 60 writes), a one-graph move of `cp2.multi` and the sync of AC-006 plus AC-007; the target on files and on the database
 - When: each is stopped at its first write, its second write, and so on to its last
 - Then: after every stop, no header in the target names a step or connection version that is not there
 
@@ -204,10 +206,11 @@ None: no hard bound and no time budget (high-level spec section 3).
 - Given: a set written by today's code (scoped graphs and `workflows` documents) without a marker
 - When: it is moved and synced
 - Then: it behaves as a set with format 1: the records arrive as in TC-SLY-016
+- And: the set is made by today's save path and its `mia-store.json` deleted afterwards, the stand-in for a set written before this version (every write now adds the marker)
 
 ### TC-SLY-034 – An older set with plain step IDs is refused by name
 - Verifies: REQ-SLY-034
-- Given: a set without a marker holding a step record `graph_nodes/n1` (no graph ID in front)
+- Given: a set without a marker holding a step record `graph_nodes/n1` (no graph ID in front), its record file written straight into the folder as a set before A-167 held it
 - When: it is moved, and synced
 - Then: both are refused naming `graph_nodes`, `n1` and MIGRATION's conversion step
 - And: nothing is written

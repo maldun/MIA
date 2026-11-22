@@ -33,3 +33,46 @@
 | REQ-API-062 | requirement | eb24f4f37757 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
 | REQ-API-063 | requirement | b5a7bfb0aa30 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
 | REQ-API-064 | requirement | 8afa79db6916 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
+| TR-TRANSFER-001 | test requirement | 41a5d5f00863 | maldun (owner) | 2026-11-22 | skimmed | group EX accepted in the chat |
+| TR-TRANSFER-005 | test requirement | d72a3dc2e725 | maldun (owner) | 2026-11-22 | skimmed | group EX accepted in the chat |
+| TR-TRANSFER-002 | test requirement | ac2f28cd4d50 | maldun (owner) | 2026-11-22 | approved | group BK accepted in the chat |
+| TR-TRANSFER-003 | test requirement | 7fb473f5f465 | maldun (owner) | 2026-11-22 | approved | group BK accepted in the chat |
+| TR-TRANSFER-007 | test requirement | 60e248935931 | maldun (owner) | 2026-11-22 | approved | group BK accepted in the chat |
+| TR-TRANSFER-004 | test requirement | af5629a4e7ff | maldun (owner) | 2026-11-22 | approved | group FI accepted in the chat; TR-TRANSFER-004 counts appends, cut backs, removals and the aside file write |
+| TR-TRANSFER-006 | test requirement | d0906ec8c67d | maldun (owner) | 2026-11-22 | approved | group FI accepted in the chat; TR-TRANSFER-004 counts appends, cut backs, removals and the aside file write |
+| TR-TRANSFER-009 | test requirement | b8d4a674432f | maldun (owner) | 2026-11-22 | approved | group EP accepted in the chat; note on splitting the start and stop functions in TR-TRANSFER-009 |
+| TR-TRANSFER-010 | test requirement | b4982745d135 | maldun (owner) | 2026-11-22 | approved | group EP accepted in the chat; note on splitting the start and stop functions in TR-TRANSFER-009 |
+| TR-TRANSFER-011 | test requirement | e6d68e033147 | maldun (owner) | 2026-11-22 | approved | group EP accepted in the chat; note on splitting the start and stop functions in TR-TRANSFER-009 |
+| TR-TRANSFER-008 | test requirement | 7cea08b0068f | maldun (owner) | 2026-11-22 | approved | group CR accepted in the chat |
+| TC-SLY-016 | check | 6e4d088688dc | maldun (owner) | 2026-11-22 | approved | scenario group Move accepted in the chat |
+| TC-SLY-017 | check | 31fb977a429f | maldun (owner) | 2026-11-22 | approved | scenario group Move accepted in the chat |
+| TC-SLY-018 | check | 054fa6f3339e | maldun (owner) | 2026-11-22 | approved | scenario group Move accepted in the chat |
+| TC-SLY-019 | check | 63d99aa0a33f | maldun (owner) | 2026-11-22 | approved | scenario group Move accepted in the chat |
+| TC-SLY-020 | check | da0b00f703a7 | maldun (owner) | 2026-11-22 | approved | scenario group Move accepted in the chat |
+| TC-SLY-021 | check | a24052d5232a | maldun (owner) | 2026-11-22 | approved | scenario group Move accepted in the chat |
+| TC-SLY-022 | check | fff0c7518395 | maldun (owner) | 2026-11-22 | approved | scenario group Same behaviour accepted in the chat |
+| TC-SLY-023 | check | f824ce0a8aff | maldun (owner) | 2026-11-22 | approved | scenario group Same behaviour accepted in the chat |
+| TC-SLY-024 | check | 492e1f12f93a | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-025 | check | 80d50016f4f8 | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-026 | check | 35c384741f55 | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-027 | check | 812ac6dc827b | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-028 | check | a13dc39b5fee | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-029 | check | 29addad7ed60 | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-036 | check | f33e601a87a9 | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-038 | check | 1ef3a85e63db | maldun (owner) | 2026-11-22 | approved | scenario group Sync accepted in the chat; TC-SLY-029 and 036 move the small store |
+| TC-SLY-030 | check | caff7fd84a4b | maldun (owner) | 2026-11-22 | approved | scenario group Side records accepted in the chat; TC-SLY-030 must be green before Verify |
+| TC-SLY-031 | check | 41a1b871c3c4 | maldun (owner) | 2026-11-22 | approved | scenario group Side records accepted in the chat; TC-SLY-030 must be green before Verify |
+| TC-SLY-032 | check | 9594769751ff | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-SLY-033 | check | bf550e6dcf56 | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-SLY-034 | check | ebf15e7c281d | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-SLY-035 | check | 4320d2194c7a | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-SLY-037 | check | 405c9ccb22fb | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-SLY-039 | check | ea1e941c1136 | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-SLY-009 | check | ad24aaadc8c8 | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-API-060 | check | 095c64dd5945 | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-API-061 | check | 3d1904a96e0e | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-API-062 | check | 1bfbea3c3c1c | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-API-063 | check | 08381af798b8 | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TC-API-064 | check | 53e22585df4a | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| SMOKE-TRANSFER-001 | check | beb9bb3da03d | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
+| TR-TRANSFER-010 | test requirement | 184e6d2ce8e6 | agent, delegated by maldun (owner) | 2026-11-22 | approved | owner in the chat 2026-11-22: make changes as you see fit until a TLS change is needed (D-468) |
