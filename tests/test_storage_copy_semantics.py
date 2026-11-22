@@ -197,7 +197,7 @@ class ALegalRecordAtADeepCallStack(unittest.TestCase):
     FRAMES = (0, 500, 700)
 
     def setUp(self):
-        self.record = {"id": "d1", "data": {"type": "data", "value": nested(197, lambda leaf: [leaf])}}   # record 1, data 2, 197 lists, a scalar at level 200
+        self.record = {"id": "g/d1", "data": {"type": "data", "value": nested(197, lambda leaf: [leaf])}}   # record 1, data 2, 197 lists, a scalar at level 200
         base = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, base, True)
         self.store = Storage(FileBackend(base))
@@ -218,7 +218,7 @@ class ALegalRecordAtADeepCallStack(unittest.TestCase):
         Example: the NaN at the end of a 190-level list in "value" is named by its path from 0 and from 700 frames, not turned into record_identity.
         """
         # Given: a node with a NaN next to a deep list
-        record = {"id": "d1", "data": {"type": "data", "value": [nested(190, lambda leaf: [leaf]), float("nan")]}}
+        record = {"id": "g/d1", "data": {"type": "data", "value": [nested(190, lambda leaf: [leaf]), float("nan")]}}
         expected = "value.1"
         # When/Then: the same schema_break answer at both depths
         for frames in (0, 700):
@@ -242,12 +242,12 @@ class ALegalRecordAtADeepCallStack(unittest.TestCase):
     @mark.req("REQ-SLY-013")
     def test_put_of_a_graph_node_and_get_work_at_every_stack_depth(self):
         """F-26.
-        Example: Storage.put("graph_nodes", "d1", a 200-level node) is stored from 0, 500 and 700 frames (never record_identity), and get returns it.
+        Example: Storage.put("graph_nodes", "g/d1", a 200-level node) is stored from 0, 500 and 700 frames (never record_identity), and get returns it.
         """
         # Given: the node of setUp. When/Then: put stores it as version 1 and get returns it, at every depth
         for frames in self.FRAMES:
             with self.subTest(frames=frames):
-                record_id = "d%d" % frames
+                record_id = "g/d%d" % frames
                 record = dict(self.record, id=record_id)
                 self.assertEqual(from_depth(frames, lambda: self.store.put("graph_nodes", record_id, record, "anna")), [{"version": 1}])
                 self.assertEqual(from_depth(frames, lambda: self.store.get("graph_nodes", record_id)["doc"]), [record])
