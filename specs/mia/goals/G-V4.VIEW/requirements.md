@@ -289,7 +289,7 @@
 - Parent: FR-70
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: a step of a type the store does not know gives 422 `refused` with rule `unknown_type` and still the same versions (exact)
+- Acceptance criterion: step.write of cp2.multi with the extra field `colour` (every graph rule kept) gives 422 `refused` with rule `schema_break`, detail `colour`, and still the same versions (exact; D-444: a step of an unknown type is refused earlier by RULES' rule `step_kind`)
 - Verified by: TC-API-021
 - Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track A; basis: IF-104 v2 A-171, IF-302 v15 A-172, prototype round 02 R5)

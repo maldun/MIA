@@ -208,3 +208,6 @@
 | TR-VIEW-016 | test requirement | 618d3f78b9b1 | Stefan Reiterer | 2026-11-22 | approved | accepted by group in the questionnaire (D-442) |
 | TR-VIEW-017 | test requirement | 8c94c2fa040e | Stefan Reiterer | 2026-11-22 | approved | accepted by group in the questionnaire (D-442) |
 | TR-VIEW-021 | test requirement | 1b7373fe702d | Stefan Reiterer | 2026-11-22 | approved | accepted by group in the questionnaire (D-442) |
+| REQ-API-036 | requirement | c7cf2f696c1e | Stefan Reiterer | 2026-11-22 | approved | example changed to the extra field colour (D-444) |
+| TC-API-021 | check | ebf68941e815 | Stefan Reiterer | 2026-11-22 | approved | example changed to the extra field colour (D-444) |
+| TR-VIEW-006 | test requirement | 385b8e2a7184 | Stefan Reiterer | 2026-11-22 | approved | example changed to the extra field colour (D-444) |

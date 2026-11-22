@@ -14,7 +14,7 @@ All checks are exact: every expected value is a status, a code, an ID, a count, 
 | TC-API-018 | REQ-API-019 | component | 1 | a configuration without a store setting; graphs written to the data folder through CORE's GraphModel | the v2 list and read routes give those graphs; the store route says `files` | exact |
 | TC-API-019 | REQ-API-020 | component | 1 | the store settings `postgress`, `""`, `5` | the start is refused, the message names `store` and the value | exact |
 | TC-API-020 | REQ-API-030 | component | 1 | MIA's web application (`web_app`) with accounts on, a files store with cp2.multi | after a login through `/api/login` the routes `/api/v2/me` and `/api/v2/graphs` answer under the same session; the v1 route `/api/graphs` answers as before | exact |
-| TC-API-021 | REQ-API-036 | component | 2 | cp2.multi at version 4 on files and on PostgreSQL; a save and a restore whose graph fails the store's record check (a step of an unknown type) | 422 `refused`, rule `unknown_type` with its detail; still 4 versions, no record of changes | exact |
+| TC-API-021 | REQ-API-036 | component | 2 | cp2.multi at version 4 on files and on PostgreSQL; a save and a restore whose graph fails the store's record check (step.write with the extra field `colour`, every graph rule kept) | 422 `refused`, rule `schema_break`, detail `colour`; still 4 versions, no record of changes | exact |
 | TC-API-022 | REQ-API-039 | component | 1 | cp2.multi at 4; a save to version 5; then a second write of the record `cp2.multi/5` attempted through the graph API's writer | the second write is not made (no new record version); the first record is unchanged | exact |
 | TC-API-023 | REQ-API-040, REQ-API-042 | component | 1 | cp2.multi at 4; the table `graph_changes` made to fail on write | the save gives version 5 with `logged` false; the version is stored; the changes route lists version 5 as `before_the_record` | exact |
 | TC-API-024 | REQ-API-047 | component | 1 | the real provider on files with allowed origin `http://localhost`; the owner's check, save, restore and arrangement save, each with `Origin: https://evil.example`; one save with that origin and no session | each is 403 `bad_origin`; still 4 versions, no arrangement, no record | exact |
@@ -120,9 +120,9 @@ None: no hard bound (D-425 E-H). The opening time is a smoke number (SMOKE-VIEW-
 
 ### TC-API-021 – A refused record check writes nothing
 - Verifies: REQ-API-036
-- Given: cp2.multi at version 4, on the file store and on PostgreSQL; a working copy with one step of a type the store does not know
-- When: the owner saves the copy, and restores a version whose content the record check refuses (written around the checks as raw records, as sample.broken is)
-- Then: each answer is 422 `refused` with the rule `unknown_type` and its detail
+- Given: cp2.multi at version 4, on the file store and on PostgreSQL; a working copy whose step.write carries the extra field `colour` (it keeps every graph rule, so only the store's record check can refuse it; D-444)
+- When: the owner saves the copy, and restores a version 5 with the same content written around the checks as raw records (as sample.broken is)
+- Then: each answer is 422 `refused` with the rule `schema_break` and the detail `colour`
 - And: cp2.multi still has 4 versions and no record of changes was written
 
 ### TC-API-022 – A record of changes is written once

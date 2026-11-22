@@ -75,7 +75,7 @@
 - Requirement: REQ-API-040
 - Group: SI
 - Kind: setup
-- Text: Each fault stand-in shall be shown to fire in the same check before its verdict counts: the unreachable store (every backend call raises `ConnectionError`), the failing record table (only writes to `graph_changes` raise; a write to `graphs` succeeds in the same save), the record the store refuses (a step of type `no_such_type` refused by IF-301 `check_record` with `unknown_type`), the unreachable JS mock.
+- Text: Each fault stand-in shall be shown to fire in the same check before its verdict counts: the unreachable store (every backend call raises `ConnectionError`), the failing record table (only writes to `graph_changes` raise; a write to `graphs` succeeds in the same save), the record the store refuses (step.write with the extra field `colour`, refused by IF-301 `check_record` with `schema_break`, D-444), the unreachable JS mock.
 - Rationale: a wrapper that never fires makes a refusal check pass for the wrong reason; TC-API-023 needs the version write to succeed and only the record write to fail, else it shows a refused save, not a version without its record.
 - Credibility aspect: stand-in fidelity
 - Verified by: an assertion in each check that the fault was raised at least once (a call counter of the wrapper)
