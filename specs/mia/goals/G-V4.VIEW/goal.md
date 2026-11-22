@@ -66,7 +66,7 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 Not yet a top-level item: the chat with MIA about the open graph, a new item for a later goal (D-425 layout); its band keeps its place in the frame.
 
 ## Split check
-Thirteen top-level items in scope (FR-48 to FR-55, NFR-10 to NFR-14) plus the IF-104 v2 amendment: above the size signal of about 8. Owner 2026-11-22 (D-430 (2)): one goal, two tracks: the interface and backend track first (IF-104 v2 with mocks and contract suite, IF-302 tables, all routes, store setting), then the page track (frame, viewer, browser checks). With the backend side of EDIT and REPLAY added (D-430 (7)) the goal holds about 25 items; the cut into a backend and a page subgoal stays the agent's suggestion for the high-level spec approval.
+Thirteen top-level items in scope (FR-48 to FR-55, NFR-10 to NFR-14) plus the IF-104 v2 amendment: above the size signal of about 8. Owner 2026-11-22 (D-430 (2)): one goal, two tracks: the interface and backend track first (IF-104 v2 with mocks and contract suite, IF-302 tables, all routes, store setting), then the page track (frame, viewer, browser checks). With the backend side of EDIT and REPLAY added (D-430 (7)) the goal holds about 25 items; the agent suggested subgoals G-V4.VIEW.API and G-V4.VIEW.PAGE; the owner keeps one goal and splits the effort within it (D-432): Track A (interface and backend) and Track B (page), each with its own requirement groups, review sittings and task block, see `high-level-spec.md` section 6.
 
 ## Parts
 | Part | Real or stand-in | Notes |
