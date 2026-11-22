@@ -24,3 +24,6 @@
 | REQ-GTB-046 | requirement | 3d5b39dd6fd2 | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
 | REQ-GTB-047 | requirement | 378bfc73371c | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
 | REQ-GTB-048 | requirement | 989c1c9394ae | Stefan Reiterer | 2026-11-22 | approved | group "RD" accepted in the questionnaire |
+| REQ-GTB-049 | requirement | ed6329e98705 | Stefan Reiterer | 2026-11-22 | approved | group "RF" accepted in the questionnaire |
+| REQ-GTB-050 | requirement | ac6e0a5f7c0c | Stefan Reiterer | 2026-11-22 | approved | group "RF" accepted in the questionnaire |
+| REQ-GTB-051 | requirement | a760a876337c | Stefan Reiterer | 2026-11-22 | approved | group "RF" accepted in the questionnaire |

@@ -257,7 +257,7 @@
 - Verification method: Test
 - Acceptance criterion: a context graph gives refused with exactly one item `kind_cannot_run` naming `context`; a graph of kind `swarm` with a cycle gives exactly one item `unknown_kind` naming `swarm` (exact)
 - Verified by: TC-GTB-043
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19)
 
 ### REQ-GTB-050 – Refusal of a run: rules, then inputs
@@ -270,20 +270,20 @@
 - Verification method: Test
 - Acceptance criterion: a workflow graph with two writers and an unsupplied input gives refused with `single_writer` first and the input second; the converted `chat` skill gives ready with `{"input.text": "hello"}` (exact)
 - Verified by: TC-GTB-043
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19)
 
 ### REQ-GTB-051 – Unsupplied input
 - Level: low   Subject: Persistence
 - Group: RF
 - Text: The run check of the Graph tables shall report every unsupplied input as one item naming the processing or loop-controlling step and the data step it reads.
-- Rationale: refines HR-003 and D-375 (a step input nobody supplies); the term is defined above: no writer, no start value in the graph, no value given with the run; settings and order connections are not inputs here (a step gets `{}` without settings, REQ-RUN-030, an order connection hands over nothing, REQ-RUN-035). the inputs of a Stage with a prepare function count as given (REQ-RUN-039, D-418 (1))
+- Rationale: refines HR-003 and D-375 (a step input nobody supplies); the term is defined above: no writer, no start value in the graph, no value given with the run; settings and order connections are not inputs here (a step gets `{}` without settings, REQ-RUN-030, an order connection hands over nothing, REQ-RUN-035); the inputs of a Stage with a prepare function count as given (REQ-RUN-039, D-418 (1))
 - Parent: HR-003
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: the converted `chat` skill without values names the step `step.converse` and the data step `input.text`; a data step with a graph value, or one written by another step, is not named (exact)
 - Verified by: TC-GTB-044
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19)
 
 ### REQ-WFM-162 – Save with the rule set of the graph's kind
