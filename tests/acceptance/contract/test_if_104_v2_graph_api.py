@@ -245,7 +245,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_list_read_and_versions(self, api):
-        """TC-IF-104-06 golden 1: every account lists the graphs with kind, version, author, time, description and counts; reads the current or an earlier version; the versions oldest first.
+        """TC-IF-104-17 golden 1: every account lists the graphs with kind, version, author, time, description and counts; reads the current or an earlier version; the versions oldest first.
         Example: cp2.multi with 4 versions, ?version=2 -> version 2 by ben, current 4."""
         # Given cp2.multi with four versions and sample.code with one
         cp2_multi(api)
@@ -274,7 +274,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_what_cannot_be_drawn_is_named(self, api):
-        """TC-IF-104-07 golden 2: a connection to a missing step is a problem of the answer; every step and connection is still in the graph.
+        """TC-IF-104-18 golden 2: a connection to a missing step is a problem of the answer; every step and connection is still in the graph.
         Example: sample.broken e2 -> var.gone gives one missing_step problem."""
         # Given sample.broken, whose connection e2 ends at a step the graph does not have
         api.seed(SAMPLE_BROKEN, "anna")
@@ -290,7 +290,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_marks_and_text_as_stored(self, api):
-        """TC-IF-104-08 golden 3: per step its kind; for a processing or loop-controlling step trust, lifecycle, code and changed_since_trusted; names come back exactly as stored.
+        """TC-IF-104-19 golden 3: per step its kind; for a processing or loop-controlling step trust, lifecycle, code and changed_since_trusted; names come back exactly as stored.
         Example: the hostile step (import.demo, not in the toolbox) is untrusted and holds code."""
         # Given sample.code with a hostile step name and a code connection e2
         api.seed(SAMPLE_CODE, "anna")
@@ -314,7 +314,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_save_derives_the_record_and_an_unchanged_save_writes_nothing(self, api):
-        """TC-IF-104-09 golden 4: the owner's change is a new version by that account with a derived record of changes; the same graph again is no new version.
+        """TC-IF-104-20 golden 4: the owner's change is a new version by that account with a derived record of changes; the same graph again is no new version.
         Example: cp2.multi at 4, step.write -> t9 with expected_version 4 gives version 5, one change_step entry."""
         # Given cp2.multi at version 4
         cp2_multi(api)
@@ -339,7 +339,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_editor_entries_are_kept_only_when_they_give_the_graph(self, api):
-        """TC-IF-104-10: entries sent by the editor are recorded as kind editor when playing them back gives the sent graph; otherwise nothing is written.
+        """TC-IF-104-21: entries sent by the editor are recorded as kind editor when playing them back gives the sent graph; otherwise nothing is written.
         Example: an add_step entry that matches is kept; a change_step entry naming the wrong tool is changes_do_not_match."""
         # Given cp2.multi at version 4
         cp2_multi(api)
@@ -361,7 +361,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_refusals_change_nothing(self, api):
-        """TC-IF-104-11 golden 5: a second account, a stale version, a broken rule, a malformed body and an unknown graph are refused; no version is written.
+        """TC-IF-104-22 golden 5: a second account, a stale version, a broken rule, a malformed body and an unknown graph are refused; no version is written.
         Example: expected_version 3 at version 4 is 409 with current 4; a cycle var.out -> step.write is rules_broken ending in cycle."""
         # Given cp2.multi at version 4
         cp2_multi(api)
@@ -391,7 +391,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_check_reports_rules_and_stores_nothing(self, api):
-        """TC-IF-104-12: the check route gives the rule report of a working copy for the owner, [] for a graph that keeps every rule; nothing is stored; another account is refused.
+        """TC-IF-104-23: the check route gives the rule report of a working copy for the owner, [] for a graph that keeps every rule; nothing is stored; another account is refused.
         Example: cp2.multi plus e9 var.out -> step.write reports cycle last."""
         # Given cp2.multi at version 4
         cp2_multi(api)
@@ -412,7 +412,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_restore_keeps_the_former_content_as_a_new_version(self, api):
-        """TC-IF-104-13 golden 6: a restore saves the content of an earlier version as a new version with one restore entry; nothing is deleted.
+        """TC-IF-104-24 golden 6: a restore saves the content of an earlier version as a new version with one restore entry; nothing is deleted.
         Example: restore 1 of cp2.multi at 4 gives version 5 naming t1."""
         # Given cp2.multi at version 4
         cp2_multi(api)
@@ -432,7 +432,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_arrangement_read_and_saved_by_the_owner(self, api):
-        """TC-IF-104-14 golden 7: no arrangement is positions null; the owner's places are kept rounded, places of unknown steps ignored; a malformed place is refused naming the step.
+        """TC-IF-104-25 golden 7: no arrangement is positions null; the owner's places are kept rounded, places of unknown steps ignored; a malformed place is refused naming the step.
         Example: {"var.in": {"x": 10.4, "y": -3}, "nope": {...}} keeps var.in at 10, -3 and saved 1."""
         # Given cp2.multi, never arranged
         cp2_multi(api)
@@ -456,7 +456,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104")
     @each_store
     def test_store_and_unreachable(self, api):
-        """TC-IF-104-15 golden 8: the store route names the store, whether it answers, and the live/copy fields with their fixed values until TRANSFER; an unreachable store is 503 on the graph routes.
+        """TC-IF-104-26 golden 8: the store route names the store, whether it answers, and the live/copy fields with their fixed values until TRANSFER; an unreachable store is 503 on the graph routes.
         Example: the file store gives store files, reachable, shown live, lag 0 since null."""
         # Given cp2.multi in a store that answers
         cp2_multi(api)
@@ -480,7 +480,7 @@ class GraphApiV2Contract(unittest.TestCase):
     @mark.req("IF-104", "REQ-GA-007")
     @each_store
     def test_no_session_no_access(self, api):
-        """TC-IF-104-16: without a session every v2 route is 401 unauthenticated and changes nothing; me names the account and whether it is the owner.
+        """TC-IF-104-27: without a session every v2 route is 401 unauthenticated and changes nothing; me names the account and whether it is the owner.
         Example: a made-up session reading cp2.multi is 401."""
         # Given cp2.multi and a made-up session
         cp2_multi(api)

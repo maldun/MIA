@@ -65,7 +65,7 @@ function cp2Multi(api) {
 }
 
 // mark.req("IF-104")
-each('TC-IF-104-06 golden 1: list, read the current and an earlier version, versions oldest first', async (api) => {
+each('TC-IF-104-17 golden 1: list, read the current and an earlier version, versions oldest first', async (api) => {
   // Given cp2.multi with four versions and sample.code
   cp2Multi(api);
   api.seed(SAMPLE_CODE, 'anna');
@@ -87,7 +87,7 @@ each('TC-IF-104-06 golden 1: list, read the current and an earlier version, vers
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-07 golden 2: a connection to a missing step is named; nothing is dropped', async (api) => {
+each('TC-IF-104-18 golden 2: a connection to a missing step is named; nothing is dropped', async (api) => {
   api.seed(SAMPLE_BROKEN, 'anna');
   await login(api, 'ben');
   const shown = (await call(api, 'GET', G('sample.broken'))).body;
@@ -97,7 +97,7 @@ each('TC-IF-104-07 golden 2: a connection to a missing step is named; nothing is
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-08 golden 3: marks per step; names exactly as stored', async (api) => {
+each('TC-IF-104-19 golden 3: marks per step; names exactly as stored', async (api) => {
   api.seed(SAMPLE_CODE, 'anna');
   await login(api, 'ben');
   const shown = (await call(api, 'GET', G('sample.code'))).body;
@@ -112,7 +112,7 @@ each('TC-IF-104-08 golden 3: marks per step; names exactly as stored', async (ap
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-09 golden 4: a save is a new version with a derived record; the same graph again writes nothing', async (api) => {
+each('TC-IF-104-20 golden 4: a save is a new version with a derived record; the same graph again writes nothing', async (api) => {
   cp2Multi(api);
   await login(api, 'anna');
   const changed = small('cp2.multi', 't9');
@@ -129,7 +129,7 @@ each('TC-IF-104-09 golden 4: a save is a new version with a derived record; the 
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-10: editor entries are kept only when they give the graph', async (api) => {
+each('TC-IF-104-21: editor entries are kept only when they give the graph', async (api) => {
   cp2Multi(api);
   await login(api, 'anna');
   const more = small('cp2.multi', 't4');
@@ -144,7 +144,7 @@ each('TC-IF-104-10: editor entries are kept only when they give the graph', asyn
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-11 golden 5: refusals change nothing', async (api) => {
+each('TC-IF-104-22 golden 5: refusals change nothing', async (api) => {
   cp2Multi(api);
   const changed = { graph: body(small('cp2.multi', 't9')) };
   const cyclic = small('cp2.multi', 't4');
@@ -170,7 +170,7 @@ each('TC-IF-104-11 golden 5: refusals change nothing', async (api) => {
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-12: the check route reports rules for the owner and stores nothing', async (api) => {
+each('TC-IF-104-23: the check route reports rules for the owner and stores nothing', async (api) => {
   cp2Multi(api);
   const cyclic = small('cp2.multi', 't4');
   cyclic.edges.push({ id: 'e9', from: 'var.out', to: 'step.write', data: {} });
@@ -187,7 +187,7 @@ each('TC-IF-104-12: the check route reports rules for the owner and stores nothi
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-13 golden 6: a restore keeps the former content as a new version', async (api) => {
+each('TC-IF-104-24 golden 6: a restore keeps the former content as a new version', async (api) => {
   cp2Multi(api);
   await login(api, 'anna');
   const answer = (await call(api, 'POST', G('cp2.multi', '/restore'), { version: 1, reason: 'back to the start' })).body;
@@ -200,7 +200,7 @@ each('TC-IF-104-13 golden 6: a restore keeps the former content as a new version
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-14 golden 7: the arrangement is read by everyone and saved by the owner', async (api) => {
+each('TC-IF-104-25 golden 7: the arrangement is read by everyone and saved by the owner', async (api) => {
   cp2Multi(api);
   await login(api, 'ben');
   const before = (await call(api, 'GET', G('cp2.multi', '/arrangement'))).body;
@@ -218,7 +218,7 @@ each('TC-IF-104-14 golden 7: the arrangement is read by everyone and saved by th
 });
 
 // mark.req("IF-104")
-each('TC-IF-104-15 golden 8: the store route and an unreachable store', async (api) => {
+each('TC-IF-104-26 golden 8: the store route and an unreachable store', async (api) => {
   cp2Multi(api);
   await login(api, 'ben');
   const up = (await call(api, 'GET', '/api/v2/store')).body;
@@ -233,7 +233,7 @@ each('TC-IF-104-15 golden 8: the store route and an unreachable store', async (a
 });
 
 // mark.req("IF-104", "REQ-GA-007")
-each('TC-IF-104-16: without a session every v2 route is 401 and changes nothing', async (api) => {
+each('TC-IF-104-27: without a session every v2 route is 401 and changes nothing', async (api) => {
   cp2Multi(api);
   const routes = [['GET', '/api/v2/me'], ['GET', '/api/v2/store'], ['GET', '/api/v2/graphs'], ['GET', G('cp2.multi')], ['GET', G('cp2.multi', '/versions')],
     ['GET', G('cp2.multi', '/arrangement')], ['GET', G('cp2.multi', '/changes')], ['POST', G('cp2.multi', '/check'), { graph: body(small('cp2.multi', 't4')) }],
