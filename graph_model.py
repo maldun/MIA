@@ -203,19 +203,33 @@ class GraphModel:
     def read_graph(self, graph_id, version=None):
         if not self.real:
             return self.tables.get(TABLE, graph_id, version)
+        # the members exactly as the header of that version pinned them (REQ-WFM-159), with the graph ID taken off every ID and end (REQ-WFM-144)
         header = self.tables.get("graphs", graph_id, version)["doc"]
         data = header["data"]
-        pinned = lambda table, members: [self.tables.get(table, m["id"], m["version"])["doc"] for m in members]    # noqa: E731
+        local = lambda record_id: graph_tables.split_scoped(record_id)[1]      # noqa: E731
+
+        def member(table, pin):
+            doc = self.tables.get(table, pin["id"], pin["version"])["doc"]
+            ends = {end: local(doc[end]) for end in ("from", "to") if end in doc}
+            return {**doc, "id": local(doc["id"]), **ends}
         return {"id": header["id"], **{key: data[key] for key in HEADER},
-                "nodes": pinned("graph_nodes", data["nodes"]), "edges": pinned("graph_edges", data["edges"])}
+                "nodes": [member("graph_nodes", pin) for pin in data["nodes"]], "edges": [member("graph_edges", pin) for pin in data["edges"]]}
 
     def graph_versions(self, graph_id):
-        """STUB (G-V4.GRAPHSTORE.CORE red tests): the versions of a graph, oldest first, [{"version", "author", "time"}]; task T-03 (REQ-WFM-158)."""
-        return []
+        """The versions of a stored graph, oldest first: [{"version", "author", "time"}] (REQ-WFM-158)."""
+        return self.tables.history("graphs", graph_id)
 
     def step_history(self, graph_id, local_id):
-        """STUB (G-V4.GRAPHSTORE.CORE red tests): the versions of one step of one graph as its headers pinned them; task T-03 (REQ-WFM-145)."""
-        return []
+        """The versions of one step or connection of ONE graph as the headers of that graph pinned them, oldest first, with account and time
+        (REQ-WFM-145): a step of another graph with the same local ID, and a version an interrupted save left unused, are not listed."""
+        record_id = graph_tables.scoped(graph_id, local_id)
+        pinned = []
+        for entry in self.tables.history("graphs", graph_id):
+            data = self.tables.get("graphs", graph_id, entry["version"])["doc"]["data"]
+            for key, table in (("nodes", "graph_nodes"), ("edges", "graph_edges")):
+                pinned += [(table, pin["version"]) for pin in data[key] if pin["id"] == record_id and (table, pin["version"]) not in pinned]
+        stored = {table: {e["version"]: e for e in self.tables.history(table, record_id)} for table in {t for t, _ in pinned}}
+        return [stored[table][version] for table, version in sorted(pinned, key=lambda p: p[1])]
 
     def topological_order(self, graph_id):
         return order_of(self.read_graph(graph_id))
