@@ -24,7 +24,30 @@ SaveResult = namedtuple("SaveResult", "saved version named rule detail", default
 
 TABLE = "workflow_graphs"      # the table of the fake; the real Storage keeps the graph as records
 HEADER = ("context_graph_id", "testbench_id", "description")
+MEMBER_TABLES = {"workflow": ("graph_nodes", "graph_edges"), "context": ("context_nodes", "context_edges")}     # the kind selects the tables (REQ-WFM-152)
 NODE_TYPES = ("data", "transform", "master")
+
+
+def context_problems(graph):
+    """The IDs a refusal names for a context graph: a step ID used twice, a connection ID used twice, a connection to a step that is not there
+    (REQ-WFM-155). Nothing else: the order, alternation, writer and stop rules are those of workflow graphs (REQ-WFM-156); CONTEXT may add rules."""
+    seen, bad = set(), []
+    for node in graph["nodes"]:
+        if node["id"] in seen:
+            bad.append(node["id"])
+        seen.add(node["id"])
+    used = set()
+    for edge in graph["edges"]:
+        if edge["id"] in used or edge["from"] not in seen or edge["to"] not in seen:
+            bad.append(edge["id"])
+        used.add(edge["id"])
+    return list(dict.fromkeys(bad))
+
+
+def _kind(graph):
+    """The kind of a graph: `workflow` when it has none (REQ-WFM-153), None when it is not one of the two kinds (REQ-WFM-154)."""
+    kind = graph.get("kind", "workflow")
+    return kind if isinstance(kind, str) and kind in MEMBER_TABLES else None
 
 
 def _refuse(named):
@@ -138,17 +161,20 @@ class GraphModel:
         self.real = hasattr(tables, "ids")
 
     def save_graph(self, graph):
-        named = check_graph(graph)
+        kind = _kind(graph)
+        if kind is None:
+            return SaveResult(False, None, [], "schema_break", "kind")
+        named = check_graph(graph) if kind == "workflow" else context_problems(graph)
         if named:
             return _refuse(named)
         if not self.real:
             return SaveResult(True, self.tables.put(TABLE, graph["id"], graph), [])
         nodes, edges = self._scoped(graph)
-        refused = self._first_refusal(graph, nodes, edges)
+        refused = self._first_refusal(graph, kind, nodes, edges)
         if refused:
             return refused
         try:
-            return self._write(graph, nodes, edges)
+            return self._write(graph, kind, nodes, edges)
         except StorageError as refusal:     # a record the Storage layer refuses after all is a refused result; other errors raise
             if refusal.code != "invalid":
                 raise
@@ -161,12 +187,13 @@ class GraphModel:
         edges = [{**e, "id": scoped(e["id"]), "from": scoped(e["from"]), "to": scoped(e["to"])} for e in graph["edges"]]
         return nodes, edges
 
-    def _first_refusal(self, graph, nodes, edges):
+    def _first_refusal(self, graph, kind, nodes, edges):
         """The refused result for the first record the Storage layer would refuse, or None, found before anything is written (REQ-WFM-146, REQ-WFM-150).
         The header is tried with every member at version 1: that catches a graph ID with a slash through its steps (REQ-WFM-160)."""
-        stored = {"nodes": {n["id"]: [1] for n in nodes}}
-        checks = [("graph_nodes", n, None) for n in nodes] + [("graph_edges", e, stored) for e in edges]
-        trial = {"kind": "workflow", "nodes": [{"id": n["id"], "version": 1} for n in nodes], "edges": [{"id": e["id"], "version": 1} for e in edges],
+        node_table, edge_table = MEMBER_TABLES[kind]
+        stored = {("context_nodes" if kind == "context" else "nodes"): {n["id"]: [1] for n in nodes}}
+        checks = [(node_table, n, None) for n in nodes] + [(edge_table, e, stored) for e in edges]
+        trial = {"kind": kind, "nodes": [{"id": n["id"], "version": 1} for n in nodes], "edges": [{"id": e["id"], "version": 1} for e in edges],
                  **{key: graph[key] for key in HEADER}}
         checks.append(("graphs", {"id": graph["id"], "data": trial}, None))
         for table, record, known in checks:
@@ -175,17 +202,17 @@ class GraphModel:
                 return SaveResult(False, None, [], broken["rule"], broken["detail"])
         return None
 
-    def _write(self, graph, nodes, edges):
+    def _write(self, graph, kind, nodes, edges):
         """Members first, each only when it differs from its newest version (REQ-WFM-148), the header last (REQ-WFM-147); an unchanged graph writes
         nothing (REQ-WFM-149). Repeating an interrupted save finds the members already written and adds the one header version (REQ-WFM-151)."""
         pins = {}
-        for key, table, records in (("nodes", "graph_nodes", nodes), ("edges", "graph_edges", edges)):
+        for key, table, records in zip(("nodes", "edges"), MEMBER_TABLES[kind], (nodes, edges)):
             pins[key] = []
             for record in records:
                 latest = self._latest(table, record["id"])
                 same = latest is not None and latest["doc"] == record
                 pins[key].append({"id": record["id"], "version": latest["version"] if same else self.tables.put(table, record["id"], record, self.author)["version"]})
-        data = {"kind": "workflow", **pins, **{key: graph[key] for key in HEADER}}
+        data = {"kind": kind, **pins, **{key: graph[key] for key in HEADER}}
         head = self._latest("graphs", graph["id"])
         if head is not None and head["doc"]["data"] == data:
             return SaveResult(True, head["version"], [])
@@ -212,8 +239,10 @@ class GraphModel:
             doc = self.tables.get(table, pin["id"], pin["version"])["doc"]
             ends = {end: local(doc[end]) for end in ("from", "to") if end in doc}
             return {**doc, "id": local(doc["id"]), **ends}
-        return {"id": header["id"], **{key: data[key] for key in HEADER},
-                "nodes": [member("graph_nodes", pin) for pin in data["nodes"]], "edges": [member("graph_edges", pin) for pin in data["edges"]]}
+        node_table, edge_table = MEMBER_TABLES[data["kind"]]
+        kind = {"kind": "context"} if data["kind"] == "context" else {}        # a workflow graph keeps the shape it had before (REQ-WFM-157)
+        return {"id": header["id"], **kind, **{key: data[key] for key in HEADER},
+                "nodes": [member(node_table, pin) for pin in data["nodes"]], "edges": [member(edge_table, pin) for pin in data["edges"]]}
 
     def graph_versions(self, graph_id):
         """The versions of a stored graph, oldest first: [{"version", "author", "time"}] (REQ-WFM-158)."""
@@ -226,7 +255,7 @@ class GraphModel:
         pinned = []
         for entry in self.tables.history("graphs", graph_id):
             data = self.tables.get("graphs", graph_id, entry["version"])["doc"]["data"]
-            for key, table in (("nodes", "graph_nodes"), ("edges", "graph_edges")):
+            for key, table in zip(("nodes", "edges"), MEMBER_TABLES[data["kind"]]):
                 pinned += [(table, pin["version"]) for pin in data[key] if pin["id"] == record_id and (table, pin["version"]) not in pinned]
         stored = {table: {e["version"]: e for e in self.tables.history(table, record_id)} for table in {t for t, _ in pinned}}
         return [stored[table][version] for table, version in sorted(pinned, key=lambda p: p[1])]
