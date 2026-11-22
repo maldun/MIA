@@ -1,6 +1,6 @@
 # Plan: G-V4.GRAPHSTORE.CORE (one stored truth, graph-scoped steps, atomic saves, both graph kinds)
 
-**Goal:** `specs/mia/goals/G-V4.GRAPHSTORE.CORE/goal.md`   **Requirements:** `requirements.md` of this folder (22 requirements, 2 assumptions; they move into N-3.2 and N-2.3 at the merge, D-408)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder   **Interface:** IF-301 v3 (`contracts/IF-301-graph-tables.md`, A-167 installed)   **Status:** Approved (owner, 2026-11-21: task cut and frame accepted in the chat questionnaire); amended by A-168 (owner, 2026-11-22, D-412: T-01b added, regression set named)
+**Goal:** `specs/mia/goals/G-V4.GRAPHSTORE.CORE/goal.md`   **Requirements:** `requirements.md` of this folder (22 requirements, 2 assumptions; they move into N-3.2 and N-2.3 at the merge, D-408)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder   **Interface:** IF-301 v3 (`contracts/IF-301-graph-tables.md`, A-167 installed)   **Status:** Approved (owner, 2026-11-21: task cut and frame accepted in the chat questionnaire); amended by A-168 (owner, 2026-11-22, D-412: T-01b added, regression set named) and A-169 (owner, 2026-11-22, D-413: checks of TC-WFM-165, 166, 168, 169 moved to T-03 and T-04)
 
 Line of work `goal/v4`; supervised. Six small tasks (T-01b added by A-168), pure logic on the Storage layer: no model step, no prompt, no eval suite, no new dependency, no new part (the nodes N-3.1, N-3.2 and N-2.3 stay, high-level spec section 5).
 
@@ -21,9 +21,9 @@ How the checks reach the code: the acceptance tests write through the real Stora
 |---|---|---|---|
 | T-01 Scoped IDs in the Graph tables | REQ-GTB-029, REQ-GTB-030, REQ-GTB-031 | TC-GTB-033, TC-GTB-034, TC-GTB-035; real side of TC-IF-301-25, -26 | red tests installed |
 | T-01b Scoped IDs in the unprotected unit tests (A-168) | none (test data follows REQ-GTB-029) | the unit suite, except the seven `graph_model` checks of `test_skill_record_storage.py` per backend | T-01 |
-| T-02 The save path: checked first, header last, changed members only | REQ-WFM-146, 147, 148, 149, 150, 151, 160 | TC-WFM-164 to TC-WFM-169, TC-WFM-178 | T-01b |
-| T-03 Reading with local IDs, versions and step history | REQ-WFM-144, 145, 158, 159 | TC-WFM-162, TC-WFM-163, TC-WFM-176, TC-WFM-177 (workflow half) | T-02 |
-| T-04 Context graphs on the same path | REQ-WFM-152, 153, 154, 155, 156, 157, 161 | TC-WFM-170 to TC-WFM-175, TC-WFM-177 (context half) | T-03 |
+| T-02 The save path: checked first, header last, changed members only | REQ-WFM-146, 147, 148, 149, 150, 151, 160 | TC-WFM-164, TC-WFM-167, TC-WFM-178; unit tests of the save path (A-169) | T-01b |
+| T-03 Reading with local IDs, versions and step history | REQ-WFM-144, 145, 158, 159 | TC-WFM-162, TC-WFM-163, TC-WFM-176, TC-WFM-177 (workflow half); workflow halves of TC-WFM-165, 166, 168, 169 (A-169) | T-02 |
+| T-04 Context graphs on the same path | REQ-WFM-152, 153, 154, 155, 156, 157, 161 | TC-WFM-170 to TC-WFM-175, TC-WFM-177 (context half); context halves of TC-WFM-165, 168, 169 (A-169) | T-03 |
 | T-05 Both stores, and the smoke check | REQ-GTB-032; REQ-WFM-152, 158, 159 on the owner's stores | TC-GTB-036 on files and PostgreSQL; SMOKE-CORE-001 green against a throw-away server | T-04 |
 
 Regression set (A-168, replaces "all other tests unchanged"): after every task the unit suite (`discover -s tests`) and every acceptance script are green, except the CORE checks of later tasks and the known reds below. Known reds: the four protected scripts `test_graph_context_tables.py`, `test_graph_document_size.py`, `test_graph_node_fields.py`, `test_graph_record_identity.py` from T-01 until A-168 is installed; the unprotected unit modules of T-01b from T-01 until T-01b; the seven `graph_model` checks of `tests/test_skill_record_storage.py` per backend until T-03 at the latest (each task logs which it turned green). Measured against a clean checkout of the task's start, never on the changed files only.
@@ -31,6 +31,9 @@ Regression set (A-168, replaces "all other tests unchanged"): after every task t
 In particular after every task: the IF-301 v1 and v2 suites, `tests/acceptance/test_graph_records.py`, `test_graph_model.py`, `test_graph_run.py`, `test_graph_run_stages.py`, `test_graph_order.py`, `test_pipeline_graph.py`, `test_skill_binding.py`, `tests/test_graph_record_checks.py`, `tests/test_graph_tables.py`, `tests/test_graph_run_findings.py`, `tests/test_skill_record_storage.py` (from T-03 on) and the IF-102 suite stay green.
 
 State at the red commit (`goal/v4` with the stubs): every CORE check fails by assertion, except TC-WFM-164, which is green from the start (today's code already checks before it writes; the owner accepted it, D-410; it is shown able to fail by the defect "no check before the first write", TR-CORE-006) and must stay green; in TC-WFM-169 two positions of the changed save end with the injected `Interrupted`, because today's code writes every member again (the defect of REQ-WFM-148).
+
+## Amendment A-169 (approved, owner 2026-11-22, D-413)
+T-02 alone cannot turn green TC-WFM-165, 166, 168, 169: they read the stored graph through `read_graph` (local IDs) and `graph_versions` (T-03) and save context graphs (T-04). Their workflow halves move to T-03, their context halves to T-04; T-02 keeps TC-WFM-164, 167, 178 and its own unit tests. Measured basis: implementation log, T-02, F-3. No requirement, check or protected file changes.
 
 ## Amendment A-168 (approved, owner 2026-11-22, D-412)
 See `specs/mia/amendments/A-168-note.md`. In short: T-01 stays; a new task **T-01b** (scoped IDs in the unprotected unit tests `test_storage.py`, `test_storage_postgres.py`, `test_storage_copy_semantics.py`, `test_graph_record_objects.py` and the direct-record checks of `test_skill_record_storage.py`) runs before T-02; four protected scripts (`test_graph_context_tables.py`, `test_graph_document_size.py`, `test_graph_node_fields.py`, `test_graph_record_identity.py`) get scoped IDs through `tools/apply_amendment_a168.sh`; "all other tests unchanged" becomes a named regression set per task.
@@ -59,7 +62,7 @@ See `specs/mia/amendments/A-168-note.md`. In short: T-01 stays; a new task **T-0
 
 ### T-02: The save path: checked first, header last, changed members only
 - Implements: REQ-WFM-146, REQ-WFM-147, REQ-WFM-148, REQ-WFM-149, REQ-WFM-150, REQ-WFM-151, REQ-WFM-160
-- Tests to turn green: TC-WFM-164 to TC-WFM-169 (`tests/acceptance/test_core_save.py`), TC-WFM-178 (`test_core_scoped_ids.py`)
+- Tests to turn green: TC-WFM-164, TC-WFM-167 (`tests/acceptance/test_core_save.py`), TC-WFM-178 (`test_core_scoped_ids.py`); the save path's own unit tests (`tests/test_graph_model_save.py`: header last, changed members only, every interruption position). TC-WFM-165, 166, 168 and 169 read the stored graph back through `read_graph` and `graph_versions` and save context graphs: their workflow halves turn green in T-03, their context halves in T-04 (A-169)
 - Touches: `graph_model.py` (`save_graph`, `_scoped`, `_latest`); new unit tests in a new `tests/test_graph_model_save.py`
 - Reuses: prototype `graph_model.py` `save_graph` (line 175 on) (R1, keep+tests)
 - Must not touch: protected material; `graph_tables.py` (T-01, done), `storage.py`
@@ -70,7 +73,7 @@ See `specs/mia/amendments/A-168-note.md`. In short: T-01 stays; a new task **T-0
 
 ### T-03: Reading with local IDs, versions and step history
 - Implements: REQ-WFM-144, REQ-WFM-145, REQ-WFM-158, REQ-WFM-159
-- Tests to turn green: TC-WFM-162, TC-WFM-163 (`test_core_scoped_ids.py`), TC-WFM-176, TC-WFM-177 workflow half (`test_core_context_and_history.py`)
+- Tests to turn green: TC-WFM-162, TC-WFM-163 (`test_core_scoped_ids.py`), TC-WFM-176, TC-WFM-177 workflow half (`test_core_context_and_history.py`); the workflow halves of TC-WFM-165, 166, 168, 169 (`test_core_save.py`, A-169); the seven `graph_model` checks per backend of `tests/test_skill_record_storage.py`
 - Touches: `graph_model.py` (`read_graph`, `graph_versions`, `step_history`, replacing the stubs)
 - Reuses: prototype `graph_model.py` lines 219 to 250 (R1, keep+tests)
 - Must not touch: protected material; `graph_tables.py`, `storage.py`
@@ -80,7 +83,7 @@ See `specs/mia/amendments/A-168-note.md`. In short: T-01 stays; a new task **T-0
 
 ### T-04: Context graphs on the same path
 - Implements: REQ-WFM-152, REQ-WFM-153, REQ-WFM-154, REQ-WFM-155, REQ-WFM-156, REQ-WFM-157, REQ-WFM-161
-- Tests to turn green: TC-WFM-170 to TC-WFM-175, TC-WFM-177 context half (`test_core_context_and_history.py`)
+- Tests to turn green: TC-WFM-170 to TC-WFM-175, TC-WFM-177 context half (`test_core_context_and_history.py`); the context halves of TC-WFM-165, 168, 169, so `test_core_save.py` is fully green (A-169)
 - Touches: `graph_model.py` (`MEMBER_TABLES`, `context_problems`, the kind in `save_graph` and `read_graph`)
 - Reuses: prototype `graph_model.py` (`context_problems` line 118, the kind switch) (R1, keep+tests)
 - Must not touch: protected material; `graph_rules.py`, the workflow rules of `check_graph` (REQ-WFM-156: not applied to a context graph)
