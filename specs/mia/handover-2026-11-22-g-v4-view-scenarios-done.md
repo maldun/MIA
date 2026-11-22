@@ -13,8 +13,8 @@ Worktree `/home/maldun/prog/Python/MIA-goal-v4-view`, branch `goal/v4.view` (not
 
 ## Next
 1. (done) A-174 installed.
-2. `test-requirements.md` (TR-VIEW-001 on): setup kind with numbers (stores: files and throw-away postgres:16; JS and Python mock fidelity; Firefox build of the pinned Playwright, 1280 x 800, colour schemes; R11 fixtures plus `cp2.multi`, a context graph, a `swarm` graph, a `chat` graph, a ~50-step graph; for each check the step that shows it can fail). Review one check at a time.
+2. (done) `goals/G-V4.VIEW/test-requirements.md`: TR-VIEW-001 to 021 approved by group (D-442). The fixtures are fixed by TR-VIEW-002 (`tests/fixtures/graph_view/`: R11 graphs plus `ctx.small`, `swarm.one`, `chat`, `chain.fifty`); the Firefox setup by TR-VIEW-008 to 013; the defects that show each check can fail go into `plan.md` (TR-VIEW-021).
 3. Red tests staged under `specs/mia/amendments/A-175…/` (install Playwright first, see the previous handover step 4); the Firefox checks use the real provider on a seeded file store (D-440 (2)).
 4. `plan.md` with the binding map, then the plan gate.
 
-Next free numbers: D-442, A-175, TC-API-026, TC-GA-040, TC-OPR-012, SMOKE-VIEW-003, TR-VIEW-001 (REQ numbers as before).
+Next free numbers: D-443, A-175, TC-API-026, TR-VIEW-022, TC-GA-040, TC-OPR-012, SMOKE-VIEW-003. REQ-API: VIEW stays at or below 059 (TRANSFER holds 060 to 064, its D-465); otherwise REQ numbers as before.
