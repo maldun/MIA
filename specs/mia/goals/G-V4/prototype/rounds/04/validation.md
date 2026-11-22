@@ -2,17 +2,17 @@
 
 <!-- Written for the owner after CP19, filled during and after the session. The owner, not the agent, judges. One row per outcome of the scope and one per open decision. -->
 
-Validated by: –
-Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
+Validated by: maldun
+Date: 22.11.2026 · Prototype state: branch prototype/g-v4 · Where it ran: here
 
 ## Outcomes
 | Item | What the user tried (Given / When from the outcome) | What was observed | Result (met / partly / not met / not tried) | Finding |
 |---|---|---|---|---|
-| FR-63 (OC-1) | Given the worktree, run `./proto.sh proto_checks/cp19_check.py`: read the lines "OC-1": two graphs that each break three rules give the same list (rule, parts, order) when saved, through the check route, when kept and before a run, five times in a row. Then `./proto.sh proto_checks/cp17_check.py`: the registry lines and the table "old case / old rule / new rules" | – | – | – |
-| FR-63 (AC-017, by hand) | Given `./proto.sh proto_checks/make_sample_store.py /tmp/gs4 --broken` and `./proto.sh graph_proto_app.py --store files:/tmp/gs4` (log in as the owner): in the editor of `cp2.multi` connect `var.out` back to `step.write` and add a second connection into one data step; both rules are named in the fixed order, the cycle last; `Keep the change` is refused with the same rules | – | – | – |
-| FR-64 (OC-2) | Given `./proto.sh proto_checks/cp19_check.py`: the lines "OC-2" and "FR-64": refused runs name every broken rule, then the input nobody supplies; no step ran; a context graph is refused as `kind_cannot_run`, an unknown kind as `unknown_kind`; the 15 converted skills are ready once their inputs are given | – | – | – |
-| FR-64 (AC-018, by hand) | Given the same page: "Try a run (stand-in steps)" on `sample.broken` (the connection `e2` named), on `chat@1` without values (`input.text` of `step.converse` named), with `{"input.text": "hello"}` (it runs), and on a working copy with a cycle (the cycle named) | – | – | – |
-| all other outcomes of rounds 01 to 03 | not in this round's scope; every check of those rounds was re-run after this round's changes (`cp1` to `cp15`, 60 page tests): all pass | – | – | – |
+| FR-63 (OC-1) | Given the worktree, run `./proto.sh proto_checks/cp19_check.py`: read the lines "OC-1": two graphs that each break three rules give the same list (rule, parts, order) when saved, through the check route, when kept and before a run, five times in a row. Then `./proto.sh proto_checks/cp17_check.py`: the registry lines and the table "old case / old rule / new rules" | run by the owner 2026-11-22 (statement: "I have signed it, it worked"); cp19: 14 pass, the OC-1 lines as described | met | – |
+| FR-63 (AC-017, by hand) | Given `./proto.sh proto_checks/make_sample_store.py /tmp/gs4 --broken` and `./proto.sh graph_proto_app.py --store files:/tmp/gs4` (log in as the owner): in the editor of `cp2.multi` connect `var.out` back to `step.write` and add a second connection into one data step; both rules are named in the fixed order, the cycle last; `Keep the change` is refused with the same rules | tried by the owner 2026-11-22 (statement: "I have signed it, it worked"): worked | met | – |
+| FR-64 (OC-2) | Given `./proto.sh proto_checks/cp19_check.py`: the lines "OC-2" and "FR-64": refused runs name every broken rule, then the input nobody supplies; no step ran; a context graph is refused as `kind_cannot_run`, an unknown kind as `unknown_kind`; the 15 converted skills are ready once their inputs are given | run by the owner 2026-11-22 (statement: "I have signed it, it worked"); cp19: 14 pass, the OC-2 and FR-64 lines as described; the FINDING line is finding 10 of the report (Q-7) | met | – |
+| FR-64 (AC-018, by hand) | Given the same page: "Try a run (stand-in steps)" on `sample.broken` (the connection `e2` named), on `chat@1` without values (`input.text` of `step.converse` named), with `{"input.text": "hello"}` (it runs), and on a working copy with a cycle (the cycle named) | tried by the owner 2026-11-22 (statement: "I have signed it, it worked"): worked | met | – |
+| all other outcomes of rounds 01 to 03 | not in this round's scope; every check of those rounds was re-run after this round's changes (`cp1` to `cp15`, 60 page tests): all pass | re-run by the agent 2026-11-22: all pass; signed by the owner with the sheet | met | – |
 
 ## Decisions for the owner (from CP17 to CP19; the numbers are in `prototype-report.md`)
 | ID | Question | Agent's proposal | Owner's decision |
