@@ -27,7 +27,8 @@ test('REQ-GA-010: no own source of the Graph app names an address outside the ho
     }
   }
   // Then
-  assert.deepEqual(sources.map((s) => s.name).sort(), ['app.js', 'graph-view.js', 'graph.css', 'index.html']);
+  // api.js, drawing.js and viewer.js: the stubs of the G-V4.VIEW page (page-interface-note.md), written in Implement
+  assert.deepEqual(sources.map((s) => s.name).sort(), ['api.js', 'app.js', 'drawing.js', 'graph-view.js', 'graph.css', 'index.html', 'viewer.js']);
   assert.deepEqual(found, []);
 });
 

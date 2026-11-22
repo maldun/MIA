@@ -2,7 +2,7 @@
 
 `seed(backend)` stores every version that is not `js_only`, in file order: `model` versions through CORE's GraphModel as their author,
 `raw` versions as raw records around the checks (as `sample.broken` in the IF-104 v2 suite). The JS checks read the same file
-(`graph_view_data.mjs`), so Python, JS and browser checks see the same graphs.
+(`graph_view_page.mjs`), so Python, JS and browser checks see the same graphs.
 """
 import copy
 import json

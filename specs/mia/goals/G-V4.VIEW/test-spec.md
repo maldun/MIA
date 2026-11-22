@@ -121,7 +121,7 @@ None: no hard bound (D-425 E-H). The opening time is a smoke number (SMOKE-VIEW-
 ### TC-API-021 – A refused record check writes nothing
 - Verifies: REQ-API-036
 - Given: cp2.multi at version 4, on the file store and on PostgreSQL; a working copy whose step.write carries the extra field `colour` (it keeps every graph rule, so only the store's record check can refuse it; D-444)
-- When: the owner saves the copy, and restores a version 5 with the same content written around the checks as raw records (as sample.broken is)
+- When: the owner saves the copy; then a version 5 with the same content is written around the checks as raw records (as sample.broken is), a clean version 6 is kept on top, and the owner restores version 5
 - Then: each answer is 422 `refused` with the rule `schema_break` and the detail `colour`
 - And: cp2.multi still has 4 versions and no record of changes was written
 
@@ -148,7 +148,7 @@ None: no hard bound (D-425 E-H). The opening time is a smoke number (SMOKE-VIEW-
 
 ### TC-API-025 – One rule report on the check route, the save and the restore
 - Verifies: REQ-API-031, REQ-API-035, HR-008
-- Given: RULES merged (IF-301 v4 in the code); cp2.multi at version 4; a working copy with a second identical connection e1' (`duplicate_connection`) and e9 var.out → step.write (`cycle`); a version 5 stored around the checks with the same faults
+- Given: RULES merged (IF-301 v4 in the code); cp2.multi at version 4; a working copy with a second identical connection e3 from var.in to step.write (`duplicate_connection`) and e9 var.out → step.write (`cycle`); a version 5 stored around the checks with the same faults and a clean version 6 kept on top
 - When: the owner sends the copy to the check route, saves it, and restores version 5
 - Then: the check route gives `duplicate_connection` and then `cycle` with their parts
 - And: the save and the restore are 422 `rules_broken` with the same items in the same order, equal to `rule_report` of IF-301 v4 for the same graph (0 differences)
