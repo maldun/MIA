@@ -11,7 +11,7 @@
      Requirements in force that stay as they are: REQ-SLY-002, 003 (versions never change), 004 (record checks on write), 007 (round trip gives identical files: every
      write into a set without a marker writes one, REQ-SLY-032, so both sides of TC-SLY-007 hold it), 008 (backup), 012 (realise IF-102);
      VIEW's REQ-API-018 to 021 (the store setting: TRANSFER adds the copy on top of it); REQ-API-022 is replaced by REQ-API-064 once a copy is set.
-     27 new and 2 changed requirements (29, above the split hint of 25; goal.md Split check, the owner confirms in the review). -->
+     28 new and 2 changed requirements (30, above the split hint of 25; goal.md Split check, the owner confirms in the review). -->
 
 ## Terms
 | Term | Meaning |
@@ -35,7 +35,7 @@
 |---|---|---|---|
 | 1 | MV | Moving the whole store: everything arrives, damaged graphs refused, members before headers, a repeat changes nothing (FR-59, HR-001, HR-004) | REQ-SLY-016, REQ-SLY-017, REQ-SLY-018, REQ-SLY-019, REQ-SLY-020, REQ-SLY-021, REQ-SLY-009 (changed), REQ-GA-008 (changed) |
 | 2 | SB | The same behaviour on files and the database, durable file writes (FR-58, HR-002, HR-005, NFR-16) | REQ-SLY-022, REQ-SLY-023 |
-| 3 | SY | Lag and one-way sync: live wins, the copy's own versions set aside, one sync at a time, rerun after an interruption (FR-93, HR-003, HR-006, HR-007) | REQ-SLY-024, REQ-SLY-025, REQ-SLY-026, REQ-SLY-027, REQ-SLY-028, REQ-SLY-029, REQ-SLY-036 |
+| 3 | SY | Lag and one-way sync: live wins, the copy's own versions set aside, one sync at a time, rerun after an interruption (FR-93, HR-003, HR-006, HR-007) | REQ-SLY-024, REQ-SLY-025, REQ-SLY-026, REQ-SLY-027, REQ-SLY-028, REQ-SLY-029, REQ-SLY-036, REQ-SLY-038 |
 | 4 | SR | Side records and the one-graph move (AC-033, FR-95 and FR-81 mechanisms) | REQ-SLY-030, REQ-SLY-031 |
 | 5 | PT | Portable sets: the format marker, older and newer sets, no paths (NFR-15, HR-008) | REQ-SLY-032, REQ-SLY-033, REQ-SLY-034, REQ-SLY-035, REQ-SLY-037 |
 | 6 | AS | The copy setting in the backend: reading the copy, AutoSync at start and stop, the real store answer (FR-58, FR-93, D-460) | REQ-API-060, REQ-API-061, REQ-API-062, REQ-API-063, REQ-API-064 |
@@ -52,7 +52,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-005: the sample store (several versions per graph, a context graph, a graph with a loop-controlling step) moved files → database → files gives every record's history entry by entry equal to the source (exact)
 - Verified by: TC-SLY-016
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP2)
 
 ### REQ-SLY-017 – Every graph checked with what the move brings
@@ -65,7 +65,7 @@
 - Verification method: Test
 - Acceptance criterion: a source whose header names step version 3 of which only versions 1 and 2 exist is found before the first write; a graph that breaks only one of the eight rules (a cycle) is moved (exact)
 - Verified by: TC-SLY-017
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: survey defect 2, D-460)
 
 ### REQ-SLY-018 – A damaged graph stops the whole move
@@ -78,7 +78,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-005 damaged store: the move ends refused with rule `move_refused`, the detail names the graph and the missing member, and every table of the target has the same records as before (exact)
 - Verified by: TC-SLY-018
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
 
 ### REQ-SLY-019 – Members before the header
@@ -91,7 +91,7 @@
 - Verification method: Test
 - Acceptance criterion: in a recorded write order of a move of a workflow and a context graph, every header version comes after each member version it names (exact)
 - Verified by: TC-SLY-019
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: survey defect 1, prototype CP2)
 
 ### REQ-SLY-020 – Moving again changes nothing
@@ -104,7 +104,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-005: the second move reports 0 records copied, 0 versions added and as many skipped as the first move copied (exact)
 - Verified by: TC-SLY-020
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
 
 ### REQ-SLY-021 – A graph of an unknown kind stops a move or sync
@@ -117,7 +117,7 @@
 - Verification method: Test
 - Acceptance criterion: a source with one graph of kind `swarm` (written directly through the backend) gives a refusal naming that graph and `unknown_kind`, and the target is unchanged (exact)
 - Verified by: TC-SLY-021
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-SLY-022 – The same answers on files and the database
@@ -130,7 +130,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-004: the sequence of `cp2_check.py` 1 and 2 plus a refused save (`schema_break`) and a stale save (`conflict`), run on both backends with a fixed clock, gives identical answer lists (exact)
 - Verified by: TC-SLY-022
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP2, CP14)
 
 ### REQ-SLY-023 – A record file is on disk before it counts
@@ -140,10 +140,10 @@
 - Rationale: refines NFR-16; survey: `storage_files.py` renames without fsync, so after a power cut an aside file or a moved version may be empty while the copy's own version is already removed
 - Parent: HR-007
 - Priority: Must
-- Verification method: Inspection
+- Verification method: Test
 - Acceptance criterion: a test that records the calls of `os.fsync` and `os.replace` around one append sees fsync of the file, then replace, then fsync of the folder (exact)
 - Verified by: TC-SLY-023
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (survey)
 
 ### REQ-SLY-024 – The lag of every graph
@@ -156,7 +156,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-006: `cp2.multi` is listed as live 6, copy 4, `behind`; AC-007: `sample.code` is listed as `differs`; a graph of kind `swarm` is listed as `refused` with reason `unknown_kind`; no other graph is listed (exact)
 - Verified by: TC-SLY-024
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3)
 
 ### REQ-SLY-025 – The sync brings the copy to the live store
@@ -169,7 +169,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-006 and AC-007 with the live store on files and on the database: after the sync every record of the graph group has the same history in both stores; a second sync adds 0 records (exact)
 - Verified by: TC-SLY-025
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3)
 
 ### REQ-SLY-026 – The copy's own versions set aside before they go
@@ -182,7 +182,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-007: the aside file holds the copy's version 2 of `sample.code` with its author and time; with a fault injected between the aside write and the first removal, the copy still holds version 2 and the aside file is complete (exact)
 - Verified by: TC-SLY-026
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3, CP15)
 
 ### REQ-SLY-027 – The sync names what it set aside
@@ -195,7 +195,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-007: the answer's `set_aside` holds `sample.code` with versions `[2]` and a file `aside/sample.code__<stamp>.json` that exists (exact)
 - Verified by: TC-SLY-027
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
 
 ### REQ-SLY-028 – One sync at a time
@@ -208,7 +208,7 @@
 - Verification method: Test
 - Acceptance criterion: while one process holds the lock, a sync from a second process ends refused naming `sync.lock` and the copy is unchanged; after the first process is killed, a sync runs (exact)
 - Verified by: TC-SLY-028
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-SLY-029 – An interrupted move or sync leaves complete graphs
@@ -221,7 +221,7 @@
 - Verification method: Test
 - Acceptance criterion: for every write position of a move, a one-graph move and a sync, on both backends (prototype CP15): after the stop no header in the target names a missing member (exact)
 - Verified by: TC-SLY-029
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP15)
 
 ### REQ-SLY-036 – A rerun finishes an interrupted move or sync
@@ -234,8 +234,21 @@
 - Verification method: Test
 - Acceptance criterion: for every write position of REQ-SLY-029's runs: after the rerun the target equals the result of an uninterrupted run, record by record (exact)
 - Verified by: TC-SLY-036
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP15)
+
+### REQ-SLY-038 – A differing graph is cut back, never removed first
+- Level: low   Subject: Persistence
+- Group: SY
+- Text: When the sync replaces a differing graph on the copy, the Storage layer shall cut its header back to the last version both stores share before cutting back its members.
+- Rationale: refines HR-007 and NFR-16 (D-406: never missing, at worst an earlier complete version); the prototype removed the header first, so an interrupted sync left the graph missing from the copy until a rerun (owner, D-466). Cutting back is a backend operation of N-3.1 on both backends (files: the version list rewritten atomically; PostgreSQL: the versions above n deleted), used only by the sync after the aside file is durable (REQ-SLY-026); no IF-102 change. After the cut the live versions follow members first (REQ-SLY-019). A graph only on the copy has no shared version and is removed, header first
+- Parent: HR-007
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-007 with a fault injected at every write of the sync, on both backends: after each stop `sample.code` is listed on the copy at version 1 (the shared one), at the copy's version 2 or at the live version 2, never missing, and every header names only existing members (exact)
+- Verified by: TC-SLY-038
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (owner D-466, finding in the SY review)
 
 ### REQ-SLY-030 – Side records travel with their graph
 - Level: low   Subject: Persistence
@@ -406,7 +419,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-16: export then seed gives identical entries, now also for every record of the graph group of the sample store, with members before headers (exact)
 - Verified by: TC-SLY-009
-- Status: Draft
+- Status: Approved
 - History: G-V1, verified; G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, change proposed (graph group, REQ-GA-008)
 
 ### REQ-GA-008 – Library export and seed
@@ -420,7 +433,7 @@
 - Verification method: Inspection
 - Acceptance criterion: the Graph app's page has no export or seed control, and REQ-SLY-009's check covers export and seed (exact)
 - Verified by: TC-SLY-009
-- Status: Draft
+- Status: Approved
 - History: G-V1, approved, out (D-177); G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, superseded by REQ-SLY-009 (proposed)
 
 ## Notes for other subgoals (not requirements of TRANSFER)
