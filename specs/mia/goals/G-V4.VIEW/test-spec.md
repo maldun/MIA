@@ -1,6 +1,6 @@
 # Test specification: G-V4.VIEW
 
-**Requirements:** `requirements.md` (Track A: REQ-API-018 to 051, REQ-RTB-010, 011, REQ-OPR-011; Track B: REQ-GA-012 to 044; all approved 2026-11-22, D-437, D-438)   **High-level spec:** HR-001 to HR-009 (no hard bound)   **Contracts:** IF-104 v2 (A-171, installed), IF-302 v15 (A-172, installed)   **Status:** Draft (agent, 2026-11-22), for review by group
+**Requirements:** `requirements.md` (Track A: REQ-API-018 to 051, REQ-RTB-010, 011, REQ-OPR-011; Track B: REQ-GA-012 to 044; all approved 2026-11-22, D-437, D-438)   **High-level spec:** HR-001 to HR-009 (no hard bound)   **Contracts:** IF-104 v2 (A-171, installed), IF-302 v15 (A-172, installed)   **Status:** Scenarios approved by the owner by group (2026-11-22, D-441)
 
 All checks are exact: every expected value is a status, a code, an ID, a count, an order, a colour value, a place in whole pixels or an equality, so no statistical check is needed. The high-level spec has no hard bound (D-425 E-H), so there is no benchmark; the opening time of a graph of about fifty steps is a measured smoke number (SMOKE-VIEW-002). The accepted cases (`../G-V4/accepted-cases.md`) are witnessed as the binding map of `plan.md` will list (Witness column); the scenarios name them with "witnesses".
 
