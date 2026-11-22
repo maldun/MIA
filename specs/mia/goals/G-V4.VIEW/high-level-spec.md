@@ -123,7 +123,7 @@ Hard bounds: **none** (D-425 E-H). The parents of HR-007 (NFR-19) and HR-008 (FR
 - Status: Draft
 
 ## 4. Nodes, interfaces and amendments
-No new node. Changed: N-5 (page), N-2.1 (read routes of IF-104 v2), N-3.1 (table `arrangements`).
+No new node. Changed: N-5 (page), N-2.1 (all routes of IF-104 v2), N-3.1 (tables `arrangements` and `graph_changes`).
 
 | Amendment | What | Protected material it touches |
 |---|---|---|
