@@ -162,14 +162,20 @@ def _connection_endpoints(view):
     return view["endpoints"]
 
 
+def _key(value):
+    """A value of a connection as a set or dict key: text and numbers as they are, anything else (a list, an object) by its repr, so a malformed
+    connection is compared instead of raising (REQ-GTB-040, Verify V-1)."""
+    return value if value is None or isinstance(value, (str, int, float, bool)) else ("unhashable", repr(value))
+
+
 def _duplicate_connection(view):
     seen_keys, seen_ids, doubled = set(), set(), []
     for edge in view["edges"]:
-        key = (edge.get("from"), edge.get("to"), _data(edge).get("role"), _data(edge).get("as"))
-        if key in seen_keys or edge.get("id") in seen_ids:
+        key = tuple(_key(v) for v in (edge.get("from"), edge.get("to"), _data(edge).get("role"), _data(edge).get("as")))
+        if key in seen_keys or _key(edge.get("id")) in seen_ids:
             doubled.append(_text(edge.get("id")))
         seen_keys.add(key)
-        seen_ids.add(edge.get("id"))
+        seen_ids.add(_key(edge.get("id")))
     return doubled
 
 
@@ -191,11 +197,11 @@ def _stop_limit(view):
     settings_in = {}
     for edge in view["edges"]:
         if _data(edge).get("role") == "settings":
-            settings_in.setdefault(edge.get("to"), []).append(edge.get("id"))
+            settings_in.setdefault(_key(edge.get("to")), []).append(edge.get("id"))
     steps = view["steps"]
     return ([s["id"] for s in steps if _type(s) == "master" and not _stop_is_valid(_data(s).get("stop"))]
             + [s["id"] for s in steps if _type(s) == "data" and ({"stop", "session"} & set(_data(s)))]
-            + [_text(t) for t, ids in settings_in.items() if len(ids) > 1])
+            + [_text(t[1] if isinstance(t, tuple) else t) for t, ids in settings_in.items() if len(ids) > 1])
 
 
 def _cycle(view):

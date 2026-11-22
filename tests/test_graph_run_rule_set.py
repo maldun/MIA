@@ -26,6 +26,25 @@ class RunCheckFirst(unittest.TestCase):
         self.asked = []
         self.runner = GraphRunner(lambda node_id: self.asked.append(node_id) or "trusted")
 
+    @mark.req("REQ-RUN-036", "REQ-GTB-040")
+    def test_connection_fields_that_are_lists_or_objects_refuse_instead_of_raising(self):
+        """Verify V-1: a connection whose to or from is a list or an object makes the run refused before any step, never an exception.
+
+        Example: DB -> T with "to": ["T"] -> ("refused", ["DB>T"]), T not called.
+        """
+        for label, field, value in (("to is a list", "to", ["T"]), ("from is an object", "from", {"x": 1})):
+            with self.subTest(case=label):
+                # Given: the reader graph with one connection end replaced by a list or object, and a Stage with prepare on T
+                g = reader()
+                g["edges"][0][field] = value
+                calls = []
+                stage = Stage(lambda inputs, outputs, node: calls.append("T"), prepare=lambda inputs, outputs, node: None)
+                # When: it is run
+                result = self.runner.run(g, {"T": stage}, {})
+                # Then: refused naming the connection, nothing ran
+                self.assertEqual((result.status, result.named), ("refused", ["DB>T"]))
+                self.assertEqual(calls, [])
+
     @mark.req("REQ-RUN-039")
     def test_a_stage_without_prepare_does_not_make_its_inputs_given(self):
         """Only a Stage with a prepare function counts its inputs as given; a Stage without one is refused like a plain function.

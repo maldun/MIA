@@ -137,6 +137,35 @@ class RuleSetUnit(unittest.TestCase):
         # And: a value for another step does not supply q
         self.assertEqual([b["input"] for b in run_check(g, {"other": "x"})["broken"]], ["q"])
 
+    @mark.req("REQ-GTB-040")
+    def test_connection_fields_that_are_lists_or_objects_never_raise(self):
+        """REQ-GTB-040 (Verify V-1): a connection whose from, to, id, role or as is a list or an object gives a report, never an exception.
+
+        Example: a connection {"id": "e1", "from": ["a"], "to": "t"} gives [connection_endpoints ["e1"]]; with "role": ["x"] the graph stays sound.
+        """
+        from graph_model import check_graph
+        nodes = [data("a"), transform("t"), data("out")]
+        cases = [  # label, the odd connection, the rule report expected
+            ("from is a list", {"id": "e1", "from": ["a"], "to": "t", "data": {}}, [("connection_endpoints", ["e1"])]),
+            ("to is an object", {"id": "e1", "from": "a", "to": {"x": 1}, "data": {}}, [("connection_endpoints", ["e1"])]),
+            ("id is a list", {"id": ["e1"], "from": "a", "to": "t", "data": {}}, []),
+            ("role is a list", {"id": "e1", "from": "a", "to": "t", "data": {"role": ["x"]}}, []),
+            ("as is an object", {"id": "e1", "from": "a", "to": "t", "data": {"as": {"x": 1}}}, []),
+        ]
+        for label, odd, expected in cases:
+            with self.subTest(case=label):
+                # Given: a sound graph a -> t -> out whose first connection is replaced by the odd one
+                g = graph(nodes, [odd, connection("e2", "t", "out")])
+                # When: the rule report, the run check and check_graph are asked
+                # Then: no exception; the report names only what the contract says
+                self.assertEqual(rules_of(rule_report(g)), expected)
+                self.assertIsInstance(run_check(g)["broken"], list)
+                self.assertIsInstance(check_graph(g), list)
+        # And: two identical odd connections are still found as duplicates
+        twice = graph(nodes, [{"id": "e1", "from": "a", "to": "t", "data": {"role": ["x"]}},
+                              {"id": "e3", "from": "a", "to": "t", "data": {"role": ["x"]}}, connection("e2", "t", "out")])
+        self.assertEqual(rules_of(rule_report(twice)), [("duplicate_connection", ["e3"])])
+
     @mark.req("REQ-GTB-040", "REQ-GTB-051")
     def test_a_malformed_given_counts_as_no_values_and_never_raises(self):
         """IF-301 v4: run_check never raises; a `given` that is not a list of IDs counts as no values given (T-01 finding, settled by delegation D-423).

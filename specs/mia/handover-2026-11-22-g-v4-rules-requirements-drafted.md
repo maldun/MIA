@@ -7,12 +7,12 @@ Read first: this file, `CLAUDE.md`, skills `dev-workflow`, `plan-phase` (or `imp
 |---|---|
 | Line of work | `goal/v4.graphapi.rules`, worktree `/home/maldun/prog/Python/MIA-goal-v4-rules`, not pushed |
 | High-level spec | approved (`f1a0ab00`) |
-| Requirements | 27 new (REQ-GTB-033 to 052, REQ-WFM-162 to 165, REQ-RUN-036 to 039) and 3 changed (REQ-WFM-150, 154, 155), **all approved by group** (`/home/maldun/prog/Python/MIA-goal-v4-rules/specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md`) |
+| Requirements | 28 new (REQ-GTB-033 to 052, REQ-WFM-162 to 165, REQ-RUN-036 to 039) and 3 changed (REQ-WFM-150, 154, 155), **all approved by group** (`/home/maldun/prog/Python/MIA-goal-v4-rules/specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md`) |
 | IF-301 v4 (A-170) | text approved in three parts (D-419); suite `test_if_301_v4_rule_set.py` (TC-IF-301-27 to 34) and mock `if_301_graph_tables_v4.py` staged in `specs/mia/amendments/A-170/tests/`; the mock passes the suite and every pure RULES check |
-| Architecture | FR-63, FR-64 in the model; the 27 requirements generated with links to FR-63/64 (D-420); `check_sysml.sh` 0 errors, `check_sysml_model.py` OK |
+| Architecture | FR-63, FR-64 in the model; the 28 requirements generated with links to FR-63/64 (D-420); `check_sysml.sh` 0 errors, `check_sysml_model.py` OK |
 | Test spec, test requirements | approved (D-422; TC-GTB-046, TC-GTB-047 and TR-RULES-003 corrected by delegation, D-424) |
 | Red tests | staged in `specs/mia/goals/G-V4.GRAPHAPI.RULES/red-tests/` (4 acceptance files, helper `rules_graphs.py`, `smoke_rules.py`); stub `graph_rule_set.py` in the branch; on a scratch install every check fails by assertion, except those listed in `plan.md` "State at the red commit"; `test_doc_check.py` 0 findings |
-| Plan | `plan.md` (T-01 rule set module, T-02 save path, T-03 runner, T-04 entry points and smoke) and `binding-map.md` (30 of 30 fixed), by delegation; the plan-gate box in `plan.md` and `Reviewed by` in `binding-map.md` are the owner's |
+| Plan | `plan.md` (T-01 rule set module, T-02 save path, T-03 runner, T-04 entry points and smoke) and `binding-map.md` (31 of 31 fixed), by delegation; the plan-gate box in `plan.md` and `Reviewed by` in `binding-map.md` are the owner's |
 
 ## 2. Next steps
 1. Done 2026-11-22: A-170 installed (`fdbf2377`), red tests installed (`71523f7a`, tag `plan-baseline-g-v4-rules`), plan gate ticked by the owner (date field still empty, his). Plan phase done.

@@ -11,7 +11,7 @@
 Reviewed by: [ ] (the owner ticks)
 Date: 2026-11-22 (agent by delegation, D-423)
 Iteration: 0 (plan gate)
-Share fixed: 30 of 30 (27 new, 3 changed), 100 %. Above the 30 % warning of BD3: every item is part of the IF-301 v4 contract that the save path, the runner and later EDIT and CONTEXT consume, or is what a person sees in a refusal (AC-017, AC-018); none is an internal choice.
+Share fixed: 31 of 31 (28 new, 3 changed; corrected from "30 of 30, 27 new", Verify V-5), 100 %. Above the 30 % warning of BD3: every item is part of the IF-301 v4 contract that the save path, the runner and later EDIT and CONTEXT consume, or is what a person sees in a refusal (AC-017, AC-018); none is an internal choice.
 
 | Requirement | Subject | Traces to (validated outcome) | Pre-sort | Probe (defect, result) | Witness | Binding | Decided by |
 |---|---|---|---|---|---|---|---|

@@ -148,3 +148,12 @@ V-1 (only if the owner chooses not to fix it now; then REQ-GTB-040 needs its def
 - Deploy: SMOKE-RULES-001 on the owner's host.
 - Validate (G-V5): whether the sentences of the rule report read well in the editor (EDIT), and whether the 57 newly refused old graphs (duplicate connections, second writers) appear in real stores.
 - TC-GTB-046's check-route half is a wiring check until IF-104 v2 is real (TR-RULES-007); the real route is verified in VIEW/EDIT.
+
+## Resolution of the findings (added by the planning session after the owner's decisions, D-461; not part of the reviewer's draft)
+| Finding | Owner's decision | Done |
+|---|---|---|
+| V-1 | fix now (Phase 3) | three unit tests first (`tests/test_graph_rule_set.py`, `tests/test_graph_run_rule_set.py`, `tests/test_graph_model_rule_set.py`), red with `TypeError`; fix in `graph_rule_set.py` (`_key`) and `graph_run.py` (`_given`); every RULES check and the IF-301 v4 suite green again; regression re-run listed below |
+| V-2 | correct the contract | amendment A-185 staged (`specs/mia/amendments/A-185/`), installed by the owner with `tools/apply_amendment_a185.sh --do`; no code or test change |
+| V-4 | accept as stated | – |
+| V-5 | correct the counts | 28 new, 3 changed (31 items) in `requirements.md`, `binding-map.md`, `goal.md`, the handover; `plan.md` follows |
+| V-3, V-6, V-7 | noted | – |

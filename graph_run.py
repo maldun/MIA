@@ -83,7 +83,8 @@ def _given(graph, nodes, inputs):
     that input a default the graph does not show (REQ-RUN-039, D-418 (1))."""
     preparing = {i for i, f in nodes.items() if isinstance(f, Stage) and f.prepare}
     edges = graph.get("edges") if isinstance(graph, dict) else None
-    read = [e.get("from") for e in edges if isinstance(e, dict) and e.get("to") in preparing] if isinstance(edges, list) else []
+    # a malformed end (a list, an object) cannot name a step; skipping it keeps the run check the one that refuses it (REQ-GTB-040, Verify V-1)
+    read = [e.get("from") for e in edges if isinstance(e, dict) and isinstance(e.get("to"), str) and e["to"] in preparing] if isinstance(edges, list) else []
     return set(inputs) | {d for d in read if isinstance(d, str)}
 
 

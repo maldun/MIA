@@ -12,7 +12,7 @@
      REQ-WFM-146 (whole graph checked first), REQ-WFM-153, REQ-WFM-156 (no workflow rules for a context graph: the context set below has none of them),
      REQ-GTB-002 (the document form keeps its five rules, Q-6), REQ-RUN-016, 017, 033.
      Accepted cases: AC-017 (FR-63) and AC-018 (FR-64), `specs/mia/goals/G-V4/accepted-cases.md`; their Witness column is filled when the checks exist.
-     27 new requirements and 3 changed ones: more than the 25 of the split hint; kept together by the owner (D-418 (3), goal.md split check). -->
+     28 new requirements and 3 changed ones (corrected from 27, Verify V-5): more than the 25 of the split hint; kept together by the owner (D-418 (3), goal.md split check). -->
 
 ## Terms
 | Term | Meaning |

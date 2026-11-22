@@ -38,6 +38,26 @@ class SaveOnTheRuleSet(unittest.TestCase):
     def counts(self):
         return {t: sum(len(self.storage.history(t, i)) for i in self.storage.ids(t)) for t in TABLES}
 
+    @mark.req("REQ-WFM-162", "REQ-GTB-040")
+    def test_connection_fields_that_are_lists_or_objects_are_refused_not_raised(self):
+        """Verify V-1: a connection whose from is a list is refused with the rule report; one whose role is a list breaks no rule and no record check
+        (a connection's data is free in IF-301) and is saved. Neither raises.
+
+        Example: from ["D1"] -> refused, rules [connection_endpoints ["D1>T1"]], nothing stored; role ["x"] -> saved.
+        """
+        def odd(change, graph_id):
+            graph = make_graph(graph_id, [data_node("D1", value="x"), transform_node("T1"), data_node("D2")], [make_edge("D1", "T1"), make_edge("T1", "D2")])
+            change(graph["edges"][0])
+            return graph
+        # Given: a sound graph D1 -> T1 -> D2 whose first connection has a list as its start
+        # When: it is saved
+        result = self.model.save_graph(odd(lambda e: e.update({"from": ["D1"]}), "odd-from"))
+        # Then: refused naming the connection, nothing stored
+        self.assertEqual((result.saved, [(i["rule"], i["parts"]) for i in result.rules]), (False, [("connection_endpoints", ["D1>T1"])]))
+        self.assertEqual(self.counts(), {t: 0 for t in TABLES})
+        # And: the same graph with a list as the role of that connection is saved, without an exception
+        self.assertTrue(self.model.save_graph(odd(lambda e: e["data"].update({"role": ["x"]}), "odd-role")).saved)
+
     @mark.req("REQ-WFM-163", "REQ-WFM-150")
     def test_a_refusal_carries_the_rule_report_and_names_every_part(self):
         """A graph with two broken rules is refused with the rule report in `rules`; `named` is the parts of both items in order; nothing stored.
