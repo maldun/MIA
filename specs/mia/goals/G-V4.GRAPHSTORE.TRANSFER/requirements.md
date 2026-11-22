@@ -1,6 +1,6 @@
 # Requirements: G-V4.GRAPHSTORE.TRANSFER (low level, new and changed items)
 
-**Top-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE/top-level-spec.md` (FR-58, FR-59, FR-93, NFR-15, NFR-16 move and sync part)   **High-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/high-level-spec.md` (HR-001 to HR-008, approved 2026-11-22)   **Status:** Draft (2026-11-22, agent by delegation D-423; the owner reviews group by group)   **Plan baseline:** –
+**Top-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE/top-level-spec.md` (FR-58, FR-59, FR-93, NFR-15, NFR-16 move and sync part)   **High-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/high-level-spec.md` (HR-001 to HR-008, approved 2026-11-22)   **Status:** Approved by the owner group by group (MV, SB, SY, SR, PT, AS; 2026-11-22, review-log.md; D-466, D-467)   **Plan baseline:** –
 
 <!-- The requirements this subgoal adds, and the proposed wording changes of requirements in force.
      Basis: the approved high-level spec, the decisions D-460, D-463, D-464, prototype rounds 02 and 03 (`graph_store_move.py`, `graph_store_sync.py`,
@@ -11,7 +11,7 @@
      Requirements in force that stay as they are: REQ-SLY-002, 003 (versions never change), 004 (record checks on write), 007 (round trip gives identical files: every
      write into a set without a marker writes one, REQ-SLY-032, so both sides of TC-SLY-007 hold it), 008 (backup), 012 (realise IF-102);
      VIEW's REQ-API-018 to 021 (the store setting: TRANSFER adds the copy on top of it); REQ-API-022 is replaced by REQ-API-064 once a copy is set.
-     28 new and 2 changed requirements (30, above the split hint of 25; goal.md Split check, the owner confirms in the review). -->
+     29 new and 2 changed requirements (31, above the split hint of 25; goal.md Split check, the owner confirms in the review). -->
 
 ## Terms
 | Term | Meaning |
@@ -38,7 +38,7 @@
 | 3 | SY | Lag and one-way sync: live wins, the copy's own versions set aside, one sync at a time, rerun after an interruption (FR-93, HR-003, HR-006, HR-007) | REQ-SLY-024, REQ-SLY-025, REQ-SLY-026, REQ-SLY-027, REQ-SLY-028, REQ-SLY-029, REQ-SLY-036, REQ-SLY-038 |
 | 4 | SR | Side records and the one-graph move (AC-033, FR-95 and FR-81 mechanisms) | REQ-SLY-030, REQ-SLY-031 |
 | 5 | PT | Portable sets: the format marker, older and newer sets, no paths (NFR-15, HR-008) | REQ-SLY-032, REQ-SLY-033, REQ-SLY-034, REQ-SLY-035, REQ-SLY-037 |
-| 6 | AS | The copy setting in the backend: reading the copy, AutoSync at start and stop, the real store answer (FR-58, FR-93, D-460) | REQ-API-060, REQ-API-061, REQ-API-062, REQ-API-063, REQ-API-064 |
+| 6 | AS | The copy setting in the backend: reading the copy, AutoSync at start and stop, the real store answer (FR-58, FR-93, D-460) | REQ-SLY-039, REQ-API-060, REQ-API-061, REQ-API-062, REQ-API-063, REQ-API-064 |
 
 ## Requirements
 
@@ -260,20 +260,20 @@
 - Verification method: Test
 - Acceptance criterion: AC-033: a graph with two recorded changes and an arrangement, moved and synced, has the same `graph_changes` and `arrangements` records at the destination; a version kept without its record of changes (VIEW REQ-API-040, `logged` false) arrives without one, and no record is made up (exact)
 - Verified by: TC-SLY-030
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-SLY-031 – The one-graph move
 - Level: low   Subject: Persistence
 - Group: SR
 - Text: When the backend asks to move one graph, the Storage layer shall copy the versions of the graph and its members that the target lacks, header last, leaving other graphs unchanged.
-- Rationale: refines HR-001 and HR-003; the mechanism of AC-027 (FR-95: a keep reaches the copy at once) and AC-033 (FR-81); signature `move_graph(source, target, graph_id)` proposed to VIEW (D-464 (2))
+- Rationale: refines HR-001 and HR-003; the mechanism of AC-027 (FR-95: a keep reaches the copy at once) and AC-033 (FR-81); signature `move_graph(source, target, graph_id)` agreed with VIEW (D-465), the call site is EDIT's; a target whose history of the graph differs is refused with `conflict`, because only the sync may set aside, cut back or remove on the copy (owner, D-467)
 - Parent: HR-003
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: after a new version of `cp2.multi` in the live store, the one-graph move adds exactly that version and its new members to the copy, and every other record of the copy is unchanged (exact)
+- Acceptance criterion: after a new version of `cp2.multi` in the live store, the one-graph move adds exactly that version and its new members to the copy, and every other record of the copy is unchanged; with a copy that holds a version 5 of its own, the move ends with `conflict` naming `cp2.multi` and the copy is unchanged (exact)
 - Verified by: TC-SLY-031
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP2)
 
 ### REQ-SLY-032 – The format marker
@@ -286,7 +286,7 @@
 - Verification method: Test
 - Acceptance criterion: a move into an empty folder leaves `mia-store.json` holding `{"format": 1}` (exact)
 - Verified by: TC-SLY-032
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-SLY-033 – An older set without unscoped records is read
@@ -299,7 +299,7 @@
 - Verification method: Test
 - Acceptance criterion: a set written by today's code without a marker, holding scoped graphs and `workflows` documents, is moved and synced like a format-1 set (exact)
 - Verified by: TC-SLY-033
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-SLY-034 – An older set with unscoped records is refused
@@ -312,7 +312,7 @@
 - Verification method: Test
 - Acceptance criterion: a set holding `graph_nodes/n1` (no slash) gives a refusal naming `graph_nodes`, `n1` and the conversion step, and nothing is written (exact)
 - Verified by: TC-SLY-034
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-SLY-035 – A newer set is refused
@@ -325,7 +325,7 @@
 - Verification method: Test
 - Acceptance criterion: a set with `{"format": 2}` is refused naming 2 and 1, and no file in it changes (exact)
 - Verified by: TC-SLY-035
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
 
 ### REQ-SLY-037 – No path of the machine in a set
@@ -338,33 +338,46 @@
 - Verification method: Test
 - Acceptance criterion: AC-008: after a move, a sync with an aside file and a copy of the folder to another place, no file of either folder contains the source folder's absolute path or the home folder (exact)
 - Verified by: TC-SLY-037
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
+
+### REQ-SLY-039 – Lag and sync on command
+- Level: low   Subject: Persistence
+- Group: AS
+- Text: The Storage layer shall offer the lag and the sync of a copy as commands of its storage tool, next to the move commands.
+- Rationale: refines HR-006 and FR-93 "when the owner runs the sync" (OC-2 "on command"); `python -m MIA.migrate lag --copy DIR` and `sync --copy DIR`, the live store from the store setting; it may run while MIA runs, the lock (REQ-SLY-028) keeps one sync at a time; no API route, which would need a new IF-104 version (owner, D-467)
+- Parent: HR-006
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-006: `lag --copy` prints the line of `cp2.multi` (live 6, copy 4, behind) and exits 0; `sync --copy` then reports the records added and exits 0; a refused sync (lock held) is one line and exit code 1 (exact)
+- Verified by: TC-SLY-039
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (owner D-467, finding in the AS review)
 
 ### REQ-API-060 – Graphs read from the copy
 - Level: low   Subject: WebApplication
 - Group: AS
 - Text: Where the configuration names a copy folder, the API and accounts shall read the graphs of IF-104 v2 from the copy.
-- Rationale: refines HR-002 and FR-58 "so that MIA can run daily on the copy"; on top of VIEW's store setting (REQ-API-018); writes go to the live store (FR-95 of EDIT, not here)
+- Rationale: refines HR-002 and FR-58 "so that MIA can run daily on the copy"; on top of VIEW's store setting (REQ-API-018); the configuration key is `copy` (a folder; absent means no copy, D-467); writes go to the live store (FR-95 of EDIT, not here)
 - Parent: HR-002
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: with a live store and a copy holding a different version of one graph, `GET` of that graph through IF-104 v2 answers the copy's version (exact)
 - Verified by: TC-API-060
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-API-061 – AutoSync off unless asked
 - Level: low   Subject: WebApplication
 - Group: AS
 - Text: Where the configuration does not switch AutoSync on, the API and accounts shall run no sync at start or stop.
-- Rationale: refines HR-003; D-460: AutoSync is off by default, until the owner's later gate MIA runs on files (D-460 (1))
+- Rationale: refines HR-003; D-460: AutoSync is off by default, until the owner's later gate MIA runs on files (D-460 (1)); the configuration key is `autosync` (true or false, default false, D-467)
 - Parent: HR-003
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: start and orderly stop with a copy set and no AutoSync setting leave the copy unchanged while the live store has a newer version (exact)
 - Verified by: TC-API-061
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-API-062 – AutoSync at start and at an orderly stop
@@ -377,7 +390,7 @@
 - Verification method: Test
 - Acceptance criterion: with AutoSync on, a newer live version is in the copy before the first answer, and a version written to the live store while running is in the copy after the orderly stop (exact)
 - Verified by: TC-API-062
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype `AutoSync`)
 
 ### REQ-API-063 – An unreachable live store does not stop the start
@@ -390,7 +403,7 @@
 - Verification method: Test
 - Acceptance criterion: with AutoSync on and the live store's address unreachable, the backend starts, answers graphs from the copy, and its log holds one line naming the live store and "sync not run" (exact)
 - Verified by: TC-API-063
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
 ### REQ-API-064 – The store answer while a copy is set
@@ -403,7 +416,7 @@
 - Verification method: Test
 - Acceptance criterion: AC-006 before the sync: `GET /api/v2/store` gives `shown: "copy"`, `live_reachable: true`, `lag: {"graphs": 1, "since": <time of live version 5 of cp2.multi>}`; after the sync `lag: {"graphs": 0, "since": null}` (exact)
 - Verified by: TC-API-064
-- Status: Draft
+- Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460 (2))
 
 ## Changed requirements (proposed; the approved text in `In force:` stays in force until the owner approves the change, M8)

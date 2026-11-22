@@ -20,3 +20,16 @@
 | REQ-SLY-029 | requirement | b16a2a27c615 | maldun (owner) | 2026-11-22 | approved | group SY accepted in the chat with REQ-SLY-038 (cut back, then append; D-466) |
 | REQ-SLY-036 | requirement | 8acbff0f4e51 | maldun (owner) | 2026-11-22 | approved | group SY accepted in the chat with REQ-SLY-038 (cut back, then append; D-466) |
 | REQ-SLY-038 | requirement | b4f0270ebe4d | maldun (owner) | 2026-11-22 | approved | group SY accepted in the chat with REQ-SLY-038 (cut back, then append; D-466) |
+| REQ-SLY-030 | requirement | f3d5e6909c34 | maldun (owner) | 2026-11-22 | approved | group SR accepted in the chat with both changes (REQ-SLY-031: conflict on a differing target; rationale: agreed with VIEW; D-467) |
+| REQ-SLY-031 | requirement | 50571b1994c1 | maldun (owner) | 2026-11-22 | approved | group SR accepted in the chat with both changes (REQ-SLY-031: conflict on a differing target; rationale: agreed with VIEW; D-467) |
+| REQ-SLY-032 | requirement | 92f34dacd6ee | maldun (owner) | 2026-11-22 | approved | group PT accepted in the chat as drafted (marker on any write, also into the live data folder; a newer set stops the start) |
+| REQ-SLY-033 | requirement | 78057219f6eb | maldun (owner) | 2026-11-22 | approved | group PT accepted in the chat as drafted (marker on any write, also into the live data folder; a newer set stops the start) |
+| REQ-SLY-034 | requirement | 9992562d8234 | maldun (owner) | 2026-11-22 | approved | group PT accepted in the chat as drafted (marker on any write, also into the live data folder; a newer set stops the start) |
+| REQ-SLY-035 | requirement | 7aea40c8ccdd | maldun (owner) | 2026-11-22 | approved | group PT accepted in the chat as drafted (marker on any write, also into the live data folder; a newer set stops the start) |
+| REQ-SLY-037 | requirement | ee5cb9df3914 | maldun (owner) | 2026-11-22 | approved | group PT accepted in the chat as drafted (marker on any write, also into the live data folder; a newer set stops the start) |
+| REQ-SLY-039 | requirement | 51bef71db30a | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
+| REQ-API-060 | requirement | 161b2bd35ff8 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
+| REQ-API-061 | requirement | 4f3e25c81af7 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
+| REQ-API-062 | requirement | eb24f4f37757 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
+| REQ-API-063 | requirement | b5a7bfb0aa30 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
+| REQ-API-064 | requirement | 8afa79db6916 | maldun (owner) | 2026-11-22 | approved | group AS accepted in the chat with REQ-SLY-039 (lag and sync commands) and the keys copy, autosync (D-467) |
