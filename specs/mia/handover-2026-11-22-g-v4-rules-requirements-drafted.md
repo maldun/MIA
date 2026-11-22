@@ -1,4 +1,4 @@
-# Handover: G-V4.GRAPHAPI.RULES, Plan done (gate ticked); next Implement T-01 (2026-11-22)
+# Handover: G-V4.GRAPHAPI.RULES, merged into goal/v4; Deploy and Validate deferred; next TRANSFER (2026-11-22)
 
 Read first: this file, `CLAUDE.md`, skills `dev-workflow`, `plan-phase` (or `implement-phase` once the gate is ticked), `agent-app`. The owner (Stefan Reiterer, maldun) decides every gate. Since D-423 the agent finishes RULES and TRANSFER on its own recommendations (recorded as taken by delegation) and asks the owner again at RUN, VIEW, EDIT and CONTEXT. No plausibility records (D-421). Older handovers: `handover-2026-11-22-g-v4-rules-round04-done.md`, `handover-2026-11-22-g-v4-rules-plan-next.md` (sections 5 and 7 still hold).
 
@@ -31,3 +31,6 @@ Next free (checked 2026-11-22): D-425, A-171, REQ-WFM-166, REQ-GTB-053, REQ-RUN-
 
 ## Start prompt for the next session
 > Continue G-V4.GRAPHAPI.RULES. Read `CLAUDE.md` and `specs/mia/handover-2026-11-22-g-v4-rules-requirements-drafted.md`, work in `/home/maldun/prog/Python/MIA-goal-v4-rules`. If the red tests are installed and the plan gate is ticked, load `implement-phase` and start T-01.
+
+## Closing state (2026-11-22)
+RULES is merged into `goal/v4` (`ae34260a`): Plan, Implement, Verify (verdict ticked, V-1 fixed, V-2 by A-185, V-4 accepted, D-461) and Commit are done; Deploy and Validate are deferred (D-462: SMOKE-RULES-001 with the next deployable G-V4 build, VAL-RULES-01 with G-V5's first test run). The records committed on `goal/v4.graphapi.rules` after `ae34260a` (this section, the Commit row, the TRANSFER start handover) reach `goal/v4` with a second small merge by the owner. Next: TRANSFER, start handover `specs/mia/handover-2026-11-22-g-v4-transfer-start.md`.
