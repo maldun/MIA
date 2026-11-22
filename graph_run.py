@@ -5,7 +5,8 @@ REQ-RUN-016 to 019 (order, refusals, failure) and REQ-RUN-030 to 035 (Stage: thr
 - run(graph, nodes, inputs) -> RunResult(status, named, named_status, values): `nodes` maps a transform or master node ID to a function
   of {input data node ID: value} that returns the value it writes; `inputs` maps data node IDs to their starting values.
   status is "done", "refused" (before any node ran: named = the node IDs, named_status = their status) or "failed" (named = [the failed node]);
-  A graph the runner cannot put in an order is "refused" too, before any node ran (named = the edges to an unknown node, else the cycle as node IDs, named_status = None);
+  First the run check of IF-301 v4 (graph_rule_set.run_check): when it refuses, the run is "refused" before any node ran and before the trust check,
+  named = the parts of every item in the check's order, repeats kept, named_status = None (REQ-RUN-036 to 038, G-V4.GRAPHAPI.RULES T-03);
   `values` maps each data node ID to its value after the run.
 - A function wrapped as Stage(function, prepare=None) is called as function(inputs, outputs, node) (A-124): inputs and outputs map the name
   (edge field `as`, else the data node ID) to the value of the data node, node is the settings object (the value of the input data node whose edge has
@@ -17,9 +18,11 @@ REQ-RUN-016 to 019 (order, refusals, failure) and REQ-RUN-030 to 035 (Stage: thr
 from collections import namedtuple
 
 try:
-    from .graph_model import find_cycle, order_of
+    from . import graph_rule_set
+    from .graph_model import order_of
 except ImportError:
-    from graph_model import find_cycle, order_of
+    import graph_rule_set
+    from graph_model import order_of
 
 RunResult = namedtuple("RunResult", "status named named_status values")
 
@@ -37,12 +40,12 @@ class GraphRunner:
         self.trust = trust
 
     def run(self, graph, nodes, inputs):
-        kinds = {n["id"]: n["data"]["type"] for n in graph["nodes"]}
-        # REQ-RUN-016: a graph without an order is not run (the writers of IF-102 do not run the graph rules, D-262)
-        unknown = [e["id"] for e in graph["edges"] if e["from"] not in kinds or e["to"] not in kinds]
-        cycle = None if unknown else find_cycle(list(kinds), graph["edges"])
-        if unknown or cycle:
-            return RunResult("refused", unknown or cycle, None, _data_values(kinds, dict(inputs)))
+        # REQ-RUN-036, 037: the run check comes first, so a graph that breaks a rule or lacks an input is refused whatever its trust (REQ-RUN-038)
+        kinds = _kinds(graph)
+        check = graph_rule_set.run_check(graph, _given(graph, nodes, inputs))
+        if check["status"] == "refused":
+            named = [part for item in check["broken"] for part in item["parts"]]
+            return RunResult("refused", named, None, _data_values(kinds, dict(inputs)))
         reads = {i: [] for i in kinds}
         for edge in graph["edges"]:
             if not _is_order(edge):     # an order edge only orders (REQ-RUN-035): it is no input of a plain callable either
@@ -73,6 +76,23 @@ class GraphRunner:
                 return RunResult("failed", [node_id], None, _data_values(kinds, values))
             values.update(written)
         return RunResult("done", [], None, _data_values(kinds, values))
+
+
+def _given(graph, nodes, inputs):
+    """The data steps the run check counts as given: the run's inputs, and every data step read by a Stage with a prepare function, which may give
+    that input a default the graph does not show (REQ-RUN-039, D-418 (1))."""
+    preparing = {i for i, f in nodes.items() if isinstance(f, Stage) and f.prepare}
+    edges = graph.get("edges") if isinstance(graph, dict) else None
+    read = [e.get("from") for e in edges if isinstance(e, dict) and e.get("to") in preparing] if isinstance(edges, list) else []
+    return set(inputs) | {d for d in read if isinstance(d, str)}
+
+
+def _kinds(graph):
+    """The type of every step with an ID, read leniently: the graph is read before the run check, which refuses a malformed graph without raising."""
+    steps = graph.get("nodes") if isinstance(graph, dict) else None
+    steps = steps if isinstance(steps, list) else []
+    return {n["id"]: (n.get("data") if isinstance(n.get("data"), dict) else {}).get("type")
+            for n in steps if isinstance(n, dict) and isinstance(n.get("id"), str)}
 
 
 def _data_values(kinds, values):
