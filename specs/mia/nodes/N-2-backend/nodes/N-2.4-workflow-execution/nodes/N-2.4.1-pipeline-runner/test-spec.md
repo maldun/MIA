@@ -102,3 +102,63 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-202
 - Given: a transform with an order edge from a data node written by another transform
 - When: the graph is run
 - Then: the writer runs first and the Stage's inputs hold no entry for the order node
+
+## Test cases of G-V4.GRAPHAPI.RULES (moved at the merge 2026-11-22; test requirements TR-RULES-001 to 009)
+All checks of RULES are exact (rule names, IDs, orders, counts, equalities): no statistical check, no benchmark (no hard bound, D-416 (4)). Accepted cases (`specs/mia/goals/G-V4/accepted-cases.md`): AC-017 is witnessed by TC-GTB-046 and TC-WFM-180, AC-018 by TC-RUN-036, TC-RUN-037 and TC-GTB-044. The validation criterion VAL-RULES-01 stays in the goal record `specs/mia/goals/G-V4.GRAPHAPI.RULES/test-spec.md`.
+
+| Test ID | Verifies | Level | Setup / inputs | Expected result | Limit / tolerance |
+|---|---|---|---|---|---|
+| TC-RUN-036 | REQ-RUN-036 | component | seven graphs, one per refusal reason of HR-006 (cycle, two writers, connection to a missing step, two identical connections, unsupplied input, context graph, unknown kind); a marker function per step | each run ends `refused`; every marker was called 0 times; a sound twin runs and calls its markers | exact counts |
+| TC-RUN-037 | REQ-RUN-037 | component | `wf-cycle` (`D1 → T1 → D2 → T2 → D1`); a graph whose connection `X8>T1` comes from a missing step; the converted `chat` skill without values | refused naming `D1, T1, D2, T2, D1`; `X8>T1`; `input.text` | exact lists |
+| TC-RUN-038 | REQ-RUN-038 | component | a graph with a cycle and an untrusted transform; the same graph without the cycle | the first refused naming the cycle, no trust status; the second refused naming the untrusted transform and its status | exact |
+| TC-RUN-039 | REQ-RUN-039 | component | the TC-RUN-034 graph (`DB` read by a Stage `T` with a prepare function, no value anywhere); the same graph with a plain function for `T` | the first runs (`done`); the second is refused naming `DB` and `T` was not called | exact |
+| TC-RUN-040 | REQ-RUN-036, HR-006 | component | the 15 converted skill graphs, each with a value for each of its unsupplied inputs | each run check is ready; no skill is refused by a rule | 15 of 15 |
+
+## Smoke tests of G-V4.GRAPHAPI.RULES (run in Phase 6, target environment)
+| Test ID | Verifies | Target | Conditions | Expected result |
+|---|---|---|---|---|
+| SMOKE-RULES-001 | REQ-RUN-036, HR-006 | the owner's host, the installed release, a throw-away files store | the 15 skills run checked with their usual inputs; the round 04 sample `sample.broken` run | each skill ready; `sample.broken` refused naming `e2`, no step run |
+
+## Scenarios (G-V4.GRAPHAPI.RULES, approved by the owner 2026-11-22, D-422)
+
+### TC-RUN-036 – No step runs when the run check refuses
+- Verifies: REQ-RUN-036
+- Given: seven graphs, one per refusal reason of HR-006: a cycle, two writers, a connection to a missing step, two identical connections, an unsupplied input, a context graph, a graph of kind `swarm`; every step is a marker function that counts its calls; a sound twin of the first
+- When: each is run
+- Then: each run ends `refused` and every marker was called 0 times
+- And: the sound twin runs and every one of its markers was called once (the markers can fire)
+- And: witnesses AC-018
+
+### TC-RUN-037 – A refused run names every part, repeats kept
+- Verifies: REQ-RUN-037
+- Given: `wf-cycle` (`D1 → T1 → D2 → T2 → D1`); a graph whose connection `X8>T1` comes from the missing step `X8`; the converted `chat` skill
+- When: each is run, `chat` without values
+- Then: the runs are refused naming `D1, T1, D2, T2, D1`, then `X8>T1`, then `input.text`
+- And: witnesses AC-018
+
+### TC-RUN-038 – Trust is checked after the run check
+- Verifies: REQ-RUN-038
+- Given: a graph with a cycle and an untrusted transform `T2`; the same graph without the cycle
+- When: each is run
+- Then: the first is refused naming the cycle and no trust status
+- And: the second is refused naming `T2` and its status `untrusted` (REQ-RUN-017)
+
+### TC-RUN-039 – An input a prepare function may give is not refused
+- Verifies: REQ-RUN-039
+- Given: the graph of TC-RUN-034 (`DB` read by the Stage `T`, no value in the graph or the run), once with a prepare function on `T` that gives nothing, once with a plain function for `T`
+- When: each is run
+- Then: the first runs to `done` (D-418 (1))
+- And: the second is refused naming `DB` and `T` was not called
+
+### TC-RUN-040 – Today's skills still run
+- Verifies: REQ-RUN-036, HR-006
+- Given: the 15 converted skill graphs, each with the value `"x"` for each of its unsupplied inputs
+- When: each is checked for a run
+- Then: all 15 are ready; none is refused by a rule
+
+### SMOKE-RULES-001 – Skills run, a broken graph does not
+- Verifies: REQ-RUN-036, HR-006
+- Given: the owner's host with the installed release; a throw-away files store
+- When: each of the 15 skills is run checked with its usual inputs, and the round 04 sample `sample.broken` is run
+- Then: each skill's run check is ready; `sample.broken` is refused naming `e2` and no step ran
+- And: the throw-away store is removed afterwards; MIA's own store is not written

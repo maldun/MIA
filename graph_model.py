@@ -1,47 +1,34 @@
-"""Graph model of a workflow graph (N-2.3, G-V2.MODEL T-01): the rules of REQ-WFM-043 to 049 and the stored graph.
+"""Graph model of a workflow graph (N-2.3, G-V2.MODEL T-01): the stored graph, checked with the rule set of its kind (G-V4.GRAPHAPI.RULES T-02).
 
 - GraphModel(tables): `tables` has put(table, id, doc) -> version, get(table, id, version=None), versions(table, id).
-- save_graph(graph) -> SaveResult(saved, version, named): `named` lists the IDs a refusal names (a node, an edge, a data node, or a cycle as IDs).
+- save_graph(graph) -> SaveResult(saved, version, named, rule, detail, rules): checks the kind, then the rule report of IF-301 v4 for the graph's kind
+  (graph_rule_set, REQ-WFM-162), then the record checks; a refusal for broken rules carries the report in `rules` and names the parts of every item
+  in `named`, in order, repeats kept (REQ-WFM-150, REQ-WFM-163).
+- check_graph(graph) -> the same parts as a flat list (REQ-WFM-164).
 - read_graph(graph_id, version=None) -> the stored graph dict.
 - topological_order(graph_id) -> the node IDs of a stored graph in an order in which every edge points forward.
 
 Node fields are the proposal of goal.md: data nodes `value`, `parameters`; transform and master `toolbox_id`; master `stop`
-({"max_repetitions": n} and/or {"max_seconds": s}, the names of IF-301 v2). The cycle search is a plain depth-first search, so no new dependency is needed.
+({"max_repetitions": n} and/or {"max_seconds": s}, the names of IF-301 v2). find_cycle stays here for the runner (N-2.4.1).
 """
 
-import math
 from collections import namedtuple
 
 try:
-    from . import graph_tables
+    from . import graph_rule_set, graph_tables
     from .storage import StorageError
 except ImportError:  # used as plain script / in tests
+    import graph_rule_set
     import graph_tables
     from storage import StorageError
 
 # `rule` and `detail` are those of a StorageError("invalid") of the record checks (as StoreResult of skill_record.py); None for a refusal of the graph rules.
-SaveResult = namedtuple("SaveResult", "saved version named rule detail", defaults=(None, None))
+# `rules` is the rule report of a refusal for broken rules (ASM-8, REQ-WFM-163), None otherwise.
+SaveResult = namedtuple("SaveResult", "saved version named rule detail rules", defaults=(None, None, None))
 
 TABLE = "workflow_graphs"      # the table of the fake; the real Storage keeps the graph as records
 HEADER = ("context_graph_id", "testbench_id", "description")
 MEMBER_TABLES = {"workflow": ("graph_nodes", "graph_edges"), "context": ("context_nodes", "context_edges")}     # the kind selects the tables (REQ-WFM-152)
-NODE_TYPES = ("data", "transform", "master")
-
-
-def context_problems(graph):
-    """The IDs a refusal names for a context graph: a step ID used twice, a connection ID used twice, a connection to a step that is not there
-    (REQ-WFM-155). Nothing else: the order, alternation, writer and stop rules are those of workflow graphs (REQ-WFM-156); CONTEXT may add rules."""
-    seen, bad = set(), []
-    for node in graph["nodes"]:
-        if node["id"] in seen:
-            bad.append(node["id"])
-        seen.add(node["id"])
-    used = set()
-    for edge in graph["edges"]:
-        if edge["id"] in used or edge["from"] not in seen or edge["to"] not in seen:
-            bad.append(edge["id"])
-        used.add(edge["id"])
-    return list(dict.fromkeys(bad))
 
 
 def _kind(graph):
@@ -50,12 +37,9 @@ def _kind(graph):
     return kind if isinstance(kind, str) and kind in MEMBER_TABLES else None
 
 
-def _refuse(named):
-    return SaveResult(False, None, list(named))
-
-
-def _node_type(node):
-    return node.get("data", {}).get("type")
+def _parts(report):
+    """The parts of every item of a rule report, in order, repeats kept (REQ-WFM-150, REQ-WFM-164)."""
+    return [part for item in report for part in item["parts"]]
 
 
 def find_cycle(ids, edges):
@@ -86,53 +70,10 @@ def find_cycle(ids, edges):
     return None
 
 
-def _limit(value, whole):
-    """A positive limit: a whole number from 1 when `whole` (2.0 counts, as in the Storage layer), else a finite number above 0; a boolean is none."""
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        return False
-    if whole:
-        return value >= 1 and (isinstance(value, int) or value.is_integer())
-    # an int is finite by nature and float() fails for one above the float range, so only a float is asked (F-19); the Storage layer accepts such a number
-    return value > 0 and (isinstance(value, int) or math.isfinite(value))
-
-
-def stop_is_valid(stop):
-    """True when `stop` is a valid stop of a master node (IF-301 v2, REQ-WFM-048): an object with `max_repetitions` (whole number, at least 1) and/or
-    `max_seconds` (finite number above 0), at least one of them, each one that is there valid (null is not valid); other keys are ignored. Kept here, not
-    taken from the Storage layer: T-01 does not depend on STORE (D-262)."""
-    if not isinstance(stop, dict) or not ({"max_repetitions", "max_seconds"} & stop.keys()):
-        return False
-    return ("max_repetitions" not in stop or _limit(stop["max_repetitions"], True)) and ("max_seconds" not in stop or _limit(stop["max_seconds"], False))
-
-
 def check_graph(graph):
-    """IDs a refusal names, or [] when the graph keeps all rules."""
-    nodes = {n["id"]: n for n in graph.get("nodes", [])}
-    edges = graph.get("edges", [])
-    # REQ-WFM-043: only data, transform and master nodes
-    bad = [i for i, n in nodes.items() if _node_type(n) not in NODE_TYPES]
-    if bad:
-        return bad
-    # REQ-WFM-045: data nodes alternate with transform or master nodes
-    bad = [e["id"] for e in edges
-           if e["from"] not in nodes or e["to"] not in nodes
-           or (_node_type(nodes[e["from"]]) == "data") == (_node_type(nodes[e["to"]]) == "data")]
-    if bad:
-        return bad
-    # REQ-WFM-046: a data node has at most one writer
-    writers = {}
-    for e in edges:
-        if _node_type(nodes[e["to"]]) == "data":
-            writers.setdefault(e["to"], set()).add(e["from"])
-    bad = [i for i, w in writers.items() if len(w) > 1]
-    if bad:
-        return bad
-    # REQ-WFM-048: a master node has a maximum of repetitions or a maximum time (`max_seconds`)
-    bad = [i for i, n in nodes.items() if _node_type(n) == "master" and not stop_is_valid(n["data"].get("stop"))]
-    if bad:
-        return bad
-    # REQ-WFM-047: no cycle
-    return find_cycle(list(nodes), edges) or []
+    """The parts of every broken rule of the graph's rule report, or [] when the graph keeps every rule (REQ-WFM-164). Kept for its callers: the
+    rules themselves are in graph_rule_set (FR-63)."""
+    return _parts(graph_rule_set.rule_report(graph))
 
 
 def order_of(graph):
@@ -164,9 +105,9 @@ class GraphModel:
         kind = _kind(graph)
         if kind is None:
             return SaveResult(False, None, [], "schema_break", "kind")
-        named = check_graph(graph) if kind == "workflow" else context_problems(graph)
-        if named:
-            return _refuse(named)
+        rules = graph_rule_set.rule_report(graph)
+        if rules:
+            return SaveResult(False, None, _parts(rules), None, None, rules)
         if not self.real:
             return SaveResult(True, self.tables.put(TABLE, graph["id"], graph), [])
         nodes, edges = self._scoped(graph)

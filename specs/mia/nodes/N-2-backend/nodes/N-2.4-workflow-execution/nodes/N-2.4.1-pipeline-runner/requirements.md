@@ -323,3 +323,69 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verified by: TC-RUN-035
 - Status: Draft
 - History: G-V2.CONVERT A-124 addition (owner decision 2026-11-16, D-251), new
+
+## Iteration 4 (goal G-V4.GRAPHAPI.RULES, one rule set for graphs; moved at the merge 2026-11-22)
+Requirements of the subgoal G-V4.GRAPHAPI.RULES (goal record `specs/mia/goals/G-V4.GRAPHAPI.RULES/`: plan, test requirements TR-RULES-001 to 009, verification report). Verified 2026-11-22 (verdict ticked by the owner); Verify findings decided in D-461: V-1 fixed (`f478e040`), V-2 corrected in the contract (A-185), V-4 accepted as stated, V-3, V-6, V-7 noted. The rule set is offered through IF-301 v4 (`contracts/IF-301-graph-tables.md`, A-170, A-185).
+
+Terms (kind, rule report, run check, unsupplied input): see the section "Terms of G-V4.GRAPHAPI.RULES" in `specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md`.
+
+## Groups of G-V4.GRAPHAPI.RULES
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 5 | RR | The run: refused before the first step, every part named, trust after (FR-64, HR-003, HR-006) | REQ-RUN-036, REQ-RUN-037, REQ-RUN-038, REQ-RUN-039 |
+
+### REQ-RUN-036 – Run check before the first step
+- Level: low-2   Subject: TaskRuntime
+- Group: RR
+- Text: When a graph is run, the Pipeline runner shall ask the run check of IF-301 with the given values before the first step runs, and run no step when it answers refused.
+- Rationale: refines HR-003 and FR-64 "before any step has run"; today the runner refuses only a missing end and a cycle (REQ-RUN-016, `graph_run.py`)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: for each refusal reason of HR-006 (cycle, two writers, missing step, two identical connections, unsupplied input, context graph, unknown kind) the run ends `refused` and the marker function of every step was called 0 times (exact)
+- Binding: fixed
+- Verified by: TC-RUN-036
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-RUN-037 – A refused run names every part
+- Level: low-2   Subject: TaskRuntime
+- Group: RR
+- Text: If the run check answers refused, then the Pipeline runner shall end the run refused, naming the parts of every item in the check's order and keeping repeated IDs.
+- Rationale: refines HR-003 and OC-2 "each broken part is named"; repeats are kept so a cycle keeps its first step at the end, as today (the scratch run of 2026-11-22 lost it when repeats were removed: three unit checks of `tests/test_graph_run_findings.py` failed)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the graph `wf-cycle` is refused naming `D1, T1, D2, T2, D1`; the graph with the missing end `X8` names the connection `X8>T1`; the converted `chat` skill without values names `input.text` (exact)
+- Binding: fixed
+- Verified by: TC-RUN-037
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP19; scratch run 2026-11-22); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-RUN-038 – Trust after the run check
+- Level: low-2   Subject: TaskRuntime
+- Group: RR
+- Text: While the run check answers ready, the Pipeline runner shall check the trust of the steps as REQ-RUN-017 says.
+- Rationale: refines HR-003; D-416 (3): a graph that breaks the rules is refused whatever its trust; trust per step is G-V4.GRAPHAPI.CODE
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a graph with a cycle and an untrusted transform is refused naming the cycle, without the trust status; the same graph without the cycle is refused naming the untrusted transform and its status (exact)
+- Binding: fixed
+- Verified by: TC-RUN-038
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: D-416 (3)); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-RUN-039 – Inputs a prepare function may give
+- Level: low-2   Subject: TaskRuntime
+- Group: RR
+- Text: When the Pipeline runner asks the run check, it shall count every input of a step whose function has a prepare function as a given value.
+- Rationale: refines HR-003 and keeps REQ-RUN-034 (D-250) as it is: a prepare function may give a default input, which the run check cannot see in the graph, and "else nothing" stays for such an input. Without this the protected TC-RUN-034 is refused in two cases (scratch run 2026-11-22); with it every protected run test passes unchanged. It narrows FR-64 a little (a prepare function that gives nothing leaves the input empty instead of refused); chosen by the owner (D-418 (1))
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the TC-RUN-034 graph (`DB` read by a Stage `T` with a prepare function, no value anywhere) runs; the same graph with a plain function for `T` is refused naming `DB` and `T` is not called (exact)
+- Binding: fixed
+- Verified by: TC-RUN-039
+- Status: Verified
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: scratch run 2026-11-22 of the protected run tests with the run check in front; owner's choice D-418 (1)); verified (G-V4.GRAPHAPI.RULES verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHAPI.RULES/requirements.md` at the merge (plan.md, "At the merge"). Accepted as stated (Verify V-4, D-461): an input of a Stage with a prepare function makes its data step given for the whole run.
