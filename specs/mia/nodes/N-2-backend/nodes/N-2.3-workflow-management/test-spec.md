@@ -622,6 +622,11 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 | TC-WFM-177 | REQ-WFM-159 | component | three saved versions of a workflow graph (with a loop-controlling step) and of a context graph | each version reads back equal to what was saved at that version | exact equality |
 | TC-WFM-178 | REQ-WFM-160 | unit | a graph with steps under the IDs `look/up`, `lookup`, `/lookup`, the empty ID | `look/up`, `/lookup` and the empty ID refused naming `unscoped_id` and the breaking record ID; nothing stored; `lookup` accepted | exact |
 
+## Smoke tests of G-V4.GRAPHSTORE.CORE (run in Phase 6, target environment)
+| Test ID | Verifies | Target | Conditions | Expected result |
+|---|---|---|---|---|
+| SMOKE-CORE-001 | REQ-WFM-158, REQ-WFM-159, REQ-WFM-152 | the owner's host, a new files directory and a new database `mia_smoke` on the owner's running PostgreSQL server, both made for the test | one workflow graph and one context graph under throw-away IDs, saved, changed twice and read | three versions each with account and time, each read as saved, on both stores |
+
 ## Scenarios (G-V4.GRAPHSTORE.CORE, approved by the owner 2026-11-21)
 
 ### TC-WFM-162 – A graph is read with local IDs
