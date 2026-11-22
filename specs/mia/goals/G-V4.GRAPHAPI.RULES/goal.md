@@ -53,7 +53,7 @@ Group spec FR-63, FR-64; decision D-375; the two existing rule sets (`../G-V4.GR
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
-| Plan | open | |
+| Plan | open | plan package complete (2026-11-22): HLS, 30 requirements, test spec, test requirements approved (D-422, D-424); red tests and A-170 staged, `plan.md`, `binding-map.md` by delegation (D-423); waits for the owner's install scripts and plan-gate box |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
