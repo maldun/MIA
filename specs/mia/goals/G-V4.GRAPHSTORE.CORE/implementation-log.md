@@ -18,6 +18,6 @@
 - Other acceptance scripts on the graph tables, HEAD against T-01: unchanged (`test_graph_model`, `test_graph_records`, `test_graph_order`, `test_graph_run`, `test_graph_run_stages`, `test_pipeline_graph`, `test_skill_binding`); CORE scripts fewer failures or the same.
 
 ## A-168: task cut after T-01 (plan amendment)
-- Status: approved by the owner, 2026-11-22 (D-412); staging copies of the four protected scripts and `tools/apply_amendment_a168.sh` to follow; not installed
+- Status: approved by the owner, 2026-11-22 (D-412); staging copies and `tools/apply_amendment_a168.sh` committed and tried on a scratch copy; not installed (the owner runs `--do`)
 - Measured basis (feedback, not verification): a clean checkout of HEAD, HEAD + T-01, and HEAD + T-01 + the prototype's `graph_model.py` (about the end state of T-02 to T-04): with the prototype code every CORE script is green and the same four protected scripts and the same unit modules stay red, so the reds are test data, not product behaviour. Numbers in `specs/mia/amendments/A-168-note.md`.
 - Changes to `plan.md`: new task T-01b before T-02; "all other tests unchanged" replaced by a named regression set with known reds; `tests/test_skill_record_storage.py` in the always-green list from T-03 on.

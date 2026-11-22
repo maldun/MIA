@@ -1,6 +1,6 @@
 # A-168: CORE task scopes after T-01; the tests A-167 missed (G-V4.GRAPHSTORE.CORE)
 
-Status: **approved by the owner, 2026-11-22 (D-412)**; the staging copies and `tools/apply_amendment_a168.sh` follow; not installed.
+Status: **approved by the owner, 2026-11-22 (D-412)**; staging copies and `tools/apply_amendment_a168.sh` ready; **not installed** (the owner runs `--do`).
 
 ## Finding (T-01, implementation log F-1 and F-2)
 The rule `unscoped_id` of T-01 (`graph_tables.py`, REQ-GTB-029 to 031) is right, but the plan assumed "all other tests unchanged" after every task. A-167 measured its impact only on the three files it rewrote. The whole suite, measured 2026-11-22:
@@ -27,3 +27,8 @@ So T-02 to T-04 fix almost none of it: the failures are plain IDs in the tests' 
 ## Why not the alternatives
 - Merge T-01 into T-02: does not touch the four protected scripts or the unit modules (no `graph_model` in them); only shortens the time where saves are refused.
 - Relax the rule (scope only in the Workflow management): rejected in A-167 (FR-60: no record may belong to no graph).
+
+## Tried (2026-11-22)
+- `--do` on a scratch worktree at cf95f544 (T-01 committed): four files updated (+36 -34, +5 -5, +12 -12, +10 -10), all four OK; a second run changes nothing.
+- The staged copies on the code before T-01 (a16465e4): all four OK as well, so they depend on nothing but the IDs.
+- `test_doc_check.py` on the staged copies: 0 errors.
