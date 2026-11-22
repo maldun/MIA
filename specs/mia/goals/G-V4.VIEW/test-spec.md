@@ -4,9 +4,9 @@
 
 All checks are exact: every expected value is a status, a code, an ID, a count, an order, a colour value, a place in whole pixels or an equality, so no statistical check is needed. The high-level spec has no hard bound (D-425 E-H), so there is no benchmark; the opening time of a graph of about fifty steps is a measured smoke number (SMOKE-VIEW-002). The accepted cases (`../G-V4/accepted-cases.md`) are witnessed as the binding map of `plan.md` will list (Witness column); the scenarios name them with "witnesses".
 
-**Check IDs of the IF-104 v2 suite (open point Q-1 of this draft).** The installed v2 suites (A-171) number their cases TC-IF-104-06 to 16, but TC-IF-104-06 and 07 are already v1 cases (A-60, A-66; `specs/mia/test-spec.md`, `tests/acceptance/contract/test_if_104_graph_api.test.mjs`). This draft uses **TC-IF-104-17 to 27** for the v2 cases (17 = installed 06, ..., 27 = installed 16); the renumbering of the two suite files and of the "Verified by" lines of REQ-API-018 to 050 is a plan amendment (A-174) the owner decides.
+**Check IDs of the IF-104 v2 suite.** The v2 cases are TC-IF-104-17 to 27; A-171 had installed them as TC-IF-104-06 to 16, which clashed with the v1 cases 06 and 07 (A-60, A-66). Amendment A-174 renumbers the two suite files (D-440 (1)).
 
-**Levels and tools.** Track A: Python `unittest` on the real provider `graph_api_v2.create_app(...)` (Flask test client), on the file store and on a throw-away postgres:16 where the case names both (the database variant skips with the reason, as TR-CORE-003). Track B: node tests (`node --test`) of the page modules against the JS mock of IF-104 v2 (`tests/helpers/mocks/if_104_v2_graph_api.mjs`) and the fake DOM (`tests/js/fake-dom.mjs`), as D-430 decided; browser checks with Playwright for Python driving Firefox (DEP-5, DEP-6) on the page served together with the real provider over a seeded throw-away file store (open point Q-2); file checks in Python.
+**Levels and tools.** Track A: Python `unittest` on the real provider `graph_api_v2.create_app(...)` (Flask test client), on the file store and on a throw-away postgres:16 where the case names both (the database variant skips with the reason, as TR-CORE-003). Track B: node tests (`node --test`) of the page modules against the JS mock of IF-104 v2 (`tests/helpers/mocks/if_104_v2_graph_api.mjs`) and the fake DOM (`tests/js/fake-dom.mjs`), as D-430 decided; browser checks with Playwright for Python driving Firefox (DEP-5, DEP-6) on the page served together with the real provider over a throw-away file store seeded from the R11 fixtures, with a real login (D-440 (2)); file checks in Python.
 
 ## Test cases
 | Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |
@@ -45,7 +45,7 @@ All checks are exact: every expected value is a status, a code, an ID, a count, 
 | TC-GA-039 | REQ-GA-042, REQ-GA-043 | end-to-end (browser) | 2 | a session: open the list, sample.code and cp2.multi, select steps, drag one, open the history and an earlier version, change the settings | no request to another origin; every request to `/api/v2` is a GET | exact |
 
 ### Contract suite IF-104 v2 (`tests/acceptance/contract/test_if_104_v2_graph_api.py` mock, files, postgres; `.test.mjs` JS mock)
-| Test ID | Installed as | Golden | Verifies | Expected result |
+| Test ID | Before A-174 | Golden | Verifies | Expected result |
 |---|---|---|---|---|
 | TC-IF-104-17 | TC-IF-104-06 | 1 | REQ-API-018, REQ-API-023, REQ-API-024, REQ-API-025, REQ-API-030 | list sorted by ID with kind, version, author, time, description, counts; version 2 of cp2.multi with current 4; versions oldest first |
 | TC-IF-104-18 | TC-IF-104-07 | 2 | REQ-API-026 | one `missing_step` problem for e2 to var.gone at `to`; nothing dropped |
