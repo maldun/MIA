@@ -1,6 +1,6 @@
 # Plan: G-V4.VIEW (graph viewer: pull from the data source and draw)
 
-**Goal:** `specs/mia/goals/G-V4.VIEW/goal.md`   **Requirements:** `requirements.md` of this folder (70 approved, D-437, D-438; Track A 37, Track B 33)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder (approved, D-441, D-442)   **Interfaces:** IF-104 v2 (A-171, `contracts/IF-104-graph-api.md`), IF-302 v15 (A-172), page interface note (D-443)   **Status:** Draft for the owner's plan gate (2026-11-22)
+**Goal:** `specs/mia/goals/G-V4.VIEW/goal.md`   **Requirements:** `requirements.md` of this folder (70 approved, D-437, D-438; Track A 37, Track B 33)   **Test spec:** `test-spec.md`, `test-requirements.md` of this folder (approved, D-441, D-442)   **Interfaces:** IF-104 v2 (A-171, `contracts/IF-104-graph-api.md`), IF-302 v15 (A-172), page interface note (D-443)   **Status:** Draft for the owner's plan gate (2026-11-23; questionnaire D-446)
 
 Line of work `goal/v4.view` (worktree `../MIA-goal-v4-view`), merges into `goal/v4`; supervised. Two tracks inside one goal (D-430 (2), D-432): Track A (interface and backend, T-01 to T-06) first, Track B (page, T-07 to T-12) after it or beside it in its own session. No model step, no prompt, no eval suite. New dev dependency: Playwright 1.64.1 with Firefox (approved D-430, installed in `mia312`, `requirements-browser.txt`, not in the image). New module: `graph_api_v2.py` (the v2 blueprint in N-2.1, D-430 (8)).
 
@@ -11,8 +11,8 @@ Line of work `goal/v4.view` (worktree `../MIA-goal-v4-view`), merges into `goal/
 - Source of each fact (P26): `requirements.md` of this folder → the generated block of `specs/mia/architecture.sysml` (D-439).
 
 ## Before the first task
-1. **Bring RULES into this branch** (owner's decision, see the questionnaire): `git merge goal/v4` on `goal/v4.view`. RULES is merged into `goal/v4` (`ceb7097a`); a trial merge conflicts only in `specs/mia/architecture.sysml` (both sides added generated entries): take both, regenerate with `tools/gen_node_requirements_model.py`, then `bash tools/check_sysml.sh` and `python3 -I tools/check_sysml_model.py .`. Needed by T-04 and T-05 (REQ-API-031, 035, TR-VIEW-014).
-2. Re-run the red state on the merged branch and record it in `implementation-log.md` (below).
+1. (done, D-446 (1)) RULES brought into this branch: `goal/v4` merged into `goal/v4.view` (`b961c573`); the conflict in `specs/mia/architecture.sysml` resolved by keeping both sides, the model regenerated unchanged, `check_sysml.sh` 0/0, `check_sysml_model.py` OK.
+2. (done) Red state on the merged branch, 2026-11-23: the same counts as at the red commit (section below); TC-API-025 now fails on the missing provider, no longer on RULES.
 3. Tick the plan gate.
 
 ## Interface fixed by the red tests
@@ -24,7 +24,7 @@ Line of work `goal/v4.view` (worktree `../MIA-goal-v4-view`), merges into `goal/
 ## State at the red commit (`82327296`, tag `plan-baseline-g-v4-view`)
 Red: `tests/acceptance/test_view_backend.py` (12), `test_graph_view_files.py` (2), `test_graph_view_browser.py` (7), `graph_view_page.test.mjs` (14), the real side of the IF-104 v2 suite (22: files and postgres) and of TC-IF-302-13, 14. Green and to be kept green: the mock side of both suites (11 + 11 JS), the IF-104 v1 suites. TC-API-025 stays red until RULES is in this branch (TR-VIEW-014).
 
-Regression set after every task: the unit suite (`<venv> -m unittest discover -s tests`), every acceptance script one by one (not in parallel: `mia.log`), `node --test "tests/js/*.test.mjs"` and `node --test tests/acceptance/graph_view_page.test.mjs`; green except the VIEW checks of later tasks and the known reds recorded in step 2 above. In particular the IF-104 v1 suites, the IF-302 v1 to v14 cases, the CORE and RULES checks, `tests/test_graph_api.py`.
+Regression set after every task: the unit suite (`<venv> -m unittest discover -s tests`), every acceptance script one by one (not in parallel: `mia.log`), `node --test "tests/js/*.test.mjs"` and `node --test tests/acceptance/graph_view_page.test.mjs`; green except the VIEW checks of later tasks (the unit suite had no known red on the merged branch, 2026-11-23). In particular the IF-104 v1 suites, the IF-302 v1 to v14 cases, the CORE and RULES checks, `tests/test_graph_api.py`.
 
 Each task's "Done when" lists the defect of TR-VIEW-021 that must make each of its new checks fail once (run, seen red, reverted, logged in `implementation-log.md`).
 
@@ -44,13 +44,13 @@ Each task's "Done when" lists the defect of TR-VIEW-021 that must make each of i
 | T-11 Left column and history | B | REQ-GA-036, 044, 037 to 040 | TC-GA-029, 030 | T-09 |
 | T-12 The page in Firefox | B | REQ-GA-041 to 043; browser side of REQ-GA-012, 013, 016, 029, 031, 032 | TC-GA-033 to 039 | T-03, T-10, T-11 |
 
-Twelve tasks are above the size signal of about eight; the owner kept one goal and cut it into the two tracks instead (D-432), six tasks each.
+Twelve tasks are above the size signal of about eight; the owner kept one goal and cut it into the two tracks instead (D-432), six tasks each. Implement runs Track A, then Track B, in one session line on `goal/v4.view` (D-446 (3)).
 
 ### T-01: Record tables
 - Implements: REQ-RTB-010, REQ-RTB-011
 - Tests to turn green: the real side of TC-IF-302-13, 14 (`tests/acceptance/contract/test_if_302_record_tables.py`)
 - Touches: `record_tables.py` (tables `arrangements`, `graph_changes` as IF-302 v15 says; `graph_changes` written once, D-435); unit tests `tests/test_record_tables_view.py`
-- Must not touch: protected material; `storage.py` and the backends (no IF-102 change, D-435); `graph_tables.py`
+- Must not touch: protected material (incl. `tests/fixtures/graph_view/`, deny rule D-446 (2)); `storage.py` and the backends (no IF-102 change, D-435); `graph_tables.py`
 - Done when: both cases green on files and PostgreSQL; the IF-302 v1 to v14 cases unchanged and green. (The installed contract cases are not in TR-VIEW-021; the defect "a second write of the same graph version replaces the record" is still run once against TC-IF-302-14 and logged.)
 
 ### T-02: Store setting, provider, access, image
