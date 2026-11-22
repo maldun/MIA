@@ -637,11 +637,11 @@
 - Group: LS
 - Text: When the owner chooses a graph in the list, the Graph app shall draw its current version.
 - Rationale: FR-48
-- Parent: choosing cp2.multi draws version 4 (exact)
+- Parent: FR-48
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-009; planned (test spec, Step 3)
-- Verified by: planned (test spec, Step 3)
+- Acceptance criterion: choosing cp2.multi draws version 4 (exact)
+- Verified by: AC-009; planned (test spec, Step 3)
 - Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
@@ -676,11 +676,11 @@
 - Group: PI
 - Text: When a graph is opened, the Graph app shall draw every step and every connection of it, each connection with its direction.
 - Rationale: FR-49
-- Parent: sample.code is drawn with 7 steps and 6 arrows (exact)
+- Parent: FR-49
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-010; planned (test spec, Step 3)
-- Verified by: planned (test spec, Step 3)
+- Acceptance criterion: sample.code is drawn with 7 steps and 6 arrows (exact)
+- Verified by: AC-010; planned (test spec, Step 3)
 - Status: Approved
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
