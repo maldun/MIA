@@ -1,5 +1,7 @@
 # Requirements: G-V4.GRAPHSTORE.CORE (low level, new and changed items)
 
+**Moved at the merge (2026-11-22, D-408):** the 22 requirements are now in `specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md` (REQ-GTB-029 to 032) and `specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md` (REQ-WFM-144 to 161), section "Iteration 4", with the status Verified. The node files are the source from now on (they win over this file for the same ID); this file stays as the record of the goal.
+
 **Top-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE/top-level-spec.md`   **High-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE.CORE/high-level-spec.md`   **Status:** Approved by the owner (2026-11-21)   **Plan baseline:** plan-baseline
 
 <!-- The requirements this subgoal adds. The 37 requirements already in force (graph tables REQ-GTB-001 to REQ-GTB-028 in

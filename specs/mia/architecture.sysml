@@ -3559,6 +3559,96 @@ package MIA_NodeRequirements {
         doc /* The Workflow management shall deliver the review with a result that holds the question, the cut-off, the way the run ended, the summary (coverage, what was found, gaps) and the flow count, and no list of works, while the full report stays unchanged in the run report, the record of the report and the files. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-WFM-144'> LocalIDsOnReading_Wfm144 {
+        subject s : TaskRuntime;
+        doc /* When a graph is read, the Workflow management shall return the IDs of its steps and connections without the graph ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-145'> HistoryOfAStepInItsGraph_Wfm145 {
+        subject s : TaskRuntime;
+        doc /* When the history of a step is asked, the Workflow management shall list the versions that the headers of that graph pin, oldest first, with account and time of each. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-146'> WholeGraphCheckedFirst_Wfm146 {
+        subject s : TaskRuntime;
+        doc /* When a graph is saved, the Workflow management shall check all its steps, connections and header against the rules before it writes the first record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-147'> HeaderWrittenLast_Wfm147 {
+        subject s : TaskRuntime;
+        doc /* When a graph is saved, the Workflow management shall write the steps and connections before the header. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-148'> ChangedMembersOnly_Wfm148 {
+        subject s : TaskRuntime;
+        doc /* When a graph is saved, the Workflow management shall write a step or connection as a new version only if its content differs from its newest version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-149'> UnchangedGraphNoVersion_Wfm149 {
+        subject s : TaskRuntime;
+        doc /* When a graph is saved whose steps, connections and header fields equal its newest version, the Workflow management shall write no record and answer with the newest version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-150'> RefusedSaveWritesNothing_Wfm150 {
+        subject s : TaskRuntime;
+        doc /* If a save is refused, then the Workflow management shall write no record, count no version and name the broken rule or the IDs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-151'> AnInterruptedSaveIsFinishedByRepeatingIt_Wfm151 {
+        subject s : TaskRuntime;
+        doc /* If a save is interrupted after any write, then the Workflow management shall complete the same graph when the same save is repeated, with exactly one new graph version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-152'> KindOfAGraphSelectsTheTables_Wfm152 {
+        subject s : TaskRuntime;
+        doc /* Where a graph has the kind `context`, the Workflow management shall store its steps and connections in the context tables and its header with the kind `context`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-153'> NoKindMeansWorkflow_Wfm153 {
+        subject s : TaskRuntime;
+        doc /* Where a graph has no kind, the Workflow management shall treat it as a workflow graph. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-154'> UnknownKindRefused_Wfm154 {
+        subject s : TaskRuntime;
+        doc /* If the kind of a graph is neither `workflow` nor `context`, then the Workflow management shall refuse the save and name the field `kind`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-155'> IdentityAndEndsOfAContextGraph_Wfm155 {
+        subject s : TaskRuntime;
+        doc /* When a context graph is saved, the Workflow management shall refuse a repeated step ID, a repeated connection ID or a connection to a missing step, and name the IDs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-156'> NoWorkflowRulesForAContextGraph_Wfm156 {
+        subject s : TaskRuntime;
+        doc /* When a context graph is saved, the Workflow management shall not apply the order, alternation, writer and stop-limit rules of workflow graphs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-157'> KindOnReading_Wfm157 {
+        subject s : TaskRuntime;
+        doc /* When a context graph is read, the Workflow management shall return it with the kind `context`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-158'> VersionsWithWhoAndWhen_Wfm158 {
+        subject s : TaskRuntime;
+        doc /* When the versions of a graph are asked, the Workflow management shall list every version, oldest first, each with the account that stored it and the time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-159'> AVersionAsItWasSaved_Wfm159 {
+        subject s : TaskRuntime;
+        doc /* When a graph is read at a given version, the Workflow management shall return the steps, connections and header fields exactly as they were saved at that version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-160'> NoSlashInAGraphID_Wfm160 {
+        subject s : TaskRuntime;
+        doc /* If a graph with at least one step is saved under an ID that contains a slash, then the Workflow management shall refuse the save and name the rule `unscoped_id`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-161'> AnEmptyContextGraphIsStored_Wfm161 {
+        subject s : TaskRuntime;
+        doc /* When a context graph without steps and connections is saved, the Workflow management shall store it as one header version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
         subject s : TaskRuntime;
         doc /* The Pipeline runner shall start a task that reaches the internet only by a command of a user. */
@@ -4494,6 +4584,26 @@ package MIA_NodeRequirements {
         doc /* If a record has more than 100,000 values, counting a value once for every path that reaches it, then the Graph tables shall refuse it as `schema_break` naming `data`. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-029'> ScopedIDOfAStepOrConnection_Gtb029 {
+        subject s : Persistence;
+        doc /* If a step or connection record is written under a non-empty ID not of the form `<graph id>/<local id>`, then the Graph tables shall refuse the record and name the rule `unscoped_id`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-030'> HeaderNamesOnlyItsOwnMembers_Gtb030 {
+        subject s : Persistence;
+        doc /* If a graph header names a step or connection whose record ID begins with the ID of another graph, then the Graph tables shall refuse the header and name the rule `unscoped_id`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-031'> TheFirstSlashSeparates_Gtb031 {
+        subject s : Persistence;
+        doc /* The Graph tables shall take the text before the first slash of a record ID as the graph ID, and the rest as the local ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-032'> SameRefusalsInBothPlaces_Gtb032 {
+        subject s : Persistence;
+        doc /* The Graph tables shall refuse the same records with the same rule on the files backend and on the database backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
         doc /* The Record tables shall define the 15 tables of IF-302 v8: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta, reports and skill_runs (the run records of the Skill run view, REQ-RTB-007); summaries and the chat log are records of history. */
@@ -4909,116 +5019,6 @@ package MIA_NodeRequirements {
         doc /* The Graph app shall start as its own container alone and by the compose stack. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-GTB-029'> ScopedIDOfAStepOrConnection_Gtb029 {
-        subject s : Persistence;
-        doc /* If a step or connection record is written under a non-empty ID not of the form `<graph id>/<local id>`, then the Graph tables shall refuse the record and name the rule `unscoped_id`. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-GTB-030'> HeaderNamesOnlyItsOwnMembers_Gtb030 {
-        subject s : Persistence;
-        doc /* If a graph header names a step or connection whose record ID begins with the ID of another graph, then the Graph tables shall refuse the header and name the rule `unscoped_id`. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-GTB-031'> TheFirstSlashSeparates_Gtb031 {
-        subject s : Persistence;
-        doc /* The Graph tables shall take the text before the first slash of a record ID as the graph ID, and the rest as the local ID. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-160'> NoSlashInAGraphID_Wfm160 {
-        subject s : TaskRuntime;
-        doc /* If a graph with at least one step is saved under an ID that contains a slash, then the Workflow management shall refuse the save and name the rule `unscoped_id`. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-144'> LocalIDsOnReading_Wfm144 {
-        subject s : TaskRuntime;
-        doc /* When a graph is read, the Workflow management shall return the IDs of its steps and connections without the graph ID. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-145'> HistoryOfAStepInItsGraph_Wfm145 {
-        subject s : TaskRuntime;
-        doc /* When the history of a step is asked, the Workflow management shall list the versions that the headers of that graph pin, oldest first, with account and time of each. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-146'> WholeGraphCheckedFirst_Wfm146 {
-        subject s : TaskRuntime;
-        doc /* When a graph is saved, the Workflow management shall check all its steps, connections and header against the rules before it writes the first record. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-147'> HeaderWrittenLast_Wfm147 {
-        subject s : TaskRuntime;
-        doc /* When a graph is saved, the Workflow management shall write the steps and connections before the header. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-148'> ChangedMembersOnly_Wfm148 {
-        subject s : TaskRuntime;
-        doc /* When a graph is saved, the Workflow management shall write a step or connection as a new version only if its content differs from its newest version. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-149'> UnchangedGraphNoVersion_Wfm149 {
-        subject s : TaskRuntime;
-        doc /* When a graph is saved whose steps, connections and header fields equal its newest version, the Workflow management shall write no record and answer with the newest version. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-150'> RefusedSaveWritesNothing_Wfm150 {
-        subject s : TaskRuntime;
-        doc /* If a save is refused, then the Workflow management shall write no record, count no version and name the broken rule or the IDs. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-151'> AnInterruptedSaveIsFinishedByRepeatingIt_Wfm151 {
-        subject s : TaskRuntime;
-        doc /* If a save is interrupted after any write, then the Workflow management shall complete the same graph when the same save is repeated, with exactly one new graph version. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-152'> KindOfAGraphSelectsTheTables_Wfm152 {
-        subject s : TaskRuntime;
-        doc /* Where a graph has the kind `context`, the Workflow management shall store its steps and connections in the context tables and its header with the kind `context`. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-153'> NoKindMeansWorkflow_Wfm153 {
-        subject s : TaskRuntime;
-        doc /* Where a graph has no kind, the Workflow management shall treat it as a workflow graph. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-154'> UnknownKindRefused_Wfm154 {
-        subject s : TaskRuntime;
-        doc /* If the kind of a graph is neither `workflow` nor `context`, then the Workflow management shall refuse the save and name the field `kind`. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-155'> IdentityAndEndsOfAContextGraph_Wfm155 {
-        subject s : TaskRuntime;
-        doc /* When a context graph is saved, the Workflow management shall refuse a repeated step ID, a repeated connection ID or a connection to a missing step, and name the IDs. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-161'> AnEmptyContextGraphIsStored_Wfm161 {
-        subject s : TaskRuntime;
-        doc /* When a context graph without steps and connections is saved, the Workflow management shall store it as one header version. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-156'> NoWorkflowRulesForAContextGraph_Wfm156 {
-        subject s : TaskRuntime;
-        doc /* When a context graph is saved, the Workflow management shall not apply the order, alternation, writer and stop-limit rules of workflow graphs. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-157'> KindOnReading_Wfm157 {
-        subject s : TaskRuntime;
-        doc /* When a context graph is read, the Workflow management shall return it with the kind `context`. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-158'> VersionsWithWhoAndWhen_Wfm158 {
-        subject s : TaskRuntime;
-        doc /* When the versions of a graph are asked, the Workflow management shall list every version, oldest first, each with the account that stored it and the time. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-159'> AVersionAsItWasSaved_Wfm159 {
-        subject s : TaskRuntime;
-        doc /* When a graph is read at a given version, the Workflow management shall return the steps, connections and header fields exactly as they were saved at that version. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-GTB-032'> SameRefusalsInBothPlaces_Gtb032 {
-        subject s : Persistence;
-        doc /* The Graph tables shall refuse the same records with the same rule on the files backend and on the database backend. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
 
     requirement r_req_clv_001 : ChatViewWithSenderAndStreaming_Clv001;
     requirement r_req_clv_002 : StopAndQueuePosition_Clv002;
@@ -5297,6 +5297,24 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_140 : TheRunRecordNamesTheReport_Wfm140;
     requirement r_req_wfm_141 : AddressesAndTextsInAReport_Wfm141;
     requirement r_req_wfm_142 : TheResultOfTheReviewIsShort_Wfm142;
+    requirement r_req_wfm_144 : LocalIDsOnReading_Wfm144;
+    requirement r_req_wfm_145 : HistoryOfAStepInItsGraph_Wfm145;
+    requirement r_req_wfm_146 : WholeGraphCheckedFirst_Wfm146;
+    requirement r_req_wfm_147 : HeaderWrittenLast_Wfm147;
+    requirement r_req_wfm_148 : ChangedMembersOnly_Wfm148;
+    requirement r_req_wfm_149 : UnchangedGraphNoVersion_Wfm149;
+    requirement r_req_wfm_150 : RefusedSaveWritesNothing_Wfm150;
+    requirement r_req_wfm_151 : AnInterruptedSaveIsFinishedByRepeatingIt_Wfm151;
+    requirement r_req_wfm_152 : KindOfAGraphSelectsTheTables_Wfm152;
+    requirement r_req_wfm_153 : NoKindMeansWorkflow_Wfm153;
+    requirement r_req_wfm_154 : UnknownKindRefused_Wfm154;
+    requirement r_req_wfm_155 : IdentityAndEndsOfAContextGraph_Wfm155;
+    requirement r_req_wfm_156 : NoWorkflowRulesForAContextGraph_Wfm156;
+    requirement r_req_wfm_157 : KindOnReading_Wfm157;
+    requirement r_req_wfm_158 : VersionsWithWhoAndWhen_Wfm158;
+    requirement r_req_wfm_159 : AVersionAsItWasSaved_Wfm159;
+    requirement r_req_wfm_160 : NoSlashInAGraphID_Wfm160;
+    requirement r_req_wfm_161 : AnEmptyContextGraphIsStored_Wfm161;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -5484,6 +5502,10 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_026 : ContextHeaderMembers_Gtb026;
     requirement r_req_gtb_027 : InputThatCannotBeChecked_Gtb027;
     requirement r_req_gtb_028 : SizeOfARecord_Gtb028;
+    requirement r_req_gtb_029 : ScopedIDOfAStepOrConnection_Gtb029;
+    requirement r_req_gtb_030 : HeaderNamesOnlyItsOwnMembers_Gtb030;
+    requirement r_req_gtb_031 : TheFirstSlashSeparates_Gtb031;
+    requirement r_req_gtb_032 : SameRefusalsInBothPlaces_Gtb032;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -5567,28 +5589,6 @@ package MIA_NodeRequirements {
     requirement r_req_ga_009 : PlainStackWithAVendoredLibrary_Ga009;
     requirement r_req_ga_010 : NoOutsideRequest_Ga010;
     requirement r_req_ga_011 : OwnContainer_Ga011;
-    requirement r_req_gtb_029 : ScopedIDOfAStepOrConnection_Gtb029;
-    requirement r_req_gtb_030 : HeaderNamesOnlyItsOwnMembers_Gtb030;
-    requirement r_req_gtb_031 : TheFirstSlashSeparates_Gtb031;
-    requirement r_req_wfm_160 : NoSlashInAGraphID_Wfm160;
-    requirement r_req_wfm_144 : LocalIDsOnReading_Wfm144;
-    requirement r_req_wfm_145 : HistoryOfAStepInItsGraph_Wfm145;
-    requirement r_req_wfm_146 : WholeGraphCheckedFirst_Wfm146;
-    requirement r_req_wfm_147 : HeaderWrittenLast_Wfm147;
-    requirement r_req_wfm_148 : ChangedMembersOnly_Wfm148;
-    requirement r_req_wfm_149 : UnchangedGraphNoVersion_Wfm149;
-    requirement r_req_wfm_150 : RefusedSaveWritesNothing_Wfm150;
-    requirement r_req_wfm_151 : AnInterruptedSaveIsFinishedByRepeatingIt_Wfm151;
-    requirement r_req_wfm_152 : KindOfAGraphSelectsTheTables_Wfm152;
-    requirement r_req_wfm_153 : NoKindMeansWorkflow_Wfm153;
-    requirement r_req_wfm_154 : UnknownKindRefused_Wfm154;
-    requirement r_req_wfm_155 : IdentityAndEndsOfAContextGraph_Wfm155;
-    requirement r_req_wfm_161 : AnEmptyContextGraphIsStored_Wfm161;
-    requirement r_req_wfm_156 : NoWorkflowRulesForAContextGraph_Wfm156;
-    requirement r_req_wfm_157 : KindOnReading_Wfm157;
-    requirement r_req_wfm_158 : VersionsWithWhoAndWhen_Wfm158;
-    requirement r_req_wfm_159 : AVersionAsItWasSaved_Wfm159;
-    requirement r_req_gtb_032 : SameRefusalsInBothPlaces_Gtb032;
 
     satisfy r_req_clv_001 by mia.frontEnd;
     satisfy r_req_clv_002 by mia.frontEnd;
@@ -5867,6 +5867,24 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_140 by mia.taskRuntime;
     satisfy r_req_wfm_141 by mia.taskRuntime;
     satisfy r_req_wfm_142 by mia.taskRuntime;
+    satisfy r_req_wfm_144 by mia.taskRuntime;
+    satisfy r_req_wfm_145 by mia.taskRuntime;
+    satisfy r_req_wfm_146 by mia.taskRuntime;
+    satisfy r_req_wfm_147 by mia.taskRuntime;
+    satisfy r_req_wfm_148 by mia.taskRuntime;
+    satisfy r_req_wfm_149 by mia.taskRuntime;
+    satisfy r_req_wfm_150 by mia.taskRuntime;
+    satisfy r_req_wfm_151 by mia.taskRuntime;
+    satisfy r_req_wfm_152 by mia.taskRuntime;
+    satisfy r_req_wfm_153 by mia.taskRuntime;
+    satisfy r_req_wfm_154 by mia.taskRuntime;
+    satisfy r_req_wfm_155 by mia.taskRuntime;
+    satisfy r_req_wfm_156 by mia.taskRuntime;
+    satisfy r_req_wfm_157 by mia.taskRuntime;
+    satisfy r_req_wfm_158 by mia.taskRuntime;
+    satisfy r_req_wfm_159 by mia.taskRuntime;
+    satisfy r_req_wfm_160 by mia.taskRuntime;
+    satisfy r_req_wfm_161 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -6054,6 +6072,10 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_026 by mia.persistence;
     satisfy r_req_gtb_027 by mia.persistence;
     satisfy r_req_gtb_028 by mia.persistence;
+    satisfy r_req_gtb_029 by mia.persistence;
+    satisfy r_req_gtb_030 by mia.persistence;
+    satisfy r_req_gtb_031 by mia.persistence;
+    satisfy r_req_gtb_032 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -6137,28 +6159,6 @@ package MIA_NodeRequirements {
     satisfy r_req_ga_009 by mia.graphApp;
     satisfy r_req_ga_010 by mia.graphApp;
     satisfy r_req_ga_011 by mia.graphApp;
-    satisfy r_req_gtb_029 by mia.persistence;
-    satisfy r_req_gtb_030 by mia.persistence;
-    satisfy r_req_gtb_031 by mia.persistence;
-    satisfy r_req_wfm_160 by mia.taskRuntime;
-    satisfy r_req_wfm_144 by mia.taskRuntime;
-    satisfy r_req_wfm_145 by mia.taskRuntime;
-    satisfy r_req_wfm_146 by mia.taskRuntime;
-    satisfy r_req_wfm_147 by mia.taskRuntime;
-    satisfy r_req_wfm_148 by mia.taskRuntime;
-    satisfy r_req_wfm_149 by mia.taskRuntime;
-    satisfy r_req_wfm_150 by mia.taskRuntime;
-    satisfy r_req_wfm_151 by mia.taskRuntime;
-    satisfy r_req_wfm_152 by mia.taskRuntime;
-    satisfy r_req_wfm_153 by mia.taskRuntime;
-    satisfy r_req_wfm_154 by mia.taskRuntime;
-    satisfy r_req_wfm_155 by mia.taskRuntime;
-    satisfy r_req_wfm_161 by mia.taskRuntime;
-    satisfy r_req_wfm_156 by mia.taskRuntime;
-    satisfy r_req_wfm_157 by mia.taskRuntime;
-    satisfy r_req_wfm_158 by mia.taskRuntime;
-    satisfy r_req_wfm_159 by mia.taskRuntime;
-    satisfy r_req_gtb_032 by mia.persistence;
     allocate r_req_clv_001 to mia.frontEnd;
     allocate r_req_clv_002 to mia.frontEnd;
     allocate r_req_clv_003 to mia.frontEnd;
@@ -6436,6 +6436,24 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_140 to mia.taskRuntime;
     allocate r_req_wfm_141 to mia.taskRuntime;
     allocate r_req_wfm_142 to mia.taskRuntime;
+    allocate r_req_wfm_144 to mia.taskRuntime;
+    allocate r_req_wfm_145 to mia.taskRuntime;
+    allocate r_req_wfm_146 to mia.taskRuntime;
+    allocate r_req_wfm_147 to mia.taskRuntime;
+    allocate r_req_wfm_148 to mia.taskRuntime;
+    allocate r_req_wfm_149 to mia.taskRuntime;
+    allocate r_req_wfm_150 to mia.taskRuntime;
+    allocate r_req_wfm_151 to mia.taskRuntime;
+    allocate r_req_wfm_152 to mia.taskRuntime;
+    allocate r_req_wfm_153 to mia.taskRuntime;
+    allocate r_req_wfm_154 to mia.taskRuntime;
+    allocate r_req_wfm_155 to mia.taskRuntime;
+    allocate r_req_wfm_156 to mia.taskRuntime;
+    allocate r_req_wfm_157 to mia.taskRuntime;
+    allocate r_req_wfm_158 to mia.taskRuntime;
+    allocate r_req_wfm_159 to mia.taskRuntime;
+    allocate r_req_wfm_160 to mia.taskRuntime;
+    allocate r_req_wfm_161 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -6623,6 +6641,10 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_026 to mia.persistence;
     allocate r_req_gtb_027 to mia.persistence;
     allocate r_req_gtb_028 to mia.persistence;
+    allocate r_req_gtb_029 to mia.persistence;
+    allocate r_req_gtb_030 to mia.persistence;
+    allocate r_req_gtb_031 to mia.persistence;
+    allocate r_req_gtb_032 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -6706,28 +6728,6 @@ package MIA_NodeRequirements {
     allocate r_req_ga_009 to mia.graphApp;
     allocate r_req_ga_010 to mia.graphApp;
     allocate r_req_ga_011 to mia.graphApp;
-    allocate r_req_gtb_029 to mia.persistence;
-    allocate r_req_gtb_030 to mia.persistence;
-    allocate r_req_gtb_031 to mia.persistence;
-    allocate r_req_wfm_160 to mia.taskRuntime;
-    allocate r_req_wfm_144 to mia.taskRuntime;
-    allocate r_req_wfm_145 to mia.taskRuntime;
-    allocate r_req_wfm_146 to mia.taskRuntime;
-    allocate r_req_wfm_147 to mia.taskRuntime;
-    allocate r_req_wfm_148 to mia.taskRuntime;
-    allocate r_req_wfm_149 to mia.taskRuntime;
-    allocate r_req_wfm_150 to mia.taskRuntime;
-    allocate r_req_wfm_151 to mia.taskRuntime;
-    allocate r_req_wfm_152 to mia.taskRuntime;
-    allocate r_req_wfm_153 to mia.taskRuntime;
-    allocate r_req_wfm_154 to mia.taskRuntime;
-    allocate r_req_wfm_155 to mia.taskRuntime;
-    allocate r_req_wfm_161 to mia.taskRuntime;
-    allocate r_req_wfm_156 to mia.taskRuntime;
-    allocate r_req_wfm_157 to mia.taskRuntime;
-    allocate r_req_wfm_158 to mia.taskRuntime;
-    allocate r_req_wfm_159 to mia.taskRuntime;
-    allocate r_req_gtb_032 to mia.persistence;
 
     dependency from r_req_clv_001 to r_req_fe_001;
     dependency from r_req_clv_002 to r_req_fe_002;
@@ -7016,6 +7016,24 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_140 to r_req_be_033;
     dependency from r_req_wfm_141 to r_req_be_033;
     dependency from r_req_wfm_142 to r_req_be_053;
+    dependency from r_req_wfm_144 to fr60;
+    dependency from r_req_wfm_145 to fr60;
+    dependency from r_req_wfm_146 to nfr16;
+    dependency from r_req_wfm_147 to nfr16;
+    dependency from r_req_wfm_148 to fr57;
+    dependency from r_req_wfm_149 to fr57;
+    dependency from r_req_wfm_150 to nfr16;
+    dependency from r_req_wfm_151 to nfr16;
+    dependency from r_req_wfm_152 to fr57;
+    dependency from r_req_wfm_153 to fr57;
+    dependency from r_req_wfm_154 to fr57;
+    dependency from r_req_wfm_155 to fr57;
+    dependency from r_req_wfm_156 to fr57;
+    dependency from r_req_wfm_157 to fr57;
+    dependency from r_req_wfm_158 to fr57;
+    dependency from r_req_wfm_159 to fr57;
+    dependency from r_req_wfm_160 to fr60;
+    dependency from r_req_wfm_161 to fr57;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;
@@ -7224,6 +7242,10 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_026 to fr40;
     dependency from r_req_gtb_027 to fr40;
     dependency from r_req_gtb_028 to fr40;
+    dependency from r_req_gtb_029 to fr60;
+    dependency from r_req_gtb_030 to fr60;
+    dependency from r_req_gtb_031 to fr60;
+    dependency from r_req_gtb_032 to fr57;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;
@@ -7333,27 +7355,5 @@ package MIA_NodeRequirements {
     dependency from r_req_ga_009 to fr22;
     dependency from r_req_ga_010 to nfr5;
     dependency from r_req_ga_011 to nfr9;
-    dependency from r_req_gtb_029 to fr60;
-    dependency from r_req_gtb_030 to fr60;
-    dependency from r_req_gtb_031 to fr60;
-    dependency from r_req_wfm_160 to fr60;
-    dependency from r_req_wfm_144 to fr60;
-    dependency from r_req_wfm_145 to fr60;
-    dependency from r_req_wfm_146 to nfr16;
-    dependency from r_req_wfm_147 to nfr16;
-    dependency from r_req_wfm_148 to fr57;
-    dependency from r_req_wfm_149 to fr57;
-    dependency from r_req_wfm_150 to nfr16;
-    dependency from r_req_wfm_151 to nfr16;
-    dependency from r_req_wfm_152 to fr57;
-    dependency from r_req_wfm_153 to fr57;
-    dependency from r_req_wfm_154 to fr57;
-    dependency from r_req_wfm_155 to fr57;
-    dependency from r_req_wfm_161 to fr57;
-    dependency from r_req_wfm_156 to fr57;
-    dependency from r_req_wfm_157 to fr57;
-    dependency from r_req_wfm_158 to fr57;
-    dependency from r_req_wfm_159 to fr57;
-    dependency from r_req_gtb_032 to fr57;
 }
 // END GENERATED: node requirements

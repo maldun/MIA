@@ -600,3 +600,153 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Given: a scripted task that asks one question, reports a progress line and returns "the report"; a second task that fails with a reason
 - When: the user starts the first task, answers its question and waits until it ends; the second task is started
 - Then: no delta event comes before the result starts, the result is later in the history than the question and its answer, the history reads user, assistant, user, assistant, and the last delta equals "the report"; the failed task leaves a message that holds the reason and the link to its run
+
+## Test cases of G-V4.GRAPHSTORE.CORE (moved at the merge 2026-11-22, D-408; test requirements TR-CORE-001 to 009)
+| Test ID | Verifies | Level | Setup / inputs | Expected result | Limit / tolerance |
+|---|---|---|---|---|---|
+| TC-WFM-162 | REQ-WFM-144 | component | a graph with steps `a`, `a/b`, connection `e1` from `a` to `a/b` | read back with the same local IDs for steps, connections and their ends | exact |
+| TC-WFM-163 | REQ-WFM-145 | component | two graphs with a step `step.write` of different content; `step.write` changed once in the first | its history has the versions of its own graph, oldest first, with account and time; the other graph's step history is unchanged; versions left by an interrupted save are not listed | exact version numbers |
+| TC-WFM-164 | REQ-WFM-146 | component | a graph whose last connection leads to a missing step, a graph with a cycle, a graph with a broken step content | the save is refused; the number of versions of every record of every graph table is as before | exact counts |
+| TC-WFM-165 | REQ-WFM-147 | component (fault injection) | a first save and a changed save of a workflow graph and of a context graph, interrupted after each write k = 1..n | after each interruption the graph is not listed or is entirely as before; never listed with a missing member | every k; no sampling; files and PostgreSQL |
+| TC-WFM-166 | REQ-WFM-148 | component | a graph of five steps saved, one step changed, saved again; then one connection changed, saved again | each save: exactly one new version of the changed step or connection and one new header version; the other records unchanged | exact counts |
+| TC-WFM-167 | REQ-WFM-149 | component | the same graph saved twice, then saved after a change of its description only | the second save writes no record and answers with the newest version; the changed description is a new header version | exact counts |
+| TC-WFM-168 | REQ-WFM-150 | component | a workflow graph with a cycle, one with two writers, one with an unknown kind of step, a context graph with a connection to a missing step | each refused naming the rule or IDs; no table grew; the version count of the stored graph is as before | exact counts |
+| TC-WFM-169 | REQ-WFM-151 | component (fault injection) | as TC-WFM-165, then the same save repeated | the repeated save gives the full graph and exactly one new header version, for every k | every k; no sampling; files and PostgreSQL |
+| TC-WFM-170 | REQ-WFM-152 | component | a context graph of three steps and two connections | members in `context_nodes` and `context_edges` under `<graph>/<local>`, none in `graph_nodes` or `graph_edges`; header kind `context` | exact IDs |
+| TC-WFM-171 | REQ-WFM-153 | component | a graph saved without a kind and the same graph with the kind `workflow` | both stored with the kind `workflow`; members in the workflow tables | exact |
+| TC-WFM-172 | REQ-WFM-154 | component | kinds `swarm`, the empty text and a number | each refused naming `kind`; nothing stored | exact |
+| TC-WFM-173 | REQ-WFM-155, REQ-WFM-161 | component | a context graph with a repeated step ID, one with a repeated connection ID, one with a connection to a missing step | each refused naming the ID; nothing written; an empty context graph accepted as one header version | exact |
+| TC-WFM-174 | REQ-WFM-156 | component | a context graph of two connected steps of the same category and a cycle | accepted (no order, alternation, writer or stop-limit rule applied) | exact |
+| TC-WFM-175 | REQ-WFM-157 | component | a context graph and a workflow graph, each read at every version | the context graph carries the kind `context`; the workflow graph has the shape it had before the kind existed | exact |
+| TC-WFM-176 | REQ-WFM-158 | component | a graph saved by three accounts | versions 1 to 3, oldest first, with the three accounts and a time each | exact |
+| TC-WFM-177 | REQ-WFM-159 | component | three saved versions of a workflow graph (with a loop-controlling step) and of a context graph | each version reads back equal to what was saved at that version | exact equality |
+| TC-WFM-178 | REQ-WFM-160 | unit | a graph with steps under the IDs `look/up`, `lookup`, `/lookup`, the empty ID | `look/up`, `/lookup` and the empty ID refused naming `unscoped_id` and the breaking record ID; nothing stored; `lookup` accepted | exact |
+
+## Scenarios (G-V4.GRAPHSTORE.CORE, approved by the owner 2026-11-21)
+
+### TC-WFM-162 – A graph is read with local IDs
+- Verifies: REQ-WFM-144
+- Given: a workflow graph `g` with steps `a` and `a/b`, and a connection `e1` from `a` to `a/b`
+- When: it is saved and read back
+- Then: the step IDs are `a` and `a/b`, the connection ID is `e1`, and its ends are `a` and `a/b`; no ID carries the graph ID
+- And: the store holds them as `g/a`, `g/a/b` and `g/e1` (D-410)
+
+### TC-WFM-163 – A step's history lists its own graph's changes
+- Verifies: REQ-WFM-145
+- Given: two graphs `lookup` and `search`, each with a step `step.write` of different content; `look` also exists with a step `x`
+- When: `step.write` of `lookup` is changed and saved
+- Then: its history lists two versions with account and time, oldest first; the history of `step.write` in `search` lists one; versions left by an interrupted earlier save are not listed
+- And: the step `x` of `look` is never a member of `lookup`
+- And: witnesses AC-002
+
+### TC-WFM-164 – The whole graph is checked before the first write
+- Verifies: REQ-WFM-146
+- Given: a stored graph, and three new graphs: one whose last connection leads to a missing step, one with a cycle, one with a broken step content
+- When: each of the three is saved
+- Then: each is refused; the number of versions of every record in every graph table is as before
+
+### TC-WFM-165 – The header is written last: no half-stored graph at any write
+- Verifies: REQ-WFM-147
+- Given: a workflow graph of five steps and four connections (ten writes for a first save) and a context graph (six writes), for a first save and a changed save of each; a store that fails at the k-th write
+- When: the save is run once for every k from 1 to the number of writes of that save
+- Then: after each interruption the graph is not listed, or is entirely as before; it is never listed with a step or connection that is missing
+- And: the check runs for every k, on the files store and on the PostgreSQL store, and fails when one k fails
+- And: one more position after the last write (the header): the injector does not fire, all writes are counted, and the graph reads as the new one (D-410)
+- And: witnesses AC-003
+
+### TC-WFM-166 – Only changed members get a new version
+- Verifies: REQ-WFM-148
+- Given: a workflow graph of five steps saved as version 1
+- When: one step is changed and the graph is saved again
+- Then: exactly one new version of that step and one new header version exist; the other four steps and all connections have no new version
+- And: when then one connection is changed and the graph saved, exactly one new version of that connection and one new header version exist; no step has a new version
+- And: a step changed and changed back gives two new step versions
+- And: witnesses AC-001
+
+### TC-WFM-167 – An unchanged graph gets no new version
+- Verifies: REQ-WFM-149
+- Given: a graph saved as version 1
+- When: the same graph is saved again; then only its description is changed and it is saved
+- Then: the second save writes no record and answers with version 1; the third save writes one header version and no step version
+- And: witnesses AC-001
+
+### TC-WFM-168 – A refused save writes nothing
+- Verifies: REQ-WFM-150
+- Given: a stored graph at version 2 and four new graphs: a cycle, two writers of one data step, an unknown kind of step, a context graph with a connection to a missing step
+- When: each is saved
+- Then: each is refused naming the rule or the IDs; no table grew; the stored graph is still at version 2
+- And: witnesses AC-003
+
+### TC-WFM-169 – An interrupted save is finished by repeating it
+- Verifies: REQ-WFM-151
+- Given: the interrupted saves of TC-WFM-165, one for every k
+- When: the same save is repeated after each interruption
+- Then: the graph is complete and equals the saved one; it has exactly one new header version; no step is stored twice for equal content
+- And: after the position past the last write the repeat writes nothing (D-410)
+- And: witnesses AC-003
+
+### TC-WFM-170 – A context graph is stored in the context tables
+- Verifies: REQ-WFM-152
+- Given: a context graph `c` of three steps and two connections
+- When: it is saved
+- Then: the members are records `c/<local>` in `context_nodes` and `context_edges` and none in `graph_nodes` or `graph_edges`; the header has the kind `context`
+
+### TC-WFM-171 – No kind means workflow
+- Verifies: REQ-WFM-153
+- Given: a graph given without a kind, and the same graph with the kind `workflow` written out
+- When: each is saved under its own ID
+- Then: both are stored with the kind `workflow` and members in the workflow tables, with the same content
+
+### TC-WFM-172 – An unknown kind is refused
+- Verifies: REQ-WFM-154
+- Given: graphs with the kind `swarm`, the empty text and the number 3
+- When: each is saved
+- Then: each is refused naming the field `kind`; nothing is stored
+- And: the rule is `schema_break` (D-410)
+
+### TC-WFM-173 – A context graph keeps identity and ends
+- Verifies: REQ-WFM-155, REQ-WFM-161
+- Given: three context graphs: one with a repeated step ID, one with a repeated connection ID, one with a connection to a missing step
+- When: each is saved
+- Then: each is refused naming the repeated or missing ID; nothing is written
+- And: a connection to a missing step is named by the connection's ID (`e1`), not by the missing step (D-410)
+- And: an empty context graph is accepted as one header version
+
+### TC-WFM-174 – Workflow rules do not apply to a context graph
+- Verifies: REQ-WFM-156
+- Given: a context graph of two connected steps of the same category and a connection back, so that it has a cycle
+- When: it is saved
+- Then: it is accepted: no order, alternation, writer or stop-limit rule of workflow graphs is applied
+
+### TC-WFM-175 – A context graph is read with its kind
+- Verifies: REQ-WFM-157
+- Given: a context graph and a workflow graph, each saved twice
+- When: each is read at every version
+- Then: the context graph is returned with the kind `context` at every version; the workflow graph has exactly the fields it had before the kind existed
+
+### TC-WFM-176 – Versions are listed with who and when
+- Verifies: REQ-WFM-158
+- Given: a graph saved by the accounts `ann`, `bob` and `cy`, one version each
+- When: the versions are asked
+- Then: versions 1 to 3 are listed oldest first with `ann`, `bob`, `cy` and a time each
+- And: witnesses AC-001
+
+### TC-WFM-177 – Every version reads back as saved
+- Verifies: REQ-WFM-159
+- Given: a workflow graph (with a loop-controlling step) and a context graph (with category steps), each saved in three different versions
+- When: each version is read at its number
+- Then: each equals what was saved at that version, step by step and connection by connection
+- And: witnesses AC-001
+
+### TC-WFM-178 – A graph ID with a slash is refused
+- Verifies: REQ-WFM-160
+- Given: a graph with steps, offered under the graph IDs `look/up`, `/lookup`, the empty ID and `lookup`
+- When: it is saved under each
+- Then: `look/up`, `/lookup` and the empty ID are refused naming `unscoped_id` and the record ID of the step or member that breaks it (`look/up/query`, `/lookup/query`, `/query`); nothing is stored for them; `lookup` is accepted (D-410: the slash is caught through the steps)
+
+### SMOKE-CORE-001 – Both graph kinds work on the owner's two stores
+- Verifies: REQ-WFM-158, REQ-WFM-159, REQ-WFM-152
+- Given: the owner's host; a new files directory and a new database `mia_smoke` on the owner's running PostgreSQL server, both made for the smoke test; a workflow graph and a context graph under throw-away IDs
+- When: each is saved, changed twice and read, on both stores
+- Then: each shows three versions with account and time and reads back as saved on both stores
+- And: afterwards the files directory is removed and the database `mia_smoke` is dropped by name; MIA's own database and files store are not written

@@ -2,7 +2,7 @@
 
 <!-- DRAFT of the plan, step "binding pass" (dev-workflow/references/binding.md section 4): concrete inputs and the results the owner saw and accepted in the validation of round 02
      (specs/mia/goals/G-V4/prototype/rounds/02/validation.md, signed by the owner 2026-11-20; every row of an outcome here was `met`).
-     Witnesses are empty on purpose: the low-level requirements do not exist yet (Plan step 1b); they are filled in when they are written, then binding_check.py BD5 can run.
+     Witnesses: AC-001 to AC-003 filled at the merge of G-V4.GRAPHSTORE.CORE (2026-11-22) with the requirements whose checks witness them (test-spec "witnesses" lines); the other cases when their subgoals are planned.
      `Accepted by` stays empty until the owner confirms the case list: the agent never fills it. Without the confirmation a case is not frozen. -->
 
 ## Approval of all cases at once
@@ -13,9 +13,9 @@ The owner approves the whole list below with one box. Tick it in Emacs (`C-c C-c
 
 | ID | Outcome | Input | Expected (what was seen and accepted, with units) | Witnesses | Accepted by | Date |
 |---|---|---|---|---|---|---|
-| AC-001 | FR-57 | Save a graph, change one step, save again; then save the identical graph again (`proto_checks/cp1_demo.py`, graph `lookup`) | The change makes exactly one new version of the changed step and of the graph; saving identical content again makes no new version | – | Stefan Reiterer (approval above) | 2026-11-21 |
-| AC-002 | FR-60 | Two graphs both have a step named `step.write`; change it in `lookup` | The history of the step in `lookup` has a new version; the other graph's step and graph history are unchanged | – | Stefan Reiterer (approval above) | 2026-11-21 |
-| AC-003 | NFR-16 | A graph with a cycle is saved; a save is interrupted between its steps and its header (`cp1_check.py` 8 to 10) | The cyclic graph is refused and nothing is stored; after the interrupted save every graph is entirely as before; the refused save is not a version | – | Stefan Reiterer (approval above) | 2026-11-21 |
+| AC-001 | FR-57 | Save a graph, change one step, save again; then save the identical graph again (`proto_checks/cp1_demo.py`, graph `lookup`) | The change makes exactly one new version of the changed step and of the graph; saving identical content again makes no new version | REQ-WFM-148, REQ-WFM-149, REQ-WFM-158, REQ-WFM-159 | Stefan Reiterer (approval above) | 2026-11-21 |
+| AC-002 | FR-60 | Two graphs both have a step named `step.write`; change it in `lookup` | The history of the step in `lookup` has a new version; the other graph's step and graph history are unchanged | REQ-GTB-029, REQ-GTB-030, REQ-WFM-145 | Stefan Reiterer (approval above) | 2026-11-21 |
+| AC-003 | NFR-16 | A graph with a cycle is saved; a save is interrupted between its steps and its header (`cp1_check.py` 8 to 10) | The cyclic graph is refused and nothing is stored; after the interrupted save every graph is entirely as before; the refused save is not a version | REQ-WFM-147, REQ-WFM-150, REQ-WFM-151 | Stefan Reiterer (approval above) | 2026-11-21 |
 | AC-004 | FR-58 | The same sequence of saves on a set of files and on the database (`cp2_check.py` 1 and 2) | Lists, versions and contents are identical in both | – | Stefan Reiterer (approval above) | 2026-11-21 |
 | AC-005 | FR-59 | Move the sample store files to database and back, repeat the move; try a store with a step version missing | The repeated move adds no records; the damaged store is refused with the graph named and nothing is written | – | Stefan Reiterer (approval above) | 2026-11-21 |
 | AC-006 | FR-93 | Live store has two more versions of `cp2.multi` than the copy; show the lag, then sync, then sync again | The lag names `cp2.multi` (live 6, copy 4, behind); after the sync the copy equals the live store; the second sync adds 0 records | – | Stefan Reiterer (approval above) | 2026-11-21 |
