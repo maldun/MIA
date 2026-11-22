@@ -180,7 +180,6 @@ class RecordTablesContract(unittest.TestCase):
             self.assertEqual(tables.validate("snapshots", dict(doc, **{field: bad})), {"rule": "schema", "detail": field}, (field, bad))
         self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
 
-
     @mark.req("IF-302")
     @each_provider(IF)
     def test_an_arrangement_is_a_versioned_record_of_whole_places(self, tables):
