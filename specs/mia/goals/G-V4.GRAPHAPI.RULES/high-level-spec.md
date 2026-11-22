@@ -1,15 +1,15 @@
 # High-Level Specification: G-V4.GRAPHAPI.RULES – one rule set for graphs
 
-**Status:** Draft (2026-11-22); open decisions taken by the owner (D-416); HR-001 to HR-006 approved by group (review-log.md); the approval of the whole document is the owner's tick below
+**Status:** Draft (2026-11-22); open decisions taken by the owner (D-416, points 1 and 5 superseded by D-417); HR-001 to HR-006 approved by group (review-log.md); the approval of the whole document is the owner's tick below
 **Top-level spec:** `../G-V4.GRAPHAPI/top-level-spec.md` (items FR-63, FR-64 are this subgoal's; FR-7 of the product spec)   **Owner:** Stefan Reiterer   **Date:** 2026-11-22
 **Basis:** the validated prototype round 04 (`../G-V4/prototype/rounds/04/`, branch `prototype/g-v4`, carry-over decided all as proposed), the reuse map row R3, the owner's decisions D-375, D-404 and D-415 (Q-1 to Q-7), the accepted cases AC-017 and AC-018 (`../G-V4/accepted-cases.md`), CORE as verified (D-414).
 
 ## 1. Big parts and technology
-RULES changes three existing parts and adds no module or interface. The rules of a graph are written **once**, per kind of graph, in a registry of kinds; every place that checks a graph asks that registry and gets **every** broken rule, in one fixed order, each with the steps or connections it concerns. A run asks the same registry, plus the inputs nobody supplies and whether the kind can run, before the first step.
+RULES changes three existing parts, adds one module and one interface version (IF-301 v4). The rules of a graph are written **once**, per kind of graph, in a registry of kinds; every place that checks a graph asks that registry and gets **every** broken rule, in one fixed order, each with the steps or connections it concerns. A run asks the same registry, plus the inputs nobody supplies and whether the kind can run, before the first step.
 
 | Part (node) | Purpose | Technology | New / existing | Decided in |
 |---|---|---|---|---|
-| N-3.2 Workflows and context graphs | the registry of kinds with the rule set of each kind; the rule report of a graph; the refusal of a run | the registry and its rule functions in `graph_rules.py` (Python 3.12, pure functions, no storage), adapted from `graph_rules_proto.py`, next to the document form's `violation`, which stays as it is (Q-6) | existing module, extended; internal to N-3.2, no interface (D-416) | D-404, D-415, D-416, prototype R3 |
+| N-3.2 Workflows and context graphs | the registry of kinds with the rule set of each kind; the rule report of a graph; the refusal of a run | a new module `graph_rule_set.py` (Python 3.12, pure functions, no storage), adapted from `graph_rules_proto.py`; offered to the other nodes through **IF-301 v4** (amendment A-170); `graph_rules.py` (document form, `violation`) stays as it is (Q-6) | new module; existing interface, new version | D-404, D-415, D-417, prototype R3 |
 | N-2.3 Workflow management (graph model) | the save path refuses a graph that breaks a rule of its kind, naming every broken rule | `GraphModel.save_graph` asks the rule set instead of `check_graph`/`context_problems`; `check_graph` stays as the flat list of named IDs | existing, changed | CORE, prototype CP17 |
 | N-2.4.1 Pipeline runner | refuses a run before any step: kind, broken rules, inputs nobody supplies | `GraphRunner.run` asks the refusal first | existing, changed | D-375, prototype CP4, CP19 |
 | N-2.1 / N-5 check route | the editor's check of a working copy | the check route of IF-104 v2 (written at G-V4 level, D-368); here tested against a mock that returns the rule report, real when IF-104 v2 is written or in EDIT | stand-in | goal.md (Parts), D-416 |
@@ -26,8 +26,8 @@ RULES changes three existing parts and adds no module or interface. The rules of
 | The document form (`workflows` table, IF-301 `validate`, IF-102, IF-104 v1, IF-203) keeps the five older rules | move it to the eight now | the document form is retired by G-V4.MIGRATION; no contract changes in RULES | Q-6 |
 | An unknown kind: the check and the run say `unknown_kind`; the save keeps CORE's `schema_break`/`kind` | one name everywhere | CORE is verified (REQ-WFM-154, V-2); such a graph cannot be stored today | Q-7 |
 | The run is refused in this order: kind, broken rules, inputs nobody supplies; the trust check (REQ-RUN-017) comes after | trust first | a graph that breaks the rules is refused whatever its trust; trust per step is G-V4.GRAPHAPI.CODE | D-416 |
-| The rule report is internal to N-3.2: the model (N-2.3) and the runner (N-2.4.1) call `graph_rules.py` directly; frozen at G-V4 as requirements, not as an interface | an amendment of IF-301 to v4 with a contract suite | the owner's choice: no interface work in RULES; the runner already calls `graph_model` directly today | D-416 |
-| The registry lives in `graph_rules.py`, next to the document form's `violation` | a new module `graph_rule_set.py` | one file for the rules of graphs; `violation` leaves with the document form (G-V4.MIGRATION) | D-416 |
+| The registry, the rule report and the refusal of a run are part of **IF-301 v4** (N-3.2's contract, amendment A-170, with a contract suite and a mock); the model (N-2.3), the runner (N-2.4.1) and later EDIT and CONTEXT consume it | internal to N-3.2 without an interface (D-416 (1), superseded) | a shared item frozen at G-V4 needs a contract its consumers can test against; every cross-part flow has an interface requirement (decomposition rule) | D-417 |
+| The registry lives in a new module `graph_rule_set.py` | in `graph_rules.py` next to `violation` (D-416 (5), superseded) | the eight rules and the five older ones of the document form stay apart; `graph_rules.py` leaves with the document form (G-V4.MIGRATION) | D-417 |
 
 ## 2. Dependencies
 | ID | Kind | What | Pin / version | Why we need it | If it fails or changes | Used by | Update policy | Contract tests (what we rely on) |
@@ -102,7 +102,7 @@ The kinds `rule` and `measure` follow CORE's approved high-level spec; `spec_che
 
 ## 4. Split proposal
 ### Nodes (decomposition)
-No new node and no new interface version. N-3.2's `graph_rules.py` gets the registry; N-2.3 and N-2.4.1 call it directly (D-416). The rule report is used by EDIT, CONTEXT and the run, so its requirements are a shared item frozen at G-V4 (consistency review, section 4).
+No new node. The interface that changes is **IF-301 v4** (amendment A-170, D-417): the registry of kinds, the rule report and the refusal of a run, beside the record checks of v3; N-3.2 provides it, N-2.3 and N-2.4.1 consume it, and EDIT and CONTEXT later. The rule report is used by EDIT, CONTEXT and the run, so IF-301 v4 is a shared item frozen at G-V4 (consistency review, section 4).
 
 ### Goals and subgoals
 | Proposed goal / subgoal | Outcome it delivers | Top-level items | Why this cut | How it is checked |
@@ -111,23 +111,21 @@ No new node and no new interface version. N-3.2's `graph_rules.py` gets the regi
 Keep together: the expected cut into tasks is four (rule set module; save path; runner; check route against the mock), within one plan.
 
 ## 5. Integration with the existing system
-- Changed: `graph_rules.py` (the registry and the rule functions, about 150 lines from `graph_rules_proto.py`, beside `violation`), `graph_model.py` (`save_graph`, `check_graph` as a view, `context_problems` removed or kept as a view), `graph_run.py` (`GraphRunner.run` asks the refusal first). Unchanged: `violation` in `graph_rules.py`, `graph_tables.py`, `storage.py`, the contracts IF-102, IF-104 v1, IF-203, IF-301.
+- New: `graph_rule_set.py` (the registry and the rule functions, about 150 lines from `graph_rules_proto.py`). Changed: `graph_model.py` (`save_graph`, `check_graph` as a view, `context_problems` removed or kept as a view), `graph_run.py` (`GraphRunner.run` asks the refusal first), the contract `contracts/IF-301-graph-tables.md` to v4 with its contract suite and mock (protected: through the owner's amendment A-170). Unchanged: `graph_rules.py`, `graph_tables.py`, `storage.py`, the contracts IF-102, IF-104 v1, IF-203.
 - Protected tests: TC-WFM-164 and TC-WFM-168 pass unchanged (prototype CP17); `test_pipeline_graph.py`, `test_skill_binding.py`, `test_graph_order.py` keep `check_graph`. To check in step 1b: the protected run tests of REQ-RUN-016 (a refusal now names every broken rule, not only the cycle or the missing end).
 - Requirement amendments expected: REQ-WFM-146/150 (a refused save names every broken rule, in order; carries V-2 and V-3 of CORE), REQ-WFM-155/156 (the context rule set from the registry, rule 4 in full, Q-3), REQ-RUN-016 (the refusal of HR-003).
 - Notes for other subgoals: CODE takes the known-tool check (Q-2); TRANSFER or MIGRATION the read-only listing of an unknown kind (Q-7); MIGRATION retires the document form (Q-6).
 
 ## 6. Risks and open questions
-| Risk / question | Impact | Mitigation / owner |
-|---|---|---|
-Decided by the owner in the HLS questionnaire of 2026-11-22 (D-416): the rule report stays internal to N-3.2, the check route is tested against a mock, the run is refused in the order kind, rules, inputs, trust, no time bound, the registry goes into `graph_rules.py`, CORE's kinds of HR items.
+Decided by the owner in the HLS questionnaire of 2026-11-22 (D-416, as recommended after D-417): the rule report is part of IF-301 v4, the check route is tested against a mock, the run is refused in the order kind, rules, inputs, trust, no time bound, the registry goes into a new module `graph_rule_set.py`, CORE's kinds of HR items.
 
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
-| The rule report is not an interface: N-2.3 and N-2.4.1 (and later EDIT, CONTEXT) call N-3.2's `graph_rules.py` directly | a change of the report form has no contract suite to catch it in the callers; the decomposition rule "every cross-part flow has an interface requirement" is met only by the frozen requirements | **decided** (D-416); the requirements of the report are frozen at G-V4, and the tests of each caller assert the report form; revisited if a caller outside the backend needs it |
+| IF-301 v4 is a protected contract change (amendment A-170): contract text, suite and mock change through the owner's script | amendment effort; the consumers N-2.3 and N-2.4.1 test against the mock | **decided** (D-417); one amendment, written in step 1b with the requirements, listed in the plan |
 | IF-104 v2 (with the check route) is written at G-V4 level and not yet there | RULES cannot test a real route | **decided:** a mock that returns the rule report; real when IF-104 v2 is written or in EDIT |
 | Order of the refusal of a run: kind, rules, inputs, then trust | a broken untrusted graph names its rules, not its trust | **decided** (D-416) |
 | A time limit for the check | none needed so far (1.4 ms for 500 steps) | **decided:** none |
-| `graph_rules.py` holds two rule sets until MIGRATION (the five of the document form, the registry) | a reader may take the wrong one | the module text says which one serves which form; `violation` leaves with MIGRATION |
+| Two rule modules until MIGRATION: `graph_rules.py` (the five of the document form) and `graph_rule_set.py` (the registry) | a reader may take the wrong one | each module's text says which form it serves; `graph_rules.py` leaves with MIGRATION |
 | Run tests of REQ-RUN-016 expect only the cycle or the missing end named | a protected test may need an amendment | checked in step 1b; amendment if needed |
 
 ## Approval

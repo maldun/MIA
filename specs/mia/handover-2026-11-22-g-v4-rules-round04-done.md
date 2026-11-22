@@ -16,12 +16,12 @@ Read first: this file, `CLAUDE.md`, the previous handover `handover-2026-11-22-g
 
 ## 3. Next steps
 1. Done: the owner validated round 04 and decided its carry-over, all as proposed (2026-11-22, `d087cc5b`).
-2. Done except the tick: high-level spec `specs/mia/goals/G-V4.GRAPHAPI.RULES/high-level-spec.md` (registry in `graph_rules.py`, internal to N-3.2; check route against a mock; refusal order kind, rules, inputs, trust; no bound; D-416).
+2. Done except the tick: high-level spec `specs/mia/goals/G-V4.GRAPHAPI.RULES/high-level-spec.md` (registry in a new `graph_rule_set.py`, offered through IF-301 v4 by amendment A-170; check route against a mock; refusal order kind, rules, inputs, trust; no bound; D-416, D-417).
 3. Requirements (EARS, grouped, batches of 5 to 7), architecture entries, test spec with scenarios, test requirements, red tests, `plan.md`, binding map; witnesses for AC-017, AC-018.
 4. Notes for other subgoals: CODE takes the known-tool check (Q-2); TRANSFER or MIGRATION the read-only listing of an unknown kind (Q-7); MIGRATION retires the document form and its five rule names (Q-6).
 
 ## 4. Numbers and rules
-- Next free numbers (check again before use): **D-417**, A-170, REQ-WFM-162, REQ-GTB-033, REQ-RUN-036, TC-WFM-179, TC-GTB-037, TC-RUN-036, TC-IF-301-27, AC-41; prototype checkpoints from CP21, assumptions from ASM-9.
+- Next free numbers (check again before use): **D-418**, A-171 (A-170: IF-301 v4, planned by D-417), REQ-WFM-162, REQ-GTB-033, REQ-RUN-036, TC-WFM-179, TC-GTB-037, TC-RUN-036, TC-IF-301-27, AC-41; prototype checkpoints from CP21, assumptions from ASM-9.
 - A session isolated in this worktree cannot `cd` into the prototype worktree; plain `git -C /home/maldun/prog/Python/MIA-prototype-g-v4 <cmd>` (one command per call) and the file tools work.
 - Untracked `specs/mia/amendments/A-167/A-167.diff` in `../MIA-goal-v4` is a view file: never commit it.
 
