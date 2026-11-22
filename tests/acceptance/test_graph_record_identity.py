@@ -29,25 +29,25 @@ RECORD_TABLES = {t: {"versioned": True, "deletable": False}
 class RecordIdentityAcceptance(unittest.TestCase):
     @mark.req("REQ-GTB-021")
     def test_a_record_under_another_id_is_refused(self):
-        """TC-GTB-022: a node whose own ID is n1 is accepted under the record ID n1 and refused under the record ID x, naming the field id; nothing is stored under x.
+        """TC-GTB-022: a node whose own ID is g/n1 is accepted under the record ID g/n1 and refused under the record ID g/x, naming the field id; nothing is stored under x.
 
-        Example: {"id": "n1", ...} written under "n1" -> version 1; written under "x" -> refused (record_identity, "id"); the store holds only n1.
+        Example: {"id": "g/n1", ...} written under "g/n1" -> version 1; written under "g/x" -> refused (record_identity, "id"); the store holds only g/n1.
         """
-        # Given: the Graph tables define the record tables, and a node whose own ID is n1
+        # Given: the Graph tables define the record tables, and a node whose own ID is g/n1 (IDs scoped since A-167, A-168)
         self.assertEqual(graph_tables.record_definitions(), RECORD_TABLES)
         store = GraphStoreStandIn()
-        record = {"id": "n1", "data": {"type": "data"}}
-        # When: it is written under the record ID x
+        record = {"id": "g/n1", "data": {"type": "data"}}
+        # When: it is written under the record ID g/x
         with self.assertRaises(StorageError) as caught:
-            store.put("graph_nodes", "x", record, "anna")
+            store.put("graph_nodes", "g/x", record, "anna")
         # Then: it is refused, the rule is record_identity and it names the field id
         self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "record_identity", "id"))
-        # And: nothing is stored under x
+        # And: nothing is stored under g/x
         self.assertEqual(store.ids("graph_nodes"), [])
-        # When: the same node is written under the record ID n1 (the twin differs only in the broken rule)
+        # When: the same node is written under the record ID g/n1 (the twin differs only in the broken rule)
         # Then: it is accepted as version 1
-        self.assertEqual(store.put("graph_nodes", "n1", record, "anna"), {"version": 1})
-        self.assertEqual(store.ids("graph_nodes"), ["n1"])
+        self.assertEqual(store.put("graph_nodes", "g/n1", record, "anna"), {"version": 1})
+        self.assertEqual(store.ids("graph_nodes"), ["g/n1"])
 
 
 if __name__ == "__main__":

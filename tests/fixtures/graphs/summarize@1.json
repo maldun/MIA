@@ -1,0 +1,77 @@
+{
+ "context_graph_id": "ctx-summarize@1",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "text"
+   },
+   "from": "input.text",
+   "id": "input.text>step.summarize",
+   "to": "step.summarize"
+  },
+  {
+   "data": {
+    "as": "sentences"
+   },
+   "from": "input.sentences",
+   "id": "input.sentences>step.summarize",
+   "to": "step.summarize"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.summarize",
+   "id": "step.summarize>var.answer",
+   "to": "var.answer"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.summarize",
+   "to": "step.summarize"
+  }
+ ],
+ "id": "summarize@1",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "view.summarize",
+    "type": "transform"
+   },
+   "id": "step.summarize"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.text"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.sentences"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {}
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

@@ -4,6 +4,8 @@
 
 Tests of this part alone against the mocks of its neighbours: unit tests with plain data, no database. The interface IF-301 is tested by its contract suite against the mock and the real part. Stages (M27): 1 = commit gate, under 2 minutes; 2 = up to 10 minutes; 3 = up to 30 minutes.
 
+IDs of steps and connections (A-167, IF-301 v3): the IDs `n1`, `e1`, `c1`, ... named in the scenarios below are local IDs. Since IF-301 v3 (REQ-GTB-029) a step or connection is stored under `<graph id>/<local id>`, so the tests write the scoped form (`wf1/n1`, `g/e1`, `h1/c1`); the rules and the expected results are unchanged.
+
 ## Test cases
 
 | Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |
@@ -222,3 +224,41 @@ TC-GTB-001 and TC-GTB-004 check the definitions and the validation; the storing 
 ## Assumptions (checked in validation)
 
 - ASM-N3-004: the graph rules are the ones of FR-7 and `contracts/IF-301-graph-tables.md`; `graphlib` of the standard library is the reference in the property test.
+
+## Test cases of G-V4.GRAPHSTORE.CORE (moved at the merge 2026-11-22, D-408; test requirements TR-CORE-001 to 009)
+| Test ID | Verifies | Level | Setup / inputs | Expected result | Limit / tolerance |
+|---|---|---|---|---|---|
+| TC-GTB-033 | REQ-GTB-029 | component | a step record and a connection record, each written under `chat`, `lookup/chat`, `/chat`, `lookup/` and an empty ID | `chat`, `/chat` and `lookup/` refused naming `unscoped_id`; the empty ID refused naming `record_identity` (`id`); `lookup/chat` accepted (a step `lookup/end` stored first) | exact rule name and field |
+| TC-GTB-034 | REQ-GTB-030 | component | headers `g` that pin `g/step`, `h/step`, `g/conn` and `h/conn`; all members exist | headers with `h/step` or `h/conn` refused naming `unscoped_id`; with `g/step` or `g/conn` accepted | exact |
+| TC-GTB-035 | REQ-GTB-031 | unit | the record IDs `lookup/a/b`, `lookup/a`, `g//`, `lookup/` | graph `lookup` and local ID `a/b`; `lookup`, `a`; `g`, `/`; no local ID (not scoped) | exact |
+| TC-GTB-036 | REQ-GTB-032 | contract | the refusal cases of TC-GTB-033, TC-GTB-034, TC-WFM-164, TC-WFM-172, TC-WFM-173, TC-WFM-178 on the files backend and on PostgreSQL 16 | the same refusal rule and detail on both | exact; the PostgreSQL half skips (never weakened) where podman, the image or psycopg 3 is missing |
+
+## Scenarios (G-V4.GRAPHSTORE.CORE, approved by the owner 2026-11-21)
+
+### TC-GTB-033 – A step or connection without a graph in its ID is refused
+- Verifies: REQ-GTB-029
+- Given: a step record and a connection record, each offered under four IDs: `chat`, `/chat`, `lookup/` and the empty ID, and once under `lookup/chat`; a step `lookup/end` is stored first, so that every connection has stored ends (D-410)
+- When: each of the ten records is written
+- Then: the three unscoped IDs `chat`, `/chat` and `lookup/` of each table are refused, each naming the rule `unscoped_id`; the empty ID is refused naming `record_identity` with the field `id`, as before (D-409)
+- And: the records under `lookup/chat` are accepted and stored
+- And: witnesses AC-002
+
+### TC-GTB-034 – A header names only its own members
+- Verifies: REQ-GTB-030
+- Given: four headers for the graph `g`: one pins the step `h/step`, one the step `g/step`, one the connection `h/conn`, one the connection `g/conn`; all four members exist
+- When: each header is written
+- Then: the headers with `h/step` and with `h/conn` are refused, each naming `unscoped_id`; the headers with `g/step` and with `g/conn` are accepted
+- And: witnesses AC-002
+
+### TC-GTB-035 – The first slash separates graph and local ID
+- Verifies: REQ-GTB-031
+- Given: the record IDs `lookup/a/b`, `lookup/a`, `g//` and `lookup/`
+- When: each is split into graph ID and local ID
+- Then: `lookup/a/b` gives graph `lookup` and local ID `a/b`; `lookup/a` gives `lookup` and `a`; `g//` gives `g` and `/`; `lookup/` gives no local ID, so it is not scoped
+
+### TC-GTB-036 – Both stores refuse the same way
+- Verifies: REQ-GTB-032
+- Given: one files store and one PostgreSQL 16 store (throw-away container), both empty
+- When: the refusal cases of TC-GTB-033, TC-GTB-034, TC-WFM-164, TC-WFM-172, TC-WFM-173 and TC-WFM-178 are run on both
+- Then: each case gives the same refusal rule and the same named detail on both stores
+- And: where podman, the image or psycopg 3 is missing the PostgreSQL half is skipped and reported as skipped, never as passed

@@ -1,0 +1,141 @@
+{
+ "context_graph_id": "ctx-verify.single@1",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "claim"
+   },
+   "from": "input.claim",
+   "id": "input.claim>step.judge",
+   "to": "step.judge"
+  },
+  {
+   "data": {
+    "as": "evidence"
+   },
+   "from": "input.evidence",
+   "id": "input.evidence>step.judge",
+   "to": "step.judge"
+  },
+  {
+   "data": {
+    "as": "context"
+   },
+   "from": "literal.judge.context",
+   "id": "literal.judge.context>step.judge",
+   "to": "step.judge"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.judge",
+   "id": "step.judge>var.one",
+   "to": "var.one"
+  },
+  {
+   "data": {
+    "as": "verdicts"
+   },
+   "from": "var.one",
+   "id": "var.one>step.count",
+   "to": "step.count"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.count",
+   "id": "step.count>var.verdict",
+   "to": "var.verdict"
+  },
+  {
+   "data": {},
+   "from": "step.judge",
+   "id": "step.judge>order-step.judge",
+   "to": "order-step.judge"
+  },
+  {
+   "data": {
+    "role": "order"
+   },
+   "from": "order-step.judge",
+   "id": "order-step.judge>step.count",
+   "to": "step.count"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.judge",
+   "to": "step.judge"
+  }
+ ],
+ "id": "verify.single@1",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "view.verdict",
+    "type": "transform"
+   },
+   "id": "step.judge"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.claim"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.evidence"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": "an impartial checker"
+   },
+   "id": "literal.judge.context"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.one"
+  },
+  {
+   "data": {
+    "toolbox_id": "code.tally",
+    "type": "transform"
+   },
+   "id": "step.count"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.verdict"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "order-step.judge"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {}
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

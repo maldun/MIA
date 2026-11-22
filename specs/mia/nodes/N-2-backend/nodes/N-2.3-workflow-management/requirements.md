@@ -1260,3 +1260,266 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-142
 - Status: Verified
 - History: A-160 (owner 2026-11-18, plan gate), new
+
+## Iteration 4 (goal G-V4.GRAPHSTORE.CORE, one stored truth for graphs; moved at the merge 2026-11-22, D-408)
+Requirements of the subgoal G-V4.GRAPHSTORE.CORE (goal record `specs/mia/goals/G-V4.GRAPHSTORE.CORE/`: plan, test requirements TR-CORE-001 to 009, verification report). Verified 2026-11-22, with the accepted deviations V-1, V-2, V-3 (D-414).
+
+## Groups of G-V4.GRAPHSTORE.CORE
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | SC | Steps belong to one graph: what a record ID says and what a step's history lists (FR-60) | REQ-WFM-160, REQ-WFM-144, REQ-WFM-145 |
+| 2 | SV | Saving a graph: order of writes, what is written, refused and interrupted saves (FR-57, NFR-16) | REQ-WFM-146, REQ-WFM-147, REQ-WFM-148, REQ-WFM-149, REQ-WFM-150, REQ-WFM-151 |
+| 3 | CG | Context graphs: the same save path for the second kind of graph (FR-57), the kind of a graph | REQ-WFM-152, REQ-WFM-153, REQ-WFM-154, REQ-WFM-155, REQ-WFM-161, REQ-WFM-156, REQ-WFM-157 |
+| 4 | RD | Reading, history and both places: versions, who and when, a version as it was saved, the same refusals on files and database (FR-57) | REQ-WFM-158, REQ-WFM-159 |
+
+### REQ-WFM-144 – Local IDs on reading
+- Level: low   Subject: TaskRuntime
+- Group: SC
+- Text: When a graph is read, the Workflow management shall return the IDs of its steps and connections without the graph ID.
+- Rationale: refines FR-60; the caller sees `step.write`, the store holds `lookup/step.write`
+- Parent: FR-60
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-04: a graph saved with local IDs is read back with the same local IDs, also for the ends of connections (exact)
+- Binding: fixed
+- Verified by: TC-WFM-162
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-145 – History of a step in its graph
+- Level: low   Subject: TaskRuntime
+- Group: SC
+- Text: When the history of a step is asked, the Workflow management shall list the versions that the headers of that graph pin, oldest first, with account and time of each.
+- Rationale: refines FR-60 and HR-004; two graphs with a step `step.write` of different content have separate histories (finding S1); versions left by an interrupted save are not listed
+- Parent: FR-60
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-05 (accepted case AC-002): changing `step.write` in `lookup` adds one version to its history and none to the history of the other graph (exact)
+- Binding: fixed
+- Verified by: TC-WFM-163
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-146 – Whole graph checked first
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: When a graph is saved, the Workflow management shall check all its steps, connections and header against the rules before it writes the first record.
+- Rationale: refines NFR-16 and HR-002; a refusal found after the first write would leave unused versions
+- Parent: NFR-16
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-06: a graph with a broken connection at its last position leaves the record counts of every table as they were (exact)
+- Binding: fixed
+- Verified by: TC-WFM-164
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-147 – Header written last
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: When a graph is saved, the Workflow management shall write the steps and connections before the header.
+- Rationale: refines NFR-16 and HR-002; the header makes a graph visible, so a graph is listed only when all its members are stored
+- Parent: NFR-16
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-07 (accepted case AC-003): a save interrupted after each of its writes never lists a graph with a missing step or connection (every write position, files and database)
+- Binding: fixed
+- Verified by: TC-WFM-165
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-148 – Changed members only
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: When a graph is saved, the Workflow management shall write a step or connection as a new version only if its content differs from its newest version.
+- Rationale: refines FR-57, FR-60; ASM-2 of round 02; the history of a step lists real changes only
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-08 (accepted case AC-001): saving a graph with one changed step writes exactly one new step version and one new header version (exact)
+- Binding: fixed
+- Verified by: TC-WFM-166
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408). Accepted deviation V-1 (D-414): after an interrupted save, an unchanged save writes a new version.
+
+### REQ-WFM-149 – Unchanged graph, no version
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: When a graph is saved whose steps, connections and header fields equal its newest version, the Workflow management shall write no record and answer with the newest version.
+- Rationale: refines FR-57; an unchanged save is not an edit
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-09 (accepted case AC-001): the same graph saved twice has one version; the second answer names it and no table grew (exact)
+- Binding: fixed
+- Verified by: TC-WFM-167
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408). Accepted deviation V-1 (D-414): after an interrupted save, an unchanged save writes a new version.
+
+### REQ-WFM-150 – Refused save writes nothing
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: If a save is refused, then the Workflow management shall write no record, count no version and name the broken rule or the IDs.
+- Rationale: refines NFR-16 and HR-005; the refusals are those of the graph rules and the record checks
+- Parent: NFR-16
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-10 (accepted case AC-003): a graph with a cycle, two writers, an unknown kind of step or a context connection to a missing step is refused and no table grew (exact)
+- Binding: fixed
+- Verified by: TC-WFM-168
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-151 – An interrupted save is finished by repeating it
+- Level: low   Subject: TaskRuntime
+- Group: SV
+- Text: If a save is interrupted after any write, then the Workflow management shall complete the same graph when the same save is repeated, with exactly one new graph version.
+- Rationale: refines NFR-16 and HR-005; unused step versions of the first attempt are pinned again when equal
+- Parent: NFR-16
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-11 (accepted case AC-003): for every write position the repeated save gives the full graph and one new header version (exact)
+- Binding: fixed
+- Verified by: TC-WFM-169
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-152 – Kind of a graph selects the tables
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: Where a graph has the kind `context`, the Workflow management shall store its steps and connections in the context tables and its header with the kind `context`.
+- Rationale: refines FR-57 for both kinds and HR-003; the member tables exist since A-98
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-12: a context graph's members are in `context_nodes` and `context_edges` under `<graph>/<local>`, none in `graph_nodes` (exact)
+- Binding: fixed
+- Verified by: TC-WFM-170
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-153 – No kind means workflow
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: Where a graph has no kind, the Workflow management shall treat it as a workflow graph.
+- Rationale: ASM-5 of round 03; all callers before the kind existed save workflow graphs
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-13: a graph saved without a kind is stored with the kind `workflow` (exact)
+- Binding: fixed
+- Verified by: TC-WFM-171
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-154 – Unknown kind refused
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: If the kind of a graph is neither `workflow` nor `context`, then the Workflow management shall refuse the save and name the field `kind`.
+- Rationale: refines FR-57 and D-404; the registry of kinds is the list of accepted kinds, today two
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-14: kind `swarm` is refused naming `kind` and nothing is stored (exact)
+- Binding: fixed
+- Verified by: TC-WFM-172
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-155 – Identity and ends of a context graph
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: When a context graph is saved, the Workflow management shall refuse a repeated step ID, a repeated connection ID or a connection to a missing step, and name the IDs.
+- Rationale: refines FR-57; the rule set of the context kind is CONTEXT's decision (FR-75, ASM-4); until then identity and ends only
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-15: each of the three faults is refused naming the ID and writes nothing (exact)
+- Binding: open
+- Verified by: TC-WFM-173
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-156 – No workflow rules for a context graph
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: When a context graph is saved, the Workflow management shall not apply the order, alternation, writer and stop-limit rules of workflow graphs.
+- Rationale: refines D-404: the rule set follows the kind of the graph; context steps are categories, not data and processing steps
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-16: a context graph with two connected steps of the same category and a cycle is accepted by this check (exact; CONTEXT may add rules)
+- Binding: open
+- Verified by: TC-WFM-174
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-157 – Kind on reading
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: When a context graph is read, the Workflow management shall return it with the kind `context`.
+- Rationale: refines FR-57 and FR-48 (a graph is listed with its kind)
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-17: a context graph read at any version carries the kind `context`; a workflow graph keeps the shape it had before (exact)
+- Binding: fixed
+- Verified by: TC-WFM-175
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-158 – Versions with who and when
+- Level: low   Subject: TaskRuntime
+- Group: RD
+- Text: When the versions of a graph are asked, the Workflow management shall list every version, oldest first, each with the account that stored it and the time.
+- Rationale: refines FR-57 and HR-003
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-18 (accepted case AC-001): a graph saved by three accounts lists versions 1 to 3 with the three accounts and a time each (exact)
+- Binding: fixed
+- Verified by: TC-WFM-176
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-159 – A version as it was saved
+- Level: low   Subject: TaskRuntime
+- Group: RD
+- Text: When a graph is read at a given version, the Workflow management shall return the steps, connections and header fields exactly as they were saved at that version.
+- Rationale: refines FR-57 and HR-003; no version is deleted (REQ-GTB-013)
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-19 (accepted case AC-001): each of three saved versions reads back equal to what was saved, for a workflow graph and a context graph (exact)
+- Binding: fixed
+- Verified by: TC-WFM-177
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-160 – No slash in a graph ID
+- Level: low   Subject: TaskRuntime
+- Group: SC
+- Text: If a graph with at least one step is saved under an ID that contains a slash, then the Workflow management shall refuse the save and name the rule `unscoped_id`.
+- Rationale: refines HR-001 and ASM-001; the record ID of its steps would name another graph; seen in the prototype: a graph `look/up` is refused naming `look/up/a`
+- Parent: FR-60
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-21: a graph with steps saved under the ID `look/up` is refused naming `unscoped_id` and nothing is stored (exact); a graph without steps is not caught by this rule (D-410)
+- Binding: fixed
+- Verified by: TC-WFM-178
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); narrowed to graphs with steps, the slash caught through the steps as in the prototype (owner's choice D-410, Plan step 4, 2026-11-21); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-WFM-161 – An empty context graph is stored
+- Level: low   Subject: TaskRuntime
+- Group: CG
+- Text: When a context graph without steps and connections is saved, the Workflow management shall store it as one header version.
+- Rationale: refines FR-57; a context graph is built up step by step, so an empty one is a valid start; the owner kept this case of TC-WFM-173 and asked for its requirement (review 2026-11-21)
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-22: an empty context graph is accepted and has exactly one header version and no member record (exact)
+- Binding: open
+- Verified by: TC-WFM-173
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 3, 2026-11-21, new (from the review of TC-WFM-173); approved by the owner in the group review of CG, 2026-11-21; verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).

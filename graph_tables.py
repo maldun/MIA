@@ -160,12 +160,12 @@ SCOPED = ("graph_nodes", "graph_edges", "context_nodes", "context_edges")
 
 
 def scoped(graph_id, local_id):
-    """The record ID of a step or connection of a graph: `<graph id>/<local id>` (D-368, prototype CP1). Both parts are plain text without a slash in the local part."""
+    """The record ID of a step or connection of a graph: `<graph id>/<local id>` (REQ-GTB-029, IF-301 v3)."""
     return "%s/%s" % (graph_id, local_id)
 
 
 def split_scoped(record_id):
-    """(graph id, local id) of a scoped record ID, or None when it is not of the form `<graph id>/<local id>`."""
+    """(graph id, local id) of a scoped record ID, cut at the first slash, or None when either part is empty (REQ-GTB-031)."""
     graph, sep, local = str(record_id).partition("/")
     return (graph, local) if sep and graph and local else None
 
@@ -198,8 +198,9 @@ def _context_node_refusal(data, categories):
     return _refusal("schema_break", broken) if broken else None
 
 
-def _check_members(data, stored, graph_id=None):
-    """unknown_member for a header member (node or edge) whose version is not stored; a member named twice is record_identity.
+def _check_members(data, stored, graph_id):
+    """unscoped_id for a header member of another graph (REQ-GTB-030), checked before unknown_member for a member whose version is not stored;
+    a member named twice is record_identity.
     A header of kind context looks its members up in the context tables, one of kind workflow in the workflow tables (REQ-GTB-026)."""
     names = ("context_nodes", "context_edges") if data["kind"] == "context" else ("nodes", "edges")
     for key, kind in zip(("nodes", "edges"), names):
@@ -208,7 +209,7 @@ def _check_members(data, stored, graph_id=None):
             return _refusal("record_identity", key)
         for member in data[key]:
             parts = split_scoped(member["id"])
-            if graph_id is not None and (parts is None or parts[0] != graph_id):     # a member of another graph is refused (D-368)
+            if parts is None or parts[0] != graph_id:
                 return _refusal("unscoped_id", member["id"])
             if stored is not None and member["version"] not in stored.get(kind, {}).get(member["id"], []):
                 return _refusal("unknown_member", member["id"])
@@ -220,7 +221,7 @@ def _check(table, record, categories, stored, record_id=None):
         return _refusal("record_identity", "id" if isinstance(record, dict) else "record")
     if record_id is not None and record_id != record["id"]:     # a header pins by the ID inside, the storage finds by the record ID (REQ-GTB-021)
         return _refusal("record_identity", "id")
-    if table in SCOPED and split_scoped(record["id"]) is None:  # D-368: a step or connection belongs to one graph, its ID says which
+    if table in SCOPED and split_scoped(record["id"]) is None:     # a step or connection belongs to one graph, its ID says which (REQ-GTB-029)
         return _refusal("unscoped_id", record["id"])
     if table in ("graph_edges", "context_edges"):
         for end in ("from", "to"):

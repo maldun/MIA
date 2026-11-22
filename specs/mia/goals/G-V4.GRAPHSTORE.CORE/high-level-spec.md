@@ -1,6 +1,6 @@
 # High-Level Specification: G-V4.GRAPHSTORE.CORE – one stored truth for graphs
 
-**Status:** Draft (step 1 of the Plan of this subgoal; nothing here is approved until the owner has gone through it item by item)
+**Status:** Approved by the owner (2026-11-21), HR-001 to HR-005 reviewed item by item (D-402)
 **Top-level spec:** `../G-V4.GRAPHSTORE/top-level-spec.md` (items FR-57, FR-60, NFR-16 are this subgoal's; FR-40 and FR-30 of the product spec, partly)   **Owner:** Stefan Reiterer   **Date:** 2026-11-21
 **Basis:** the validated prototype round 02 (`../G-V4/prototype/`, branch `prototype/g-v4`), the reuse map decision R1 `keep+tests` (D-400), the accepted cases AC-001 to AC-003 (`../G-V4/accepted-cases.md`).
 
@@ -41,7 +41,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Text: The system shall refuse a step or connection record whose ID is not of the form `<graph id>/<local id>`, with the rule name `unscoped_id`, and shall refuse a graph header that names a member of another graph.
 - Rationale: makes "every step belongs to exactly one graph" true by construction; the first `/` separates, a local ID may contain further slashes, a graph ID does not (ASM-1).
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-002 – Write order of a save
 - Kind: rule
@@ -49,7 +49,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Text: The system shall check the whole graph before the first write, write the steps and connections that changed, and write the header last, so that a graph appears only when all its members are stored.
 - Rationale: a refused save writes nothing; an interrupted save leaves at most step versions no graph names.
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-003 – Measure: one stored truth, every change a version (FR-57)
 - Kind: measure
@@ -60,7 +60,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Rationale: FR-57 is an outcome of the owner, "nothing disappears"; counting versions and comparing what is read with what was saved decides it on real graphs, not on toy cases.
 - Reference: Fedora host, Python 3.12, PostgreSQL 16 under podman.
 - Detail in: the test requirements of this subgoal (to be written in step 3).
-- Status: Draft
+- Status: Approved
 
 ### HR-004 – Measure: a step belongs to one graph (FR-60)
 - Kind: measure
@@ -71,7 +71,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Metric: 0 new record versions in the other graph; the history of the changed step has exactly the changes made in its graph.
 - Reference: as HR-003.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-005 – Measure: no half-stored graph (NFR-16)
 - Kind: measure
@@ -82,16 +82,16 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Metric: for every k and every case 0 graphs that are listed with a missing member, 0 counted versions for a refused save, 100 % of repeated saves reach the full graph. Pass only when all k pass; no sampling.
 - Reference: as HR-003.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ## 4. Split proposal
 ### Nodes (decomposition)
-The existing nodes N-3.1, N-3.2 and N-2.3 stay as they are; CORE adds no node. The interface that changes is **IF-301 v2** (the tables of graphs, with the scoped IDs and the rule `unscoped_id`; the amendment of A-92 / REQ-GTB-021, whose protected tests have to be rewritten) and, only for REPLAY, a write-once record in IF-302.
+The existing nodes N-3.1, N-3.2 and N-2.3 stay as they are; CORE adds no node. The interface that changes is **IF-301 v3** (the tables of graphs, with the scoped IDs and the rule `unscoped_id`; the amendment of A-92 / REQ-GTB-021, whose protected tests have to be rewritten) and, only for REPLAY, a write-once record in IF-302.
 
 ### Goals and subgoals
 | Proposed goal / subgoal | Outcome it delivers | Top-level items | Why this cut | How it is checked |
 |---|---|---|---|---|
-| CORE (this) | one stored truth, graph-scoped steps, atomic saves, for both graph kinds | FR-57, FR-60, NFR-16 | first of the group, everything else stands on it; a few new requirements among many existing ones (the checker counts 37) | the three measures above, the contract suite IF-301 v2 |
+| CORE (this) | one stored truth, graph-scoped steps, atomic saves, for both graph kinds | FR-57, FR-60, NFR-16 | first of the group, everything else stands on it; a few new requirements among many existing ones (the checker counts 37) | the three measures above, the contract suite IF-301 v3 |
 Keep together: the 37 requirements come from the descendants of two or three items and most are verified in G-V1 and G-V2.
 
 ## 5. Integration with the existing system
@@ -109,5 +109,10 @@ Decided by the owner in the HLS review of 2026-11-21 (D-402): the separator rule
 | An interrupted save leaves step versions no graph names; they accumulate | storage growth, unused rows | **decided:** accepted for now, no clean-up (`step_history` ignores them); revisited when the amount matters |
 | The separator `/` is the first slash (ASM-1) | a graph ID with a slash is refused | **decided:** confirmed (HR-001) |
 | The files backend cannot make several records atomic | the order is the only protection | the fault-injection measure (HR-005) proves it for both backends; if PostgreSQL could do better (one transaction), say so in the requirements |
-| Rewriting the protected tests of A-92 | amendment effort | one amendment, joint with IF-301 v2 owners, listed in the plan |
+| Rewriting the protected tests of A-92 | amendment effort | one amendment, joint with IF-301 v3 owners, listed in the plan |
 | No hard performance bound | none claimed | **decided:** none (owner); a budget, if any, comes with the requirements |
+
+## Approval
+Reviewed item by item with the owner on 2026-11-21 (review log: `review-log.md`). The approval of the whole document is the owner's: tick the box (in Emacs `C-c C-c` on the line) or say so in the chat; the agent then sets the status to Approved and never before.
+
+- [x] Approved by Stefan Reiterer (owner). Date: 2026-11-21 (said in the chat, "approved")

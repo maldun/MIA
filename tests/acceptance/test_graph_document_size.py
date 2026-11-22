@@ -52,13 +52,13 @@ class DocumentSizeAcceptance(unittest.TestCase):
 
         Example: a data node whose value is a list of 99 995 numbers is stored (100 000 values); one of 99 996 numbers is refused (schema_break, "data").
         """
-        # Given: three data nodes. The record, its id, the data object, its type and the value list count 5 values besides the numbers
-        at_limit = data_node("d1", [1] * 99995)                  # 5 + 99 995 = 100 000 values
-        over_limit = data_node("d2", [1] * 99996)                # 100 001 values
+        # Given (IDs scoped since A-167, A-168): three data nodes. The record, its id, the data object, its type and the value list count 5 values besides the numbers
+        at_limit = data_node("g/d1", [1] * 99995)                  # 5 + 99 995 = 100 000 values
+        over_limit = data_node("g/d2", [1] * 99996)                # 100 001 values
         shared = 1
         for _ in range(30):
             shared = [shared, shared]                           # 31 levels deep, the same child twice per level: 2**30 paths
-        many_paths = data_node("d3", shared)
+        many_paths = data_node("g/d3", shared)
         # When/Then: the record at the limit is stored as version 1
         store = GraphStoreStandIn()
         self.assertEqual(put_within_limit(store, at_limit), ("stored", {"version": 1}))
@@ -67,7 +67,7 @@ class DocumentSizeAcceptance(unittest.TestCase):
         # And: the record with 2**30 paths is refused the same way within the time limit, not after minutes
         self.assertEqual(put_within_limit(store, many_paths), ("refused", ("schema_break", "data")))
         # And: the refusals stored nothing
-        self.assertEqual(store.ids("graph_nodes"), ["d1"])
+        self.assertEqual(store.ids("graph_nodes"), ["g/d1"])
 
 
 if __name__ == "__main__":

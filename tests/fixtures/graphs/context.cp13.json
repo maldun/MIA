@@ -1,0 +1,46 @@
+{
+ "context_graph_id": "",
+ "description": "context graph of prototype round 03",
+ "edges": [
+  {
+   "data": {
+    "relation": "supports"
+   },
+   "from": "source",
+   "id": "e1",
+   "to": "claim"
+  },
+  {
+   "data": {},
+   "from": "claim",
+   "id": "e2",
+   "to": "note"
+  }
+ ],
+ "id": "context.cp13",
+ "kind": "context",
+ "nodes": [
+  {
+   "data": {
+    "text": "water boils at 100 C",
+    "type": "claim"
+   },
+   "id": "claim"
+  },
+  {
+   "data": {
+    "type": "source",
+    "url": "local:book-1"
+   },
+   "id": "source"
+  },
+  {
+   "data": {
+    "text": "ctx",
+    "type": "note"
+   },
+   "id": "note"
+  }
+ ],
+ "testbench_id": ""
+}

@@ -85,13 +85,13 @@ class GraphRecordAcceptance(unittest.TestCase):
     def test_a_node_of_each_type_is_stored_as_a_record(self):
         """TC-GTB-016: one node of each registered type is written and read back with the same ID and the same JSON field, which holds its type.
 
-        Example: {"id": "t1", "data": {"type": "transform", "toolbox_id": "t-demo"}} -> read back equal, data["type"] == "transform".
+        Example: {"id": "g/t1", "data": {"type": "transform", "toolbox_id": "t-demo"}} -> read back equal, data["type"] == "transform".
         """
         # Given: the registered types are data, master and transform; one node of each, with an ID and a JSON field that holds its type
         store = new_store(self)
         self.assertEqual(list(graph_tables.types()), NODE_TYPES)
-        records = [node("d1", "data", value=7, parameters={"k": 1}), node("t1", "transform", toolbox_id="t-demo"),
-                   node("m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 3})]
+        records = [node("g/d1", "data", value=7, parameters={"k": 1}), node("g/t1", "transform", toolbox_id="t-demo"),
+                   node("g/m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 3})]
         for record in records:
             # When: each is written and read back
             self.assertEqual(store.put("graph_nodes", record["id"], record, WHO), {"version": 1})
@@ -105,17 +105,17 @@ class GraphRecordAcceptance(unittest.TestCase):
     def test_an_edge_is_stored_as_a_record(self):
         """TC-GTB-006: an edge with an ID, a start node, an end node and a JSON field is read back with the same four fields.
 
-        Example: e1 from n1 to n2 with {"label": "x"} -> {"id": "e1", "from": "n1", "to": "n2", "data": {"label": "x"}}.
+        Example: g/e1 from g/n1 to g/n2 with {"label": "x"} -> {"id": "g/e1", "from": "g/n1", "to": "g/n2", "data": {"label": "x"}}.
         """
-        # Given: the nodes n1 and n2 are stored, and the edge e1 with its JSON field
+        # Given: the nodes g/n1 and g/n2 are stored, and the edge g/e1 with its JSON field
         store = new_store(self)
-        store.put("graph_nodes", "n1", node("n1", "data"), WHO)
-        store.put("graph_nodes", "n2", node("n2", "data"), WHO)
+        store.put("graph_nodes", "g/n1", node("g/n1", "data"), WHO)
+        store.put("graph_nodes", "g/n2", node("g/n2", "data"), WHO)
         # When: the edge is written and read back
-        self.assertEqual(store.put("graph_edges", "e1", edge("e1", "n1", "n2", label="x"), WHO), {"version": 1})
-        read = store.get("graph_edges", "e1")["doc"]
+        self.assertEqual(store.put("graph_edges", "g/e1", edge("g/e1", "g/n1", "g/n2", label="x"), WHO), {"version": 1})
+        read = store.get("graph_edges", "g/e1")["doc"]
         # Then: it has the same ID, start node, end node and JSON field
-        self.assertEqual(read, {"id": "e1", "from": "n1", "to": "n2", "data": {"label": "x"}})
+        self.assertEqual(read, {"id": "g/e1", "from": "g/n1", "to": "g/n2", "data": {"label": "x"}})
 
     @mark.req("REQ-GTB-007")
     def test_a_transform_node_keeps_its_toolbox_id(self):
@@ -125,9 +125,9 @@ class GraphRecordAcceptance(unittest.TestCase):
         """
         # Given: a transform node that names the toolbox ID t-demo
         store = new_store(self)
-        store.put("graph_nodes", "t1", node("t1", "transform", toolbox_id="t-demo"), WHO)
+        store.put("graph_nodes", "g/t1", node("g/t1", "transform", toolbox_id="t-demo"), WHO)
         # When: it is read back and rebuilt
-        read = store.get("graph_nodes", "t1")["doc"]
+        read = store.get("graph_nodes", "g/t1")["doc"]
         built = graph_tables.to_object(read)
         # Then: the node names t-demo
         self.assertEqual(read["data"]["toolbox_id"], "t-demo")
@@ -145,9 +145,9 @@ class GraphRecordAcceptance(unittest.TestCase):
         marker = os.path.join(folder, "ran")
         task, stop = {"command": "touch %s" % marker}, {"max_repetitions": 3, "max_seconds": 2.5}
         store = new_store(self)
-        store.put("graph_nodes", "m1", node("m1", "master", toolbox_id="t-lead", stop=stop, task=task), WHO)
+        store.put("graph_nodes", "g/m1", node("g/m1", "master", toolbox_id="t-lead", stop=stop, task=task), WHO)
         # When: it is read back and rebuilt
-        read = store.get("graph_nodes", "m1")["doc"]
+        read = store.get("graph_nodes", "g/m1")["doc"]
         built = graph_tables.to_object(read)
         # Then: the definition and the stopping criterion are equal to what was written
         self.assertEqual((read["data"]["task"], read["data"]["stop"]), (task, stop))
@@ -160,14 +160,14 @@ class GraphRecordAcceptance(unittest.TestCase):
     def test_the_class_is_rebuilt_from_the_type_id(self):
         """TC-GTB-009: each stored node is rebuilt as the class registered for its type ID, with equal values.
 
-        Example: stored d1 (data, value 7) and d2 (data) -> two objects of one class; t1 (transform) and m1 (master) -> two other classes.
+        Example: stored g/d1 (data, value 7) and g/d2 (data) -> two objects of one class; g/t1 (transform) and g/m1 (master) -> two other classes.
         """
         # Given: stored nodes of each registered type, two of type data (they must share their class)
         store = new_store(self)
-        records = [node("d1", "data", value=7, parameters={"k": 1}), node("d2", "data"), node("t1", "transform", toolbox_id="t-demo"),
-                   node("m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 2}, task={"goal": "x"})]
-        expected = {"d1": {"value": 7, "parameters": {"k": 1}}, "d2": {"value": None, "parameters": {}},   # an absent parameters is the empty object (contract)
-                    "t1": {"toolbox_id": "t-demo"}, "m1": {"toolbox_id": "t-lead", "stop": {"max_repetitions": 2}, "task": {"goal": "x"}}}
+        records = [node("g/d1", "data", value=7, parameters={"k": 1}), node("g/d2", "data"), node("g/t1", "transform", toolbox_id="t-demo"),
+                   node("g/m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 2}, task={"goal": "x"})]
+        expected = {"g/d1": {"value": 7, "parameters": {"k": 1}}, "g/d2": {"value": None, "parameters": {}},   # an absent parameters is the empty object (contract)
+                    "g/t1": {"toolbox_id": "t-demo"}, "g/m1": {"toolbox_id": "t-lead", "stop": {"max_repetitions": 2}, "task": {"goal": "x"}}}
         for record in records:
             store.put("graph_nodes", record["id"], record, WHO)
         # When: each is read and rebuilt
@@ -177,8 +177,8 @@ class GraphRecordAcceptance(unittest.TestCase):
             self.assertEqual(set(built), {"object"})
             objects[record["id"]] = built["object"]
         # Then: the class depends on the type ID alone
-        self.assertIs(type(objects["d1"]), type(objects["d2"]))
-        self.assertEqual(len({type(objects[i]) for i in ("d1", "t1", "m1")}), 3)
+        self.assertIs(type(objects["g/d1"]), type(objects["g/d2"]))
+        self.assertEqual(len({type(objects[i]) for i in ("g/d1", "g/t1", "g/m1")}), 3)
         # And: the values equal the stored ones
         for node_id, values in expected.items():
             self.assertEqual(objects[node_id].id, node_id)
@@ -189,23 +189,23 @@ class GraphRecordAcceptance(unittest.TestCase):
     def test_an_unknown_type_is_refused_when_written_and_when_read(self):
         """TC-GTB-010: a node with the type ID x.unknown is refused as a write and as a record already in storage, both naming x.unknown.
 
-        Example: {"id": "u1", "data": {"type": "x.unknown"}} -> write refused (unknown_type, x.unknown); read gives {"refused": unknown_type, x.unknown}.
+        Example: {"id": "g/u1", "data": {"type": "x.unknown"}} -> write refused (unknown_type, x.unknown); read gives {"refused": unknown_type, x.unknown}.
         """
         # Given: a good node already stored, and a node of the type x.unknown
         store = new_store(self)
-        store.put("graph_nodes", "ok", node("ok", "transform", toolbox_id="t"), WHO)
-        record = node("u1", "x.unknown")
+        store.put("graph_nodes", "g/ok", node("g/ok", "transform", toolbox_id="t"), WHO)
+        record = node("g/u1", "x.unknown")
         # When: it is written
-        rule = refusal(self, store, "graph_nodes", "u1", record)
+        rule = refusal(self, store, "graph_nodes", "g/u1", record)
         # Then: the write is refused and the message names x.unknown (no other record changed: refusal() compares the whole store)
         self.assertEqual(rule, ("unknown_type", "x.unknown"))
         # When: the same record is present in storage (put past the check, as a record written by an older or damaged writer) and is read
-        StorageMock.put(store, "graph_nodes", "u1", record, WHO)
-        built = graph_tables.to_object(store.get("graph_nodes", "u1")["doc"])
+        StorageMock.put(store, "graph_nodes", "g/u1", record, WHO)
+        built = graph_tables.to_object(store.get("graph_nodes", "g/u1")["doc"])
         # Then: the read is refused and the message names x.unknown
         self.assertEqual(built, {"refused": {"rule": "unknown_type", "detail": "x.unknown"}})
         # And: the other record is as before
-        self.assertEqual(store.get("graph_nodes", "ok")["version"], 1)
+        self.assertEqual(store.get("graph_nodes", "g/ok")["version"], 1)
 
     @mark.req("REQ-GTB-011")
     def test_a_field_that_breaks_its_schema_is_refused_naming_its_path(self):
@@ -215,11 +215,11 @@ class GraphRecordAcceptance(unittest.TestCase):
         """
         # Given: two stored nodes for the edge to join, and one broken record each (top-level fields: the path is the key as the validator names it)
         store = new_store(self)
-        store.put("graph_nodes", "n1", node("n1", "data"), WHO)
-        store.put("graph_nodes", "n2", node("n2", "data"), WHO)
-        cases = [("graph_nodes", node("t1", "transform"), "toolbox_id"),                # a required key is missing
-                 ("graph_nodes", node("t1", "transform", toolbox_id=5), "toolbox_id"),  # a value of the wrong kind
-                 ("graph_edges", {"id": "e1", "from": "n1", "to": "n2", "data": "x"}, "data")]   # the JSON field of an edge must be an object
+        store.put("graph_nodes", "g/n1", node("g/n1", "data"), WHO)
+        store.put("graph_nodes", "g/n2", node("g/n2", "data"), WHO)
+        cases = [("graph_nodes", node("g/t1", "transform"), "toolbox_id"),                # a required key is missing
+                 ("graph_nodes", node("g/t1", "transform", toolbox_id=5), "toolbox_id"),  # a value of the wrong kind
+                 ("graph_edges", {"id": "g/e1", "from": "g/n1", "to": "g/n2", "data": "x"}, "data")]   # the JSON field of an edge must be an object
         for table, record, path in cases:
             with self.subTest(record=record):
                 # When/Then: each write is refused as schema_break and names the path of the broken field
@@ -246,17 +246,17 @@ class GraphRecordAcceptance(unittest.TestCase):
     def test_an_edit_is_a_new_version(self):
         """TC-GTB-013: after an edit of a node, an edge and the whole graph, the new version exists and the one before is unchanged; all earlier versions can still be read.
 
-        Example: node n1 toolbox "t-old" -> "t-new": versions [1, 2], version 1 still names "t-old".
+        Example: node wf1/n1 toolbox "t-old" -> "t-new": versions [1, 2], version 1 still names "t-old".
         """
         # Given: a stored graph at version 1 (two nodes, an edge, the header)
         store = new_store(self)
-        n1, n2, e1 = node("n1", "transform", toolbox_id="t-old"), node("n2", "data"), edge("e1", "n1", "n2", label="a")
-        wf1 = header("wf1", [("n1", 1), ("n2", 1)], [("e1", 1)])
+        n1, n2, e1 = node("wf1/n1", "transform", toolbox_id="t-old"), node("wf1/n2", "data"), edge("wf1/e1", "wf1/n1", "wf1/n2", label="a")
+        wf1 = header("wf1", [("wf1/n1", 1), ("wf1/n2", 1)], [("wf1/e1", 1)])
         for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf1)):
             self.assertEqual(store.put(table, record["id"], record, WHO), {"version": 1})
         # When: one node is edited, then one edge, then the whole graph
-        n1b, e1b = node("n1", "transform", toolbox_id="t-new"), edge("e1", "n1", "n2", label="b")
-        wf1b = header("wf1", [("n1", 2), ("n2", 1)], [("e1", 2)], description="edited")
+        n1b, e1b = node("wf1/n1", "transform", toolbox_id="t-new"), edge("wf1/e1", "wf1/n1", "wf1/n2", label="b")
+        wf1b = header("wf1", [("wf1/n1", 2), ("wf1/n2", 1)], [("wf1/e1", 2)], description="edited")
         edits = [("graph_nodes", n1, n1b), ("graph_edges", e1, e1b), ("graphs", wf1, wf1b)]
         for table, before, after in edits:
             self.assertEqual(store.put(table, after["id"], after, WHO), {"version": 2})
@@ -277,18 +277,18 @@ class GraphRecordAcceptance(unittest.TestCase):
     def test_a_refused_edit_changes_nothing(self):
         """TC-GTB-017: an edit that breaks a check (unknown type, schema break, an ID that already exists) is refused; the latest version stays 1 with its content.
 
-        Example: node n1 edited to type x.unknown -> refused; version 1 of n1 is still the latest and no version 2 exists.
+        Example: node wf1/n1 edited to type x.unknown -> refused; version 1 of wf1/n1 is still the latest and no version 2 exists.
         """
         # Given: a stored graph at version 1, and one breaking edit each of a node, an edge and the whole graph
         store = new_store(self)
-        n1, n2, e1 = node("n1", "transform", toolbox_id="t"), node("n2", "data"), edge("e1", "n1", "n2", label="a")
-        wf1 = header("wf1", [("n1", 1), ("n2", 1)], [("e1", 1)])
+        n1, n2, e1 = node("wf1/n1", "transform", toolbox_id="t"), node("wf1/n2", "data"), edge("wf1/e1", "wf1/n1", "wf1/n2", label="a")
+        wf1 = header("wf1", [("wf1/n1", 1), ("wf1/n2", 1)], [("wf1/e1", 1)])
         stored = [("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf1)]
         for table, record in stored:
             store.put(table, record["id"], record, WHO)
-        edits = [("graph_nodes", "n1", node("n1", "x.unknown")),                                     # an unknown type
-                 ("graph_edges", "e1", {"id": "e1", "from": "n1", "to": "n2", "data": "x"}),         # a field that breaks its schema
-                 ("graphs", "wf1", header("wf1", [("n1", 1), ("n1", 1)], [("e1", 1)]))]              # an ID that is already a member of the graph
+        edits = [("graph_nodes", "wf1/n1", node("wf1/n1", "x.unknown")),                                     # an unknown type
+                 ("graph_edges", "wf1/e1", {"id": "wf1/e1", "from": "wf1/n1", "to": "wf1/n2", "data": "x"}),         # a field that breaks its schema
+                 ("graphs", "wf1", header("wf1", [("wf1/n1", 1), ("wf1/n1", 1)], [("wf1/e1", 1)]))]              # an ID that is already a member of the graph
         for table, record_id, record in edits:
             with self.subTest(table=table):
                 # When: the edit is made; Then: it is refused (refusal() also checks that no table changed)
@@ -305,35 +305,35 @@ class GraphRecordAcceptance(unittest.TestCase):
 
     @mark.req("REQ-GTB-017")
     def test_a_graph_version_pins_its_members(self):
-        """TC-GTB-018: header version 1 still reads node n1 at version 1 with its old content after n1 was edited; header version 2 reads n1 at version 2.
+        """TC-GTB-018: header version 1 still reads node wf1/n1 at version 1 with its old content after wf1/n1 was edited; header version 2 reads wf1/n1 at version 2.
 
-        Example: n1 toolbox "t-old" (version 1) -> "t-new" (version 2); header version 1 -> n1 at version 1 names "t-old".
+        Example: wf1/n1 toolbox "t-old" (version 1) -> "t-new" (version 2); header version 1 -> wf1/n1 at version 1 names "t-old".
         """
-        # Given: a header wf1 (kind workflow, context graph, empty testbench ID, description) naming n1, n2 and e1, each at version 1
+        # Given: a header wf1 (kind workflow, context graph, empty testbench ID, description) naming wf1/n1, wf1/n2 and wf1/e1, each at version 1
         store = new_store(self)
-        n1, n2, e1 = node("n1", "transform", toolbox_id="t-old"), node("n2", "data"), edge("e1", "n1", "n2")
-        wf_v1 = header("wf1", [("n1", 1), ("n2", 1)], [("e1", 1)])
+        n1, n2, e1 = node("wf1/n1", "transform", toolbox_id="t-old"), node("wf1/n2", "data"), edge("wf1/e1", "wf1/n1", "wf1/n2")
+        wf_v1 = header("wf1", [("wf1/n1", 1), ("wf1/n2", 1)], [("wf1/e1", 1)])
         for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1)):
             store.put(table, record["id"], record, WHO)
         # When: the header is stored and read back
         store.put("graphs", "wf1", wf_v1, WHO)
         # Then: the first read equals what was stored
         self.assertEqual(store.get("graphs", "wf1")["doc"], wf_v1)
-        # When: n1 is edited (version 2) and a second header version naming n1 at version 2 is stored
-        n1_v2 = node("n1", "transform", toolbox_id="t-new")
-        self.assertEqual(store.put("graph_nodes", "n1", n1_v2, WHO), {"version": 2})
-        wf_v2 = header("wf1", [("n1", 2), ("n2", 1)], [("e1", 1)])
+        # When: wf1/n1 is edited (version 2) and a second header version naming wf1/n1 at version 2 is stored
+        n1_v2 = node("wf1/n1", "transform", toolbox_id="t-new")
+        self.assertEqual(store.put("graph_nodes", "wf1/n1", n1_v2, WHO), {"version": 2})
+        wf_v2 = header("wf1", [("wf1/n1", 2), ("wf1/n2", 1)], [("wf1/e1", 1)])
         self.assertEqual(store.put("graphs", "wf1", wf_v2, WHO), {"version": 2})
 
         def members(version):
             """The nodes of a header version as the header pins them."""
             pinned = store.get("graphs", "wf1", version=version)["doc"]["data"]["nodes"]
             return {m["id"]: (m["version"], store.get("graph_nodes", m["id"], version=m["version"])["doc"]) for m in pinned}
-        # And: header version 1 still reads n1 at version 1 with its old content
-        self.assertEqual(members(1), {"n1": (1, n1), "n2": (1, n2)})
-        # And: header version 2 reads n1 at version 2; the other members are the same as in version 1
-        self.assertEqual(members(2), {"n1": (2, n1_v2), "n2": (1, n2)})
-        self.assertEqual(store.get("graphs", "wf1", version=2)["doc"]["data"]["edges"], [{"id": "e1", "version": 1}])
+        # And: header version 1 still reads wf1/n1 at version 1 with its old content
+        self.assertEqual(members(1), {"wf1/n1": (1, n1), "wf1/n2": (1, n2)})
+        # And: header version 2 reads wf1/n1 at version 2; the other members are the same as in version 1
+        self.assertEqual(members(2), {"wf1/n1": (2, n1_v2), "wf1/n2": (1, n2)})
+        self.assertEqual(store.get("graphs", "wf1", version=2)["doc"]["data"]["edges"], [{"id": "wf1/e1", "version": 1}])
 
     @mark.req("REQ-GTB-018")
     def test_a_skill_is_stored_as_a_versioned_record(self):
@@ -360,34 +360,34 @@ class GraphRecordAcceptance(unittest.TestCase):
 
     @mark.req("REQ-GTB-019")
     def test_a_header_with_a_missing_member_is_refused(self):
-        """TC-GTB-020: a header naming n1 at version 5 when n1 has versions 1 and 2 is refused naming n1; the same header naming version 2 is accepted.
+        """TC-GTB-020: a header naming wf1/n1 at version 5 when wf1/n1 has versions 1 and 2 is refused naming wf1/n1; the same header naming version 2 is accepted.
 
-        Example: n1 versions [1, 2]; member {"id": "n1", "version": 5} -> unknown_member "n1"; version 2 -> stored as header version 1.
+        Example: wf1/n1 versions [1, 2]; member {"id": "wf1/n1", "version": 5} -> unknown_member "wf1/n1"; version 2 -> stored as header version 1.
         """
-        # Given: node n1 stored with versions 1 and 2
+        # Given: node wf1/n1 stored with versions 1 and 2
         store = new_store(self)
-        store.put("graph_nodes", "n1", node("n1", "transform", toolbox_id="a"), WHO)
-        store.put("graph_nodes", "n1", node("n1", "transform", toolbox_id="b"), WHO)
-        # When: a header naming n1 at version 5 is stored; Then: it is refused and names n1
-        self.assertEqual(refusal(self, store, "graphs", "wf1", header("wf1", [("n1", 5)], [])), ("unknown_member", "n1"))
+        store.put("graph_nodes", "wf1/n1", node("wf1/n1", "transform", toolbox_id="a"), WHO)
+        store.put("graph_nodes", "wf1/n1", node("wf1/n1", "transform", toolbox_id="b"), WHO)
+        # When: a header naming wf1/n1 at version 5 is stored; Then: it is refused and names wf1/n1
+        self.assertEqual(refusal(self, store, "graphs", "wf1", header("wf1", [("wf1/n1", 5)], [])), ("unknown_member", "wf1/n1"))
         # When: the same header naming version 2 is stored; Then: it is accepted (the twin differs only in the broken rule)
-        self.assertEqual(store.put("graphs", "wf1", header("wf1", [("n1", 2)], []), WHO), {"version": 1})
+        self.assertEqual(store.put("graphs", "wf1", header("wf1", [("wf1/n1", 2)], []), WHO), {"version": 1})
 
     @mark.req("REQ-GTB-020")
     def test_an_edge_to_a_missing_node_is_refused(self):
-        """TC-GTB-021: an edge e1 from n1 to n9 with only n1 stored is refused naming n9; the same edge after n9 is stored is accepted.
+        """TC-GTB-021: an edge g/e1 from g/n1 to g/n9 with only g/n1 stored is refused naming g/n9; the same edge after g/n9 is stored is accepted.
 
-        Example: stored n1 -> e1 (n1 to n9) refused with unknown_endpoint "n9"; after n9 is stored e1 is stored as version 1.
+        Example: stored g/n1 -> g/e1 (g/n1 to g/n9) refused with unknown_endpoint "g/n9"; after g/n9 is stored g/e1 is stored as version 1.
         """
-        # Given: node n1 stored and the edge e1 from n1 to n9
+        # Given: node g/n1 stored and the edge g/e1 from g/n1 to g/n9
         store = new_store(self)
-        store.put("graph_nodes", "n1", node("n1", "data"), WHO)
-        record = edge("e1", "n1", "n9", label="x")
-        # When: the edge is stored; Then: it is refused and names n9
-        self.assertEqual(refusal(self, store, "graph_edges", "e1", record), ("unknown_endpoint", "n9"))
-        # When: n9 is stored and the same edge again; Then: it is accepted (the twin differs only in the broken rule)
-        store.put("graph_nodes", "n9", node("n9", "data"), WHO)
-        self.assertEqual(store.put("graph_edges", "e1", record, WHO), {"version": 1})
+        store.put("graph_nodes", "g/n1", node("g/n1", "data"), WHO)
+        record = edge("g/e1", "g/n1", "g/n9", label="x")
+        # When: the edge is stored; Then: it is refused and names g/n9
+        self.assertEqual(refusal(self, store, "graph_edges", "g/e1", record), ("unknown_endpoint", "g/n9"))
+        # When: g/n9 is stored and the same edge again; Then: it is accepted (the twin differs only in the broken rule)
+        store.put("graph_nodes", "g/n9", node("g/n9", "data"), WHO)
+        self.assertEqual(store.put("graph_edges", "g/e1", record, WHO), {"version": 1})
 
 
 class StorageStandInAcceptance(unittest.TestCase):
@@ -506,8 +506,8 @@ def generated_graph(seed):
             fields = {"toolbox_id": "t%d" % rnd.randint(0, 5), "stop": stop}
             if rnd.random() < 0.5:
                 fields["task"] = {"goal": "g%d" % i}
-        nodes.append(node("n%d" % i, kind, **fields))
-    edges = [edge("e%d" % i, rnd.choice(nodes)["id"], rnd.choice(nodes)["id"], **({"label": "l%d" % i} if rnd.random() < 0.5 else {}))
+        nodes.append(node("g%d/n%d" % (seed, i), kind, **fields))
+    edges = [edge("g%d/e%d" % (seed, i), rnd.choice(nodes)["id"], rnd.choice(nodes)["id"], **({"label": "l%d" % i} if rnd.random() < 0.5 else {}))
              for i in range(rnd.randint(0, 40))]
     members = header("g%d" % seed, [(n["id"], 1) for n in nodes], [(e["id"], 1) for e in edges])
     return nodes, edges, members

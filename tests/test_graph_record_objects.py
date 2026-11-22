@@ -11,7 +11,7 @@ import graph_tables  # noqa: E402
 
 
 def data_node(**fields):
-    return {"id": "d1", "data": dict({"type": "data"}, **fields)}
+    return {"id": "g/d1", "data": dict({"type": "data"}, **fields)}
 
 
 class ClassesFromTypeIds(unittest.TestCase):
@@ -56,7 +56,7 @@ class ClassesFromTypeIds(unittest.TestCase):
         without = graph_tables.to_object(data_node())["object"]
         # Then: equal objects, and the written record has no `value`
         self.assertEqual(with_null, without)
-        self.assertEqual(graph_tables.to_record(without), {"id": "d1", "data": {"type": "data", "parameters": {}}})
+        self.assertEqual(graph_tables.to_record(without), {"id": "g/d1", "data": {"type": "data", "parameters": {}}})
 
     def test_an_object_of_another_class_is_not_a_node(self):
         """to_record of something that is not one of the listed classes raises TypeError (a programming error, not a record to refuse).
@@ -70,15 +70,15 @@ class ClassesFromTypeIds(unittest.TestCase):
     def test_a_context_node_round_trips_with_its_category(self):
         """A context-graph node keeps its category and its other fields through object and record.
 
-        Example: {"id": "c1", "data": {"type": "entity", "name": "Ada", "born": 1815}} -> ContextNode("c1", "entity", {...}) -> the same record.
+        Example: {"id": "g/c1", "data": {"type": "entity", "name": "Ada", "born": 1815}} -> ContextNode("g/c1", "entity", {...}) -> the same record.
         """
         # Given: a category that lists entity, and a node of it with two fields
         categories = {"entity": {"type": "object"}}
-        record = {"id": "c1", "data": {"type": "entity", "name": "Ada", "born": 1815}}
+        record = {"id": "g/c1", "data": {"type": "entity", "name": "Ada", "born": 1815}}
         # When: it is rebuilt and written back
         obj = graph_tables.to_object(record, categories=categories)["object"]
         # Then: the category and fields are on the object and the record is the same
-        self.assertEqual((obj.id, obj.type, obj.fields), ("c1", "entity", {"name": "Ada", "born": 1815}))
+        self.assertEqual((obj.id, obj.type, obj.fields), ("g/c1", "entity", {"name": "Ada", "born": 1815}))
         self.assertEqual(graph_tables.to_record(obj), record)
 
 

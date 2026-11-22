@@ -2,7 +2,7 @@
 
 Usage: python3 -I tools/check_sysml_model.py <repository root>
 Checks bracket balance of every .sysml file, id parity between architecture.sysml and the
-high-level spec (FR, NFR, CON), satisfy/allocate coverage, allocation paths, existence of the code
+high-level spec (FR, NFR, CON; items of later goals may come from specs/mia/goals/*/top-level-spec.md), satisfy/allocate coverage, allocation paths, existence of the code
 files named in the model, and that baseline ids cited by the model and the spec exist in
 baseline-requirements.md. It does not parse SysML."""
 import re, sys, pathlib
@@ -46,6 +46,19 @@ if GEN_BEGIN in arch:
 hls = (spec / "high-level-spec.md").read_text()
 ids_model = set(re.findall(r"requirement def <'((?:FR|NFR|CON)-\d+)'>", arch))
 ids_hls = set(re.findall(r"- \*\*((?:FR|NFR)-\d+) ", hls)) | set(re.findall(r"- \*\*(CON-\d)\*\*", hls))
+# items of later iterations live in the approved top-level specs of their goals (G-V4 on); the system HLS stays the source for its own ids.
+# A model item that only a goal spec names counts as known; its doc must equal one of that goal's sentences (section 6).
+goal_text, goal_outcome = {}, set()   # goal_outcome: goal items with an `Outcome:` line, their acceptance criterion (section 7)
+for tls in sorted(spec.glob("goals/*/top-level-spec.md")):
+    last = None
+    for line in tls.read_text(encoding="utf-8").split("\n"):
+        m = re.match(r"^- ((?:N?FR)-\d+)(?: \([^)]*\))?: (.*)$", line)
+        last = m.group(1) if m and m.group(1) not in ids_hls else (last if line.startswith("  ") else None)
+        if m and last:
+            goal_text.setdefault(last, set()).add(re.sub(r"\s+", " ", m.group(2).replace("**", "").replace("`", "")).strip())
+        elif last and line.strip().startswith("- Outcome:"):
+            goal_outcome.add(last)
+ids_hls |= ids_model & set(goal_text)
 print("model ids:", len(ids_model), "HLS ids:", len(ids_hls))
 if ids_model != ids_hls:
     problems.append(f"id mismatch: model-only {sorted(ids_model - ids_hls)} HLS-only {sorted(ids_hls - ids_model)}")
@@ -144,7 +157,7 @@ for line in hls.split("\n"):
         hls_text[m.group(1)] = norm(m.group(2))
 for rid in sorted(i for i in defs if not i.startswith("IF-")):   # interface requirements have no HLS sentence; their text is in requirements.md
     m = re.search(r"requirement def <'%s'> \w+ \{\s*subject mia : MiaSystem;\s*doc /\*(.*?)\*/" % re.escape(rid), arch, re.S)
-    if m and norm(m.group(1)) != hls_text.get(rid):
+    if m and norm(m.group(1)) != hls_text.get(rid) and norm(m.group(1)) not in goal_text.get(rid, ()):
         problems.append(f"{rid}: the doc in architecture.sysml differs from the HLS sentence")
 
 # 7. every requirement is covered by at least one acceptance criterion of section 6 of the HLS
@@ -157,7 +170,7 @@ for line in hls.split("\n"):
         covered |= {x.strip() for x in m.group(2).split(",") if x.strip()}
 print("acceptance criteria:", ac_rows)
 for rid in sorted(ids_hls):
-    if rid not in covered:
+    if rid not in covered and rid not in goal_outcome:
         problems.append(f"{rid}: not covered by any acceptance criterion")
 for rid in sorted(covered - ids_hls):
     problems.append(f"acceptance criteria cite unknown requirement {rid}")

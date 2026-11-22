@@ -1,7 +1,8 @@
 """Generate the model block of the node requirements (task T-14) and put it at the end of specs/mia/architecture.sysml.
 
 Usage: python3 -I tools/gen_node_requirements_model.py <repository root>
-For every REQ-id of specs/mia/nodes/**/requirements.md: a `requirement def` with the requirement text as doc and its way of verification, a usage,
+For every REQ-id of specs/mia/nodes/**/requirements.md, and every approved REQ-id of specs/mia/goals/*/requirements.md (a goal keeps
+its new requirements there until its merge moves them into the node files; a node file wins over a goal file for the same id): a `requirement def` with the requirement text as doc and its way of verification, a usage,
 `satisfy` and `allocate` to the part of its subject, and a `dependency` to its parent. The block lies between two marker lines and is rewritten
 on every run; nothing in it is edited by hand (change the requirement files and run this again). The interface ids (IF-...) are already in the model."""
 import pathlib
@@ -28,11 +29,18 @@ def camel(title, rid):
 
 def read(root):
     out = []
-    for path in sorted((root / "specs/mia/nodes").rglob("requirements.md")):
+    nodes = sorted((root / "specs/mia/nodes").rglob("requirements.md"))
+    goals = sorted((root / "specs/mia/goals").glob("*/requirements.md"))
+    seen = set()
+    for path in nodes + goals:
         for block in re.split(r"\n(?=### )", path.read_text(encoding="utf-8"))[1:]:
             head = block.split("\n")[0]
             if not head.startswith("### REQ-"):
                 continue
+            rid = head[4:].split(" ")[0]
+            if path in goals and (rid in seen or not re.search(r"^- Status: Approved\s*$", block, re.M)):
+                continue
+            seen.add(rid)
             field = lambda k: (re.search(r"- %s: (.*)" % k, block) or [0, ""])[1].strip()
             methods = [HOW[m.strip().lower()] for m in field("Verification method").split(",") if m.strip().lower() in HOW] or ["test"]
             subject = re.search(r"Subject: (\w+)", block)

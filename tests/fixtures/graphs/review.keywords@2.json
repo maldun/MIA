@@ -1,0 +1,65 @@
+{
+ "context_graph_id": "ctx-review.keywords@2",
+ "description": "steps in the listed order",
+ "edges": [
+  {
+   "data": {
+    "as": "question"
+   },
+   "from": "input.question",
+   "id": "input.question>step.step",
+   "to": "step.step"
+  },
+  {
+   "data": {
+    "as": "output"
+   },
+   "from": "step.step",
+   "id": "step.step>var.answer",
+   "to": "var.answer"
+  },
+  {
+   "data": {
+    "as": "model"
+   },
+   "from": "descriptor.model",
+   "id": "descriptor.model>step.step",
+   "to": "step.step"
+  }
+ ],
+ "id": "review.keywords@2",
+ "nodes": [
+  {
+   "data": {
+    "toolbox_id": "view.review_keywords",
+    "type": "transform"
+   },
+   "id": "step.step"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "input.question"
+  },
+  {
+   "data": {
+    "type": "data"
+   },
+   "id": "var.answer"
+  },
+  {
+   "data": {
+    "type": "data",
+    "value": {
+     "model": "light",
+     "options": {
+      "temperature": 0
+     }
+    }
+   },
+   "id": "descriptor.model"
+  }
+ ],
+ "testbench_id": ""
+}

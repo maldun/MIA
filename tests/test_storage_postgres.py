@@ -94,7 +94,7 @@ class PostgresStorage(StorageBehaviour, unittest.TestCase):
         """
         # Given/When
         with self.assertRaises(StorageError) as caught:
-            self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}, "anna")
+            self.store.put("graph_nodes", "g/n1", {"id": "g/n1", "data": {"type": "data", "foo": 1}}, "anna")
         # Then
         self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "foo"))
         self.assertEqual(list(self.store.ids("graph_nodes")), [])

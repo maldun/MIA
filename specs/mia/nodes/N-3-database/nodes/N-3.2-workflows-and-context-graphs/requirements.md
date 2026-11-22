@@ -4,6 +4,8 @@
 
 The tables of workflows and context graphs and the graph rules that every write of such a record must pass (the second line of defence for TB-edit). Provides IF-301. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
+IDs of steps and connections (A-167, IF-301 v3): the IDs `n1`, `e1`, `c1`, ... named in the acceptance criteria below are local IDs. Since IF-301 v3 (REQ-GTB-029) a step or connection is stored under `<graph id>/<local id>`, so the tests write the scoped form (`wf1/n1`, `g/e1`, `h1/c1`); the rules and the expected results are unchanged.
+
 ## Requirements
 
 ### REQ-GTB-001 – Shared state held
@@ -396,3 +398,68 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-GTB-029
 - Status: Verified
 - History: G-V2.STORE Verify F-22, 2026-11-08, new (A-102, proposed)
+
+## Iteration 4 (goal G-V4.GRAPHSTORE.CORE, one stored truth for graphs; moved at the merge 2026-11-22, D-408)
+Requirements of the subgoal G-V4.GRAPHSTORE.CORE (goal record `specs/mia/goals/G-V4.GRAPHSTORE.CORE/`: plan, test requirements TR-CORE-001 to 009, verification report). Verified 2026-11-22, with the accepted deviations V-1, V-2, V-3 (D-414).
+
+## Groups of G-V4.GRAPHSTORE.CORE
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | SC | Steps belong to one graph: what a record ID says and what a step's history lists (FR-60) | REQ-GTB-029, REQ-GTB-030, REQ-GTB-031 |
+| 4 | RD | Reading, history and both places: versions, who and when, a version as it was saved, the same refusals on files and database (FR-57) | REQ-GTB-032 |
+
+### REQ-GTB-029 – Scoped ID of a step or connection
+- Level: low   Subject: Persistence
+- Group: SC
+- Text: If a step or connection record is written under a non-empty ID not of the form `<graph id>/<local id>`, then the Graph tables shall refuse the record and name the rule `unscoped_id`.
+- Rationale: refines FR-60 and HR-001; makes a step belong to exactly one graph by construction (D-368); amends the plain IDs of A-92 / REQ-GTB-021
+- Parent: FR-60
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-01 (accepted case AC-002): a step written under `chat` is refused naming `unscoped_id`, under `lookup/chat` it is accepted (exact)
+- Binding: fixed
+- Verified by: TC-GTB-033
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); text changed to 'a non-empty ID' (D-409), approved by the owner 2026-11-21; verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-GTB-030 – Header names only its own members
+- Level: low   Subject: Persistence
+- Group: SC
+- Text: If a graph header names a step or connection whose record ID begins with the ID of another graph, then the Graph tables shall refuse the header and name the rule `unscoped_id`.
+- Rationale: refines FR-60 and HR-001; a header of graph g must not pin a member of graph h
+- Parent: FR-60
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-02: a header `g` naming `h/step` is refused naming `unscoped_id`; naming `g/step` it is accepted (exact)
+- Binding: fixed
+- Verified by: TC-GTB-034
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-GTB-031 – The first slash separates
+- Level: low   Subject: Persistence
+- Group: SC
+- Text: The Graph tables shall take the text before the first slash of a record ID as the graph ID, and the rest as the local ID.
+- Rationale: refines HR-001 and ASM-1 of round 02; confirmed by the owner (D-402); example: `lookup/a/b` is the local ID `a/b` of the graph `lookup`, so a local ID can hold slashes and a graph ID cannot
+- Parent: FR-60
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-03: `lookup/a/b` is accepted as the local ID `a/b` of `lookup` and read back as `a/b` (exact)
+- Binding: fixed
+- Verified by: TC-GTB-035
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).
+
+### REQ-GTB-032 – Same refusals in both places
+- Level: low   Subject: Persistence
+- Group: RD
+- Text: The Graph tables shall refuse the same records with the same rule on the files backend and on the database backend.
+- Rationale: refines FR-57 and HR-003; MIA runs on a copy of files and a live database (FR-58)
+- Parent: FR-57
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-CORE-20: the cases of AC-CORE-01 to AC-CORE-02, AC-CORE-06, AC-CORE-21, AC-CORE-14 and AC-CORE-15 give the same refusal on both backends (exact)
+- Binding: fixed
+- Verified by: TC-GTB-036
+- Status: Verified
+- History: G-V4.GRAPHSTORE.CORE Plan step 1b, 2026-11-21, new (basis: prototype round 03); verified (G-V4.GRAPHSTORE.CORE verification report, verdict ticked by the owner 2026-11-22) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.CORE/requirements.md` at the merge (D-408).

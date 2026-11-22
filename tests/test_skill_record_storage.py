@@ -202,8 +202,8 @@ class SkillRecordOnRealStorage:
         # Given: a graph whose node D1 has a field that its type does not list, and the refusal the Storage layer itself gives for that node
         graph = chain_graph("wf-bad")
         graph["nodes"][0]["data"]["foo"] = 1
-        with self.assertRaises(StorageError) as expected:
-            self.storage.put("graph_nodes", "D1", graph["nodes"][0], AUTHOR)
+        with self.assertRaises(StorageError) as expected:                # the record form of D1: its ID scoped by the graph (REQ-GTB-029)
+            self.storage.put("graph_nodes", "wf-bad/D1", dict(graph["nodes"][0], id="wf-bad/D1"), AUTHOR)
         # When: the graph is saved on the real side
         result = self.model.save_graph(graph)
         # Then: a refused result (no exception) with the rule and detail of the refusal, and no header
@@ -232,17 +232,18 @@ class SkillRecordOnRealStorage:
     def test_a_header_naming_an_unknown_member_version_is_refused_with_the_storage_rule(self):
         """The header pins member versions; one that is not stored is refused by the Storage layer with `unknown_member`.
 
-        Example: a header naming node D1 at version 5 (only version 1 stored) raises code `invalid`, rule `unknown_member`, detail `D1`.
+        Example: a header naming node wf-a/D1 at version 5 (only version 1 stored) raises code `invalid`, rule `unknown_member`, detail `wf-a/D1`.
         """
-        # Given: a saved graph, so D1 is stored at version 1
+        # Given: a saved graph, so its step D1 is stored at version 1 under the scoped ID wf-a/D1 (REQ-GTB-029)
         self.model.save_graph(chain_graph("wf-a", context_graph_id="c", testbench_id="", description=""))
-        data = {"kind": "workflow", "nodes": [{"id": "D1", "version": 5}], "edges": [], "context_graph_id": "c", "testbench_id": "", "description": ""}
-        # When: a header names version 5 of D1
+        data = {"kind": "workflow", "nodes": [{"id": "wf-a/D1", "version": 5}], "edges": [], "context_graph_id": "c", "testbench_id": "", "description": ""}
+        # When: a new header version of wf-a names version 5 of wf-a/D1
         with self.assertRaises(StorageError) as refused:
-            self.storage.put("graphs", "wf-x", {"id": "wf-x", "data": data}, AUTHOR)
+            self.storage.put("graphs", "wf-a", {"id": "wf-a", "data": data}, AUTHOR)
         # Then: it is refused with the rule of the Storage layer, and nothing is stored
-        self.assertEqual((refused.exception.code, refused.exception.rule, refused.exception.detail), ("invalid", "unknown_member", "D1"))
+        self.assertEqual((refused.exception.code, refused.exception.rule, refused.exception.detail), ("invalid", "unknown_member", "wf-a/D1"))
         self.assertEqual(self.storage.ids("graphs"), ["wf-a"])
+        self.assertEqual([h["version"] for h in self.storage.history("graphs", "wf-a")], [1])
 
     @mark.req("REQ-WFM-044")
     def test_an_old_version_of_a_graph_reads_back_with_the_members_of_that_version(self):
@@ -339,7 +340,7 @@ class SkillRecordOnRealStorage:
             node = {"id": "M1", "data": {"type": "master", "toolbox_id": "m1", "stop": stop}}
             # When: the rule of the model and the record check judge the node
             by_model = check_graph(make_graph("wf-stop", [data_node("D1"), node, data_node("D2")], [make_edge("D1", "M1"), make_edge("M1", "D2")])) == []
-            by_storage = check_record("graph_nodes", node, record_id="M1") is None
+            by_storage = check_record("graph_nodes", dict(node, id="wf-stop/M1"), record_id="wf-stop/M1") is None     # the record form, scoped (REQ-GTB-029)
             if by_model != by_storage:
                 disagreements.append((stop, by_model, by_storage))
         # Then: they never disagree
@@ -359,7 +360,8 @@ class SkillRecordOnRealStorage:
                 # When: the model checks the graph and the record check judges the node
                 named = check_graph(make_graph("wf-big", [data_node("D1"), node, data_node("D2")], [make_edge("D1", "M1"), make_edge("M1", "D2")]))
                 # Then: no exception, both answer alike, and the answer is the expected one
-                self.assertEqual((named == [], check_record("graph_nodes", node, record_id="M1") is None), (accepted, accepted))
+                stored = dict(node, id="wf-big/M1")             # the record form: the step ID scoped by its graph (REQ-GTB-029)
+                self.assertEqual((named == [], check_record("graph_nodes", stored, record_id="wf-big/M1") is None), (accepted, accepted))
                 self.assertEqual(named, [] if accepted else ["M1"])
 
     @mark.req("REQ-WFM-048")

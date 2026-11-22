@@ -35,24 +35,24 @@ class NodeFieldsAcceptance(unittest.TestCase):
     def test_a_node_with_an_extra_field_is_refused_on_write_and_on_read(self):
         """TC-GTB-023: a node whose JSON field holds a field its type does not list is refused on write and on read as schema_break naming the field.
 
-        Example: {"id": "d1", "data": {"type": "data", "foo": 1}} -> write refused (schema_break, "foo"); read gives {"refused": schema_break, "foo"}, no exception.
+        Example: {"id": "g/d1", "data": {"type": "data", "foo": 1}} -> write refused (schema_break, "foo"); read gives {"refused": schema_break, "foo"}, no exception.
         """
-        # Given: one node per type with an extra field `foo`, and a data node with a key `id` inside its JSON field; each case gets its own store with one good node
-        cases = [(node("d1", "data", foo=1), "foo"),
-                 (node("t1", "transform", toolbox_id="t", foo=1), "foo"),
-                 (node("m1", "master", toolbox_id="t", stop=STOP, foo=1), "foo"),
-                 (node("d2", "data", id="x"), "id")]
+        # Given (IDs scoped since A-167, A-168): one node per type with an extra field `foo`, and a data node with a key `id` inside its JSON field; each case gets its own store with one good node
+        cases = [(node("g/d1", "data", foo=1), "foo"),
+                 (node("g/t1", "transform", toolbox_id="t", foo=1), "foo"),
+                 (node("g/m1", "master", toolbox_id="t", stop=STOP, foo=1), "foo"),
+                 (node("g/d2", "data", id="x"), "id")]
         for record, field in cases:
             with self.subTest(record=record):
                 store = GraphStoreStandIn()
-                store.put("graph_nodes", "ok", node("ok", "transform", toolbox_id="t"), "anna")
+                store.put("graph_nodes", "g/ok", node("g/ok", "transform", toolbox_id="t"), "anna")
                 # When: it is written
                 with self.assertRaises(StorageError) as caught:
                     store.put("graph_nodes", record["id"], record, "anna")
                 # Then: it is refused as schema_break naming the extra field
                 self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", field))
                 # And: nothing is stored under its ID
-                self.assertEqual(store.ids("graph_nodes"), ["ok"])
+                self.assertEqual(store.ids("graph_nodes"), ["g/ok"])
                 # When: the same record is already in storage (put past the check, as a record of an older or damaged writer) and is read
                 StorageMock.put(store, "graph_nodes", record["id"], record, "anna")
                 built = graph_tables.to_object(store.get("graph_nodes", record["id"])["doc"])
@@ -63,16 +63,16 @@ class NodeFieldsAcceptance(unittest.TestCase):
     def test_the_twins_without_the_extra_field_are_accepted(self):
         """TC-GTB-023 twin: the same three nodes without the extra field are accepted as version 1, and a context-graph node keeps the fields its category allows.
 
-        Example: {"id": "d1", "data": {"type": "data"}} -> version 1; a node of the category entity with a field foo and categories {"entity": {"type": "object"}} -> version 1.
+        Example: {"id": "g/d1", "data": {"type": "data"}} -> version 1; a node of the category entity with a field foo and categories {"entity": {"type": "object"}} -> version 1.
         """
-        # Given: an empty store
+        # Given (IDs scoped since A-167, A-168): an empty store
         store = GraphStoreStandIn()
         # When/Then: the twins differ from the refused nodes only in the broken rule, so each is accepted as version 1
-        for record in (node("d1", "data"), node("t1", "transform", toolbox_id="t"), node("m1", "master", toolbox_id="t", stop=STOP)):
+        for record in (node("g/d1", "data"), node("g/t1", "transform", toolbox_id="t"), node("g/m1", "master", toolbox_id="t", stop=STOP)):
             self.assertEqual(store.put("graph_nodes", record["id"], record, "anna"), {"version": 1})
         # And: the schema of a context-graph node comes from its categories, not from the fixed list, so its extra field is not refused here
         categories = {"entity": {"type": "object"}}
-        self.assertEqual(store.put("graph_nodes", "c1", node("c1", "entity", foo=1), "anna", categories=categories), {"version": 1})
+        self.assertEqual(store.put("graph_nodes", "g/c1", node("g/c1", "entity", foo=1), "anna", categories=categories), {"version": 1})
 
 
 if __name__ == "__main__":

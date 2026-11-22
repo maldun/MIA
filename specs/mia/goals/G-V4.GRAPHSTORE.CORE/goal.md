@@ -8,7 +8,7 @@ Proposed 2026-11-20 by the owner (maldun), D-392: G-V4.GRAPHSTORE is cut into th
 - Exit criterion: OC-1 to OC-3 (tests still to be written in Plan)
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
-- Line of work: goal/v4.graphstore.core
+- Line of work: goal/v4 (as the plan says; D-414)
 - Subgoals: –
 - Depends on: –; first of the group
 - Status: Agreed
@@ -54,9 +54,9 @@ Group spec FR-57, FR-60, NFR-16; `../G-V4.GRAPHSTORE/research.md`, `spikes.md` (
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
-| Plan | open | |
-| Implement | open | |
-| Verify | open | |
-| Commit | open | |
-| Deploy | open | |
+| Plan | done | approved by the owner 2026-11-21 (`plan.md`, review log); amended by A-168, A-169 |
+| Implement | done | T-01 to T-05 and T-01b, 2026-11-22; `implementation-log.md` (A-168, A-169) |
+| Verify | done | `verification-report.md`: verified with accepted deviations V-1, V-2, V-3 (D-414); verdict ticked by the owner 2026-11-22 |
+| Commit | done | no branch merge (line of work `goal/v4`, D-414); requirements, checks, scenarios and the smoke row moved into N-3.2 and N-2.3, model regenerated, witnesses of AC-001 to AC-003 filled; TR-CORE-001 to 009 installed by the owner (`tools/apply_merge_g_v4_core.sh`), 2026-11-22; trace check back to 549 errors, none about CORE |
+| Deploy | done | SMOKE-CORE-001 green on the owner's PostgreSQL server and a files store, 2026-11-22 (`deployment-record.md`); nothing installed into the running MIA (no user surface) |
 | Validate | open | the first test run, G-V5 (parked, D-386) |
