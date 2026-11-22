@@ -38,6 +38,7 @@ Group-spec items and work outside the table (they are no items of the product sp
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+| cut again (the draft requirements: 27 new, 2 changed, above the hint of 25) | keep together (agent, by delegation D-423; the owner confirms in the plan review) | six groups of 2 to 8; the six tasks of the high-level spec stay; a cut would put the shared move check and record copy behind a new interface | 2026-11-22 |
 | cut into "move" (FR-59, NFR-15) and "sync" (FR-93, AutoSync) | keep together (agent, by delegation D-423; the owner confirms in the plan review) | the sync reuses the move's integrity check and record copy; one interface (IF-102) and one module; expected 15 to 20 new requirements and six tasks | 2026-11-22 |
 
 ## Source

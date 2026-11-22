@@ -1,6 +1,6 @@
 # High-Level Specification: G-V4.GRAPHSTORE.TRANSFER – files and database interchangeable, move and sync
 
-**Status:** Draft (2026-11-22), written by the agent on its own recommendations (D-423); decisions by delegation D-460 (survey points) and D-463 (this spec); owner D-464 (A-186)
+**Status:** Approved (2026-11-22), written by the agent on its own recommendations (D-423); decisions by delegation D-460 (survey points) and D-463 (this spec); owner D-464 (A-186)
 **Top-level spec:** `../G-V4.GRAPHSTORE/top-level-spec.md` (items FR-58, FR-59, FR-93, NFR-15 and the move and sync part of NFR-16 are this subgoal's; NFR-8 and REQ-GA-008 of the product spec)   **Owner:** Stefan Reiterer   **Date:** 2026-11-22
 **Basis:** prototype rounds 02 (CP2, CP3, CP9) and 03 (CP13 to CP15) on `prototype/g-v4` (`graph_store_move.py`, `graph_store_sync.py`); the accepted cases AC-004 to AC-008, AC-027, AC-033 (`../G-V4/accepted-cases.md`); CORE and RULES as merged into `goal/v4` (`ceb7097a`); VIEW's IF-104 v2 store route (A-171) and IF-302 v15 side tables (A-172) on `goal/v4.view`; the read-only survey of 2026-11-22.
 
@@ -50,7 +50,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Text: The Storage layer shall move graphs between two stores only through one transfer function that checks every graph against the records it brings along before it writes anything, and writes a graph's members before its header.
 - Rationale: today the move checks records alone and writes headers before context steps (survey, `storage_copy.py:48`, `migrate.py:77`); AC-005.
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-002 – Same answers on both backends
 - Kind: rule
@@ -58,7 +58,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Text: Every storage operation on graphs shall give the same answer, versions, authors, times and refusals on the files backend and on the PostgreSQL backend.
 - Rationale: FR-58 and NFR-8; AC-004.
 - Depends on: DEP-1, DEP-2, DEP-3
-- Status: Draft
+- Status: Approved
 
 ### HR-003 – One-way sync, live wins, nothing lost
 - Kind: rule
@@ -66,7 +66,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Text: The sync shall bring the copy to the live store's history of every graph and shall write every version that exists only on the copy durably to the aside folder before removing it from the copy.
 - Rationale: FR-93; AC-006, AC-007.
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-004 – Measure: move without loss (OC-3)
 - Kind: measure
@@ -77,7 +77,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Rationale: OC-3.
 - Reference: Fedora host, Python 3.12, PostgreSQL 16 in a throw-away container.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-005 – Measure: the same answers (OC-1)
 - Kind: measure
@@ -88,7 +88,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Rationale: OC-1.
 - Reference: as HR-004.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-006 – Measure: lag and sync (OC-2)
 - Kind: measure
@@ -99,7 +99,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Rationale: OC-2.
 - Reference: as HR-004.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-007 – Measure: interrupted move or sync (OC-5)
 - Kind: measure
@@ -110,7 +110,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Rationale: OC-5 and NFR-16 (D-406 wording).
 - Reference: as HR-004.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-008 – Measure: portable sets (OC-4)
 - Kind: measure
@@ -121,7 +121,7 @@ The kinds `rule` and `measure` follow CORE's and RULES' approved high-level spec
 - Rationale: OC-4.
 - Reference: as HR-004.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ## 4. Split proposal
 ### Nodes (decomposition)
@@ -152,4 +152,4 @@ Expected cut into tasks (six, step 5): T-01 move integrity (the two defects, tes
 ## Approval
 Reviewed item by item with the owner (review log: `review-log.md`). The approval of the whole document is the owner's: tick the box (in Emacs `C-c C-c` on the line) or say so in the chat; the agent then sets the status to Approved and never before.
 
-- [ ] Approved by maldun (owner). Date:
+- [X] Approved by maldun (owner). Date:
