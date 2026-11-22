@@ -46,11 +46,13 @@ None; the fingerprint stays `cb0a21233175`.
 ## Carry-over (the developer decides)
 | Item (requirement, spec text, decision, code, scenario) | Where | Decision: adopt / adapt / drop / stand-in | Reason |
 |---|---|---|---|
-| The registry of kinds with the rule set per kind and the run flag (R3 update) | `graph_rules_proto.py` (`KINDS`, `RULES`, `check`, `refusal`) | adapt | Proposed by the agent, for the owner to confirm or change: replaces `check_graph` and `context_problems` of `graph_model.py` in N-3.2; the decisions Q-1 to Q-7 set its content |
-| The save path asks the one rule set; `SaveResult.rules` | `graph_model.py` (prototype change) | adapt | Proposed by the agent, for the owner to confirm or change: the CORE tests stay green; wording amendment of REQ-WFM-146/150 (finding 2) |
-| The mapping of the older rules and the generator comparison | `proto_checks/cp17_check.py` | adapt | Proposed by the agent, for the owner to confirm or change: becomes the scenario and test requirement that the eight rules refuse whatever the five refused |
-| The same list at every entry point; refusal before a run | `proto_checks/cp19_check.py` | adapt | Proposed by the agent, for the owner to confirm or change: becomes the acceptance test of OC-1 and OC-2 (with the runner of N-2.4.1, the check route against the IF-104 mock) |
-| The kind kept by the editor's working copy | `graph_proto_app.py` (`full_graph`) | adopt | Proposed by the agent, for the owner to confirm or change: a scenario for EDIT and the check route |
+| The registry of kinds with the rule set per kind and the run flag (R3 update) | `graph_rules_proto.py` (`KINDS`, `RULES`, `check`, `refusal`) | adapt | Confirmed by the owner 2026-11-22 as proposed: replaces `check_graph` and `context_problems` of `graph_model.py` in N-3.2; the decisions Q-1 to Q-7 set its content |
+| The save path asks the one rule set; `SaveResult.rules` | `graph_model.py` (prototype change) | adapt | Confirmed by the owner 2026-11-22 as proposed: the CORE tests stay green; wording amendment of REQ-WFM-146/150 (finding 2) |
+| The mapping of the older rules and the generator comparison | `proto_checks/cp17_check.py` | adapt | Confirmed by the owner 2026-11-22 as proposed: becomes the scenario and test requirement that the eight rules refuse whatever the five refused |
+| The same list at every entry point; refusal before a run | `proto_checks/cp19_check.py` | adapt | Confirmed by the owner 2026-11-22 as proposed: becomes the acceptance test of OC-1 and OC-2 (with the runner of N-2.4.1, the check route against the IF-104 mock) |
+| The kind kept by the editor's working copy | `graph_proto_app.py` (`full_graph`) | adopt | Confirmed by the owner 2026-11-22 as proposed: a scenario for EDIT and the check route |
+
+Decided by: Stefan Reiterer (owner), 2026-11-22, by answer in the session ("All as proposed")
 
 ## Prototype tests (run once here; the developer's carry-over decision above decides what happens)
 | Question (requirement or top-level item) | Command (repeatable) | Result (value, unit, uncertainty, hardware, date; pass / fail / not_run) |
