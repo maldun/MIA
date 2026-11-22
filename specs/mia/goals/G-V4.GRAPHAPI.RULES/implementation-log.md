@@ -114,3 +114,10 @@ None.
 
 ## Plan amendment A-170b (2026-11-22, D-428)
 TC-GTB-046, second graph: run with `{"d1": "x"}` (the owner's choice) because `d1` has no value and no writer and the run check rightly reports it as an unsupplied input (REQ-GTB-051, REQ-RUN-037). Staged in `specs/mia/amendments/A-170b/`; on a scratch install `test_rules_measures.py` is OK (TC-GTB-046 both graphs, TC-GTB-047, TC-RUN-040). Installed by the owner with `tools/apply_amendment_a170b.sh --do`.
+
+## T-04: Every entry point, and the smoke check (2026-11-22)
+- **Done:** no product change needed: after A-170b (D-428) TC-GTB-046 is green with T-02 and T-03 as committed; every RULES acceptance file is green.
+- **Tests green:** `test_rules_rule_set.py`, `test_rules_save.py`, `test_rules_run.py`, `test_rules_measures.py` (TC-GTB-046 both graphs, five repeats; TC-GTB-047 counts 57 newly refused: 42 `duplicate_connection`, 15 `single_writer`; TC-RUN-040), `contract/test_if_301_v4_rule_set.py` (mock and real), `test_core_save.py`, `test_graph_run.py`, `test_graph_run_stages.py`.
+- **Smoke:** `python tests/smoke/smoke_rules.py` on the branch: every skill's run check ready; `sample.broken` refused naming `e2`, no step run; SMOKE-RULES-001 pass (the owner's host run is Deploy).
+- **Regression:** unit suite `discover -s tests` OK (2548 tests, 5 skipped, 2 expected failures, 481 s); every acceptance script (Python and JS) green except the known reds `test_decide_guard.py`, `test_judge_calibration.py`. No RULES red left.
+- **Deviations:** none.
