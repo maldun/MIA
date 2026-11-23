@@ -8,10 +8,12 @@ while it does not answer, every graph route says store_unreachable and changes n
 create_app(backend, accounts_store, store, allowed_origins) is the same provider as a Flask app of its own, with the account routes and the guard: the
 entry point the contract suite and the page checks run on.
 """
+import json
+
 from flask import Blueprint, Flask, g, jsonify, request
 
 try:
-    from . import accounts, accounts_api, graph_model
+    from . import accounts, accounts_api, graph_model, graph_rule_set
     from .storage import Storage, StorageError
     from .toolbox import Toolbox, ToolboxError
     from .workflow_library import WorkflowLibrary
@@ -19,6 +21,7 @@ except ImportError:
     import accounts
     import accounts_api
     import graph_model
+    import graph_rule_set
     from storage import Storage, StorageError
     from toolbox import Toolbox, ToolboxError
     from workflow_library import WorkflowLibrary
@@ -99,6 +102,47 @@ def steps_of(graph, toolbox):
     return steps
 
 
+class Refused(Exception):
+    """a save the API refuses: the status, the error code and its fields of IF-104 v2; nothing is written"""
+
+    def __init__(self, status, code, **fields):
+        super().__init__(code)
+        self.status, self.code, self.fields = status, code, fields
+
+
+def _member(item):
+    return {"id": item["id"], "data": item.get("data") or {}}
+
+
+def _link(edge):
+    return {"from": edge["from"], "to": edge["to"], "data": edge.get("data") or {}}
+
+
+def content(graph):
+    """what a save compares: the description, the steps and the connections, in any order and with any order of keys (REQ-API-033)"""
+    return json.dumps({"description": graph.get("description"), "nodes": sorted((_member(n) for n in graph["nodes"]), key=lambda n: str(n["id"])),
+                       "edges": sorted(({**_link(e), "id": e["id"]} for e in graph["edges"]), key=lambda e: str(e["id"]))}, sort_keys=True)
+
+
+def derive(before, after):
+    """the entries that lead from one graph to the other, without `n` (REQ-API-037): connections removed, steps removed (each with the connections
+    that go with it), steps added, steps changed, then connections added and changed; the order of IF-104 v2's mock, so the record plays back"""
+    bn, an = {n["id"]: _member(n)["data"] for n in before["nodes"]}, {n["id"]: _member(n)["data"] for n in after["nodes"]}
+    be, ae = {e["id"]: _link(e) for e in before["edges"]}, {e["id"]: _link(e) for e in after["edges"]}
+    gone = [i for i in bn if i not in an]
+    entry = lambda op, target, old, new: {"op": op, "target": target, "before": old, "after": new, "reason": None}      # noqa: E731
+    out = [entry("remove_connection", i, e, None) for i, e in be.items() if i not in ae and e["from"] not in gone and e["to"] not in gone]
+    out += [{**entry("remove_step", i, bn[i], None), "connections": [{"id": k, **e} for k, e in be.items() if i in (e["from"], e["to"])]} for i in gone]
+    out += [entry("add_step", i, None, d) for i, d in an.items() if i not in bn]
+    out += [entry("change_step", i, bn[i], d) for i, d in an.items() if i in bn and bn[i] != d]
+    for i, e in ae.items():
+        if i not in be:
+            out.append(entry("add_connection", i, None, e))
+        elif be[i] != e:
+            out.append(entry("change_connection", i, be[i], e))
+    return out
+
+
 class GraphReader:
     """the read routes on the Storage layer of the backend (REQ-API-023 to 029, 043, 049)"""
 
@@ -138,6 +182,40 @@ class GraphReader:
             raise
         return {"positions": entry["doc"]["positions"], "version": entry["version"], "author": entry["author"], "time": entry["time"]}
 
+    def sent_graph(self, graph_id, body):
+        """the graph a request describes: the sent steps and connections under the stored header; `description` taken when sent (IF-104 v2 save body)"""
+        stored = self.read_graph(graph_id)
+        graph = body.get("graph") if isinstance(body, dict) else None
+        if not isinstance(graph, dict) or not isinstance(graph.get("nodes"), list) or not isinstance(graph.get("edges"), list):
+            raise Refused(422, "invalid", detail="graph")
+        header = {k: v for k, v in stored["graph"].items() if k not in ("nodes", "edges", "description")}
+        return stored, {**header, "description": graph.get("description", stored["graph"].get("description")), "nodes": graph["nodes"], "edges": graph["edges"]}
+
+
+class GraphWriter:
+    """the save route (REQ-API-032 to 037, 048): a new version authored by the account with its derived record of changes, or a refusal that writes nothing"""
+
+    def __init__(self, backend, reader):
+        self.storage, self.reader = Storage(backend), reader
+
+    def save(self, graph_id, body, author):
+        stored, graph = self.reader.sent_graph(graph_id, body)
+        current = stored["current"]
+        if body.get("expected_version") is not None and body["expected_version"] != current:
+            raise Refused(409, "conflict", current=current)
+        rules = graph_rule_set.rule_report(graph)       # first: a graph that breaks a rule may not even have steps that can be compared
+        if rules:
+            raise Refused(422, "rules_broken", rules=rules)
+        if content(graph) == content(stored["graph"]):
+            return {"version": current, "changed": False, "logged": None, "entries": 0}
+        result = graph_model.GraphModel(self.storage, author=author).save_graph(graph)
+        if not result.saved:
+            raise Refused(422, "refused", rule=result.rule, detail=result.detail)
+        entries = [{"n": n, **e} for n, e in enumerate(derive(stored["graph"], graph), 1)]
+        record = {"graph": graph_id, "version": result.version, "from_version": current, "kind": "derived", "entries": entries}
+        self.storage.put("graph_changes", "%s/%d" % (graph_id, result.version), record, author)
+        return {"version": result.version, "changed": True, "logged": True, "entries": len(entries)}
+
 
 def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
     """the v2 routes on `backend` (an IF-102 backend); `store` the configured name, `is_owner(account)`, `allowed_origins()` the origins of the page"""
@@ -169,10 +247,19 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
         return jsonify({"store": store, "reachable": up, "shown": "live", "live_reachable": up, "lag": {"graphs": 0, "since": None}})
 
     reader = GraphReader(backend)
+    writer = GraphWriter(backend, reader)
 
     @bp.errorhandler(NotFound)
     def unknown(err):
         return error(404, "not_found", **({"detail": err.detail} if err.detail else {}))
+
+    @bp.errorhandler(Refused)
+    def refused(err):
+        return error(err.status, err.code, **err.fields)
+
+    @bp.put("/graphs/<graph_id>", endpoint="save")
+    def save(graph_id):
+        return jsonify(writer.save(graph_id, request.get_json(silent=True), g.account))
 
     @bp.get("/graphs", endpoint="list_graphs")
     def list_graphs():
@@ -194,10 +281,10 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
         return jsonify(reader.read_arrangement(graph_id))
 
     def not_built():
-        return error(501, "not_built")              # the remaining routes come with T-03 to T-06 of G-V4.VIEW
+        return error(501, "not_built")              # the remaining routes come with T-05 and T-06 of G-V4.VIEW
 
     for rule, methods, name in (("/graphs/<graph_id>/changes", ["GET"], "changes"), ("/graphs/<graph_id>/check", ["POST"], "check"),
-                                ("/graphs/<graph_id>", ["PUT"], "save"), ("/graphs/<graph_id>/restore", ["POST"], "restore"),
+                                ("/graphs/<graph_id>/restore", ["POST"], "restore"),
                                 ("/graphs/<graph_id>/arrangement", ["PUT"], "save_arrangement")):
         bp.add_url_rule(rule, name, lambda graph_id=None: not_built(), methods=methods)
     return bp

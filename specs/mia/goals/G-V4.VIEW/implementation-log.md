@@ -7,6 +7,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-01 Record tables | done | see `git log` ("feat: T-01 record tables arrangements and graph_changes") | TC-IF-302-13, 14 (mock and real); `tests/test_record_tables_view.py` (6 unit tests) | `tests/test_record_tables.py`: the expected table set gets the two new tables (A-172) |
 | T-02 Store setting, provider, access, image | done | see `git log` ("feat: T-02 store setting, v2 provider, access and image") | TC-API-019, 024, TC-OPR-011; TC-IF-104-26 (mock, files, postgres); `tests/test_graph_api_v2.py` (7 unit tests) | TC-API-018, 020 and TC-IF-104-27 wait for T-03 (they need the list, read and versions routes) |
 | T-03 Read routes | done | see `git log` ("feat: T-03 read routes") | TC-IF-104-17, 18, 19, 26, 27 (mock, files, postgres); read parts of TC-IF-104-24, 25; TC-API-018, 020; `tests/test_graph_api_v2.py` (10 unit tests) | the write parts of TC-IF-104-24, 25 stop at 501 `not_built` (T-05) |
+| T-04 Save as a new version, refusals | done | see `git log` ("feat: T-04 save as a new version, refusals") | TC-IF-104-22 (mock, files, postgres); the save parts of TC-IF-104-20 and TC-API-021; `tests/test_graph_api_v2.py` (18 unit tests) | TC-IF-104-20 stops at the changes route (T-06), TC-API-021 at the restore (T-05) |
 
 ## T-01: Record tables
 
@@ -86,3 +87,30 @@ The contract cases TC-IF-104-17 to 19 got no defect run, as in T-01 (TR-VIEW-021
 **Open questions for Verify / the owner (behaviour only in the code, P25):**
 1. A step without stored data or type is given the kind `unknown`; REQ-API-027 names no value for that case. Proposal: keep, and name it at the merge.
 2. A version that is not a whole number (`?version=abc`) is 404 `not_found` with `detail: "version"`, the same as a version that is not stored (REQ-API-049 names only the second). Proposal: keep.
+
+## T-04: Save as a new version, refusals
+
+**What was done**
+- `graph_api_v2.py`: `PUT /graphs/<id>` (route 9) through `GraphWriter.save`, in this order: unknown graph 404 `not_found`; a body without a `graph` object or with `nodes`/`edges` not lists 422 `invalid`, detail `graph` (REQ-API-048); `expected_version` not the current one 409 `conflict` with `current` (REQ-API-034); the rule report of IF-301 v4 (`graph_rule_set.rule_report`) not empty 422 `rules_broken` with `rules` (REQ-API-035); equal in content to the current version (any order of steps, connections and keys) the current version with `changed: false`, `logged: null`, nothing written (REQ-API-033); else CORE's `GraphModel.save_graph` with the owner as author (REQ-API-032), whose record-check refusal is 422 `refused` with `rule` and `detail` (REQ-API-036); then the record of changes `graph_changes/<id>/<version>` of kind `derived`, from the current version, with the derived entries numbered from 1 (REQ-API-037).
+- The sent graph keeps the stored header (`id`, `kind`, `context_graph_id`, `testbench_id`); `description` is taken when sent (IF-104 v2 save body).
+- `derive(before, after)`: the entries in the order of the IF-104 v2 mock (connections removed, steps removed, steps added, steps changed, connections added and changed); a removed step carries the connections that go with it in `connections`, and those are not listed again as `remove_connection`.
+- Unit tests `tests/test_graph_api_v2.py` +8 (`Saving`), written first and seen red (7 failures, 1 error): a changed step with its derived record read from the store, an unchanged graph in another order, a new description only, the order of entries, a stale version, a cycle and a step that is a text, the extra field `colour`, malformed bodies and an unknown graph. Two findings on the way, each caught by these tests: the comparison depended on the order of keys (the test client sends sorted keys; now `json.dumps(sort_keys=True)`), and a step that is not an object broke the comparison before the rules ran (the rule report now comes first).
+
+**Tests green (my runs, feedback only):** IF-104 v2 suite TC-IF-104-22 on mock, files and postgres; TC-IF-104-20 passes its save answers and the author, then stops at `changes` (501, T-06); TC-API-021 passes its refused save on files and postgres, then stops at the restore (501, T-05). The derived record of TC-IF-104-20 is shown by the unit test reading `graph_changes` directly. `tests/test_graph_api_v2.py` 18/18.
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2578 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 186 pass; acceptance scripts all OK except the VIEW checks of later tasks (`test_view_backend.py` 5, the IF-104 v2 suite 10 on the real side, `test_graph_view_files.py` 2, `test_graph_view_browser.py` 7 errors, `graph_view_page.test.mjs` 14) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Plan deviation (as in T-02):** `plan.md` puts TC-IF-104-20 and TC-API-021 into T-04, but each needs a route of a later task: TC-IF-104-20 reads the record through the changes route (T-06), TC-API-021 restores (T-05). They turn green with those tasks.
+
+**Deliberate defect (TR-VIEW-021), run once, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| the record check skipped: a `schema_break` refusal of CORE's save written around the checks as raw records (with the test's own `append_raw_version`, since the Storage layer refuses the record a second time) | TC-API-021 | fails on files and postgres (200 instead of 422 `refused`) |
+
+A first try that only bypassed CORE's `_first_refusal` still ended refused, by the Storage layer's own check (`StorageError invalid`, a 500): the record check holds in two places.
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. A `remove_step` entry carries a field `connections` (the connections removed with the step) that IF-104 v2's entry fields do not list; the mock does the same, and the connections are not repeated as `remove_connection` entries. Proposal: name the field in IF-104 v2 at the merge (needed to play a record back).
+2. An `expected_version` that is not a number (`"4"`) is a 409 `conflict`, as in the mock; the contract lists no `invalid` for it. Proposal: keep.
+3. A graph equal in content to the current version that breaks a rule (a stored broken graph saved again) is `rules_broken`, not unchanged: the rules come first, as in the mock.

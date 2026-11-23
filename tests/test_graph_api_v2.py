@@ -110,14 +110,18 @@ class Provider(unittest.TestCase):
         self.assertEqual([(a.status_code, a.get_json()["error"]) for a in answers], [(401, "unauthenticated")] * 2)
 
 
+def sent(graph):
+    return {"description": graph["description"], "nodes": graph["nodes"], "edges": graph["edges"]}
+
+
 def small(graph_id):
     return {"id": graph_id, "context_graph_id": "ctx", "testbench_id": "tb", "description": "small",
             "nodes": [{"id": "var.in", "data": {"type": "data", "value": "x"}}, {"id": "step.a", "data": {"type": "transform", "toolbox_id": "tool.a"}}],
             "edges": [{"id": "e1", "from": "var.in", "to": "step.a", "data": {}}]}
 
 
-class Reading(unittest.TestCase):
-    """the read routes of T-03 beyond the contract cases: bad versions, unknown graphs, duplicate steps, context graphs"""
+class Stored(unittest.TestCase):
+    """g.one (var.in -> step.a) stored once by anna, and anna logged in on the provider"""
 
     def setUp(self):
         root = tempfile.mkdtemp()
@@ -128,6 +132,20 @@ class Reading(unittest.TestCase):
         graph_model.GraphModel(Storage(self.backend), author="anna").save_graph(small("g.one"))
         self.web = graph_api_v2.create_app(self.backend, self.accounts_store, "files", (ORIGIN,)).test_client()
         self.web.post("/api/login", json={"user": "anna", "password": "pw-anna-x"}, headers={"Origin": ORIGIN})
+
+    def save(self, payload, graph_id="g.one"):
+        answer = self.web.put("/api/v2/graphs/" + graph_id, json=payload, headers={"Origin": ORIGIN})
+        return answer.status_code, answer.get_json()
+
+    def stored_versions(self):
+        return len(Storage(self.backend).history("graphs", "g.one"))
+
+    def records(self):
+        return Storage(self.backend).ids("graph_changes")
+
+
+class Reading(Stored):
+    """the read routes of T-03 beyond the contract cases: bad versions, unknown graphs, duplicate steps, context graphs"""
 
     @mark.req("REQ-API-049")
     def test_a_version_that_is_not_stored_is_not_found(self):
@@ -169,6 +187,118 @@ class Reading(unittest.TestCase):
         steps = graph_api_v2.steps_of(graph, toolbox=None)
         # Then only the kind is given, unknown where none is stored
         self.assertEqual(steps, {"c.a": {"kind": "transform"}, "c.b": {"kind": "unknown"}})
+
+
+
+class Saving(Stored):
+    """the save route of T-04: a new version with its derived record, nothing written for an unchanged graph or a refusal"""
+
+    @mark.req("REQ-API-032", "REQ-API-037")
+    def test_a_changed_step_is_a_new_version_with_a_derived_record(self):
+        """Example: step.a tool.a -> tool.b at version 1 -> version 2 by anna; record g.one/2 derived from 1 with one change_step."""
+        # Given g.one at version 1, its step.a changed to tool.b
+        graph = small("g.one")
+        graph["nodes"][1]["data"]["toolbox_id"] = "tool.b"
+        # When anna saves it on version 1
+        status, answer = self.save({"graph": sent(graph), "expected_version": 1})
+        # Then version 2 is written by anna
+        self.assertEqual((status, answer), (200, {"version": 2, "changed": True, "logged": True, "entries": 1}))
+        self.assertEqual(Storage(self.backend).get("graphs", "g.one")["author"], "anna")
+        # And its record of changes is derived from version 1
+        record = Storage(self.backend).get("graph_changes", "g.one/2")
+        self.assertEqual((record["author"], record["version"]), ("anna", 1))
+        doc = record["doc"]
+        self.assertEqual((doc["graph"], doc["version"], doc["from_version"], doc["kind"]), ("g.one", 2, 1, "derived"))
+        self.assertEqual(doc["entries"], [{"n": 1, "op": "change_step", "target": "step.a", "before": {"type": "transform", "toolbox_id": "tool.a"},
+                                           "after": {"type": "transform", "toolbox_id": "tool.b"}, "reason": None}])
+
+    @mark.req("REQ-API-033")
+    def test_an_unchanged_graph_writes_nothing(self):
+        """Example: g.one sent as stored, its steps in another order -> version 1, changed false, logged null; no record."""
+        # Given g.one as stored, its steps sent in the other order
+        graph = small("g.one")
+        graph["nodes"].reverse()
+        # When anna saves it
+        status, answer = self.save({"graph": sent(graph)})
+        # Then nothing is written
+        self.assertEqual((status, answer), (200, {"version": 1, "changed": False, "logged": None, "entries": 0}))
+        self.assertEqual((self.stored_versions(), self.records()), (1, []))
+
+    @mark.req("REQ-API-032")
+    def test_a_new_description_is_a_version_without_entries(self):
+        """Example: only the description changed -> version 2, entries 0; the header keeps context_graph_id ctx."""
+        # Given g.one with a new description
+        graph = small("g.one")
+        graph["description"] = "another text"
+        # When anna saves it
+        status, answer = self.save({"graph": sent(graph)})
+        # Then it is version 2 with no entries, and the stored header is kept
+        self.assertEqual((status, answer), (200, {"version": 2, "changed": True, "logged": True, "entries": 0}))
+        stored = graph_model.GraphModel(Storage(self.backend)).read_graph("g.one")
+        self.assertEqual((stored["description"], stored["context_graph_id"], stored["testbench_id"]), ("another text", "ctx", "tb"))
+
+    @mark.req("REQ-API-037")
+    def test_entries_follow_the_order_of_the_record(self):
+        """Example: e1 rewired, var.in removed with its connection, var.new added -> remove_step, add_step, add_connection; no separate remove_connection."""
+        # Given g.one before, and after: var.in gone (and e1 with it), var.new added and connected by e2
+        before = small("g.one")
+        after = {**before, "nodes": [before["nodes"][1], {"id": "var.new", "data": {"type": "data"}}],
+                 "edges": [{"id": "e2", "from": "var.new", "to": "step.a", "data": {}}]}
+        # When the entries are derived
+        entries = graph_api_v2.derive(before, after)
+        # Then the step removal carries its connection, then the addition, then the new connection
+        self.assertEqual([(e["op"], e["target"]) for e in entries], [("remove_step", "var.in"), ("add_step", "var.new"), ("add_connection", "e2")])
+        self.assertEqual(entries[0]["connections"], [{"id": "e1", "from": "var.in", "to": "step.a", "data": {}}])
+
+    @mark.req("REQ-API-034")
+    def test_a_stale_version_is_a_conflict(self):
+        """Example: expected_version 7 at version 1 -> 409 conflict, current 1; nothing written."""
+        # Given a changed g.one
+        graph = small("g.one")
+        graph["nodes"][1]["data"]["toolbox_id"] = "tool.b"
+        # When it is saved with a version that is not the current one
+        status, answer = self.save({"graph": sent(graph), "expected_version": 7})
+        # Then it is a conflict naming the current version
+        self.assertEqual((status, answer), (409, {"error": "conflict", "current": 1}))
+        self.assertEqual(self.stored_versions(), 1)
+
+    @mark.req("REQ-API-035")
+    def test_a_broken_rule_is_refused_with_the_report(self):
+        """Example: a connection step.a -> var.in closes a cycle -> 422 rules_broken whose last item is cycle; a step that is no object too."""
+        # Given a graph with a cycle, and a graph whose step is a text
+        cyclic = small("g.one")
+        cyclic["edges"].append({"id": "e9", "from": "step.a", "to": "var.in", "data": {}})
+        odd = {"nodes": ["x"], "edges": []}
+        # When both are saved
+        answers = [self.save({"graph": g}) for g in (sent(cyclic), odd)]
+        # Then both are refused with the rule report, and nothing is written
+        self.assertEqual([(s, a["error"]) for s, a in answers], [(422, "rules_broken")] * 2)
+        self.assertEqual(answers[0][1]["rules"][-1]["rule"], "cycle")
+        self.assertEqual((self.stored_versions(), self.records()), (1, []))
+
+    @mark.req("REQ-API-036")
+    def test_a_record_check_refusal_names_rule_and_detail(self):
+        """Example: step.a with the extra field colour -> 422 refused, rule schema_break, detail colour; nothing written."""
+        # Given step.a with a field the record check does not know
+        graph = small("g.one")
+        graph["nodes"][1]["data"]["colour"] = "red"
+        # When it is saved
+        status, answer = self.save({"graph": sent(graph)})
+        # Then the record check refuses it
+        self.assertEqual((status, answer), (422, {"error": "refused", "rule": "schema_break", "detail": "colour"}))
+        self.assertEqual((self.stored_versions(), self.records()), (1, []))
+
+    @mark.req("REQ-API-048", "REQ-API-049")
+    def test_a_malformed_body_or_unknown_graph_is_refused(self):
+        """Example: nodes a text, no graph, a body that is a list -> 422 invalid detail graph; g.none -> 404 not_found."""
+        # Given three malformed bodies and an unknown graph
+        bodies = [{"graph": {"nodes": "x", "edges": []}}, {"nodes": [], "edges": []}, ["x"]]
+        # When each is saved
+        answers = [self.save(b) for b in bodies] + [self.save({"graph": sent(small("g.none"))}, "g.none")]
+        # Then the malformed ones name the graph and the unknown one is not found
+        self.assertEqual(answers, [(422, {"error": "invalid", "detail": "graph"})] * 3 + [(404, {"error": "not_found"})])
+        self.assertEqual(self.stored_versions(), 1)
+
 
 
 if __name__ == "__main__":
