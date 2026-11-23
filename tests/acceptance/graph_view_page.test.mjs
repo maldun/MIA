@@ -177,12 +177,12 @@ test('TC-GA-024 REQ-GA-026 REQ-GA-027: kinds differ by shape and word; marks onl
 });
 
 test('TC-GA-025 REQ-GA-028: a graph of another kind is drawn in one neutral shape with its type in words, no marks', async () => {
-  // Example: ctx.small -> boxes "concept", "source"; swarm.one -> boxes "agent", its untrusted step unmarked; the status bar names the kind.
-  // Given a context graph and a graph of kind swarm with an untrusted step
+  // Example: ctx.small -> boxes "concept", "data", "source" (c.note of type data a box, not an ellipse: A-175); swarm.one -> boxes "agent", its untrusted step unmarked; the status bar names the kind.
+  // Given a context graph (one step of the workflow type data) and a graph of kind swarm with an untrusted step
   const mock = await seededMock(['ctx.small', 'swarm.one']);
   const { root, viewer, drawing } = await pageWith({ mock });
   await viewer.start();
-  for (const [id, kind, types] of [['ctx.small', 'context', ['concept', 'source']], ['swarm.one', 'swarm', ['agent']]]) {
+  for (const [id, kind, types] of [['ctx.small', 'context', ['concept', 'data', 'source']], ['swarm.one', 'swarm', ['agent']]]) {
     // When each is opened
     await viewer.open(id);
     const { nodes } = drawing.last().data;

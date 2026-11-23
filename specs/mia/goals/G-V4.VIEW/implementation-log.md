@@ -344,3 +344,7 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 1. `onSelect(fn)` was added to the drawing of section 3 of the interface note (a click in the picture selects; REQ-GA-036 says "when the owner selects a step", and without it only the step list selects). The recording drawing of the node checks does not have it; the viewer calls it only where it exists. Proposal: name it in the interface note at the merge.
 2. After the first stabilisation the solver stays off until the owner switches the arrangement off and on again; dragging one step does not move the others. Proposal: keep (REQ-GA-031, 032).
 3. The layered reset runs left to right (`direction: 'LR'`). Proposal: keep.
+
+## A-175 installed (2026-11-23)
+
+The owner installed A-175 (`tools/apply_amendment_a175.sh --do`, D-454). After the install: `graph_view_page.test.mjs` 15/15; `test_graph_view_browser.py`, `test_view_backend.py`, `test_graph_view_files.py` OK (the browser checks seed `ctx.small` with its new step through CORE). The planned defect of TC-GA-025 (`isWorkflow` always true) run again: TC-GA-025 now **fails** on it, restored after. Finding F-1 closed.

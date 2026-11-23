@@ -399,6 +399,13 @@
        "type": "source",
        "text": "layout notes"
       }
+     },
+     {
+      "id": "c.note",
+      "data": {
+       "type": "data",
+       "text": "a step of another kind whose type is a workflow type (A-175)"
+      }
      }
     ],
     "edges": [
