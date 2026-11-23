@@ -99,6 +99,29 @@ class PostgresStorage(StorageBehaviour, unittest.TestCase):
         self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "foo"))
         self.assertEqual(list(self.store.ids("graph_nodes")), [])
 
+    @mark.req("REQ-SLY-038")
+    def test_a_record_cut_back_to_version_2_lists_versions_1_and_2(self):
+        """cut keeps the versions 1 to n unchanged, deletes the ones above, and touches no other record; cut to 0 leaves no record.
+
+        Example: sample.code at versions 1..4, cut to 2 -> versions [1, 2]; other.code keeps 1..3; other.code cut to 0 -> ids [sample.code].
+        """
+        # Given: two records with four and three versions
+        backend = self._previous
+        for record_id, n in (("sample.code", 4), ("other.code", 3)):
+            for version in range(1, n + 1):
+                backend.append("graphs", record_id, {"id": record_id, "version": version, "author": "ann",
+                                                     "time": "2026-11-23T10:00:0%dZ" % version, "doc": {"text": "v%d" % version}})
+        before = backend.versions("graphs", "sample.code")
+        # When: one is cut back to version 2
+        backend.cut("graphs", "sample.code", 2)
+        # Then: it lists versions 1 and 2 as they were; the other record is untouched
+        self.assertEqual(backend.versions("graphs", "sample.code"), before[:2])
+        self.assertEqual([e["version"] for e in backend.versions("graphs", "other.code")], [1, 2, 3])
+        # When: the other is cut back to version 0
+        backend.cut("graphs", "other.code", 0)
+        # Then: it is gone
+        self.assertEqual(backend.ids("graphs"), ["sample.code"])
+
 
 class SharedDatabase(unittest.TestCase):
     @classmethod

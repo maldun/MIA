@@ -653,8 +653,9 @@ package MIA_Architecture {
                    PostgreSQL backend, accounts, the copy between backends (library export and seed, migration). Partly: the old file stores are
                    not behind it yet (N-2 tasks, D-67, D-105).
                    G-V4.GRAPHSTORE.TRANSFER, in graph_store_transfer.py (REQ-SLY-016 to 039): built (T-01) the whole-store move checked per
-                   graph with members before headers; planned the lag, the one-way sync with the aside folder and the cut back, the one-graph
-                   move, the format marker, durable file writes. */
+                   graph with members before headers; built (T-02) durable file writes and, in both backends, the cut back of a record to a
+                   version and, in the file backend, put_file for a plain file below the root (backend operations beside IF-102, for the
+                   sync only); planned the lag, the one-way sync with the aside folder, the one-graph move, the format marker. */
             @Implementation { :>> status = ImplementationStatus::partly;
                               :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py",
                                              "graph_store_transfer.py"); }

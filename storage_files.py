@@ -2,7 +2,11 @@
 The file backend of the Storage layer (stage 0 of deploy/REQUIREMENTS_DB.md: the default, no database, no new dependency).
 
 One JSON file per record, <root>/<table>/<quoted id>.json, holding the list of its versions. The id is quoted so that an id with a slash or a dot
-cannot leave its folder. A file is replaced atomically (written to a temporary file, then renamed), as content_store.py does.
+cannot leave its folder. A file is replaced atomically and durably (REQ-SLY-023): written to a temporary file that is flushed to disk, renamed,
+then the folder is flushed, so after a power cut a record file is either the old one or the complete new one.
+
+Beyond IF-102, for the sync of G-V4.GRAPHSTORE.TRANSFER only: cut (a record cut back to a version, REQ-SLY-038) and put_file (a plain file below
+the root, e.g. the aside file of REQ-SLY-026).
 """
 import json
 import os
@@ -28,18 +32,42 @@ class FileBackend:
             return []
 
     def append(self, table, record_id, entry):
-        entries = self.versions(table, record_id) + [entry]
-        folder = self._folder(table)
+        self._replace(self._path(table, record_id), json.dumps(self.versions(table, record_id) + [entry], ensure_ascii=False))
+
+    def cut(self, table, record_id, version):
+        """Keeps the versions 1 to `version`; a record without versions above it is not written, one cut to 0 is gone."""
+        entries = self.versions(table, record_id)
+        if len(entries) <= version:
+            return
+        if version == 0:
+            self.remove(table, record_id)
+            return
+        self._replace(self._path(table, record_id), json.dumps(entries[:version], ensure_ascii=False))
+
+    def put_file(self, path, text):
+        """Writes text durably to `path`, relative to the root."""
+        self._replace(os.path.join(self.root, path), text)
+
+    @staticmethod
+    def _replace(path, text):
+        folder = os.path.dirname(path)
         os.makedirs(folder, exist_ok=True)
         fd, tmp = tempfile.mkstemp(dir=folder, suffix=".tmp")
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                json.dump(entries, handle, ensure_ascii=False)
-            os.replace(tmp, self._path(table, record_id))
+                handle.write(text)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(tmp, path)
         except BaseException:
             if os.path.exists(tmp):
                 os.remove(tmp)
             raise
+        folder_fd = os.open(folder, os.O_RDONLY)
+        try:
+            os.fsync(folder_fd)
+        finally:
+            os.close(folder_fd)
 
     def ids(self, table):
         try:

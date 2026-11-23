@@ -69,6 +69,10 @@ class PostgresBackend:
     def remove(self, table, record_id):
         self._query("DELETE FROM records WHERE tbl = %s AND id = %s RETURNING 1", (table, record_id))
 
+    def cut(self, table, record_id, version):
+        """Keeps the versions 1 to `version` in one statement (REQ-SLY-038; only the sync of a copy uses it, never through IF-102)."""
+        self._query("DELETE FROM records WHERE tbl = %s AND id = %s AND version > %s RETURNING 1", (table, record_id, version))
+
     def publish(self, event):
         self._query("SELECT pg_notify(%s, %s)", (CHANNEL, json.dumps(event)))
 

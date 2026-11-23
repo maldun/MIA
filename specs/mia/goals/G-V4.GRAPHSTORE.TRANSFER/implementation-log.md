@@ -5,6 +5,7 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | Task | Status | Commit | Tests green (reported) | Notes |
 |---|---|---|---|---|
 | T-01 Move integrity and order | done | see `git log` ("feat: T-01 move integrity and order") | TC-SLY-016 to 020, TC-SLY-009 (`tests/acceptance/test_transfer_move.py` 6 of 7); the move half of TC-SLY-021; `tests/test_graph_store_transfer.py` (9 unit tests); `tests/test_storage_copy.py`, `tests/test_migrate.py` kept | TC-SLY-021 stays red at its sync half (line 156, `sync_store` is still the stub) until T-03 |
+| T-02 Durable files, cut back, the same answers | done | see `git log` ("feat: T-02 durable files, cut back") | TC-SLY-023; TC-SLY-022 kept (`tests/acceptance/test_transfer_sync.py` class SameBehaviour 2 of 2); `tests/test_storage_files.py` (6 new unit tests); `tests/test_storage_postgres.py` 44 (1 new) | the format marker is left to T-05 (decision below) |
 
 ## T-01: Move integrity and order
 
@@ -30,6 +31,27 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **Traceability:** `trace_check.py --spec-dir specs/mia --tests-dir tests` gives the same 549 errors on this change as on a clean export of HEAD (legacy items, compared line by line); none new.
 
+## T-02: Durable files, cut back, the same answers
+
+**What was done**
+- `storage_files.py`: one private writer `_replace(path, text)` for every file the backend writes: temporary file in the target folder, flush and `os.fsync` of the file, `os.replace`, then `os.fsync` of the folder (REQ-SLY-023); a failure before the rename removes the temporary file and leaves the old one. `append` writes through it (same JSON text as before, so REQ-SLY-007's identical files hold). `cut(table, id, n)` keeps the versions 1 to n and rewrites the file through `_replace`; nothing is written when the record has no version above n; `n == 0` removes the record. `put_file(path, text)` writes a plain file at `path` relative to the root through `_replace`, making its folders.
+- `storage_postgres.py`: `cut(table, id, n)` is one `DELETE ... WHERE tbl, id AND version > n`.
+- `storage.py`, IF-102 and `graph_store_transfer.py` untouched (the sync calls `cut` and `put_file` in T-03).
+- `specs/mia/architecture.sysml`: the storageLayer doc says what T-02 built. `check_sysml_model.py` OK; `check_sysml.sh specs/mia/architecture.sysml` 0 errors, 0 warnings.
+- Unit tests written first and seen red (files 6 of 6, PostgreSQL cut 1 of 1 with `AttributeError: cut`): durable append (exactly fsync file, replace, fsync folder), a failed flush keeps the old file and leaves no temporary file, cut to 2 lists 1 and 2 (the demonstrator, on files and on the database), cut at or above the last version and on a missing record writes nothing, cut to 0 leaves no record, `put_file` below the root is durable.
+
+**Tests green (my runs, feedback only):** `tests/acceptance/test_transfer_sync.py` SameBehaviour 2/2 (TC-SLY-022 on a throw-away postgres:16, TC-SLY-023); `tests/test_storage_files.py` 6/6; `tests/test_storage_postgres.py` 44/44; `tests/test_storage.py` OK.
+
+**Regression set (2026-11-23, sequential, runner `/home/maldun/.claude-work/jobs/85fdeba4/tmp/regress02.sh`):** unit suite `discover -s tests` 2570 tests OK (skipped 5, expected failures 2). Acceptance scripts one by one, compared with a clean `git archive HEAD` export (`/home/maldun/.claude-work/jobs/85fdeba4/tmp/acc02_new.txt`, `acc02_base.txt`): the only difference is `test_transfer_sync.py` 8 failures + 1 skipped (was 9: TC-SLY-023 now green). `test_rules_rule_set.py` is red only in the export (it asks git). Unchanged reds: `test_decide_guard.py`, `test_judge_calibration.py` (known), `test_transfer_move.py` 1, `test_transfer_interrupt.py` 6, `test_transfer_sets.py` 6 (T-03 to T-05). No new red.
+
+**Deliberate-defect check (TR-TRANSFER-008),** runner `/home/maldun/.claude-work/jobs/85fdeba4/tmp/mutate_t02.py` (replaces `FileBackend._replace` in the test process by a rename without fsync, as before T-02; code on disk unchanged):
+
+| Defect | Check | Result |
+|---|---|---|
+| no flush (rename only) | TC-SLY-023 | fails |
+
+**Traceability:** `trace_check.py --spec-dir specs/mia --tests-dir tests` gives the same 549 ERROR lines as the HEAD export (compared line by line); none new.
+
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
@@ -45,9 +67,13 @@ None.
 | Decision | Where in code | Proposed requirement or amendment |
 |---|---|---|
 | The command line text of a refused move: `refused: <graph>: <rule> <detail> (nothing was written)`, all graphs on one line separated by `; ` | `migrate._explain` | none proposed: same form as the existing `refused:` line of REQ-SLY-007 (finding F1 of G-V1); Verify may ask for an item under REQ-SLY-039's command texts |
+| `cut(table, id, 0)` removes the record on both backends; a cut at or above the last version writes nothing | `FileBackend.cut`, `PostgresBackend.cut` | none: REQ-SLY-038 calls cut only with the shared version (≥ 1) and removes a copy-only graph with `remove`; the case is defined so both backends answer alike (REQ-SLY-022) |
+| `put_file` takes a path relative to the store's root | `FileBackend.put_file` | none: follows REQ-SLY-027 (aside paths relative to the copy); the only caller is the sync (T-03) with paths it builds itself |
 
 ## Decisions
 - T-01: `library-seed` does not run the per-graph check of the move; it keeps `copy_records`' checks and the write order (members first). REQ-SLY-009 asks for identical entries and the order, not for the graph check; a damaged library folder is refused by `copy_records` only where a record breaks put's rules.
+
+- T-02: the format marker (`mia-store.json`, `{"format": 1}`) is **not** written in T-02 but in T-05. The plan names REQ-SLY-032 under T-05 and REQ-SLY-023 asks only for the flush; TC-SLY-023 allows either. If the marker were written now, it would have no reading side: an older set or a newer one (REQ-SLY-034, 035) would not be told apart, and every files store and library export would change its tree one task early. T-05 adds both sides together, through `put_file`.
 
 ## Open questions for Phase 4
 - T-01: should `library-seed` also refuse a folder whose headers name missing members (the check of REQ-SLY-017)? Not asked by REQ-SLY-009; noted above.
