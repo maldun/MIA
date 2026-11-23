@@ -1,4 +1,5 @@
-"""Scores the owner's marks of spike C against the bar (right >= 68 %, invented <= 5 %, shares of all marked items).
+"""Scores the owner's marks of spike C against the bar (right >= 68 %, invented <= 5 %, shares of all marked items),
+and a sample of at least 120 against NFR-23 (at most 4 invented, at least 91 right).
 usage: python3 -I score_marks.py MARKS.json [OTHER.json]
 MARKS.json = file saved by forms/spike-c-marking.html ({"items": [...], "missing": [...]}).
 OTHER.json (optional, a list of {id, decision}, e.g. judge-claude.json) is compared with the marks: agreement and
@@ -41,6 +42,11 @@ def main(argv):
     ok_r, ok_i = s["right"] >= BAR_RIGHT, s["invented"] <= BAR_INVENTED
     print(f"bar: right >= {100 * BAR_RIGHT:.0f} % -> {'PASS' if ok_r else 'FAIL'}; "
           f"invented <= {100 * BAR_INVENTED:.0f} % -> {'PASS' if ok_i else 'FAIL'}")
+    if n >= 120:   # NFR-23 (D-384): per sample of at least 120, at most 4 invented and at least 91 right
+        print(f"NFR-23: {n} marked, {c['invented']} invented, {c['right']} right -> "
+              f"{'MET' if c['invented'] <= 4 and c['right'] >= 91 else 'NOT MET'}")
+    else:
+        print(f"NFR-23: not decided, {n} marked (at least 120 needed)")
     for doc in dict.fromkeys(m["doc"] for m in marked):
         dn, ds, dc = shares([m for m in marked if m["doc"] == doc])
         print(f"  {doc:36s} n={dn:2d} right {dc['right']:2d}  useless {dc['trivial']:2d}  wrong {dc['wrong']}  invented {dc['invented']}")

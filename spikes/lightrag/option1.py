@@ -8,13 +8,14 @@ writes OUTDIR/<doc>.json = {accepted: [...], refused: [{item, reason}], seconds,
 Rules (candidate requirement text for Plan, not applied to FR-42):
   a proposal is refused when a name it uses does not occur in the source document, or when its quote is not
   a verbatim passage of the document, or when a relation's quote does not contain both of its ends."""
-import json, re, sys, time, urllib.request
+import json, os, re, sys, time, urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from checks import entity_in_source, relation_in_source, norm
 
-HOST, MODEL, CTX = "http://127.0.0.1:11434", "gemma4:12b-it-qat", 8192
+HOST, CTX = "http://127.0.0.1:11434", 8192
+MODEL = os.environ.get("MIA_SPIKE_MODEL", "gemma4:12b-it-qat")  # the full model for NFR-23 sample B (nfr23-sample-plan.md)
 MAX_CHARS = 3000  # about 750 tokens of text, leaves room for prompt and answer in 8192
 
 SCHEMA = {"type": "object", "required": ["entities", "relations"], "properties": {
@@ -99,12 +100,14 @@ def build(doc_text: str, ask_fn=ask):
     return dict(accepted=accepted, refused=refused, chunks=len(chunks))
 
 
-def main(argv):
+def main(argv, build_fn=None):
+    build_fn = build_fn or build
     out = Path(argv[1])
     out.mkdir(parents=True, exist_ok=True)
     for f in map(Path, argv[2:]):
         t = time.time()
-        res = build(f.read_text())
+        res = build_fn(f.read_text())
+        res["model"] = MODEL
         res["seconds"] = round(time.time() - t, 1)
         (out / f"{f.stem}.json").write_text(json.dumps(res, indent=1))
         print(f.stem, res["chunks"], "chunks", len(res["accepted"]), "accepted", len(res["refused"]), "refused", res["seconds"], "s", flush=True)
