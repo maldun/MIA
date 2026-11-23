@@ -28,6 +28,7 @@ except ImportError:
     from workflow_library import WorkflowLibrary
 
 STORES = ("files", "database")
+EDITOR_OPS = ("add_step", "remove_step", "change_step", "add_connection", "remove_connection", "change_connection")      # `restore` is the restore route's
 WRITES = ("POST", "PUT", "PATCH", "DELETE")
 OPEN_ROUTES = ("graph_api_v2.me", "graph_api_v2.store")      # they answer while the store is down: `store` says so itself (REQ-API-021)
 
@@ -144,6 +145,41 @@ def derive(before, after):
     return out
 
 
+def apply_change(graph, change):
+    """the graph after one entry of the editor; ValueError when the entry does not fit the graph (REQ-API-038)"""
+    op, target = change["op"], change["target"]
+    nodes, edges = {n["id"]: n for n in graph["nodes"]}, {e["id"]: e for e in graph["edges"]}
+    if op == "add_step" and target not in nodes:
+        return {**graph, "nodes": graph["nodes"] + [{"id": target, "data": change["after"]}]}
+    if op == "remove_step" and target in nodes:
+        return {**graph, "nodes": [n for n in graph["nodes"] if n["id"] != target], "edges": [e for e in graph["edges"] if target not in (e["from"], e["to"])]}
+    if op == "change_step" and target in nodes:
+        return {**graph, "nodes": [{"id": n["id"], "data": change["after"]} if n["id"] == target else n for n in graph["nodes"]]}
+    if op == "add_connection" and target not in edges:
+        return {**graph, "edges": graph["edges"] + [{"id": target, **_link(change["after"])}]}
+    if op == "remove_connection" and target in edges:
+        return {**graph, "edges": [e for e in graph["edges"] if e["id"] != target]}
+    if op == "change_connection" and target in edges:
+        return {**graph, "edges": [{"id": target, **_link(change["after"])} if e["id"] == target else e for e in graph["edges"]]}
+    raise ValueError("%s %s does not fit" % (op, target))
+
+
+def editor_entries(current, graph, changes):
+    """the editor's entries as recorded, when playing them back on `current` gives `graph`; else `changes_do_not_match` (REQ-API-038, 051)"""
+    try:
+        if not isinstance(changes, list) or any(not isinstance(c, dict) or c.get("op") not in EDITOR_OPS for c in changes):
+            raise ValueError("not a list of entries")
+        played = current
+        for change in changes:
+            played = apply_change(played, change)
+    except (ValueError, KeyError, TypeError):
+        raise Refused(422, "changes_do_not_match") from None
+    if content({**played, "description": graph.get("description")}) != content(graph):
+        raise Refused(422, "changes_do_not_match")
+    trimmed = lambda r: r.strip() if isinstance(r, str) and r.strip() else None      # noqa: E731
+    return [{"op": c["op"], "target": c["target"], "before": c.get("before"), "after": c.get("after"), "reason": trimmed(c.get("reason"))} for c in changes]
+
+
 class GraphReader:
     """the read routes on the Storage layer of the backend (REQ-API-023 to 029, 043, 049)"""
 
@@ -183,6 +219,20 @@ class GraphReader:
             raise
         return {"positions": entry["doc"]["positions"], "version": entry["version"], "author": entry["author"], "time": entry["time"]}
 
+    def changes(self, graph_id):
+        """one item per version, oldest first: its record of changes, or `before_the_record` for a version kept without one (REQ-API-042)"""
+        items = []
+        for entry in self.versions(graph_id):
+            try:
+                doc = self.storage.get("graph_changes", "%s/%d" % (graph_id, entry["version"]))["doc"]
+                record = {"kind": doc["kind"], "from_version": doc["from_version"], "entries": doc["entries"]}
+            except StorageError as err:
+                if err.code != "not_found":
+                    raise
+                record = {"kind": "before_the_record", "entries": []}
+            items.append({"version": entry["version"], **record, "author": entry["author"], "time": entry["time"]})
+        return items
+
     def sent_graph(self, graph_id, body):
         """the graph a request describes: the sent steps and connections under the stored header; `description` taken when sent (IF-104 v2 save body)"""
         stored = self.read_graph(graph_id)
@@ -215,10 +265,15 @@ class GraphWriter:
         current = stored["current"]
         if body.get("expected_version") is not None and body["expected_version"] != current:
             raise Refused(409, "conflict", current=current)
-        kept = self._keep(graph_id, stored, graph, author, "derived", lambda: derive(stored["graph"], graph))
+        if body.get("changes") is None:
+            kind, entries_of = "derived", lambda: derive(stored["graph"], graph)
+        else:
+            kind, entries_of = "editor", lambda: editor_entries(stored["graph"], graph, body["changes"])
+        kept = self._keep(graph_id, stored, graph, author, kind, entries_of)
         if kept is None:
             return {"version": current, "changed": False, "logged": None, "entries": 0}
-        return {"version": kept[0], "changed": True, "logged": True, "entries": kept[1]}
+        version, entries, logged = kept
+        return {"version": version, "changed": True, "logged": logged, "entries": entries}
 
     def restore(self, graph_id, body, author):
         """the content of an earlier version as a new version with one `restore` entry; nothing is deleted (REQ-API-041)"""
@@ -233,20 +288,29 @@ class GraphWriter:
         return {"version": kept[0] if kept else stored["current"], "restored": version, "changed": kept is not None}
 
     def _keep(self, graph_id, stored, graph, author, kind, entries_of):
-        """`graph` as the version after `stored` with its record of changes (`entries_of()`); (new version, number of entries), or None when the content
-        is the same. The rules come first: a graph that breaks one may not even have steps that can be compared (REQ-API-033, 035, 036)."""
+        """`graph` as the version after `stored` with its record of changes (`entries_of()`, which may refuse); (new version, number of entries,
+        whether the record was written), or None when the content is the same. The rules come first: a graph that breaks one may not even have
+        steps that can be compared (REQ-API-033, 035, 036)."""
         rules = graph_rule_set.rule_report(graph)
         if rules:
             raise Refused(422, "rules_broken", rules=rules)
+        entries = [{"n": n, **e} for n, e in enumerate(entries_of(), 1)]
         if content(graph) == content(stored["graph"]):
             return None
         result = graph_model.GraphModel(self.storage, author=author).save_graph(graph)
         if not result.saved:
             raise Refused(422, "refused", rule=result.rule, detail=result.detail)
-        entries = [{"n": n, **e} for n, e in enumerate(entries_of(), 1)]
         record = {"graph": graph_id, "version": result.version, "from_version": stored["current"], "kind": kind, "entries": entries}
-        self.storage.put("graph_changes", "%s/%d" % (graph_id, result.version), record, author)
-        return result.version, len(entries)
+        return result.version, len(entries), self._log(graph_id, result.version, record, author)
+
+    def _log(self, graph_id, version, record, author):
+        """write the record of changes once (REQ-API-039): never over a record with its ID; a record that cannot be written leaves the version kept
+        and listed as made before the record (REQ-API-040)"""
+        try:
+            self.storage.put("graph_changes", "%s/%d" % (graph_id, version), record, author, expected_version=0)      # 0: only while no record has this ID
+            return True
+        except Exception:      # `conflict` (a record is there already), a lost connection or a failing disk: the version stays without this record
+            return False
 
     def save_arrangement(self, graph_id, body, author):
         """the places of the graph's steps, rounded, as the one arrangement record of the graph; places of unknown steps ignored (REQ-API-044)"""
@@ -339,10 +403,9 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
     def read_arrangement(graph_id):
         return jsonify(reader.read_arrangement(graph_id))
 
-    def not_built():
-        return error(501, "not_built")              # the changes route comes with T-06 of G-V4.VIEW
-
-    bp.add_url_rule("/graphs/<graph_id>/changes", "changes", lambda graph_id=None: not_built(), methods=["GET"])
+    @bp.get("/graphs/<graph_id>/changes", endpoint="changes")
+    def changes(graph_id):
+        return jsonify(reader.changes(graph_id))
     return bp
 
 

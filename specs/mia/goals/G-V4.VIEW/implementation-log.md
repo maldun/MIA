@@ -9,6 +9,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-03 Read routes | done | see `git log` ("feat: T-03 read routes") | TC-IF-104-17, 18, 19, 26, 27 (mock, files, postgres); read parts of TC-IF-104-24, 25; TC-API-018, 020; `tests/test_graph_api_v2.py` (10 unit tests) | the write parts of TC-IF-104-24, 25 stop at 501 `not_built` (T-05) |
 | T-04 Save as a new version, refusals | done | see `git log` ("feat: T-04 save as a new version, refusals") | TC-IF-104-22 (mock, files, postgres); the save parts of TC-IF-104-20 and TC-API-021; `tests/test_graph_api_v2.py` (18 unit tests) | TC-IF-104-20 stops at the changes route (T-06), TC-API-021 at the restore (T-05) |
 | T-05 Check, restore, arrangement save | done | see `git log` ("feat: T-05 check, restore, arrangement save") | TC-IF-104-23, 25 (mock, files, postgres); the restore part of TC-IF-104-24; TC-API-021 (T-04's), TC-API-025; `tests/test_graph_api_v2.py` (23 unit tests) | TC-IF-104-24 stops at the changes route (T-06) |
+| T-06 Record of changes | done | see `git log` ("feat: T-06 record of changes") | every Track A check: IF-104 v2 suite 33/33 (mock, files, postgres), `test_view_backend.py` 9/9 (TC-API-018 to 025, TC-OPR-011); `tests/test_graph_api_v2.py` (28 unit tests) | Track A complete |
 
 ## T-01: Record tables
 
@@ -137,3 +138,29 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 1. Each arrangement save replaces the whole arrangement (places not sent are dropped), as the mock does; REQ-API-044 says "the one arrangement record", not whether a save merges. Proposal: keep (the page always sends every place).
 2. Python's `round` rounds a half to the even number (10.5 gives 10, 11.5 gives 12), as the mock does; REQ-API-044 says "rounded to whole numbers". Proposal: keep, and name it in IF-104 v2 at the merge if it matters to EDIT.
 3. A restore body without a whole-number `version` (missing, `"1"`, `true`) is 404 `not_found` with `detail: "version"`; the contract lists no `invalid` for route 10. Proposal: keep.
+
+## T-06: Record of changes
+
+**What was done**
+- `graph_api_v2.py`: a save with `changes` (the editor's entries) plays them back on the current version (`apply_change`, the six editor operations; `restore` is the restore route's) and keeps them as kind `editor` only when the result equals the sent graph in content; otherwise, or when the list is not a list of entries with a known operation, 422 `changes_do_not_match` and nothing written (REQ-API-038, 051). A kept entry is `{n, op, target, before, after, reason}` with the reason trimmed (empty is null); other keys are dropped.
+- The record is written once (REQ-API-039): `Storage.put(..., expected_version=0)`, so it is written only while no record has its ID, in the same lock as the version check. When it cannot be written (a record already there, a lost connection, a failing disk), the version is kept and the save answers `logged: false` (REQ-API-040).
+- `GET /graphs/<id>/changes` (route 7, REQ-API-042): one item per version, oldest first, `{version, kind, from_version, author, time, entries}` from its record, or `before_the_record` (no `from_version`, `entries` empty) for a version without one; `author` and `time` are the version's.
+- Order of a save or restore (`_keep`): rules, then the entries (which may refuse), then unchanged content, then CORE's save, then the record.
+- No 501 route is left; `architecture.sysml`: `webApp.graphApiV2` status `built` (all eleven routes); model checks OK, SysML 0/0.
+- Unit tests `tests/test_graph_api_v2.py` +5 (`RecordOfChanges`), written first and seen red on the T-05 code (4 failures, 1 error): matching editor entries, five entry lists that do not give the graph, a record already there, a lost record with the changes route, the changes route after a save and a restore.
+
+**Tests green (my runs, feedback only):** every Track A check: the IF-104 v2 suite 33/33 (TC-IF-104-17 to 27 on mock, files and postgres), `test_view_backend.py` 9/9 (TC-API-018 to 025, TC-OPR-011, files and postgres where the case asks); `tests/test_graph_api_v2.py` 28/28.
+
+**Regression set (2026-11-23, sequential, while G-V4.GRAPHSTORE.TRANSFER ran its own unit suite on the same machine from 20:25):** unit suite 2588 tests, 2 failures, both not of T-06: (1) `test_checkout_untouched` named `specs/mia/handover-...md` and `review-log.md`, which I edited during the run (D-451); its re-run then named a stale `mia.log` (ignored, left in the checkout root by earlier manual runs); with that file moved to the scratchpad the check is OK. (2) `test_sandbox` `test_runs_in_parallel_do_not_collide` gave `None` for two of four podman runs, twice, both while TRANSFER's suite ran; run alone the four runs give 0, 2, 4, 6 (T-06 does not touch the sandbox). `node --test "tests/js/*.test.mjs"` 186 pass; acceptance scripts all OK, `test_view_backend.py` and the IF-104 v2 suite included, except the page checks of Track B (`test_graph_view_files.py` 2, `test_graph_view_browser.py` 7 errors, `graph_view_page.test.mjs` 14) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`; traceability check: warnings only (TR-PANEL credibility aspects, not of this goal).
+
+**Deliberate defects (TR-VIEW-021), run once each, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| the record written twice (`expected_version=0` dropped) | TC-API-022 | fails (2 record versions instead of 1) |
+| the save refused when the record write fails (only a `StorageError` gives `logged: false`, any other error is raised) | TC-API-023 | fails (500 instead of 200) |
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. When a record with the new version's ID is already there (TC-API-022), the save answers `logged: false`: this save did not write the record. REQ-API-039 and REQ-API-040 do not say what `logged` is then. Proposal: keep.
+2. Keys of an editor entry other than `op`, `target`, `before`, `after`, `reason` are dropped from the record (the mock does the same). Proposal: keep.
+3. The changes route gives `author` and `time` of the graph version, not of the record (the record has its own, written a moment later by the same account). Proposal: keep.

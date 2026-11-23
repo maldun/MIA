@@ -385,5 +385,95 @@ class CheckRestoreArrange(Stored):
 
 
 
+class RecordFails:
+    """the backend, except that a write to graph_changes raises, as a lost connection does"""
+
+    def __init__(self, backend):
+        self.backend = backend
+
+    def append(self, table, record_id, entry):
+        if table == "graph_changes":
+            raise OSError("down")
+        return self.backend.append(table, record_id, entry)
+
+    def __getattr__(self, name):
+        return getattr(self.backend, name)
+
+
+class RecordOfChanges(Stored):
+    """the record of changes of T-06: editor entries, written once, a lost record, the changes route"""
+
+    def changes(self):
+        return self.web.get("/api/v2/graphs/g.one/changes").get_json()
+
+    def with_note(self):
+        graph = small("g.one")
+        graph["nodes"].append({"id": "var.note", "data": {"type": "data", "value": 1}})
+        return graph
+
+    @mark.req("REQ-API-038")
+    def test_matching_editor_entries_are_kept_as_editor(self):
+        """Example: add_step var.note with reason " a note " -> version 2, record editor, entry n 1, reason trimmed, extra keys dropped."""
+        # Given g.one plus var.note, and the editor's entry for it
+        entry = {"op": "add_step", "target": "var.note", "before": None, "after": {"type": "data", "value": 1}, "reason": " a note ", "extra": 1}
+        # When anna saves with that entry
+        status, answer = self.save({"graph": sent(self.with_note()), "changes": [entry]})
+        # Then the entry is kept as the editor's
+        self.assertEqual((status, answer), (200, {"version": 2, "changed": True, "logged": True, "entries": 1}))
+        doc = Storage(self.backend).get("graph_changes", "g.one/2")["doc"]
+        self.assertEqual((doc["kind"], doc["entries"]), ("editor", [{"n": 1, "op": "add_step", "target": "var.note", "before": None,
+                                                                    "after": {"type": "data", "value": 1}, "reason": "a note"}]))
+
+    @mark.req("REQ-API-051")
+    def test_entries_that_do_not_give_the_graph_are_refused(self):
+        """Example: an entry with another value, a restore entry, an unknown step removed, a text instead of a list -> 422 changes_do_not_match."""
+        # Given g.one plus var.note and entry lists that do not give it
+        wrong = [[{"op": "add_step", "target": "var.note", "after": {"type": "data", "value": 2}}],
+                 [{"op": "restore", "target": 1}], [{"op": "remove_step", "target": "var.gone"}], "add var.note", [None]]
+        # When anna saves with each
+        answers = [self.save({"graph": sent(self.with_note()), "changes": c}) for c in wrong]
+        # Then each is refused and nothing is written
+        self.assertEqual(answers, [(422, {"error": "changes_do_not_match"})] * 5)
+        self.assertEqual((self.stored_versions(), self.records()), (1, []))
+
+    @mark.req("REQ-API-039")
+    def test_a_record_that_exists_is_not_written_again(self):
+        """Example: a record g.one/2 already there -> the save of version 2 keeps it, logged false."""
+        # Given a record g.one/2 written before the version (as after a move)
+        Storage(self.backend).put("graph_changes", "g.one/2", {"graph": "g.one", "version": 2, "from_version": 1, "kind": "editor", "entries": []}, "anna")
+        # When anna saves version 2
+        status, answer = self.save({"graph": sent(self.with_note())})
+        # Then the version is kept, the record not written again
+        self.assertEqual((status, answer), (200, {"version": 2, "changed": True, "logged": False, "entries": 1}))
+        self.assertEqual(len(Storage(self.backend).history("graph_changes", "g.one/2")), 1)
+
+    @mark.req("REQ-API-040", "REQ-API-042")
+    def test_a_lost_record_keeps_the_version(self):
+        """Example: graph_changes failing -> version 2 with logged false; the changes route lists 1 and 2 before_the_record."""
+        # Given the provider on a backend whose record writes fail
+        self.web = graph_api_v2.create_app(RecordFails(self.backend), self.accounts_store, "files", (ORIGIN,)).test_client()
+        self.web.post("/api/login", json={"user": "anna", "password": "pw-anna-x"}, headers={"Origin": ORIGIN})
+        # When anna saves a changed graph
+        status, answer = self.save({"graph": sent(self.with_note())})
+        # Then the version is kept without its record
+        self.assertEqual((status, answer), (200, {"version": 2, "changed": True, "logged": False, "entries": 1}))
+        self.assertEqual([(i["version"], i["kind"], i["entries"]) for i in self.changes()], [(1, "before_the_record", []), (2, "before_the_record", [])])
+
+    @mark.req("REQ-API-042")
+    def test_the_changes_route_lists_every_version(self):
+        """Example: a save and a restore -> before_the_record 1, derived 2 from 1, restore 3 from 2; authors and times of the versions."""
+        # Given g.one saved once more and then restored to version 1
+        self.save({"graph": sent(self.with_note())})
+        self.web.post("/api/v2/graphs/g.one/restore", json={"version": 1}, headers={"Origin": ORIGIN})
+        # When the changes are asked for
+        items = self.changes()
+        # Then each version has its item, oldest first, with the version's author and time
+        self.assertEqual([(i["version"], i["kind"], i.get("from_version")) for i in items], [(1, "before_the_record", None), (2, "derived", 1), (3, "restore", 2)])
+        times = [v["time"] for v in Storage(self.backend).history("graphs", "g.one")]
+        self.assertEqual([(i["author"], i["time"]) for i in items], [("anna", t) for t in times])
+        self.assertNotIn("from_version", items[0])
+        self.assertEqual(self.web.get("/api/v2/graphs/g.none/changes").status_code, 404)
+
+
 if __name__ == "__main__":
     unittest.main()

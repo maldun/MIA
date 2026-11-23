@@ -334,12 +334,12 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_api.py"); }
         }
         part graphApiV2 {
-            doc /* Target (G-V4.VIEW, REQ-API-018 to 051): IF-104 v2 under /api/v2 beside v1, a Flask blueprint in graph_api_v2.py (since T-02: guard, me, store;
+            doc /* Target (G-V4.VIEW, REQ-API-018 to 051): IF-104 v2 under /api/v2 beside v1, a Flask blueprint in graph_api_v2.py (all eleven routes since T-06;
                    entry create_app(backend, accounts_store, store, allowed_origins), REQ-API-030), adapted from the prototype's graph_proto_app.py (R5)
                    on CORE's GraphModel. Reads (list, graph, versions, arrangement, changes, store, me) for every session; check, save, restore and
                    arrangement writes for the owner only; the store (files or PostgreSQL) named by the store setting; a refused save names the
                    broken rule (IF-301 v4 of RULES); the record of changes derived, checked and written once. */
-            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_api_v2.py"); }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_api_v2.py"); }
         }
         part variantStore {
             doc /* Target: character variants as data (shown or hidden parts, colours), stored like presets; a workflow names one, the chat has the default. */
