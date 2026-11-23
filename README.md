@@ -108,6 +108,7 @@ MIA with Ollama, SearXNG, the graph page, an HTTPS front and PostgreSQL as conta
     - "chat_log_max_messages":10000, (optional: the oldest messages are dropped above this number)
     - "behaviours_file":"library/behaviours.json", "persona_file":"data/persona.json", "reputable_trust":0.6, (optional: the list of behaviours users can vote on, the shared persona text of the chat, and the trust from which a source makes an answer a fact)
     - "structured_memory":false, "memory_budget_tokens":400, (optional: records of facts, preferences and commitments from what users write, kept in the memory table and added to the system message when they match the question; needs the light model, so keep it off when the chat runs on the full model on a 16 GB card)
+    - "store":"files", (optional: where the Graph app reads and keeps graphs through IF-104 v2: "files" (default) is the data folder of the accounts (`accounts_dir`), "database" is PostgreSQL at `MIA_DATABASE_URL` (needs `requirements-db.txt`; the image has it); any other value stops the start)
     - "chat_queue":1, (optional: how many messages may wait while MIA is answering; more are refused with a hint)
     - "chat_rate_per_minute":10, (optional: messages per minute and connection, 0 = no limit)
     - "chat_token":"a secret", (optional: token for deleting the conversation over the API; default is the editor token)
