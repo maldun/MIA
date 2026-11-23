@@ -1,6 +1,6 @@
 # High-Level Specification: G-V4.GRAPHAPI.RUN – one loaded graph for the order, the rules and the run
 
-**Status:** Draft (2026-11-23), for the owner's approval together with the goal update (D-473, D-474); decisions D-475
+**Status:** Reviewed by group 2026-11-23 (D-476: parts and key decisions, dependencies, HR-001 to HR-007 accepted); the approval of the whole document with the goal update (D-473, D-474) is the owner's box below; decisions D-475, D-476
 **Top-level spec:** `../G-V4.GRAPHAPI/top-level-spec.md` (items FR-65 and, for the six skills with equivalence suites, NFR-17 are this subgoal's; FR-37 of the product spec)   **Owner:** Stefan Reiterer   **Date:** 2026-11-23
 **Basis:** the read-only survey of the run path (2026-11-23, in D-473), the networkx spike of the group (`../G-V4.GRAPHAPI/spikes.md`), RULES as merged (IF-301 v4, `graph_rule_set.py`), CORE as verified (the stored form, `GraphModel.read_graph`), the equivalence work of G-V2 (REQ-WFM-057 to 060, 069, 110 to 115; A-122, D-244; `eval-spec.md`).
 
@@ -45,7 +45,7 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Text: The order of steps, the rule set and the Pipeline runner shall read a graph only through one loaded graph that the loader of N-3.2 builds from the stored form.
 - Rationale: OC-1 "built in one place"; today about seven places build their own view (D-473).
 - Depends on: DEP-2
-- Status: Draft
+- Status: Approved
 
 ### HR-002 – One step after the other in a fixed order
 - Kind: rule
@@ -53,7 +53,7 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Text: The Pipeline runner shall run the steps of a loaded graph one at a time, each after every step it reads from, in the order that breaks ties by the position of the step in the stored graph.
 - Rationale: FR-65 and its outcome (no two steps at the same time, the same order for the same graph and inputs); the tie rule keeps today's order (D-475 (2)).
 - Depends on: DEP-2
-- Status: Draft
+- Status: Approved
 
 ### HR-003 – Everything the run needs is on the loaded graph
 - Kind: rule
@@ -61,7 +61,7 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Text: The loaded graph shall carry every field of the stored steps and connections, including type, tool, stop limit, settings values, role and name, unchanged.
 - Rationale: OC-3; the run needs them for loop-controlling steps, session settings and a step that reads several data steps; the converted graphs of research and verify_computable have master steps and three skills have settings connections (survey, D-473).
 - Depends on: DEP-2
-- Status: Draft
+- Status: Approved
 
 ### HR-004 – A skill runs from its stored graph
 - Kind: rule
@@ -69,7 +69,7 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Text: When a skill with a stored graph runs, the Pipeline runner shall run the loaded stored graph of that skill and name its graph ID and version in the run record.
 - Rationale: OC-1, OC-4; the path from storage to a run is RUN's (D-473 (1)); the record serves MIGRATION's OC-3 and CODE's FR-67 (D-475 (3)).
 - Depends on: DEP-1
-- Status: Draft
+- Status: Approved
 
 ### HR-005 – The loader is part of IF-301
 - Kind: technology
@@ -77,7 +77,7 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Text: The loader shall be offered by N-3.2 as an operation of IF-301 v5, beside the unchanged operations of IF-301 v4, with a contract suite and a mock.
 - Rationale: the rule set is N-3.2's and its consumers test against IF-301; IF-301 is frozen at G-V4, so v5 is a joint amendment (A-187) agreed by its consumers (D-475 (1)).
 - Depends on: DEP-2
-- Status: Draft
+- Status: Approved
 
 ### HR-006 – Measure: the same results as before (OC-2)
 - Kind: measure
@@ -88,7 +88,7 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Rationale: OC-2 "every result is the same as before"; the oracle is recorded before today's code is changed.
 - Reference: Fedora host, Python 3.12, networkx 3.7.
 - Detail in: the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ### HR-007 – Measure: the six skills give the same results from their stored graph (OC-4)
 - Kind: measure
@@ -99,7 +99,7 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Rationale: NFR-17 for the six (D-473 (3)); the same rule as G-V2, now on the stored path.
 - Reference: the owner's host, MP-light with its digest, Ollama as pinned in `eval-spec.md`.
 - Detail in: `eval-spec.md` and the test requirements of this subgoal.
-- Status: Draft
+- Status: Approved
 
 ## 4. Split proposal
 ### Nodes (decomposition)
@@ -127,7 +127,7 @@ Decided by the owner in the HLS questionnaire of 2026-11-23 (D-475): the loader 
 | networkx's own order differs from today's Kahn order | a converted skill could run its steps in another order | `lexicographical_topological_sort` keyed by the stored position; HR-006 compares the order on 15 + 500 graphs against the oracle recorded before the change |
 | extract.rules has no baseline run file | HR-007 cannot be decided for it | a baseline run on the old runner first (a real model run, logged), before the stored-graph run |
 | The equivalence runs need the shared GPU for some hours | other sessions' model work | announced to the running sessions first (CLAUDE.md) |
-| The six skills must be stored before they can run from their stored graph, and storing them is MIGRATION's | RUN's OC-4 would wait for MIGRATION | **open for step 1b:** RUN's checks store the six skills themselves through CORE's save path into a throw-away store (a check fixture, not the import); MIGRATION does the real import |
+| The six skills must be stored before they can run from their stored graph, and storing them is MIGRATION's | RUN's OC-4 would wait for MIGRATION | **decided (D-476):** RUN's checks and equivalence runs store the six converted graphs through CORE's save path into a throw-away store (a check fixture, not the import) and run from there; MIGRATION does the real import |
 | Protected run tests may pin internals that move (tie order, `find_cycle`) | an amendment of a protected test | checked in step 1b; amendment if needed |
 
 ## Approval
