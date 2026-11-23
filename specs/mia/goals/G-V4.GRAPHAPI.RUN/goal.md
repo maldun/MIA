@@ -55,6 +55,7 @@ Group spec FR-65, NFR-17; `../G-V4.GRAPHAPI/spikes.md` (networkx spike); D-375; 
 | N-2.4.1 Pipeline runner (graph run, converter) | real | the loader, the order, the run |
 | N-3.1 Storage layer (files and PostgreSQL backends, copy) | stand-in | a fake storage serves stored graphs |
 | N-4.1 Evaluation (suites, harness) | real | the suites of the converted skills |
+| N-2.4.3 Run log | real | the run record gets the fields `graph` and `graph_version` (REQ-RUN-044; additive, no interface fixes the record's fields; Plan step 2, 2026-11-24) |
 | local model server with the pinned models (Ollama) | real | the pinned model for the equivalence runs; scripted replies in unit tests |
 | N-2.4.2 Tools and sandbox | stand-in | scripted tools |
 
@@ -68,7 +69,7 @@ Group spec FR-65, NFR-17; `../G-V4.GRAPHAPI/spikes.md` (networkx spike); D-375; 
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
-| Plan | open | started 2026-11-23: step 0 (goal update, D-473, D-474) and step 1a (`high-level-spec.md`, D-475) drafted, for the owner's approval together |
+| Plan | open | step 0 (goal update, D-473, D-474) and step 1a (`high-level-spec.md`, D-475, D-476) reviewed, the owner's boxes open; step 1b (`requirements.md`, 2026-11-24) and step 2 (A-187 text staged, `architecture.sysml`) drafted by the agent, for review group by group |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |

@@ -410,7 +410,9 @@ package MIA_Architecture {
             doc /* Executes pipeline graphs of seven node kinds, enforces budgets, emits events, retries locally;
                    core.py loads a skill, takes its pipeline from the library and runs it;
                    run_workflow.py runs a workflow of the library (IF-202) and gives the harness its access (IF-105),
-                   tools/sync_workflows.py writes one library workflow per skill (D-112). */
+                   tools/sync_workflows.py writes one library workflow per skill (D-112).
+                   G-V4.GRAPHAPI.RUN (planned): graph_run.py reads the loaded graph of IF-301 v5 and runs one step at a time; a skill whose
+                   graph is stored runs from its newest version, and the run record names graph and version (REQ-RUN-040 to 045). */
             @Implementation {
                 :>> status = ImplementationStatus::built;
                 :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py", "run_workflow.py", "tools/sync_workflows.py", "graph_run.py");
@@ -425,7 +427,9 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("plans.py"); }
         }
         part workflowGraph {
-            doc /* Target: workflows and agent sessions stored as process graphs and generated into runner configuration. */
+            doc /* Target: workflows and agent sessions stored as process graphs and generated into runner configuration.
+                   G-V4.GRAPHAPI.RUN (planned): the order of steps on the loaded graph of IF-301 v5, ties by the position of the step in the
+                   stored graph (REQ-WFM-166, 167). */
             @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("context_graph.py", "graph_model.py"); }
         }
         part scheduler {
@@ -662,7 +666,9 @@ package MIA_Architecture {
             doc /* Target (iteration 2, FR-40, overlaps TD-21): workflow and context graphs as node and edge records (ID plus JSON
                    with a fixed type) in PostgreSQL through the storage layer; data classes rebuilt from a type ID, types as JSON
                    schemas, versions never deleted. Today a graph is one versioned document (graph_tables.py).
-                   G-V4.GRAPHAPI.RULES: the registry of kinds, the rule report and the run check of IF-301 v4 (A-170), in graph_rule_set.py. */
+                   G-V4.GRAPHAPI.RULES: the registry of kinds, the rule report and the run check of IF-301 v4 (A-170), in graph_rule_set.py.
+                   G-V4.GRAPHAPI.RUN (planned): the loader of IF-301 v5 (A-187), the one loaded graph (a networkx MultiDiGraph, networkx==3.7)
+                   that the order, the graph rules and the run read, in graph_load.py (added to the modules when it exists); the rule set's own view and copied cycle finder go. */
             @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_tables.py", "graph_rules.py", "graph_rule_set.py"); }
             @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
@@ -1720,6 +1726,18 @@ package MIA_Requirements {
         doc /* The system shall refuse to run a graph that breaks the rules, has a step input that nobody supplies or is of a kind that cannot run, and name the broken part before any step has run. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    /* G-V4.GRAPHAPI.RUN: items of the same top-level spec that the requirements of G-V4.GRAPHAPI.RUN refine; their parents HR-001 to HR-007
+       (RUN high-level spec) appear here as their own parents FR-65 and NFR-17 (D-420). */
+    requirement def <'FR-65'> OneStepAfterTheOther {
+        subject mia : MiaSystem;
+        doc /* The system shall run the steps of a stored graph one after the other in a fixed order in which every step runs after the steps it reads from. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'NFR-17'> SameResultsAfterTheRework {
+        subject mia : MiaSystem;
+        doc /* Skills give the same results after the rework as before. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement, HowVerified::test); }
+    }
 
     // ================================================================ the requirement tree
 
@@ -1790,6 +1808,8 @@ package MIA_Requirements {
     requirement nfr16 : NoHalfStoredGraph;
     requirement fr63 : OneRuleSetPerKind;
     requirement fr64 : RefuseARunThatCannotWork;
+    requirement fr65 : OneStepAfterTheOther;
+    requirement nfr17 : SameResultsAfterTheRework;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
@@ -1884,6 +1904,8 @@ package MIA_Allocation {
     satisfy nfr16 by mia;
     satisfy fr63 by mia;
     satisfy fr64 by mia;
+    satisfy fr65 by mia;
+    satisfy nfr17 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
@@ -2094,6 +2116,10 @@ package MIA_Allocation {
     allocate fr63 to mia.taskRuntime.workflowGraph;
     allocate fr64 to mia.persistence.graphRecords;
     allocate fr64 to mia.taskRuntime.pipelineRunner;
+    allocate fr65 to mia.persistence.graphRecords;
+    allocate fr65 to mia.taskRuntime.workflowGraph;
+    allocate fr65 to mia.taskRuntime.pipelineRunner;
+    allocate nfr17 to mia.taskRuntime.pipelineRunner;
     allocate fr40 to mia.persistence.typeRegistry;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
