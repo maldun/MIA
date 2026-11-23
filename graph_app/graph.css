@@ -30,3 +30,15 @@ body { font-family: var(--font-sans); font-size: var(--text-base); line-height: 
   background: var(--glass-solid); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow); }
 .settings[hidden] { display: none; }
 .setting { display: flex; justify-content: space-between; gap: var(--space-2); align-items: center; font-size: var(--text-sm); }
+.left-column h3, .selection h3 { margin: var(--space-3) 0 var(--space-1); font-size: var(--text-sm); font-weight: 600; color: var(--text-muted); }
+.field { margin: 0; font-size: var(--text-sm); overflow-wrap: anywhere; }
+.stored-text { margin: var(--space-2) 0 0; padding: var(--space-2); max-height: 14rem; overflow: auto; font-family: var(--font-mono); font-size: var(--text-sm); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--field); border-radius: var(--radius-sm); }
+.step-list, .history-list { list-style: none; margin: 0; padding: 0; font-size: var(--text-sm); }
+.step-list { max-height: 12rem; overflow: auto; }
+.step-entry, .history-entry { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); overflow-wrap: anywhere; cursor: pointer; }
+.step-entry:hover, .history-entry:hover, .graph-entry:hover, .graph-entry[aria-current="true"], .history-entry[aria-selected="true"] { background: var(--hover); }
+.history { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); align-items: flex-start; margin-bottom: var(--space-2); }
+.history-buttons { display: flex; gap: var(--space-2); }
+.history-list { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); max-height: 4.5rem; overflow: auto; }
+.history-row button { font: inherit; font-size: var(--text-sm); color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); }
+.history-row button[disabled] { color: var(--text-muted); }

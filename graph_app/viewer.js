@@ -6,6 +6,9 @@ import { pictureOf } from './adapter.js';
 import { problemText } from './problems.js';
 import { placed, layered } from './arrangement.js';
 import { loadSettings, saveSettings, validSettings, drawingOptions } from './settings.js';
+import { kindOf, isWorkflow } from './step-marks.js';
+import { stepFields, connectionFields, storedText } from './panel.js';
+import { historyEntries, neighbour } from './history.js';
 
 /** the areas of a later subgoal: one line naming it, no control (REQ-GA-013) */
 const LATER = {
@@ -32,6 +35,13 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
   const notice = el('p', { 'data-notice': 'store_unreachable', class: 'notice', role: 'alert' }, 'The store does not answer now; what is shown stays as it was.');
   const canvas = el('div', { class: 'drawing', 'data-drawing': '' });
   const problemList = el('ul', { class: 'problems', 'aria-label': 'what cannot be drawn' });
+  const hint = el('p', { class: 'hint' }, 'Nothing selected.');
+  const selection = el('div', { class: 'selection' }, hint);
+  const stepList = el('ul', { class: 'step-list', 'aria-label': 'steps of the shown graph' });
+  const historyOpen = el('button', { id: 'history-open', type: 'button', disabled: '' }, 'History');
+  const previousButton = el('button', { id: 'history-previous', type: 'button', disabled: '' }, 'Previous version');
+  const nextButton = el('button', { id: 'history-next', type: 'button', disabled: '' }, 'Next version');
+  const historyList = el('ul', { class: 'history-list', 'aria-label': 'versions, newest first' });
   let settings = loadSettings(storage);
   const choice = (name, label, values) => el('label', { class: 'setting' }, `${label} `,
     el('select', { 'data-setting': name }, ...values.map((v) => el('option', { value: v }, v))));
@@ -46,11 +56,13 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
       area('section', 'search-band', 'Search and chat', later('SEARCH')),
       area('section', 'other-things', 'Other things', store, settingsOpen, settingsPlace)),
     el('div', { class: 'work' },
-      area('aside', 'left-column', 'Selection', problemList, el('p', { class: 'hint' }, 'Nothing selected.')),
+      area('aside', 'left-column', 'Selection', problemList, selection, el('h3', {}, 'Steps'), stepList),
       el('div', { class: 'centre' },
         area('main', 'picture', 'Picture', canvas),
         area('section', 'actions-row', 'Actions', later('EDIT')))),
-    area('section', 'history-row', 'History and replay', el('div', { class: 'later-parts' }, later('REPLAY'), later('RUN'))),
+    area('section', 'history-row', 'History and replay',
+      el('div', { class: 'history' }, el('div', { class: 'history-buttons' }, historyOpen, previousButton, nextButton), historyList),
+      el('div', { class: 'later-parts' }, later('REPLAY'), later('RUN'))),
     area('footer', 'status-bar', 'Graph status', status));
   const statusBar = status.parentElement;
   let graphs = [];
@@ -60,6 +72,8 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
   let picture = null;      // what the drawing got for the open version, before places
   let saved = null;        // the saved arrangement of the open graph (REQ-GA-030)
   let moved = {};          // where the owner dropped steps while this graph is open (REQ-GA-032)
+  let shown = null;        // the read answer of the version shown (REQ-GA-036, 039)
+  let versions = null;     // the versions of the open graph, once its history is opened (REQ-GA-038)
 
   /** a list entry: a tab stop of its own; Enter or a click opens it, the arrow keys move to the next or previous shown entry */
   function entry(g) {
@@ -118,11 +132,48 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     return drawing;
   }
 
-  /** the picture of the shown version at its places, and what cannot be drawn named in the left column (REQ-GA-024 to 031) */
-  function draw(shown) {
+  /** the picture of the shown version at its places; what cannot be drawn and the steps listed in the left column (REQ-GA-024 to 031) */
+  function draw() {
     picture = pictureOf(shown);
     theDrawing().show({ nodes: placed(picture.nodes, saved, moved), edges: picture.edges }, drawingOptions(settings));
     problemList.replaceChildren(...(shown.problems ?? []).map((p) => el('li', { 'data-problem': p.problem }, problemText(p))));
+    stepList.replaceChildren(...picture.nodes.map((n) => stepEntry(n.id)));
+    selection.replaceChildren(hint);
+    status.textContent = graphStatus(shown);
+  }
+
+  /** a step of the step list: the other way to a step besides the picture, by Tab, the arrow keys and Enter (REQ-GA-041) */
+  function stepEntry(id) {
+    const item = el('li', { 'data-step-id': id, class: 'step-entry', tabindex: '0' }, id);
+    item.addEventListener('click', () => controller.selectStep(id));
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') controller.selectStep(id);
+      if (event.key === 'ArrowDown') item.nextElementSibling?.focus();
+      if (event.key === 'ArrowUp') item.previousElementSibling?.focus();
+    });
+    return item;
+  }
+
+  /** the selection's fields as `label: value` and its stored text, all as text (REQ-GA-029, 036) */
+  function showSelection(heading, fields, stored) {
+    selection.replaceChildren(el('h3', {}, heading),
+      ...fields.map(([name, label, value]) => el('p', { 'data-field': name, class: 'field' }, `${label}: ${value}`)),
+      el('pre', { 'data-stored-text': '', class: 'stored-text' }, storedText(stored)));
+  }
+
+  function showHistory() {
+    const number = shown?.version;
+    historyList.replaceChildren(...(versions ? historyEntries(versions, shown.current) : []).map((v) => {
+      const item = el('li', { 'data-version': String(v.version), 'data-current': String(v.current), class: 'history-entry', tabindex: '0' }, v.text);
+      if (v.version === number) item.setAttribute('aria-selected', 'true');
+      item.addEventListener('click', () => controller.showVersion(v.version));
+      item.addEventListener('keydown', (event) => { if (event.key === 'Enter') controller.showVersion(v.version); });
+      return item;
+    }));
+    const offer = (button, on) => (on ? button.removeAttribute('disabled') : button.setAttribute('disabled', ''));
+    offer(historyOpen, openId !== null);
+    offer(previousButton, Boolean(versions) && neighbour(versions, number, 'previous') !== null);
+    offer(nextButton, Boolean(versions) && neighbour(versions, number, 'next') !== null);
   }
 
   function showSettings() {
@@ -138,6 +189,9 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     select.addEventListener('change', () => controller.setSettings({ [select.dataset.setting]: select.value }));
   }
   settingsPlace.querySelector('#layered-reset').addEventListener('click', () => controller.layered());
+  historyOpen.addEventListener('click', () => controller.openHistory());
+  previousButton.addEventListener('click', () => controller.previous());
+  nextButton.addEventListener('click', () => controller.next());
   showSettings();
 
   const controller = {
@@ -162,21 +216,68 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     },
     /** the current version of a graph with its saved arrangement, drawn; the status bar names it (REQ-GA-017, 021, 030) */
     async open(id) {
-      let shown;
+      let answer;
       let arrangement;
       try {
-        [shown, arrangement] = await Promise.all([api.readGraph(id), api.readArrangement(id)]);
+        [answer, arrangement] = await Promise.all([api.readGraph(id), api.readArrangement(id)]);
       } catch (err) {
         return refused(err);
       }
       answered();
       if (id !== openId) moved = {};
       openId = id;
+      shown = answer;
       saved = arrangement.positions;
+      versions = null;
       markOpen();
-      status.textContent = graphStatus(shown);
-      draw(shown);
+      draw();
+      showHistory();
     },
+    /** a step's fields and stored text in the left column (REQ-GA-036, 037); a missing step names only its kind */
+    async selectStep(id) {
+      const step = shown?.graph.nodes.find((n) => n.id === id);
+      const node = picture?.nodes.find((n) => n.id === id);
+      if (!node) return controller.selectNothing();
+      const kind = step ? kindOf(step, isWorkflow(shown.graph)).kind : node.kind;
+      showSelection(`step ${id}`, stepFields(step ?? { id }, kind, isWorkflow(shown.graph) ? shown.steps?.[id] : null), step ?? { id, missing: true });
+    },
+    /** a connection's ends, role and stored text in the left column (REQ-GA-036) */
+    async selectConnection(id) {
+      const edge = shown?.graph.edges.find((e) => e.id === id);
+      if (!edge) return controller.selectNothing();
+      showSelection(`connection ${id}`, connectionFields(edge), edge);
+    },
+    /** nothing selected leaves the left column without fields (REQ-GA-044) */
+    async selectNothing() {
+      selection.replaceChildren(hint);
+    },
+    /** the versions of the open graph, newest first (REQ-GA-038) */
+    async openHistory() {
+      if (openId === null) return;
+      try {
+        versions = await api.versions(openId);
+      } catch (err) {
+        return refused(err);
+      }
+      answered();
+      showHistory();
+    },
+    /** an earlier (or the current) version, drawn read-only and named in the status bar (REQ-GA-039) */
+    async showVersion(version) {
+      let answer;
+      try {
+        answer = await api.readGraph(openId, version);
+      } catch (err) {
+        return refused(err);
+      }
+      answered();
+      shown = answer;
+      draw();
+      showHistory();
+    },
+    /** one version older or newer; nothing beyond the ends (REQ-GA-040) */
+    async previous() { return step('previous'); },
+    async next() { return step('next'); },
     /** the connection style and the automatic arrangement, at once and without reading the graph again; kept on the device (REQ-GA-034, 035) */
     async setSettings(change) {
       settings = { ...settings, ...validSettings(change) };
@@ -192,5 +293,10 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
       theDrawing().show({ nodes: layered(picture.nodes, picture.edges), edges: picture.edges }, drawingOptions(settings, 'layered'));
     },
   };
+  async function step(direction) {
+    const version = versions && shown ? neighbour(versions, shown.version, direction) : null;
+    if (version !== null) await controller.showVersion(version);
+  }
+
   return controller;
 }

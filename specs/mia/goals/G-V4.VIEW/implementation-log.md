@@ -14,6 +14,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-08 List and opening | done | see `git log` ("feat: T-08 list and opening") | TC-GA-018, 019, 020 (TC-GA-021 stays green); `tests/js/list-filter.test.mjs` (3), `tests/js/graph-viewer-list.test.mjs` (5) | TC-GA-017 stops at `selectStep` (the left column, T-11) |
 | T-09 The picture | done | see `git log` ("feat: T-09 the picture") | TC-GA-022, 023, 024, 025; `tests/js/graph-picture.test.mjs` (8) | finding F-1: TC-GA-025 cannot see its planned defect (owner decision) |
 | T-10 Arrangement and settings | done | see `git log` ("feat: T-10 arrangement and settings") | TC-GA-026, 027, 028; `tests/js/graph-settings.test.mjs` (3), `graph-arrangement.test.mjs` (4), `graph-viewer-arrange.test.mjs` (3) | the drawing applies seed, solver and drag in T-12 |
+| T-11 Left column and history | done | see `git log` ("feat: T-11 left column and history") | TC-GA-029, 030, and TC-GA-017 (waiting since T-08): all 15 page node checks green; `tests/js/graph-panel.test.mjs` (5), `graph-viewer-history.test.mjs` (3) | the browser side follows in T-12 |
 
 ## T-01: Record tables
 
@@ -280,3 +281,28 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 1. The fixed seed is 7 and the solver `barnesHut` (the prototype's); REQ-GA-031 fixes only that there is one of each. Proposal: keep; TC-GA-036 checks the sameness in Firefox at T-12.
 2. Moved places stay while the same graph is open (also when it is read again) and are let go by the layered reset or by opening another graph. REQ-GA-032 says "while the graph is open". Proposal: keep.
 3. Settings words ("View settings", "Connections", "Arrange by itself", "Reset to layers") are mine. Proposal: keep; the owner may change them.
+
+## T-11: Left column and history
+
+**What was done**
+- `graph_app/panel.js` (R6, written again for the hooks of the interface note): `stepFields(step, kind, info)` gives `[name, label, value]` for `kind`, `toolbox_id` and, for a processing or loop-controlling step of a workflow graph, `trust`, `lifecycle`, `reason`, `changed_since_trusted`, `code` (a missing value `none`, a yes/no value `yes` or `no`, REQ-GA-036, 037); `connectionFields(edge)` for `from`, `to`, `role`; `storedText(item)` (`JSON.stringify(…, null, 2)`).
+- `graph_app/history.js` (R6, written again): `historyEntries(versions, current)` newest first with who and when, the current one marked; `neighbour(versions, shown, direction)`, null beyond the ends (REQ-GA-038, 040).
+- `graph_app/viewer.js`: the left column holds the problems, the selection (`p[data-field]` as `label: value`, `pre[data-stored-text]`, or "Nothing selected.") and the step list (`li[data-step-id]` per drawn step, missing steps included: a tab stop each, Enter or a click selects, the arrow keys move; REQ-GA-041 on the page side); `selectStep`, `selectConnection`, `selectNothing` (REQ-GA-044); a new picture empties the selection. The history row: `#history-open` (offered once a graph is open), the entries `li[data-version]` with `data-current` and `aria-selected` on the shown one (click or Enter shows it), `#history-previous` and `#history-next` with `disabled` where no step is offered; `openHistory`, `showVersion(n)` (the version read-only, named in the status bar as `version n of m` with its author and time, REQ-GA-039), `previous`, `next`. Opening a graph resets its history.
+- `graph_app/graph.css`: styles for the fields, the stored text (mono font from the tokens), the step list and the history row, all from the tokens. `tests/js/graph-app-files.test.mjs`: the file list gets `panel.js` and `history.js`.
+- Unit tests written first and seen red (4: the modules were missing): `graph-panel.test.mjs` (5) and `graph-viewer-history.test.mjs` (3: the step list by click and Enter with a missing step; an unknown ID and a new version leave no field; the history buttons and the marked entry).
+
+**Tests green (my runs, feedback only):** `graph_view_page.test.mjs` 15/15 (TC-GA-017 to 030 and the helper check; TC-GA-017 had waited for `selectStep` since T-08); `node --test "tests/js/*.test.mjs"` 225 pass; TC-GA-031, 032 OK.
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2588 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 225 pass; acceptance scripts all OK, `graph_view_page.test.mjs` 15/15 included, except the browser checks of T-12 (`test_graph_view_browser.py` 7 errors) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Deliberate defects (TR-VIEW-021), run once each, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| `changed_since_trusted` left out of the fields | TC-GA-029 | fails |
+| the history oldest first | TC-GA-030 | fails |
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. The left column shows the fields the interface note names; a data step's `value` and a step's other stored values are only in the stored text. REQ-GA-036 says "its known values as labelled fields". Proposal: keep (the stored text holds everything); widen at EDIT if wanted.
+2. Field labels ("toolbox ID", "changed since trusted", "holds code") and button words ("History", "Previous version", "Next version") are mine. Proposal: keep; the owner may change them.
+3. A selection is let go when another version is shown (the step may not exist there). Proposal: keep.
