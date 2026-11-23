@@ -225,7 +225,7 @@ None: no hard bound (D-425 E-H). The opening time is a smoke number (SMOKE-VIEW-
 
 ### TC-GA-025 – A graph of another kind
 - Verifies: REQ-GA-028
-- Given: in the JS mock a context graph (steps of types `concept` and `source`) and a graph of kind `swarm` with an untrusted step
+- Given: in the JS mock a context graph (steps of types `concept`, `source` and `data`, the last a workflow type, A-175) and a graph of kind `swarm` with an untrusted step
 - When: each is opened
 - Then: every step is a box labelled with its type in words, and no step carries a mark
 - And: the status bar names the kind (`context`, `swarm`) and the page offers no control that changes the graph
