@@ -38,7 +38,7 @@ T-06 depends on T-04, T-05 (done) **and VIEW merged into `goal/v4`**. On 2026-11
 - Deliberate defects: a runner patches the module in the test process (examples `mutate_t03.py`, `mutate_t04.py` in the same folder); make the mutation fail at the check's own assertion, not by an error of the mutation. For T-06 the plan names no defect; an obvious one is "AutoSync only at start" against TC-API-062.
 - Unit tests first and seen red (T-03's were written after the code; logged as a deviation).
 - `trace_check.py`: 549 old ERROR lines; compare with the export line by line.
-- Numbers: next D-471, next A-187 (VIEW keeps D-430 to D-459, A-171 to A-184).
+- Numbers: next D-472 (D-471 is EDIT's plan points on `goal/v4`), next A-187 (VIEW keeps D-430 to D-459, A-171 to A-184).
 - PostgreSQL in tests: throw-away `postgres:16` under podman only. Before a long run, look at `ListAgents`: VIEW's session may run browser or database checks at the same time.
 
 ## Start prompt for the new session
