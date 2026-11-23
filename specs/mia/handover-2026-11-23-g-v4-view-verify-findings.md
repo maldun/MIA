@@ -21,8 +21,7 @@ Not in Implement: V-3 goes to TRANSFER (note it in TRANSFER's handover); V-6, V-
 ## The owner (V-15) – done 2026-11-24
 The image was built and `tests/test_delivery_on_stack.py` is OK (5 tests). Keep the tag `mia-view-check` until the merge: removing it can drop the cached pip layer, and the offline build would fail again.
 
-Build the release image once with network, so that the offline build of `tests/test_delivery_on_stack.py` finds the new pip layer:
-`podman build -f deploy/Containerfile -t mia-view-check .` (in the worktree; downloads Python packages; remove the tag afterwards with `podman rmi mia-view-check`).
+What was run: `podman build -f deploy/Containerfile -t mia-view-check .` in the worktree (with network), so that the offline build of `tests/test_delivery_on_stack.py` finds the new pip layer.
 
 ## Then Verify again (a fresh session)
 Run the automated checks in full and the three reproductions in `specs/mia/goals/G-V4.VIEW/verify-repro/`. Review only the fix commits. Re-run `tests/test_delivery_on_stack.py`. Fill the verdict box.
