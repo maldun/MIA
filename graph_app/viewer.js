@@ -2,6 +2,8 @@
 // checks drive. Everything is read-only; the areas of later subgoals are present and empty (REQ-GA-013).
 import { storeEntry, graphStatus } from './store-note.js';
 import { filterGraphs, entryLabel } from './list-filter.js';
+import { pictureOf } from './adapter.js';
+import { problemText } from './problems.js';
 
 /** the areas of a later subgoal: one line naming it, no control (REQ-GA-013) */
 const LATER = {
@@ -27,13 +29,14 @@ export function createViewer({ document, root, api, makeDrawing }) {      // `st
   const status = el('p', { class: 'status-line', role: 'status' }, 'No graph open · read-only');
   const notice = el('p', { 'data-notice': 'store_unreachable', class: 'notice', role: 'alert' }, 'The store does not answer now; what is shown stays as it was.');
   const canvas = el('div', { class: 'drawing', 'data-drawing': '' });
+  const problemList = el('ul', { class: 'problems', 'aria-label': 'what cannot be drawn' });
   root.replaceChildren(
     el('header', { class: 'top-band' },
       area('section', 'graph-list', 'Graphs', filterBox, list),
       area('section', 'search-band', 'Search and chat', later('SEARCH')),
       area('section', 'other-things', 'Other things', store)),
     el('div', { class: 'work' },
-      area('aside', 'left-column', 'Selection', el('p', { class: 'hint' }, 'Nothing selected.')),
+      area('aside', 'left-column', 'Selection', problemList, el('p', { class: 'hint' }, 'Nothing selected.')),
       el('div', { class: 'centre' },
         area('main', 'picture', 'Picture', canvas),
         area('section', 'actions-row', 'Actions', later('EDIT')))),
@@ -94,13 +97,11 @@ export function createViewer({ document, root, api, makeDrawing }) {      // `st
     canvas.hidden = false;
   }
 
-  /** what the drawing gets for now: every step and every directed connection (the picture of T-09 adds shapes and marks) */
+  /** the picture of the shown version, and what cannot be drawn named in the left column (REQ-GA-024 to 028) */
   function draw(shown) {
     drawing ??= makeDrawing(canvas);
-    drawing.show({
-      nodes: shown.graph.nodes.map((n) => ({ id: n.id, label: n.id })),
-      edges: shown.graph.edges.map((e) => ({ id: e.id, from: e.from, to: e.to, arrows: 'to' })),
-    }, {});
+    drawing.show(pictureOf(shown), {});
+    problemList.replaceChildren(...(shown.problems ?? []).map((p) => el('li', { 'data-problem': p.problem }, problemText(p))));
   }
 
   filterBox.addEventListener('input', () => controller.filter(filterBox.value));

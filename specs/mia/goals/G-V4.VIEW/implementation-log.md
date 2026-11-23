@@ -12,6 +12,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-06 Record of changes | done | see `git log` ("feat: T-06 record of changes") | every Track A check: IF-104 v2 suite 33/33 (mock, files, postgres), `test_view_backend.py` 9/9 (TC-API-018 to 025, TC-OPR-011); `tests/test_graph_api_v2.py` (28 unit tests) | Track A complete |
 | T-07 Tokens, frame, status | done | see `git log` ("feat: T-07 tokens, frame, status") | TC-GA-021, TC-GA-031, 032; `tests/js/store-note.test.mjs` (2), `tests/js/graph-viewer-frame.test.mjs` (3) | Track B started; the list is text only until T-08, the picture empty until T-09 |
 | T-08 List and opening | done | see `git log` ("feat: T-08 list and opening") | TC-GA-018, 019, 020 (TC-GA-021 stays green); `tests/js/list-filter.test.mjs` (3), `tests/js/graph-viewer-list.test.mjs` (5) | TC-GA-017 stops at `selectStep` (the left column, T-11) |
+| T-09 The picture | done | see `git log` ("feat: T-09 the picture") | TC-GA-022, 023, 024, 025; `tests/js/graph-picture.test.mjs` (8) | finding F-1: TC-GA-025 cannot see its planned defect (owner decision) |
 
 ## T-01: Record tables
 
@@ -223,3 +224,31 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 **Open questions for Verify / the owner (behaviour only in the code, P25):**
 1. The filter does not search the kind (the prototype did; REQ-GA-020 names ID and description only). Proposal: keep as the requirement says.
 2. The words of the login note ("Not logged in. Log in through the main app.") and of the store notice ("The store does not answer now; what is shown stays as it was.") are mine. Proposal: keep; the owner may change them.
+
+## T-09: The picture
+
+**What was done**
+- `graph_app/step-marks.js` (R6, written again for D-426): `kindOf(step, workflow)` gives shape and word (data ellipse "data", transform box "processing", master hexagon "loop-controlling"; any other type, and every step of a graph of another kind, a box with its stored type, `unknown` when none); `marksOf(info)` gives at most `untrusted`, `changed`, `code`, one word each, only for a processing or loop-controlling step (the prototype marked trusted steps too and used several words: D-426 says trusted steps stay plain); `isWorkflow(graph)`.
+- `graph_app/problems.js` (R6, written again for IF-104 v2 `problems`): `missingSteps(problems)`, `problemText(p)`.
+- `graph_app/adapter.js` (R6, written again): `pictureOf(shown)` gives the drawing `{nodes, edges}` of the interface note: every stored step once (a step ID used twice is drawn as stored first; the problem names it), a node `{missing: true, kind: 'missing step'}` for each missing end, every connection with `arrows: 'to'`, `dashes` true for a connection to or from a missing step; labels are the ID, then the kind and the marks, plain text (REQ-GA-024 to 029).
+- `graph_app/viewer.js`: the opening draws `pictureOf(shown)`; the left column lists what cannot be drawn, `li[data-problem]` per problem in words (REQ-GA-025). `graph.css`: the problem list in `var(--danger)`, hidden when empty. `tests/js/graph-app-files.test.mjs`: the expected file list gets the three modules.
+- Unit tests `tests/js/graph-picture.test.mjs` (8), written first and seen red (the modules were missing): kinds and shapes, marks, another kind, a context step with workflow types, the missing step and dashes, a step ID used twice, the problem words, a hostile label kept as text.
+
+**Tests green (my runs, feedback only):** TC-GA-022 to 025 of `graph_view_page.test.mjs` (with TC-GA-018 to 021; TC-GA-017 still waits for `selectStep`, T-11); `node --test "tests/js/*.test.mjs"` 207 pass; TC-GA-031, 032 OK.
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2588 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 207 pass; acceptance scripts all OK except the page checks of later tasks (`graph_view_page.test.mjs` 6, `test_graph_view_browser.py` 7 errors) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Deliberate defects (TR-VIEW-021), run once each, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| the arrows left out | TC-GA-022 | fails |
+| the connection to a missing step dropped | TC-GA-023 | fails |
+| a mark on every step (`checked`) | TC-GA-024 | fails |
+| a graph of another kind drawn with the workflow shapes (`isWorkflow` always true) | TC-GA-025 | **passes**: the check does not see it (F-1); my unit tests `graph-picture.test.mjs` fail twice on it |
+
+**Finding F-1 (for the owner; protected test and fixture, so not changed):** TC-GA-025 cannot fail on its planned defect. Its graphs of another kind, `ctx.small` (types `concept`, `source`) and `swarm.one` (type `agent`), use no workflow type, so the workflow shapes give the same boxes; and the backend (and the JS mock) never send trust marks for a graph of another kind, so the page cannot add any. A defect that drew such a graph with the workflow shapes would show only on a step whose type is `data`, `transform` or `master`. Covered meanwhile by my unit test "a step of another kind whose type is a workflow type is still a neutral box". Owner's decision (D-454): amend the fixture, amendment A-175. The proposal was an amendment that gives `ctx.small` (fixture `tests/fixtures/graph_view/graphs.json`, protected) a step of type `data`, and TC-GA-025 the assertion that it is a box; or accept the unit test as the witness and record that the check cannot see the defect.
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. A step ID used twice is drawn once, as stored first (vis-network refuses two nodes with one ID); REQ-GA-025 names only missing steps. Proposal: keep; the problem list names it.
+2. The label of a step is two lines, its ID and then its kind and marks (`step.write` / `processing · untrusted · code`). Proposal: keep; the owner sees it in the browser at T-12.
