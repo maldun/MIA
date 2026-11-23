@@ -8,6 +8,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-02 Store setting, provider, access, image | done | see `git log` ("feat: T-02 store setting, v2 provider, access and image") | TC-API-019, 024, TC-OPR-011; TC-IF-104-26 (mock, files, postgres); `tests/test_graph_api_v2.py` (7 unit tests) | TC-API-018, 020 and TC-IF-104-27 wait for T-03 (they need the list, read and versions routes) |
 | T-03 Read routes | done | see `git log` ("feat: T-03 read routes") | TC-IF-104-17, 18, 19, 26, 27 (mock, files, postgres); read parts of TC-IF-104-24, 25; TC-API-018, 020; `tests/test_graph_api_v2.py` (10 unit tests) | the write parts of TC-IF-104-24, 25 stop at 501 `not_built` (T-05) |
 | T-04 Save as a new version, refusals | done | see `git log` ("feat: T-04 save as a new version, refusals") | TC-IF-104-22 (mock, files, postgres); the save parts of TC-IF-104-20 and TC-API-021; `tests/test_graph_api_v2.py` (18 unit tests) | TC-IF-104-20 stops at the changes route (T-06), TC-API-021 at the restore (T-05) |
+| T-05 Check, restore, arrangement save | done | see `git log` ("feat: T-05 check, restore, arrangement save") | TC-IF-104-23, 25 (mock, files, postgres); the restore part of TC-IF-104-24; TC-API-021 (T-04's), TC-API-025; `tests/test_graph_api_v2.py` (23 unit tests) | TC-IF-104-24 stops at the changes route (T-06) |
 
 ## T-01: Record tables
 
@@ -114,3 +115,25 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 1. A `remove_step` entry carries a field `connections` (the connections removed with the step) that IF-104 v2's entry fields do not list; the mock does the same, and the connections are not repeated as `remove_connection` entries. Proposal: name the field in IF-104 v2 at the merge (needed to play a record back).
 2. An `expected_version` that is not a number (`"4"`) is a 409 `conflict`, as in the mock; the contract lists no `invalid` for it. Proposal: keep.
 3. A graph equal in content to the current version that breaks a rule (a stored broken graph saved again) is `rules_broken`, not unchanged: the rules come first, as in the mock.
+
+## T-05: Check, restore, arrangement save
+
+**What was done**
+- `graph_api_v2.py`: `POST /graphs/<id>/check` (route 8): the IF-301 v4 rule report of the sent steps and connections under the stored header, nothing stored (REQ-API-031); `POST /graphs/<id>/restore` (route 10): the content of an earlier version as a new version with a record of kind `restore` holding one entry (`target` the restored version, `reason` trimmed or null), nothing deleted (REQ-API-041); `PUT /graphs/<id>/arrangement` (route 11): the places of the graph's steps rounded to whole numbers as the one `arrangements` record of the graph, places of unknown steps ignored, `positions` not an object 422 `invalid` detail `positions`, a place that is not two finite numbers (a boolean is none) 422 `invalid` with the step ID (REQ-API-044, 048). Only the changes route still answers 501 (T-06).
+- Save and restore share `GraphWriter._keep`: the rules first (`rules_broken`), then unchanged content (nothing written), then CORE's save (`refused` on a record check), then the record of changes. A restore of the current content answers `changed: false`.
+- Unit tests `tests/test_graph_api_v2.py` +5 (`CheckRestoreArrange`), written first and seen red on the T-04 code (4 failures, 1 error): the check with a cycle and a malformed body; a restore with its record and trimmed reason; a restore of the current content and of versions 0, 9, `"1"` and none; an arrangement kept rounded and replaced by the next save; malformed arrangements. One finding on the way, caught by T-04's unit test: the first draft derived the entries before the rule check, so a step that is a text broke the save again; the entries are now derived only after the rules and the comparison (`entries_of`).
+
+**Tests green (my runs, feedback only):** IF-104 v2 suite TC-IF-104-23, 25 on mock, files and postgres; TC-IF-104-24 passes its restore answer and versions, then stops at `changes` (501, T-06); `test_view_backend.py` TC-API-021 (left by T-04) and TC-API-025 on files and postgres; `tests/test_graph_api_v2.py` 23/23. Left for T-06: TC-IF-104-20, 21, 24 (the changes route and editor entries), TC-API-022, 023.
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2583 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 186 pass; acceptance scripts all OK except the VIEW checks of later tasks (`test_view_backend.py` 2, the IF-104 v2 suite 6 on the real side, `test_graph_view_files.py` 2, `test_graph_view_browser.py` 7 errors, `graph_view_page.test.mjs` 14) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Deliberate defect (TR-VIEW-021), run once, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| the check route on CORE's `check_graph` instead of `rule_report` | TC-API-025 | fails (a flat list of parts instead of the items) |
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. Each arrangement save replaces the whole arrangement (places not sent are dropped), as the mock does; REQ-API-044 says "the one arrangement record", not whether a save merges. Proposal: keep (the page always sends every place).
+2. Python's `round` rounds a half to the even number (10.5 gives 10, 11.5 gives 12), as the mock does; REQ-API-044 says "rounded to whole numbers". Proposal: keep, and name it in IF-104 v2 at the merge if it matters to EDIT.
+3. A restore body without a whole-number `version` (missing, `"1"`, `true`) is 404 `not_found` with `detail: "version"`; the contract lists no `invalid` for route 10. Proposal: keep.

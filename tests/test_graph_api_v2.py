@@ -301,5 +301,89 @@ class Saving(Stored):
 
 
 
+class CheckRestoreArrange(Stored):
+    """the check, restore and arrangement routes of T-05 beyond the contract cases"""
+
+    def post(self, path, payload):
+        answer = self.web.post("/api/v2/graphs/g.one" + path, json=payload, headers={"Origin": ORIGIN})
+        return answer.status_code, answer.get_json()
+
+    def arrange(self, payload):
+        answer = self.web.put("/api/v2/graphs/g.one/arrangement", json=payload, headers={"Origin": ORIGIN})
+        return answer.status_code, answer.get_json()
+
+    def tool_b(self):
+        graph = small("g.one")
+        graph["nodes"][1]["data"]["toolbox_id"] = "tool.b"
+        self.assertEqual(self.save({"graph": sent(graph)})[0], 200)
+
+    @mark.req("REQ-API-031", "REQ-API-048")
+    def test_check_answers_the_report_and_stores_nothing(self):
+        """Example: a cycle step.a -> var.in -> rules ending in cycle; a malformed body 422 invalid graph; still one version."""
+        # Given g.one with a cycle in the working copy
+        cyclic = small("g.one")
+        cyclic["edges"].append({"id": "e9", "from": "step.a", "to": "var.in", "data": {}})
+        # When it and a malformed body are checked
+        report, bad = self.post("/check", {"graph": sent(cyclic)}), self.post("/check", {"graph": {"nodes": []}})
+        # Then the report ends in the cycle, the malformed body is refused, nothing is stored
+        self.assertEqual((report[0], report[1]["rules"][-1]["rule"]), (200, "cycle"))
+        self.assertEqual(bad, (422, {"error": "invalid", "detail": "graph"}))
+        self.assertEqual((self.stored_versions(), self.records()), (1, []))
+
+    @mark.req("REQ-API-041")
+    def test_a_restore_is_a_new_version_with_one_restore_entry(self):
+        """Example: version 1 restored at 2 with reason " back " -> version 3 with tool.a; record g.one/3 restore from 2, reason trimmed."""
+        # Given g.one at version 2 (step.a uses tool.b)
+        self.tool_b()
+        # When version 1 is restored with a reason
+        status, answer = self.post("/restore", {"version": 1, "reason": " back "})
+        # Then version 3 has the content of version 1
+        self.assertEqual((status, answer), (200, {"version": 3, "restored": 1, "changed": True}))
+        stored = graph_model.GraphModel(Storage(self.backend)).read_graph("g.one")
+        self.assertEqual(stored["nodes"][1]["data"]["toolbox_id"], "tool.a")
+        # And its record names the restore, from version 2
+        doc = Storage(self.backend).get("graph_changes", "g.one/3")["doc"]
+        self.assertEqual((doc["kind"], doc["from_version"], doc["entries"]),
+                         ("restore", 2, [{"n": 1, "op": "restore", "target": 1, "before": None, "after": None, "reason": "back"}]))
+
+    @mark.req("REQ-API-041", "REQ-API-049")
+    def test_a_restore_of_the_current_content_or_a_missing_version(self):
+        """Example: restoring version 1 at version 1 -> changed false, nothing written; versions 0, 9, "1" and none -> 404 not_found version."""
+        # Given g.one at version 1
+        # When its own version and versions that are not stored are restored
+        same = self.post("/restore", {"version": 1})
+        missing = [self.post("/restore", body) for body in ({"version": 0}, {"version": 9}, {"version": "1"}, {})]
+        # Then the first changes nothing and the others are not found
+        self.assertEqual(same, (200, {"version": 1, "restored": 1, "changed": False}))
+        self.assertEqual(missing, [(404, {"error": "not_found", "detail": "version"})] * 4)
+        self.assertEqual((self.stored_versions(), self.records()), (1, []))
+
+    @mark.req("REQ-API-044", "REQ-API-048")
+    def test_the_arrangement_is_kept_rounded_and_replaced(self):
+        """Example: var.in 10.4, -3 and step.a 2.6, 0 -> saved 2, version 1; a second save with only step.a replaces the record (version 2)."""
+        # Given g.one never arranged
+        # When the owner saves two places, then one place
+        first, second = self.arrange({"positions": {"var.in": {"x": 10.4, "y": -3}, "step.a": {"x": 2.6, "y": 0}}}), self.arrange({"positions": {"step.a": {"x": 1, "y": 1}}})
+        # Then both are saved, the second as the whole new arrangement
+        self.assertEqual((first, second), ((200, {"version": 1, "saved": 2}), (200, {"version": 2, "saved": 1})))
+        read = self.web.get("/api/v2/graphs/g.one/arrangement").get_json()
+        self.assertEqual((read["positions"], read["version"], read["author"]), ({"step.a": {"x": 1, "y": 1}}, 2, "anna"))
+
+    @mark.req("REQ-API-048")
+    def test_a_malformed_arrangement_is_refused(self):
+        """Example: positions a list -> detail positions; var.in with y true, x infinite, or a text -> detail var.in; nothing stored."""
+        # Given malformed arrangement bodies
+        bodies = [{"positions": []}, {}, {"positions": {"var.in": {"x": 1, "y": True}}}, {"positions": {"var.in": {"x": float("inf"), "y": 0}}},
+                  {"positions": {"var.in": "far"}}]
+        # When each is saved
+        answers = [self.arrange(b) for b in bodies[:3] + bodies[4:]]
+        # Then each names what is wrong, and no arrangement is stored
+        self.assertEqual(answers, [(422, {"error": "invalid", "detail": d}) for d in ("positions", "positions", "var.in", "var.in")])
+        self.assertEqual(self.web.get("/api/v2/graphs/g.one/arrangement").get_json(), {"positions": None})
+        # And an infinite number is refused by the place check itself (JSON cannot carry it)
+        self.assertFalse(graph_api_v2.a_place({"x": float("inf"), "y": 0}))
+
+
+
 if __name__ == "__main__":
     unittest.main()

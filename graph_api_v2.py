@@ -9,6 +9,7 @@ create_app(backend, accounts_store, store, allowed_origins) is the same provider
 entry point the contract suite and the page checks run on.
 """
 import json
+import math
 
 from flask import Blueprint, Flask, g, jsonify, request
 
@@ -192,29 +193,75 @@ class GraphReader:
         return stored, {**header, "description": graph.get("description", stored["graph"].get("description")), "nodes": graph["nodes"], "edges": graph["edges"]}
 
 
+def a_place(xy):
+    """a place of the arrangement body: x and y finite numbers, a boolean is none (IF-104 v2, REQ-API-048)"""
+    number = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)      # noqa: E731
+    return isinstance(xy, dict) and number(xy.get("x")) and number(xy.get("y"))
+
+
 class GraphWriter:
-    """the save route (REQ-API-032 to 037, 048): a new version authored by the account with its derived record of changes, or a refusal that writes nothing"""
+    """the routes that check or change (REQ-API-031 to 037, 041, 044, 048): a new version authored by the account with its record of changes,
+    or a refusal that writes nothing"""
 
     def __init__(self, backend, reader):
         self.storage, self.reader = Storage(backend), reader
+
+    def check(self, graph_id, body):
+        """the rule report of a working copy under the stored graph's kind; nothing is stored (REQ-API-031)"""
+        return {"rules": graph_rule_set.rule_report(self.reader.sent_graph(graph_id, body)[1])}
 
     def save(self, graph_id, body, author):
         stored, graph = self.reader.sent_graph(graph_id, body)
         current = stored["current"]
         if body.get("expected_version") is not None and body["expected_version"] != current:
             raise Refused(409, "conflict", current=current)
-        rules = graph_rule_set.rule_report(graph)       # first: a graph that breaks a rule may not even have steps that can be compared
+        kept = self._keep(graph_id, stored, graph, author, "derived", lambda: derive(stored["graph"], graph))
+        if kept is None:
+            return {"version": current, "changed": False, "logged": None, "entries": 0}
+        return {"version": kept[0], "changed": True, "logged": True, "entries": kept[1]}
+
+    def restore(self, graph_id, body, author):
+        """the content of an earlier version as a new version with one `restore` entry; nothing is deleted (REQ-API-041)"""
+        version = body.get("version") if isinstance(body, dict) else None
+        if not isinstance(version, int) or isinstance(version, bool):
+            raise NotFound("version")
+        old = self.reader.read_graph(graph_id, version)["graph"]
+        reason = body.get("reason").strip() if isinstance(body.get("reason"), str) and body["reason"].strip() else None
+        entry = {"op": "restore", "target": version, "before": None, "after": None, "reason": reason}
+        stored = self.reader.read_graph(graph_id)
+        kept = self._keep(graph_id, stored, old, author, "restore", lambda: [entry])
+        return {"version": kept[0] if kept else stored["current"], "restored": version, "changed": kept is not None}
+
+    def _keep(self, graph_id, stored, graph, author, kind, entries_of):
+        """`graph` as the version after `stored` with its record of changes (`entries_of()`); (new version, number of entries), or None when the content
+        is the same. The rules come first: a graph that breaks one may not even have steps that can be compared (REQ-API-033, 035, 036)."""
+        rules = graph_rule_set.rule_report(graph)
         if rules:
             raise Refused(422, "rules_broken", rules=rules)
         if content(graph) == content(stored["graph"]):
-            return {"version": current, "changed": False, "logged": None, "entries": 0}
+            return None
         result = graph_model.GraphModel(self.storage, author=author).save_graph(graph)
         if not result.saved:
             raise Refused(422, "refused", rule=result.rule, detail=result.detail)
-        entries = [{"n": n, **e} for n, e in enumerate(derive(stored["graph"], graph), 1)]
-        record = {"graph": graph_id, "version": result.version, "from_version": current, "kind": "derived", "entries": entries}
+        entries = [{"n": n, **e} for n, e in enumerate(entries_of(), 1)]
+        record = {"graph": graph_id, "version": result.version, "from_version": stored["current"], "kind": kind, "entries": entries}
         self.storage.put("graph_changes", "%s/%d" % (graph_id, result.version), record, author)
-        return {"version": result.version, "changed": True, "logged": True, "entries": len(entries)}
+        return result.version, len(entries)
+
+    def save_arrangement(self, graph_id, body, author):
+        """the places of the graph's steps, rounded, as the one arrangement record of the graph; places of unknown steps ignored (REQ-API-044)"""
+        steps = {n["id"] for n in self.reader.read_graph(graph_id)["graph"]["nodes"]}
+        positions = body.get("positions") if isinstance(body, dict) else None
+        if not isinstance(positions, dict):
+            raise Refused(422, "invalid", detail="positions")
+        kept = {}
+        for step, xy in positions.items():
+            if step in steps:
+                if not a_place(xy):
+                    raise Refused(422, "invalid", detail=step)
+                kept[step] = {"x": round(xy["x"]), "y": round(xy["y"])}
+        saved = self.storage.put("arrangements", graph_id, {"graph": graph_id, "positions": kept}, author)
+        return {"version": saved["version"], "saved": len(kept)}
 
 
 def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
@@ -257,9 +304,21 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
     def refused(err):
         return error(err.status, err.code, **err.fields)
 
+    @bp.post("/graphs/<graph_id>/check", endpoint="check")
+    def check(graph_id):
+        return jsonify(writer.check(graph_id, request.get_json(silent=True)))
+
     @bp.put("/graphs/<graph_id>", endpoint="save")
     def save(graph_id):
         return jsonify(writer.save(graph_id, request.get_json(silent=True), g.account))
+
+    @bp.post("/graphs/<graph_id>/restore", endpoint="restore")
+    def restore(graph_id):
+        return jsonify(writer.restore(graph_id, request.get_json(silent=True), g.account))
+
+    @bp.put("/graphs/<graph_id>/arrangement", endpoint="save_arrangement")
+    def save_arrangement(graph_id):
+        return jsonify(writer.save_arrangement(graph_id, request.get_json(silent=True), g.account))
 
     @bp.get("/graphs", endpoint="list_graphs")
     def list_graphs():
@@ -281,12 +340,9 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
         return jsonify(reader.read_arrangement(graph_id))
 
     def not_built():
-        return error(501, "not_built")              # the remaining routes come with T-05 and T-06 of G-V4.VIEW
+        return error(501, "not_built")              # the changes route comes with T-06 of G-V4.VIEW
 
-    for rule, methods, name in (("/graphs/<graph_id>/changes", ["GET"], "changes"), ("/graphs/<graph_id>/check", ["POST"], "check"),
-                                ("/graphs/<graph_id>/restore", ["POST"], "restore"),
-                                ("/graphs/<graph_id>/arrangement", ["PUT"], "save_arrangement")):
-        bp.add_url_rule(rule, name, lambda graph_id=None: not_built(), methods=methods)
+    bp.add_url_rule("/graphs/<graph_id>/changes", "changes", lambda graph_id=None: not_built(), methods=["GET"])
     return bp
 
 
