@@ -50,16 +50,17 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     choice('edges', 'Connections', ['rounded', 'straight']), choice('arrangement', 'Arrange by itself', ['on', 'off']),
     el('button', { id: 'layered-reset', type: 'button' }, 'Reset to layers'));
   settingsPlace.hidden = true;
+  // the owner's layout (D-425, narrowed by D-458 and D-459): the graph list above the left column and as wide as it, a slim band of search and
+  // store above the picture, the picture as high as the rest allows; the areas are direct children of the root so the grid can place them,
+  // and their order is the Tab order (list, band, left column, picture, actions, history)
   root.replaceChildren(
-    el('header', { class: 'top-band' },
-      area('section', 'graph-list', 'Graphs', filterBox, list),
+    area('section', 'graph-list', 'Graphs', filterBox, list),
+    el('div', { class: 'band' },
       area('section', 'search-band', 'Search and chat', later('SEARCH')),
-      area('section', 'other-things', 'Other things', store)),
-    el('div', { class: 'work' },
-      area('aside', 'left-column', 'Selection', problemList, selection, el('h3', {}, 'Steps'), stepList),
-      el('div', { class: 'centre' },
-        area('main', 'picture', 'Picture', el('div', { class: 'picture-tools' }, settingsOpen, settingsPlace), canvas),
-        area('section', 'actions-row', 'Actions', later('EDIT')))),
+      el('section', { 'data-area': 'other-things', 'aria-label': 'Store', class: 'area other-things' }, store)),      // no visible heading (D-459)
+    area('aside', 'left-column', 'Selection', problemList, selection, el('h3', {}, 'Steps'), stepList),
+    area('main', 'picture', 'Picture', el('div', { class: 'picture-tools' }, settingsOpen, settingsPlace), canvas),
+    area('section', 'actions-row', 'Actions', later('EDIT')),
     area('section', 'history-row', 'History and replay',
       el('div', { class: 'history' }, el('div', { class: 'history-buttons' }, historyOpen, previousButton, nextButton), historyList),
       el('div', { class: 'later-parts' }, later('REPLAY'), later('RUN'))),

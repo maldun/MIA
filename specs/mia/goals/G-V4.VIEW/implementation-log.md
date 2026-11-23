@@ -348,3 +348,11 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 ## A-175 installed (2026-11-23)
 
 The owner installed A-175 (`tools/apply_amendment_a175.sh --do`, D-454). After the install: `graph_view_page.test.mjs` 15/15; `test_graph_view_browser.py`, `test_view_backend.py`, `test_graph_view_files.py` OK (the browser checks seed `ctx.small` with its new step through CORE). The planned defect of TC-GA-025 (`isWorkflow` always true) run again: TC-GA-025 now **fails** on it, restored after. Finding F-1 closed.
+
+## Layout after the owner's look (2026-11-23, D-459)
+
+The owner looked at the page in Firefox and asked for a different arrangement of the frame (D-459). Changed: `graph_app/viewer.js` (the areas are direct children of the root, in the Tab order list, band, left column, picture, actions, history, status; the store part without a visible heading, `aria-label` "Store"), `graph_app/graph.css` (a grid with named areas: the graph list above the left column and as wide as it, the slim band of search and store above the picture; the graph list does not stretch the band's row, `contain: size`; the selection and the step list share the left column), `graph_app/drawing.js` (the solver starts the steps without a place in their layers, left to right, and relaxes them from there, `barnesHut` with `springLength` 140, `avoidOverlap` 0.6: before, steps either overlapped or settled in a tall column the view had to zoom far out for, so labels were tiny). `tests/js/graph-viewer-frame.test.mjs`: the store part has no heading.
+
+Checks after the change (my runs): `node --test "tests/js/*.test.mjs"` 225 pass; `graph_view_page.test.mjs` 15/15; `test_graph_view_files.py` OK; `test_graph_view_browser.py` 7/7 in three runs. Screenshots in light and dark: no page errors.
+
+Open for Verify: REQ-GA-012 says each area is "visible by its label"; the store part now carries its label only for screen readers (the owner's wish).

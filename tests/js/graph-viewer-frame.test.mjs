@@ -15,18 +15,19 @@ function page(api = {}) {
   return { root, viewer: createViewer({ document: doc, root, api }) };
 }
 
-test('REQ-GA-012: every area of the owner\'s layout is there once, with a label and a heading', () => {
-  // Example: [data-area=picture] once, aria-label "Picture", its h2 "Picture".
+test('REQ-GA-012: every area of the owner\'s layout is there once, with a label and a heading; the store part has no visible heading (D-459)', () => {
+  // Example: [data-area=picture] once, aria-label "Picture", its h2 "Picture"; [data-area=other-things] aria-label "Store", no h2.
   // Given a new viewer
   const { root } = page();
   // When the areas are looked up
-  // Then each is there once, labelled, with the label as its heading
+  // Then each is there once and labelled, with the label as its heading except the store part
   for (const name of AREAS) {
     const found = root.querySelectorAll(`[data-area=${name}]`);
     assert.equal(found.length, 1, name);
     const label = found[0].getAttribute('aria-label');
     assert.ok(label, name);
-    assert.equal(found[0].querySelector('h2').textContent, label);
+    if (name === 'other-things') assert.equal(found[0].querySelector('h2'), null);
+    else assert.equal(found[0].querySelector('h2').textContent, label);
   }
 });
 

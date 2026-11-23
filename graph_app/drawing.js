@@ -1,6 +1,8 @@
 // The drawing on the vendored vis-network (G-V4.VIEW, page-interface-note.md section 3) and the browser's read-only test hook
 // (`window.graphViewTest`, TR-VIEW-010, 013). Colours and the font come from the design tokens as the browser resolves them (REQ-GA-016);
 // one fixed seed and solver settle a graph the same way on every opening (REQ-GA-031); a dropped step is held where it was dropped (REQ-GA-032).
+import { layered } from './arrangement.js';
+
 const SMOOTH = { rounded: { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 }, straight: false };
 
 /** a CSS value resolved by the browser, e.g. var(--text) -> rgb(...): vis-network draws on a canvas and does not read CSS variables */
@@ -63,12 +65,25 @@ function visNode(n, t) {
   return node;
 }
 
+/** start places for the solver: the steps without a place begin in their layer, left to right, so a workflow settles reading from left to
+ *  right instead of in a tall column the view must zoom far out for; the solver only relaxes them from there (deterministic, REQ-GA-031) */
+function startPlaces(nodes, edges) {
+  const level = Object.fromEntries(layered(nodes, edges).map((n) => [n.id, n.level]));
+  const rank = {};
+  return nodes.map((n) => {
+    if (n.x !== undefined) return n;
+    const l = level[n.id];
+    rank[l] = (rank[l] ?? 0) + 1;
+    return { ...n, x: l * 220, y: (rank[l] % 2 ? 1 : -1) * Math.floor(rank[l] / 2) * 110 };
+  });
+}
+
 function visOptions(o, t) {
   const layered = o.layout === 'layered';
   return {
     layout: { randomSeed: o.seed, improvedLayout: true, hierarchical: layered ? { enabled: true, direction: 'LR', sortMethod: 'directed', levelSeparation: 220 } : { enabled: false } },
     physics: { enabled: o.physics && !layered, solver: o.solver, stabilization: { enabled: true, iterations: 400, fit: true },
-      barnesHut: { gravitationalConstant: -6000, springLength: 170, avoidOverlap: 0.6 } },
+      barnesHut: { gravitationalConstant: -2500, springLength: 140, avoidOverlap: 0.6 } },
     edges: { arrows: { to: { enabled: true } }, smooth: SMOOTH[o.edges] ?? SMOOTH.rounded, color: { color: t.muted, highlight: t.accent }, font: { color: t.muted, face: t.font } },
     interaction: { hover: true, keyboard: false, selectConnectedEdges: false },
   };
@@ -108,11 +123,12 @@ export function visDrawing(container, vis, win = globalThis) {
       options = { ...o };
       hook.settled = false;
       network.setOptions(visOptions(options, colours));
-      nodes = new vis.DataSet(data.nodes.map((n) => visNode(n, colours)));
+      const settling = options.physics && options.layout !== 'layered';
+      nodes = new vis.DataSet((settling ? startPlaces(data.nodes, data.edges) : data.nodes).map((n) => visNode(n, colours)));
       // setData stabilizes once when physics is on (and fires stabilizationIterationsDone); a second stabilize() here would move the steps
       // again after `settled` was reported, so a step read or dragged in between would jump (found by TC-GA-037)
       network.setData({ nodes, edges: new vis.DataSet(data.edges.map((e) => ({ id: e.id, from: e.from, to: e.to, dashes: Boolean(e.dashes) }))) });
-      if (!(options.physics && options.layout !== 'layered')) win.setTimeout(settle, 0);
+      if (!settling) win.setTimeout(settle, 0);
     },
     setOptions(o) {
       const switchedOn = o.physics === true && !options.physics;

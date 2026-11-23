@@ -1,18 +1,29 @@
 /* The graph viewer's own styles (REQ-GA-015): every colour, font, spacing, radius and shadow is a variable of tokens.css, the main app's
    design tokens, so light and dark follow the system through data-theme="auto" (REQ-GA-016). The picture's colours are handed to the
-   drawing library from the same variables (drawing.js). Layout: the owner's sketch (D-425): top band, left column beside the picture,
-   actions under the picture, the history and replay row, the status bar. */
+   drawing library from the same variables (drawing.js). Layout: the owner's sketch (D-425) as the owner narrowed it (D-459): the graph list
+   above the left column and as wide as it, a slim band of search and store above the picture, actions under the picture, the history and
+   replay row, the status bar. */
 html, body { margin: 0; height: 100%; }
 body { font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--leading); color: var(--text); background: var(--page-bg); }
-#app { display: grid; grid-template-rows: auto 1fr auto auto; gap: var(--space-3); height: 100vh; padding: var(--space-3); box-sizing: border-box; }
+#app { display: grid; grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr); grid-template-rows: auto 11rem minmax(0, 1fr) auto auto auto;
+  grid-template-areas: "list band" "list picture" "left picture" "left actions" "history history" "status status";
+  gap: var(--space-3); height: 100vh; padding: var(--space-3); box-sizing: border-box; }
+.graph-list { grid-area: list; display: flex; flex-direction: column; min-height: 0; contain: size; }      /* its entries scroll; it does not stretch the band's row */
+.band { grid-area: band; display: flex; gap: var(--space-3); min-width: 0; }
+.left-column { grid-area: left; }
+.picture { grid-area: picture; }
+.actions-row { grid-area: actions; }
+.history-row { grid-area: history; }
+.status-bar { grid-area: status; }
+.band .area, .actions-row { padding: var(--space-2) var(--space-3); }
+.search-band { flex: 1 1 auto; }
+.other-things { flex: 0 1 auto; }
+.band .search-band h2, .area.actions-row h2 { display: inline; margin: 0 var(--space-2) 0 0; }
+.search-band .later, .actions-row .later { display: inline; }
 .area { background: var(--glass-solid); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); min-width: 0; }
 .area h2 { margin: 0 0 var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--text-muted); }
-.top-band { display: grid; grid-template-columns: minmax(16rem, 2fr) minmax(12rem, 3fr) minmax(12rem, 1fr); gap: var(--space-3); }
-.graph-entries { list-style: none; margin: 0; padding: 0; max-height: 8.5rem; overflow: auto; font-size: var(--text-sm); }
+.graph-entries { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-height: 0; overflow: auto; font-size: var(--text-sm); }
 .graph-entry { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); overflow-wrap: anywhere; }
-.work { display: grid; grid-template-columns: minmax(16rem, 22rem) 1fr; gap: var(--space-3); min-height: 0; }
-.left-column { overflow: auto; }
-.centre { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: var(--space-3); min-height: 0; }
 .picture { display: flex; flex-direction: column; min-height: 0; }
 .drawing { flex: 1 1 auto; min-height: 0; border-radius: var(--radius-sm); background: var(--field); }
 .later, .hint, .store { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
@@ -44,6 +55,6 @@ body { font-family: var(--font-sans); font-size: var(--text-base); line-height: 
 .history-row button { font: inherit; font-size: var(--text-sm); color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); }
 .history-row button[disabled] { color: var(--text-muted); }
 .left-column { display: flex; flex-direction: column; overflow: hidden; }
-.selection { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.selection { flex: 1 1 0; min-height: 4rem; overflow: auto; }
 .left-column > h3 { flex: none; }
-.step-list { flex: none; max-height: 10rem; overflow: auto; }
+.step-list { flex: 0 1 auto; min-height: 3rem; max-height: 10rem; overflow: auto; }
