@@ -13,6 +13,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-07 Tokens, frame, status | done | see `git log` ("feat: T-07 tokens, frame, status") | TC-GA-021, TC-GA-031, 032; `tests/js/store-note.test.mjs` (2), `tests/js/graph-viewer-frame.test.mjs` (3) | Track B started; the list is text only until T-08, the picture empty until T-09 |
 | T-08 List and opening | done | see `git log` ("feat: T-08 list and opening") | TC-GA-018, 019, 020 (TC-GA-021 stays green); `tests/js/list-filter.test.mjs` (3), `tests/js/graph-viewer-list.test.mjs` (5) | TC-GA-017 stops at `selectStep` (the left column, T-11) |
 | T-09 The picture | done | see `git log` ("feat: T-09 the picture") | TC-GA-022, 023, 024, 025; `tests/js/graph-picture.test.mjs` (8) | finding F-1: TC-GA-025 cannot see its planned defect (owner decision) |
+| T-10 Arrangement and settings | done | see `git log` ("feat: T-10 arrangement and settings") | TC-GA-026, 027, 028; `tests/js/graph-settings.test.mjs` (3), `graph-arrangement.test.mjs` (4), `graph-viewer-arrange.test.mjs` (3) | the drawing applies seed, solver and drag in T-12 |
 
 ## T-01: Record tables
 
@@ -252,3 +253,30 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 **Open questions for Verify / the owner (behaviour only in the code, P25):**
 1. A step ID used twice is drawn once, as stored first (vis-network refuses two nodes with one ID); REQ-GA-025 names only missing steps. Proposal: keep; the problem list names it.
 2. The label of a step is two lines, its ID and then its kind and marks (`step.write` / `processing · untrusted · code`). Proposal: keep; the owner sees it in the browser at T-12.
+
+## T-10: Arrangement and settings
+
+**What was done**
+- `graph_app/settings.js` (R6, written again for the interface note's names): `KEY`, `DEFAULTS` (`edges: rounded`, `arrangement: on`), `loadSettings(storage)` (the defaults where nothing is saved, the text is damaged, a value is unknown or the storage throws, REQ-GA-035), `saveSettings` (false on a blocked storage, never a throw), `validSettings`, `drawingOptions(settings, layout)` with the fixed `SEED` 7 and `SOLVER` `barnesHut` (the prototype's validated solver, REQ-GA-031).
+- `graph_app/arrangement.js` (R6, written again): `placed(nodes, saved, moved)` (a moved place wins over the saved one, either is held with `fixed`, a step without one is left to the solver, places of unknown steps ignored, REQ-GA-030, 032); `layered(nodes, edges)` (longest-path levels in a depth-first order; a connection that closes a cycle is left out of the layering so a stored cyclic graph still gets whole-number levels; no place held, REQ-GA-033).
+- `graph_app/viewer.js`: opening reads the graph and its arrangement together and draws the steps at their places with the drawing options of the settings; the drawing's drag end keeps the dropped place (rounded to whole pixels) while the same graph stays open, also when it is read again; another graph starts without moved places. The settings place in "other things": the button `#settings-open` (with `aria-expanded`), the group `[data-settings]` with `[data-setting=edges]`, `[data-setting=arrangement]` and the button `#layered-reset`; a change reaches the drawing through `setOptions` at once without reading the graph again and is saved on the device; `setSettings`, `layered()` on the controller.
+- `graph_app/graph.css`: the settings place as a small popover under its button (opening it first pushed the rows below out of the frame); the filter field and the controls styled from the tokens; the picture may shrink, so the actions row stays inside the frame at 1280 × 800 (seen in Firefox, light and dark).
+- `tests/js/graph-app-files.test.mjs`: the expected file list gets `arrangement.js` and `settings.js` (and is kept sorted).
+- Unit tests written first and seen red (5 files failing to load): `graph-settings.test.mjs` (3), `graph-arrangement.test.mjs` (4, with a branch and join and a cycle), `graph-viewer-arrange.test.mjs` (3: a moved place kept, the settings place and its writes, the layered reset by call and by button).
+
+**Tests green (my runs, feedback only):** TC-GA-026, 027, 028 (with TC-GA-018 to 025); `node --test "tests/js/*.test.mjs"` 217 pass; TC-GA-031, 032 OK.
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2588 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 217 pass; acceptance scripts all OK except the page checks of later tasks (`graph_view_page.test.mjs` 3, `test_graph_view_browser.py` 7 errors) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Deliberate defects (TR-VIEW-021), run once each, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| the saved arrangement ignored (`saved = null`) | TC-GA-026 | fails |
+| every step on one level (`level: 0`) | TC-GA-027 | fails |
+| the settings not written to the storage | TC-GA-028 | fails |
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. The fixed seed is 7 and the solver `barnesHut` (the prototype's); REQ-GA-031 fixes only that there is one of each. Proposal: keep; TC-GA-036 checks the sameness in Firefox at T-12.
+2. Moved places stay while the same graph is open (also when it is read again) and are let go by the layered reset or by opening another graph. REQ-GA-032 says "while the graph is open". Proposal: keep.
+3. Settings words ("View settings", "Connections", "Arrange by itself", "Reset to layers") are mine. Proposal: keep; the owner may change them.

@@ -29,7 +29,7 @@ test('REQ-GA-010: no own source of the Graph app names an address outside the ho
   // Then
   // the G-V4.VIEW page (page-interface-note.md); tokens.css is the copy of the main app's tokens (REQ-GA-014); drawing.js until T-09 a stub
   assert.deepEqual(sources.map((s) => s.name).sort(),
-    ['adapter.js', 'api.js', 'app.js', 'drawing.js', 'graph-view.js', 'graph.css', 'index.html', 'list-filter.js', 'problems.js', 'step-marks.js', 'store-note.js', 'tokens.css', 'viewer.js']);
+    ['adapter.js', 'api.js', 'app.js', 'arrangement.js', 'drawing.js', 'graph-view.js', 'graph.css', 'index.html', 'list-filter.js', 'problems.js', 'settings.js', 'step-marks.js', 'store-note.js', 'tokens.css', 'viewer.js']);
   assert.deepEqual(found, []);
 });
 

@@ -12,8 +12,8 @@ body { font-family: var(--font-sans); font-size: var(--text-base); line-height: 
 .graph-entry { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); overflow-wrap: anywhere; }
 .work { display: grid; grid-template-columns: minmax(16rem, 22rem) 1fr; gap: var(--space-3); min-height: 0; }
 .left-column { overflow: auto; }
-.centre { display: grid; grid-template-rows: 1fr auto; gap: var(--space-3); min-height: 0; }
-.picture { display: flex; flex-direction: column; min-height: 20rem; }
+.centre { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: var(--space-3); min-height: 0; }
+.picture { display: flex; flex-direction: column; min-height: 0; }
 .drawing { flex: 1 1 auto; min-height: 0; border-radius: var(--radius-sm); background: var(--field); }
 .later, .hint, .store { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
 .later-parts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
@@ -23,3 +23,10 @@ body { font-family: var(--font-sans); font-size: var(--text-base); line-height: 
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .problems { margin: 0 0 var(--space-2); padding-left: var(--space-4); font-size: var(--text-sm); color: var(--danger); }
 .problems:empty { display: none; }
+.other-things button, .settings select, #graph-filter { font: inherit; font-size: var(--text-sm); color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); }
+#graph-filter { box-sizing: border-box; width: 100%; margin-bottom: var(--space-2); }
+.other-things { position: relative; }
+.settings { position: absolute; z-index: 10; top: 100%; right: 0; min-width: 16rem; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3);
+  background: var(--glass-solid); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow); }
+.settings[hidden] { display: none; }
+.setting { display: flex; justify-content: space-between; gap: var(--space-2); align-items: center; font-size: var(--text-sm); }
