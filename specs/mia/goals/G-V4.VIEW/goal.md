@@ -89,7 +89,7 @@ Thirteen top-level items in scope (FR-48 to FR-55, NFR-10 to NFR-14) plus the IF
 |---|---|---|
 | Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
 | Plan | done | plan package approved, plan gate ticked by the owner 2026-11-23 (D-447); red tests `82327296`, tag `plan-baseline-g-v4-view`; `plan.md` |
-| Implement | open | started 2026-11-23 with T-01; `implementation-log.md` |
+| Implement | done | T-01 to T-12 committed 2026-11-23, one commit each (`3b7b8fb3` … T-12); `implementation-log.md` (findings F-1 → A-175 staged, F-2 open; open questions for Verify); every VIEW check green on the branch (my runs) |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |

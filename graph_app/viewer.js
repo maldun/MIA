@@ -54,11 +54,11 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     el('header', { class: 'top-band' },
       area('section', 'graph-list', 'Graphs', filterBox, list),
       area('section', 'search-band', 'Search and chat', later('SEARCH')),
-      area('section', 'other-things', 'Other things', store, settingsOpen, settingsPlace)),
+      area('section', 'other-things', 'Other things', store)),
     el('div', { class: 'work' },
       area('aside', 'left-column', 'Selection', problemList, selection, el('h3', {}, 'Steps'), stepList),
       el('div', { class: 'centre' },
-        area('main', 'picture', 'Picture', canvas),
+        area('main', 'picture', 'Picture', el('div', { class: 'picture-tools' }, settingsOpen, settingsPlace), canvas),
         area('section', 'actions-row', 'Actions', later('EDIT')))),
     area('section', 'history-row', 'History and replay',
       el('div', { class: 'history' }, el('div', { class: 'history-buttons' }, historyOpen, previousButton, nextButton), historyList),
@@ -128,6 +128,7 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     if (!drawing) {
       drawing = makeDrawing(canvas);
       drawing.onDragEnd(({ id, x, y }) => { moved[id] = { x: Math.round(x), y: Math.round(y) }; });
+      drawing.onSelect?.(({ step, connection }) => (step ? controller.selectStep(step) : connection ? controller.selectConnection(connection) : controller.selectNothing()));
     }
     return drawing;
   }

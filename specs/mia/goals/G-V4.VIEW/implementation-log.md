@@ -15,6 +15,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-09 The picture | done | see `git log` ("feat: T-09 the picture") | TC-GA-022, 023, 024, 025; `tests/js/graph-picture.test.mjs` (8) | finding F-1: TC-GA-025 cannot see its planned defect (owner decision) |
 | T-10 Arrangement and settings | done | see `git log` ("feat: T-10 arrangement and settings") | TC-GA-026, 027, 028; `tests/js/graph-settings.test.mjs` (3), `graph-arrangement.test.mjs` (4), `graph-viewer-arrange.test.mjs` (3) | the drawing applies seed, solver and drag in T-12 |
 | T-11 Left column and history | done | see `git log` ("feat: T-11 left column and history") | TC-GA-029, 030, and TC-GA-017 (waiting since T-08): all 15 page node checks green; `tests/js/graph-panel.test.mjs` (5), `graph-viewer-history.test.mjs` (3) | the browser side follows in T-12 |
+| T-12 The page in Firefox | done | see `git log` ("feat: T-12 the page in Firefox") | TC-GA-033 to 039 (`test_graph_view_browser.py` 7/7, three runs); every VIEW check green | `graph-view.js` kept (finding F-2, protected smoke check); A-175 still staged |
 
 ## T-01: Record tables
 
@@ -306,3 +307,40 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 1. The left column shows the fields the interface note names; a data step's `value` and a step's other stored values are only in the stored text. REQ-GA-036 says "its known values as labelled fields". Proposal: keep (the stored text holds everything); widen at EDIT if wanted.
 2. Field labels ("toolbox ID", "changed since trusted", "holds code") and button words ("History", "Previous version", "Next version") are mine. Proposal: keep; the owner may change them.
 3. A selection is let go when another version is shown (the step may not exist there). Proposal: keep.
+
+## T-12: The page in Firefox
+
+**What was done**
+- `graph_app/drawing.js`: `visDrawing(container, vis)` on the vendored vis-network 10.1.2. Colours and the font are the tokens as the browser resolves them (a probe element: vis draws on a canvas and cannot read `var(--…)`), read again when the system's colour scheme changes (REQ-GA-016); data steps ellipses, processing steps boxes, loop-controlling steps a hexagon drawn around its text (vis puts a hexagon's label outside the shape; the prototype's renderer, R6), untrusted and missing steps with a dashed border in `--danger`; connections with arrows, dashed where the page says so, rounded or straight. Layout: `randomSeed` the page's fixed seed and the solver `barnesHut` with `avoidOverlap` (REQ-GA-031); the layered reset as vis's hierarchical layout from the levels (left to right). After the first stabilisation physics is switched off, so a settled graph keeps its places; a dropped step is held (`fixed`) where it was dropped (REQ-GA-032). `onDragEnd`, `onStabilized`, and `onSelect` (a click on a step, a connection or empty space: an addition to section 3 of the interface note, see the open questions). The read-only test hook `window.graphViewTest` (`settled`, `positions()`, `domPosition(id)`, `labels()`, `labelColour()`, TR-VIEW-010, 013).
+- `graph_app/viewer.js`: a click in the picture selects the step or connection, or nothing on empty space (through `onSelect` where the drawing has it); the "View settings" button and its popover moved into the picture's header (D-458).
+- `graph_app/graph.css`: the left column a column whose selection scrolls on its own, so the step list stays in sight; the settings in the picture's top right corner.
+- `app.js` and `index.html` were already the entry of the interface note (T-07).
+- **Not done: `graph_app/graph-view.js` and `tests/js/graph-view.test.mjs` are kept** (finding F-2): the protected smoke check `tests/smoke/smoke_stack.py` lists `graph-view.js` in `GRAPH_FILES` (the files the graph container must serve, equal to `graph_app/`), so removing it would break a protected check. The file is no longer loaded by the page.
+
+**Findings on the way, each caught by a browser check:**
+1. TC-GA-037 (dropped step jumped): the page let vis stabilise twice on opening (adding the data, then an explicit `stabilize()`), so `settled` was reported after the first round while the second still moved the steps. Now the data goes in with `setData`, which stabilises once.
+2. TC-GA-037 (step moved by the settings): every settings change passed `physics` and switched the solver on again with `fit`, which moved the view. Now the drawing settles again only when the arrangement is switched from off to on, and then without fitting the view.
+3. TC-GA-038 (settings out of reach by Tab forward): D-458.
+
+**Tests green (my runs, feedback only):** `test_graph_view_browser.py` 7/7 (TC-GA-033 to 039) in three runs in a row (Firefox of Playwright, headless, 1280 × 800); `graph_view_page.test.mjs` 15/15; `test_graph_view_files.py` OK; `node --test "tests/js/*.test.mjs"` 225 pass. With Track A this is every VIEW check (A-175, once installed, changes TC-GA-025 only).
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2588 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 225 pass; every acceptance script OK (`test_view_backend.py`, the IF-104 v2 suite, `test_graph_view_files.py`, `test_graph_view_browser.py` included) except the known reds `test_decide_guard.py`, `test_judge_calibration.py`; `graph_view_page.test.mjs` and the JS contract suites 49 pass; model check OK; traceability check: the same 549 ERROR lines as at the plan gate (`39a47d7f`), none new, none gone (older items: IF-001 to 006, REQ-GATE, REQ-EVAL, TC-API-001 …, not of this goal).
+
+**Deliberate defects (TR-VIEW-021), run once each in Firefox, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| a button in the empty EDIT area | TC-GA-033 | fails (`1 != 0 : EDIT`) |
+| a fixed light background (`background: white !important`) | TC-GA-034 | fails (white instead of the dark `--page-bg`) |
+| a link around the stored name in the step list (`innerHTML`) | TC-GA-035 | fails (the `<img …>` part became markup) |
+| a random seed | TC-GA-036 | fails (other places on the second opening) |
+| the arrangement saved on drop (`PUT …/arrangement`) | TC-GA-037 | fails (a PUT was sent) |
+| step list entries without keyboard focus (no `tabindex`) | TC-GA-038 | fails (`step:step.check` not reached) |
+| a planted stylesheet `https://example.invalid/x.css` | TC-GA-039 | fails (the outside request is listed) |
+
+**Finding F-2 (for the owner; protected smoke check):** the plan has T-12 remove `graph_app/graph-view.js` and its unit test, but `tests/smoke/smoke_stack.py` (protected) names `graph-view.js` among the graph container's files. Proposal: keep the file until an amendment changes `GRAPH_FILES` of the smoke check (then remove both in one commit), or keep it for good as a dead file; either way the page does not load it.
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. `onSelect(fn)` was added to the drawing of section 3 of the interface note (a click in the picture selects; REQ-GA-036 says "when the owner selects a step", and without it only the step list selects). The recording drawing of the node checks does not have it; the viewer calls it only where it exists. Proposal: name it in the interface note at the merge.
+2. After the first stabilisation the solver stays off until the owner switches the arrangement off and on again; dragging one step does not move the others. Proposal: keep (REQ-GA-031, 032).
+3. The layered reset runs left to right (`direction: 'LR'`). Proposal: keep.
