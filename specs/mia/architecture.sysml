@@ -656,8 +656,8 @@ package MIA_Architecture {
                    graph with members before headers; built (T-02) durable file writes and, in both backends, the cut back of a record to a
                    version and, in the file backend, put_file for a plain file below the root (backend operations beside IF-102, for the
                    sync only); built (T-03) the lag and the one-way sync under the copy's lock, the aside file before the cut back, and
-                   the lag and sync commands of migrate; built (T-04) the one-graph move and the side records with their graph; planned
-                   the format marker. */
+                   the lag and sync commands of migrate; built (T-04) the one-graph move and the side records with their graph; built (T-05)
+                   the format marker of a set of files and the refusal of a newer or an older set. */
             @Implementation { :>> status = ImplementationStatus::partly;
                               :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py",
                                              "graph_store_transfer.py"); }

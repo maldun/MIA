@@ -295,6 +295,56 @@ class OneGraph(unittest.TestCase):
         self.assertEqual(records, without[:-1] + side + [("graphs", ts.MULTI)])
 
 
+class OlderSets(unittest.TestCase):
+    def setUp(self):
+        self.base = tempfile.mkdtemp(prefix="transfer-unit-")
+        self.addCleanup(shutil.rmtree, self.base, True)
+        self.old = FileBackend(os.path.join(self.base, "old"))
+        ts.small_store(self.old)
+        self.old.append("graph_edges", "e9", {"id": "e9", "version": 1, "author": "owner", "time": ts.STAMP,
+                                              "doc": {"id": "e9", "from": "a", "to": "b", "data": {}}})
+
+    @mark.req("REQ-SLY-034")
+    def test_an_unscoped_connection_in_a_set_without_a_marker_stops_the_one_graph_move(self):
+        """Example: graph_edges/e9 (no graph ID in front), no marker: move_graph of cp2.multi refused older_format naming e9; nothing written."""
+        # Given: the set without its marker
+        os.remove(os.path.join(self.old.root, transfer.MARKER))
+        target = FileBackend(os.path.join(self.base, "target"))
+        # When / Then: refused naming the record and the conversion step
+        with self.assertRaises(StorageError) as refused:
+            transfer.move_graph(self.old, target, ts.MULTI)
+        self.assertEqual((refused.exception.rule, refused.exception.detail),
+                         ("older_format", {"table": "graph_edges", "id": "e9", "conversion": transfer.CONVERSION_STEP}))
+        self.assertEqual(ts.entries(target), {})
+
+    @mark.req("REQ-SLY-034")
+    def test_a_set_with_its_marker_and_an_unscoped_record_is_invalid_not_older(self):
+        """Example: the same set with its marker: the move is refused by the record check (invalid, unscoped_id), not as older_format."""
+        # Given: the set keeps its marker
+        target = FileBackend(os.path.join(self.base, "target"))
+        # When / Then: refused as a damaged record of today's format, nothing written
+        with self.assertRaises(StorageError) as refused:
+            transfer.move_store(self.old, target)
+        self.assertEqual((refused.exception.rule, refused.exception.detail["id"]), ("unscoped_id", "e9"))
+        self.assertEqual(ts.entries(target), {})
+
+    @mark.req("REQ-SLY-035")
+    def test_the_commands_name_a_newer_set_in_one_line(self):
+        """Example: `lag --data <set of format 2> --copy DIR`: "refused: ... format 2 ... knows format 1 ...", exit 1."""
+        # Given: a live set of format 2
+        with open(os.path.join(self.old.root, transfer.MARKER), "w", encoding="utf-8") as handle:
+            handle.write('{"format": 2}')
+        out = io.StringIO()
+        # When: the owner asks for the lag
+        with contextlib.redirect_stdout(out):
+            code = migrate.main(["lag", "--data", self.old.root, "--copy", os.path.join(self.base, "copy")])
+        # Then: one line naming both formats, exit 1
+        self.assertEqual(code, 1)
+        lines = out.getvalue().splitlines()
+        self.assertEqual(len(lines), 1)
+        self.assertRegex(lines[0], r"^refused: .*format 2.*format 1")
+
+
 class Export(unittest.TestCase):
     @mark.req("REQ-SLY-009")
     def test_the_export_holds_the_graph_group(self):

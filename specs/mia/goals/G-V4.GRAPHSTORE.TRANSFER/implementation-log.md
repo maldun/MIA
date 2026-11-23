@@ -8,6 +8,7 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | T-02 Durable files, cut back, the same answers | done | see `git log` ("feat: T-02 durable files, cut back") | TC-SLY-023; TC-SLY-022 kept (`tests/acceptance/test_transfer_sync.py` class SameBehaviour 2 of 2); `tests/test_storage_files.py` (6 new unit tests); `tests/test_storage_postgres.py` 44 (1 new) | the format marker is left to T-05 (decision below) |
 | T-03 Lag, sync, aside, lock, commands | done | see `git log` ("feat: T-03 lag, sync, aside, lock, commands") | TC-SLY-024 to 028, TC-SLY-038, TC-SLY-039, TC-SLY-021 whole; `tests/test_graph_store_transfer.py` 14 (5 new) | TC-SLY-033 and 037 (T-05) green early through the sync |
 | T-04 Side records, one-graph move, interruptions | done | see `git log` ("feat: T-04 side records, one-graph move, interruptions") | TC-SLY-031, TC-SLY-029, TC-SLY-036 (all cases); `tests/test_graph_store_transfer.py` 19 (5 new) | TC-SLY-030 skipped until VIEW is merged; must be green before Verify |
+| T-05 Portable sets | done | see `git log` ("feat: T-05 portable sets") | TC-SLY-032 to 035, TC-SLY-037 (`test_transfer_sets.py` 6/6); `tests/test_storage_files.py` 10 (4 new), `tests/test_graph_store_transfer.py` 22 (3 new) | two T-02 unit tests adapted to the marker (below) |
 
 ## T-01: Move integrity and order
 
@@ -95,10 +96,29 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **Traceability:** 549 ERROR lines, the same as the export (compared line by line); none new.
 
+## T-05: Portable sets
+
+**What was done**
+- `storage_files.py`: `FORMAT = 1` and `MARKER = "mia-store.json"` live here (the backend writes and reads the marker; `graph_store_transfer` names them too, as the tests use them). `_mark()` writes `{"format": 1}` through `_replace` (durable) into a set without a marker before the first `append`, `cut` that writes, or `put_file` (REQ-SLY-032, 023). `FileBackend(root)` reads the marker (`format()`, None without one) and refuses a later format with `StorageError("format", detail={"found", "known"})`, writing nothing (REQ-SLY-035). A set without a marker is read as format 1 (REQ-SLY-033).
+- `graph_store_transfer.py`: `check_format(source)` before any write of `move_store`, `move_graph` and `sync_store`: a files source without a marker holding a step or connection ID without a graph ID in front is `StorageError("invalid", rule="older_format", detail={"table", "id", "conversion": CONVERSION_STEP})` (REQ-SLY-034). A database source, and a set with its marker, are not asked: there such a record is refused by today's record check as `invalid`/`unscoped_id` (A-167).
+- `migrate.py`: `main` turns a `format` refusal raised while opening a set into one line, exit 1 (`refused: a set of files has format 2, this MIA knows format 1 (nothing was written)`); `older_format` is one line naming the record and the conversion.
+- Checked: no code outside the tests lists a store's root as tables (`harness.list_suites` lists the eval suites folder, not a store), so the marker and `sync.lock` in the root are not read as tables.
+- Unit tests written first and seen red: `tests/test_storage_files.py` class FormatMarker (4: the first append writes the marker first and durably, cut and put_file into a set without a marker write it, a later format is not opened, the known format opens and keeps its marker); `tests/test_graph_store_transfer.py` class OlderSets (3: an unscoped connection stops the one-graph move, the command names a newer set in one line; and a set with its marker and an unscoped record is `unscoped_id`, which passed already on T-04's code: kept as a characterization check).
+- Two T-02 unit tests adapted (my own, not protected): the first write into an empty folder now has the marker's three calls first, so "an append writes exactly fsync, replace, fsync" now starts from a set with its marker, and the `put_file` test checks the last three calls (as TC-SLY-023 does).
+
+**Tests green (my runs, feedback only):** `tests/acceptance/test_transfer_sets.py` 6/6; `test_transfer_sync.py` OK (1 skipped), `test_transfer_interrupt.py` OK, `test_transfer_move.py` OK; `tests/test_storage_files.py` 10/10; `tests/test_graph_store_transfer.py` 22/22; `tests/test_migrate.py` 10/10.
+
+**Regression set (2026-11-23, sequential, runner `/home/maldun/.claude-work/jobs/85fdeba4/tmp/regress05.sh`):** unit suite 2587 tests, 1 failure: `test_sandbox.RunTests.test_runs_are_independent_and_leave_nothing_behind` found a `mia-sandbox-*` folder in the shared `/tmp` it had not made; re-run alone twice: OK; the VIEW session ran its checks at the same time (Findings). Acceptance scripts compared with a `git archive` export of the T-04 state (`/home/maldun/.claude-work/jobs/85fdeba4/tmp/acc05_new.txt`, `acc05_base.txt`): only `test_transfer_sets.py` turned OK; `test_rules_rule_set.py` red only in the export. Unchanged reds: `test_decide_guard.py`, `test_judge_calibration.py` (known). No new red; no TRANSFER check red.
+
+**Deliberate defects:** none named by the plan for T-05.
+
+**Traceability:** 549 ERROR lines, the same as the export (compared line by line); none new.
+
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
 | `tests/acceptance/test_skill_run_view_browser.py` failed once in the full acceptance run and passed twice alone (not storage; not changed by T-03) | T-03 | none new: a protected check, reported for Verify; no change made |
+| `tests/test_sandbox.py` (`test_runs_are_independent_and_leave_nothing_behind`) counts `mia-sandbox-*` folders in the shared `/tmp`; it failed once while another session ran checks, OK twice alone | T-05 | none new: not changed by TRANSFER; reported for Verify (a check that reads a shared folder can see other sessions' runs) |
 
 ## Plan amendments
 None.

@@ -66,6 +66,16 @@ def _parser():
 
 
 def main(argv=None, open_db=_open_postgres):
+    try:
+        return _run(argv, open_db)
+    except StorageError as err:            # a set of a newer format is refused when it is opened (REQ-SLY-035): one line, not a traceback
+        if err.code != "format":
+            raise
+        print(_explain(err))
+        return 1
+
+
+def _run(argv, open_db):
     parser = _parser()
     args = parser.parse_args(argv)
     if args.command in ("lag", "sync"):
@@ -137,6 +147,11 @@ def _target(target, dry_run):
 
 
 def _explain(err):
+    if err.code == "format":
+        return "refused: a set of files has format %d, this MIA knows format %d (nothing was written)" % (err.detail["found"], err.detail["known"])
+    if err.rule == "older_format":
+        return "refused: %s/%s has an ID from before scoped IDs; convert the set first with %s (nothing was written)" % (
+            err.detail["table"], err.detail["id"], err.detail["conversion"])
     if err.code == "locked":
         return "refused: another sync or move holds the copy's lock %s (nothing was written)" % err.detail["lock"]
     if err.rule == "move_refused":

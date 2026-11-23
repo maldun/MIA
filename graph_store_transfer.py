@@ -1,8 +1,8 @@
 """
 Moving graphs between stores and keeping a copy in sync with the live store (G-V4.GRAPHSTORE.TRANSFER; REQ-SLY-016 to 039).
 
-Built: move_store (T-01), lag, sync_store and copy_lock (T-03), move_graph and the side records (T-04); the format marker follows (T-05). The
-prototype's graph_store_move.py and graph_store_sync.py (prototype/g-v4, rounds 02 and 03) are the basis.
+Built: move_store (T-01), lag, sync_store and copy_lock (T-03), move_graph and the side records (T-04), the older-set refusal (T-05; the
+marker itself is the FileBackend's). The prototype's graph_store_move.py and graph_store_sync.py (prototype/g-v4, rounds 02 and 03) are the basis.
 
 Stores are backends (storage_files.FileBackend, storage_postgres.PostgresBackend: versions, append, ids, remove, cut, close); a copy is always a
 FileBackend, its root holds the aside folder, the lock and the format marker.
@@ -29,18 +29,19 @@ try:
     from . import graph_rule_set, graph_tables
     from .storage import StorageError, table_definitions
     from .storage_copy import GRAPH_GROUP, _check_entries, copy_records, ordered_tables
+    from .storage_files import FORMAT, MARKER  # noqa: F401  named here too: the format of a set belongs to its moves (REQ-SLY-032)
 except ImportError:  # used as plain script / in tests
     import graph_rule_set
     import graph_tables
     from storage import StorageError, table_definitions
     from storage_copy import GRAPH_GROUP, _check_entries, copy_records, ordered_tables
+    from storage_files import FORMAT, MARKER  # noqa: F401
 
-FORMAT = 1                     # the format of a set of files this code writes and reads (REQ-SLY-032)
-MARKER = "mia-store.json"       # the format marker in the root of a set of files
 LOCK = "sync.lock"              # the lock file in the root of a copy (REQ-SLY-028)
 ASIDE = "aside"                 # the aside folder in the root of a copy (REQ-SLY-026)
 CONVERSION_STEP = "the conversion of G-V4.GRAPHSTORE.MIGRATION"   # named by the refusal of an older set (REQ-SLY-034)
 HEADERS = "graphs"
+MEMBER_TABLES = ("graph_nodes", "graph_edges", "context_nodes", "context_edges")
 
 
 def _members(kind):
@@ -79,6 +80,17 @@ def graph_problems(source, graph_id, node_ids):
                 checked.add(name)
                 add(graph_tables.check_record(tables[1], entry["doc"], stored={keys[0]: node_ids[tables[0]]}))
     return problems
+
+
+def check_format(source):
+    """A set of files without a marker that holds a step or connection with a plain ID (from before A-167) is refused before any write, naming
+    the record and MIGRATION's conversion (REQ-SLY-034); with a marker or on the database such a record is only invalid (unscoped_id)."""
+    if getattr(source, "root", None) is None or source.format() is not None:
+        return
+    for table in MEMBER_TABLES:
+        for record_id in sorted(source.ids(table)):
+            if "/" not in record_id:
+                raise StorageError("invalid", rule="older_format", detail={"table": table, "id": record_id, "conversion": CONVERSION_STEP})
 
 
 def check_graphs(source, graph_ids):
@@ -122,6 +134,7 @@ def move_store(source, target):
     """Every record of every table from the source to the target, unchanged (REQ-SLY-016); every graph checked first, nothing written when one is
     damaged (REQ-SLY-017, 018, 021); members before headers (REQ-SLY-019); records already there are skipped (REQ-SLY-020). copy_records keeps
     its own checks: a record with another history in the target is a conflict, a record put would refuse is invalid, both before any write."""
+    check_format(source)
     check_graphs(source, source.ids(HEADERS))
     return copy_records(source, target, ordered_tables(table_definitions()))
 
@@ -138,6 +151,7 @@ def move_graph(source, target, graph_id):
     StorageError("conflict", detail={"graph": graph_id}); both before any write. A stop at any write leaves the target's graph at its last
     complete version, and a rerun appends the rest (REQ-SLY-029, 036)."""
     with _lock_of(target):
+        check_format(source)
         check_graphs(source, [graph_id])
         plan = []
         for table, record_id in _graph_records(source, target, graph_id):
@@ -270,6 +284,7 @@ def sync_store(live, copy):
     (REQ-SLY-026, 027), then cut back (REQ-SLY-038); then the live versions the copy lacks follow, members before headers (REQ-SLY-019).
     "graphs" counts the graphs that were not current, "records" the versions appended."""
     with copy_lock(copy.root):
+        check_format(live)
         check_graphs(live, live.ids(HEADERS))
         states = {graph_id: _state(live, copy, graph_id) for graph_id in _graphs(live, copy)}
         states = {graph_id: found for graph_id, found in states.items() if found[0] != "current"}
