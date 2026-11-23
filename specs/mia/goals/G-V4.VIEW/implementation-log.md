@@ -356,3 +356,7 @@ The owner looked at the page in Firefox and asked for a different arrangement of
 Checks after the change (my runs): `node --test "tests/js/*.test.mjs"` 225 pass; `graph_view_page.test.mjs` 15/15; `test_graph_view_files.py` OK; `test_graph_view_browser.py` 7/7 in three runs. Screenshots in light and dark: no page errors.
 
 Open for Verify: REQ-GA-012 says each area is "visible by its label"; the store part now carries its label only for screen readers (the owner's wish).
+
+## Finding F-2 decided (D-500)
+
+`graph_app/graph-view.js` and `tests/js/graph-view.test.mjs` stay as they are (the protected smoke check names the file); the page does not load it. The removal named in T-12 is not done, by the owner's decision.
