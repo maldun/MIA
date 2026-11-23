@@ -16,8 +16,8 @@ Proposed 2026-11-23 by the agent on the owner's split decision (D-474): G-V4.GRA
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given each of the skills kept on the old runner as part of the user interface (chat, check_speech, memory_write, review_abstract, review_full, review_keywords, review_section, review_summary, summarize), when it runs on its graph with the same scripted model replies, then it makes the same model calls and gives the same outputs as on the old runner, and the owner sees no difference in the app | NFR-17 of G-V4.GRAPHAPI (D-473 (3)); the owner's decision of 2026-11-07 revisited |
-| OC-2 | Given MIA after the switch, when any skill runs, then it runs on its graph; there is no second way of running a skill | D-473 (4) |
+| OC-1 | Given each of the skills kept on the old runner as part of the user interface (chat, check_speech, memory_write, review_abstract, review_full, review_keywords, review_section, review_summary, summarize), when it runs on its graph with the same scripted model replies, then it makes the same model calls and gives the same outputs as on the old runner, and the owner sees no difference in the app | OC-2 of G-V4.GRAPHAPI (NFR-17; D-473 (3)); the owner's decision of 2026-11-07 revisited |
+| OC-2 | Given MIA after the switch, when any skill runs, then it runs on its graph; there is no second way of running a skill | OC-1 of G-V4.GRAPHAPI (D-473 (4)) |
 
 ## Scope
 Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`); the items are named when Plan step 1b writes them.
