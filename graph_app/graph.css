@@ -1,13 +1,23 @@
-/* The Graph app follows the light and dark scheme of the system; no outside fonts (REQ-GA-010). vis-network draws on a canvas:
-   app.js hands it the node colors below. */
-:root { color-scheme: light dark; --fg: #1d1d1f; --bg: #fafafa; --panel: #f0f0f2; --data: #dbeafe; --process: #fde68a; --line: #6b7280; }
-@media (prefers-color-scheme: dark) { :root { --fg: #e5e7eb; --bg: #18181b; --panel: #232327; --data: #1e3a8a; --process: #78350f; --line: #9ca3af; } }
-body { margin: 0; font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg); }
-header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 8px 16px; }
-h1 { font-size: 1.125rem; margin: 0; }
-h2 { font-size: 1rem; margin: 0 0 8px; }
-#status { padding: 0 16px; min-height: 1.4em; }
-.work { display: flex; flex-wrap: wrap; gap: 16px; padding: 0 16px 16px; }
-#view { flex: 1 1 480px; height: calc(100vh - 140px); min-height: 320px; border: 1px solid var(--line); border-radius: 6px; }
-aside { flex: 0 1 320px; min-width: 0; background: var(--panel); border-radius: 6px; padding: 12px; }
-#detail { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8125rem; }
+/* The graph viewer's own styles (REQ-GA-015): every colour, font, spacing, radius and shadow is a variable of tokens.css, the main app's
+   design tokens, so light and dark follow the system through data-theme="auto" (REQ-GA-016). The picture's colours are handed to the
+   drawing library from the same variables (drawing.js). Layout: the owner's sketch (D-425): top band, left column beside the picture,
+   actions under the picture, the history and replay row, the status bar. */
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--leading); color: var(--text); background: var(--page-bg); }
+#app { display: grid; grid-template-rows: auto 1fr auto auto; gap: var(--space-3); height: 100vh; padding: var(--space-3); box-sizing: border-box; }
+.area { background: var(--glass-solid); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); min-width: 0; }
+.area h2 { margin: 0 0 var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--text-muted); }
+.top-band { display: grid; grid-template-columns: minmax(16rem, 2fr) minmax(12rem, 3fr) minmax(12rem, 1fr); gap: var(--space-3); }
+.graph-entries { list-style: none; margin: 0; padding: 0; max-height: 8.5rem; overflow: auto; font-size: var(--text-sm); }
+.graph-entry { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+.work { display: grid; grid-template-columns: minmax(16rem, 22rem) 1fr; gap: var(--space-3); min-height: 0; }
+.left-column { overflow: auto; }
+.centre { display: grid; grid-template-rows: 1fr auto; gap: var(--space-3); min-height: 0; }
+.picture { display: flex; flex-direction: column; min-height: 20rem; }
+.drawing { flex: 1 1 auto; min-height: 0; border-radius: var(--radius-sm); background: var(--field); }
+.later, .hint, .store { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
+.later-parts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
+.status-bar { padding: var(--space-2) var(--space-3); }
+.status-bar h2 { display: inline; margin: 0 var(--space-2) 0 0; }
+.status-line { display: inline; margin: 0; font-size: var(--text-sm); overflow-wrap: anywhere; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

@@ -27,8 +27,9 @@ test('REQ-GA-010: no own source of the Graph app names an address outside the ho
     }
   }
   // Then
-  // api.js, drawing.js and viewer.js: the stubs of the G-V4.VIEW page (page-interface-note.md), written in Implement
-  assert.deepEqual(sources.map((s) => s.name).sort(), ['api.js', 'app.js', 'drawing.js', 'graph-view.js', 'graph.css', 'index.html', 'viewer.js']);
+  // the G-V4.VIEW page (page-interface-note.md); tokens.css is the copy of the main app's tokens (REQ-GA-014); drawing.js until T-09 a stub
+  assert.deepEqual(sources.map((s) => s.name).sort(),
+    ['api.js', 'app.js', 'drawing.js', 'graph-view.js', 'graph.css', 'index.html', 'store-note.js', 'tokens.css', 'viewer.js']);
   assert.deepEqual(found, []);
 });
 
@@ -38,7 +39,7 @@ test('REQ-GA-010: the page loads its style and scripts from its own folder, the 
   // When
   const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]);
   // Then
-  assert.deepEqual(refs, ['graph.css', 'vendor/vis-network.min.js', 'app.js']);
+  assert.deepEqual(refs, ['tokens.css', 'graph.css', 'vendor/vis-network.min.js', 'app.js']);
 });
 
 test('REQ-GA-010: the vendored graph library makes no request of its own', () => {

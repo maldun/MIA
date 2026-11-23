@@ -10,6 +10,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-04 Save as a new version, refusals | done | see `git log` ("feat: T-04 save as a new version, refusals") | TC-IF-104-22 (mock, files, postgres); the save parts of TC-IF-104-20 and TC-API-021; `tests/test_graph_api_v2.py` (18 unit tests) | TC-IF-104-20 stops at the changes route (T-06), TC-API-021 at the restore (T-05) |
 | T-05 Check, restore, arrangement save | done | see `git log` ("feat: T-05 check, restore, arrangement save") | TC-IF-104-23, 25 (mock, files, postgres); the restore part of TC-IF-104-24; TC-API-021 (T-04's), TC-API-025; `tests/test_graph_api_v2.py` (23 unit tests) | TC-IF-104-24 stops at the changes route (T-06) |
 | T-06 Record of changes | done | see `git log` ("feat: T-06 record of changes") | every Track A check: IF-104 v2 suite 33/33 (mock, files, postgres), `test_view_backend.py` 9/9 (TC-API-018 to 025, TC-OPR-011); `tests/test_graph_api_v2.py` (28 unit tests) | Track A complete |
+| T-07 Tokens, frame, status | done | see `git log` ("feat: T-07 tokens, frame, status") | TC-GA-021, TC-GA-031, 032; `tests/js/store-note.test.mjs` (2), `tests/js/graph-viewer-frame.test.mjs` (3) | Track B started; the list is text only until T-08, the picture empty until T-09 |
 
 ## T-01: Record tables
 
@@ -164,3 +165,32 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 1. When a record with the new version's ID is already there (TC-API-022), the save answers `logged: false`: this save did not write the record. REQ-API-039 and REQ-API-040 do not say what `logged` is then. Proposal: keep.
 2. Keys of an editor entry other than `op`, `target`, `before`, `after`, `reason` are dropped from the record (the mock does the same). Proposal: keep.
 3. The changes route gives `author` and `time` of the graph version, not of the record (the record has its own, written a moment later by the same account). Proposal: keep.
+
+## T-07: Tokens, frame, status
+
+**What was done**
+- `graph_app/tokens.css`: a byte copy of `templates/static/chat/tokens.css` (REQ-GA-014); `index.html` loads it before `graph.css`, sets `data-theme="auto"` on `<html>` so the tokens follow the system's light or dark setting (REQ-GA-016), and holds only `<div id="app">`.
+- `graph_app/graph.css` written again: every colour, font, spacing, radius and shadow from `var(--…)` (REQ-GA-015); the layout of the owner's sketch (D-425) as a grid: top band (graph list, search and chat, other things), the left column beside the picture with the actions under it, the history and replay row, the status bar.
+- `graph_app/viewer.js`: `createViewer({document, root, api})` builds the frame with the eight areas of the interface note (`data-area`, `aria-label` and the label as heading, REQ-GA-012) and the four later areas (`data-later` SEARCH, EDIT, REPLAY, RUN: one line naming the subgoal, no control, REQ-GA-013); `start()` asks `me`, `store` and the list, fills the store entry `[data-store]` ("store: files, reachable", text only, REQ-GA-018) and the list entries (text only until T-08); `open(id)` reads the current version and puts graph ID, kind, version, author, time and `read-only` into the status bar (REQ-GA-017). `storage` and `makeDrawing` are taken in with T-10 and T-09.
+- `graph_app/store-note.js` (R6, written again for the v2 store route: the prototype's helper read the older `/api/v2/status` shape): `storeEntry(answer)` and `graphStatus(shown)`, pure.
+- `graph_app/api.js`: `httpApi(fetchFn, base)` with the six GETs of the interface note (rejecting with `{status, code, detail}`); written now because `start()` needs `me` and `store` (the plan names `api.js` in T-08).
+- `graph_app/app.js` replaced by the page entry of the interface note (the old file-open page of N-5 T-01 is gone; `graph-view.js` and its tests stay until T-09 decides). Not in T-07's "Touches", but `index.html` cannot load the new frame without it.
+- `tests/js/graph-app-files.test.mjs` (not protected): the expected file list gets `store-note.js` and `tokens.css`, the expected links of `index.html` start with `tokens.css`.
+- Unit tests written first and seen red (4 failures: the modules were missing): `tests/js/store-note.test.mjs` (2), `tests/js/graph-viewer-frame.test.mjs` (3: every area once with label and heading; the later areas in their areas, one line, no control; the store entry from the store route).
+- A look in Firefox (Playwright, 1280 × 800, light and dark, the browser checks' server helper): the frame renders without page errors, the areas sit as in the sketch, the background and text follow the theme. Screenshots: `/tmp/claude-1000/-home-maldun-prog-Python-MIA-goal-v4-view/0ca32470-a536-4706-9a76-e2b655730929/scratchpad/frame-light.png`, `.../frame-dark.png` (scratchpad, not kept).
+
+**Tests green (my runs, feedback only):** TC-GA-021 (`graph_view_page.test.mjs`; the other 12 node checks wait for T-08 to T-11); TC-GA-031, 032 (`test_graph_view_files.py`); `node --test "tests/js/*.test.mjs"` 191 pass.
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2588 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 191 pass; acceptance scripts all OK, `test_graph_view_files.py` now included, except the page checks of later tasks (`graph_view_page.test.mjs` 13, `test_graph_view_browser.py` 6 errors and 1 failure) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`. The browser checks now load the frame: six stop at the `window.graphViewTest.settled` hook (the picture, T-09), TC-GA-038 at the keyboard reach of the list (`ul` takes the focus, the entries do not; T-08 and T-12).
+
+**Deliberate defects (TR-VIEW-021), run once each, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| the store entry hard-coded `database` | TC-GA-021 | fails |
+| one byte of the copy of `tokens.css` changed (`/*` to `/ *` in line 1) | TC-GA-031 | fails |
+| `color: #fff` planted in `graph.css` | TC-GA-032 | fails (`graph.css: colour literal in color: #fff`) |
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. The words of the later areas, the area labels ("Graphs", "Search and chat", "Other things", "Selection", "Picture", "Actions", "History and replay", "Graph status") and the status line form (`cp2.multi · workflow · version 4 · stored by ben · <time> · read-only`, `version 2 of 4` for an older one) are mine; no requirement fixes them. Proposal: the owner looks at the screenshots and changes words as he likes.
+2. The list says `1 connections` for one connection (the interface note fixes `<n> connections`). Proposal: decide at T-08 (singular for one would need the note's form widened).
