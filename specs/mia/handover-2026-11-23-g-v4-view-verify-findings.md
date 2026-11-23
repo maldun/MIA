@@ -1,5 +1,7 @@
 # Handover: G-V4.VIEW Verify found defects; back to Implement (2026-11-23)
 
+**Superseded by `handover-2026-11-24-g-v4-view-fixes-next.md`.**
+
 Worktree `/home/maldun/prog/Python/MIA-goal-v4-view`, branch `goal/v4.view`. Report: `specs/mia/goals/G-V4.VIEW/verification-report.md` (independent reviewer; proposal: not yet verified). Owner's decisions: D-501 in `specs/mia/review-log.md`.
 
 ## For the Implement session (load `dev-workflow`, `implement-phase`)
