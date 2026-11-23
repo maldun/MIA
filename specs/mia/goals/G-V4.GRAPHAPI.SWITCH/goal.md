@@ -16,17 +16,13 @@ Proposed 2026-11-23 by the agent on the owner's split decision (D-474): G-V4.GRA
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given each of the skills kept on the old runner as part of the user interface (chat, check_speech, memory_write, review_abstract, review_full, review_keywords, review_section, review_summary, summarize), when it runs on its graph with the same scripted model replies, then it makes the same model calls and gives the same outputs as on the old runner, and the owner sees no difference in the app | OC-2 of G-V4.GRAPHAPI (NFR-17; D-473 (3)); the owner's decision of 2026-11-07 revisited |
+| OC-1 | Given each of the skills kept on the old runner as part of the user interface (chat, check_speech, memory_write, review_abstract, review_full, review_keywords, review_section, review_summary, summarize), when it runs on its graph with the same scripted model replies, then it makes the same model calls and gives the same outputs as on the old runner, and the owner sees no difference in the app | OC-2 of G-V4.GRAPHAPI (D-473 (3); the owner's decision of 2026-11-07 revisited) |
 | OC-2 | Given MIA after the switch, when any skill runs, then it runs on its graph; there is no second way of running a skill | OC-1 of G-V4.GRAPHAPI (D-473 (4)) |
 
 ## Scope
 Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`); the items are named when Plan step 1b writes them.
 
-| Item | In/Out | Reason |
-|---|---|---|
-| NFR-17 | partly | the nine skills without suites, by scripted replies (D-473 (3)); the six with suites are RUN's |
-| FR-6 | partly | skills run on their graph; live trust, lifecycle, budgets and stop stay parked in G-V5 |
-| FR-65 | out | the order and the run are RUN's; SWITCH uses them |
+Its items are named in its Plan, after RUN's plan is approved (D-474); SWITCH starts only after RUN, so no item is shared while both run and nothing needs freezing. In words: the nine skills without suites on their graph (NFR-17 of the group spec, by scripted replies, D-473 (3)); skills run on their graph (part of FR-6; live trust, lifecycle, budgets and stop stay parked in G-V5); the order and the run (FR-65 of the group spec) and the six skills with suites are RUN's.
 
 ## Split check
 | Suggestion | Decision (split / keep together) | Reason | Date |
