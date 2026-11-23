@@ -1,0 +1,54 @@
+{
+ "accepted": [
+  {
+   "term": "Retrieval-Augmented Generation (RAG) systems",
+   "definition": "Retrieval-Augmented Generation (RAG) systems enhance large language models (LLMs) by integrating external knowledge sources, enabling more accurate and contextually relevant responses tailored to user needs.",
+   "quote": "Retrieval-Augmented Generation (RAG) systems enhance large language models (LLMs) by integrating external knowledge sources, enabling more accurate and contextually relevant responses tailored to user needs.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Existing RAG systems have significant limitations, including reliance on flat data representations and inadequate contextual awareness.",
+   "quote": "However, existing RAG systems have significant limitations, including reliance on flat data representations and inadequate contextual awareness, which can lead to fragmented answers that fail to capture complex inter-dependencies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "LightRAG incorporates graph structures into text indexing and retrieval processes.",
+   "quote": "To address these challenges, we propose LightRAG, which incorporates graph structures into text indexing and retrieval processes.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This innovative framework employs a dual-level retrieval system that enhances comprehensive information retrieval from both low-level and high-level knowledge discovery.",
+   "quote": "This innovative framework employs a dual-level retrieval system that enhances comprehensive information retrieval from both low-level and high-level knowledge discovery.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The integration of graph structures with vector representations facilitates efficient retrieval of related entities and their relationships.",
+   "quote": "Additionally, the integration of graph structures with vector representations facilitates efficient retrieval of related entities and their relationships, significantly improving response times while maintaining contextual relevance.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The integration of graph structures with vector representations significantly improves response times while maintaining contextual relevance.",
+   "quote": "Additionally, the integration of graph structures with vector representations facilitates efficient retrieval of related entities and their relationships, significantly improving response times while maintaining contextual relevance.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The capability is further enhanced by an incremental update algorithm that ensures the timely integration of new data.",
+   "quote": "This capability is further enhanced by an incremental update algorithm that ensures the timely integration of new data, allowing the system to remain effective and responsive in rapidly changing data environments.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Extensive experimental validation demonstrates considerable improvements in retrieval accuracy and efficiency compared to existing approaches.",
+   "quote": "Extensive experimental validation demonstrates considerable improvements in retrieval accuracy and efficiency compared to existing approaches.",
+   "kind": "fact"
+  },
+  {
+   "statement": "LightRAG is open-source and available at the link: https://github.com/HKUDS/LightRAG",
+   "quote": "We have made our LightRAG open-source and available at the link: https://github.com/HKUDS/LightRAG",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 1,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 13.9
+}

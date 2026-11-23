@@ -1,0 +1,358 @@
+{
+ "accepted": [
+  {
+   "term": "Meta-analysis",
+   "definition": "Meta-analysis is a method of synthesis of quantitative data from multiple independent studies addressing a common research question.",
+   "quote": "Meta-analysis is a method of synthesis of quantitative data from multiple independent studies addressing a common research question.",
+   "kind": "definition"
+  },
+  {
+   "term": "meta-analysis",
+   "definition": "meta-analysis refers to the analysis of analyses",
+   "quote": "meta-analysis refers to the analysis of analyses",
+   "kind": "definition"
+  },
+  {
+   "statement": "An important part of this method involves computing a combined effect size across all of the studies.",
+   "quote": "An important part of this method involves computing a combined effect size across all of the studies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "By combining these effect sizes the statistical power is improved and can resolve uncertainties or discrepancies found in individual studies.",
+   "quote": "By combining these effect sizes the statistical power is improved and can resolve uncertainties or discrepancies found in individual studies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Meta-analyses are integral in supporting research grant proposals, shaping treatment guidelines, and influencing health policies.",
+   "quote": "Meta-analyses are integral in supporting research grant proposals, shaping treatment guidelines, and influencing health policies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "They are also pivotal in summarizing existing research to guide future studies, thereby cementing their role as a fundamental methodology in metascience.",
+   "quote": "They are also pivotal in summarizing existing research to guide future studies, thereby cementing their role as a fundamental methodology in metascience.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Meta-analyses are often, but not always, important components of a systematic review.",
+   "quote": "Meta-analyses are often, but not always, important components of a systematic review.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass.",
+   "quote": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass",
+   "kind": "fact"
+  },
+  {
+   "statement": "Glass's work aimed at describing aggregated measures of relationships and effects.",
+   "quote": "Glass's work aimed at describing aggregated measures of relationships and effects.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation.",
+   "quote": "a 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation",
+   "kind": "fact"
+  },
+  {
+   "statement": "The first model meta-analysis was published in 1978 on the effectiveness of psychotherapy by Mary Lee Smith and Glass.",
+   "quote": "The first model meta-analysis was published in 1978 on the effectiveness of psychotherapy by Mary Lee Smith and Glass.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The first example of this was by Hans Eysenck, who, in a 1978 article in response to the work done by Smith and Glass, called meta-analysis an \"exercise in mega-silliness\".",
+   "quote": "The first example of this was by Hans Eysenck, who, in a 1978 article in response to the work done by Smith and Glass, called meta-analysis an \"exercise in mega-silliness\".",
+   "kind": "fact"
+  },
+  {
+   "statement": "By 1991 there were 334 published meta-analyses and this had grown to 9,135 by 2014.",
+   "quote": "By 1991 there were 334 published meta-analyses and this had grown to 9,135 by 2014.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The field of meta-analysis expanded greatly after the 1970s and touches multiple disciplines; including psychology, medicine, and ecology.",
+   "quote": "The field of meta-analysis expanded greatly after the 1970s and touches multiple disciplines; including psychology, medicine, and ecology.",
+   "kind": "fact"
+  },
+  {
+   "statement": "One of the most important steps in a meta-analysis is data collection.",
+   "quote": "One of the most important steps in a meta-analysis is data collection.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The use of Boolean operators and search limits can assist the literature search.",
+   "quote": "The use of Boolean operators and search limits can assist the literature search.",
+   "kind": "fact"
+  },
+  {
+   "term": "snowballing",
+   "definition": "The reference lists of eligible studies can also be searched for eligible studies (i.e., snowballing).",
+   "quote": "The reference lists of eligible studies can also be searched for eligible studies (i.e., snowballing).",
+   "kind": "definition"
+  },
+  {
+   "term": "data-collection form",
+   "definition": "A data-collection form provides a standardized means of collecting data from eligible studies.",
+   "quote": "A data-collection form provides a standardized means of collecting data from eligible studies.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Many scientists use duplicate search terms within two or more databases to cover multiple sources.",
+   "quote": "Indeed, many scientists use duplicate search terms within two or more databases to cover multiple sources.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The initial search may return a large volume of studies.",
+   "quote": "The initial search may return a large volume of studies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Quite often, the abstract or the title of the manuscript reveals that the study is not eligible for inclusion, based on the pre-specified criteria.",
+   "quote": "Quite often, the abstract or the title of the manuscript reveals that the study is not eligible for inclusion, based on the pre-specified criteria.",
+   "kind": "fact"
+  },
+  {
+   "statement": "If the study appears eligible (or even if there is some doubt), the full paper can be retained for closer inspection.",
+   "quote": "However, if the study appears eligible (or even if there is some doubt), the full paper can be retained for closer inspection.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The reference lists of eligible articles can also be searched for any relevant articles.",
+   "quote": "The reference lists of eligible articles can also be searched for any relevant articles.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These search results need to be detailed in a PRIMSA flow diagram, which details the flow of information through all stages of the review.",
+   "quote": "These search results need to be detailed in a PRIMSA flow diagram, which details the flow of information through all stages of the review.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The search terms and strategy should be specific enough for a reader to reproduce the search.",
+   "quote": "The search terms and strategy should be specific enough for a reader to reproduce the search.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The date range of studies, along with the date (or date period) the search was conducted, should also be provided.",
+   "quote": "The date range of studies, along with the date (or date period) the search was conducted, should also be provided.",
+   "kind": "fact"
+  },
+  {
+   "statement": "For a meta-analysis of correlational data, effect size information is usually collected as Pearson correlation coefficient (r).",
+   "quote": "For a meta-analysis of correlational data, effect size information is usually collected as Pearson correlation coefficient (r).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Partial correlations are often reported in research; however, these may inflate relationships in comparison to zero-order correlations.",
+   "quote": "Partial correlations are often reported in research; however, these may inflate relationships in comparison to zero-order correlations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A 2024 simulation study found that standard meta-analysis methods are biased away from zero when applied to partial correlations, and proposed a correction that adjust the degrees of freedom used to compute the correlations.",
+   "quote": "A 2024 simulation study found that standard meta-analysis methods are biased away from zero when applied to partial correlations, and proposed a correction that adjust the degrees of freedom used to compute the correlations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The partialed-out variables will likely vary from study to study.",
+   "quote": "Moreover, the partialed-out variables will likely vary from study to study.",
+   "kind": "fact"
+  },
+  {
+   "statement": "As a consequence, many meta-analyses exclude partial correlations from their analysis.",
+   "quote": "As a consequence, many meta-analyses exclude partial correlations from their analysis.",
+   "kind": "fact"
+  },
+  {
+   "statement": "As a final resort, plot digitizers can be used to scrape data points from scatterplots (if available) for the calculation of Pearson's r.",
+   "quote": "As a final resort, plot digitizers can be used to scrape data points from scatterplots (if available) for the calculation of Pearson's r.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Data on important study characteristics that may moderate observed effects, such as the mean age of participants, should also be collected.",
+   "quote": "Data on important study characteristics that may moderate observed effects, such as the mean age of participants, should also be collected.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A measure of study quality can also be included in these forms to assess the quality of evidence from each study.",
+   "quote": "A measure of study quality can also be included in these forms to assess the quality of evidence from each study.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There are more than 80 tools available to assess the quality and risk of bias in observational studies, reflecting the diversity of research approaches between fields.",
+   "quote": "There are more than 80 tools available to assess the quality and risk of bias in observational studies, reflecting the diversity of research approaches between fields.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These tools usually include an assessment of how dependent variables were measured, appropriate selection of participants, and appropriate control for confounding factors.",
+   "quote": "These tools usually include an assessment of how dependent variables were measured, appropriate selection of participants, and appropriate control for confounding factors.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Other quality measures that may be more relevant to correlational studies include sample size, psychometric properties, and method reporting.",
+   "quote": "Other quality measures that may be more relevant to correlational studies include sample size, psychometric properties, and method reporting.",
+   "kind": "fact"
+  },
+  {
+   "term": "grey literature",
+   "definition": "Grey literature is defined as research that has not been formally published.",
+   "quote": "grey literature, which is defined as research that has not been formally published.",
+   "kind": "definition"
+  },
+  {
+   "term": "individual participant data (IPD)",
+   "definition": "Individual participant data (IPD) represents raw data as collected by the study centers.",
+   "quote": "IPD evidence represents raw data as collected by the study centers.",
+   "kind": "definition"
+  },
+  {
+   "term": "one-stage methods",
+   "definition": "In one-stage methods the IPD from all studies are modeled simultaneously whilst accounting for the clustering of participants within studies.",
+   "quote": "In one-stage methods the IPD from all studies are modeled simultaneously whilst accounting for the clustering of participants within studies.",
+   "kind": "definition"
+  },
+  {
+   "term": "two-stage methods",
+   "definition": "Two-stage methods first compute summary statistics for AD from each study and then calculate overall statistics as a weighted average of the study statistics.",
+   "quote": "Two-stage methods first compute summary statistics for AD from each study and then calculate overall statistics as a weighted average of the study statistics.",
+   "kind": "definition"
+  },
+  {
+   "term": "fixed effect model",
+   "definition": "The fixed effect model provides a weighted average of a series of study estimates.",
+   "quote": "The fixed effect model provides a weighted average of a series of study estimates.",
+   "kind": "definition"
+  },
+  {
+   "statement": "The inclusion of grey literature reduces the risk of publication bias.",
+   "quote": "While the inclusion of grey literature reduces the risk of publication bias",
+   "kind": "fact"
+  },
+  {
+   "statement": "The methodological quality of the work is often (but not always) lower than formally published work.",
+   "quote": "the methodological quality of the work is often (but not always) lower than formally published work.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Reports from conference proceedings are the most common source of grey literature.",
+   "quote": "Reports from conference proceedings, which are the most common source of grey literature",
+   "kind": "fact"
+  },
+  {
+   "statement": "Reports from conference proceedings are poorly reported.",
+   "quote": "Reports from conference proceedings, which are the most common source of grey literature, are poorly reported",
+   "kind": "fact"
+  },
+  {
+   "statement": "Data in the subsequent publication are often inconsistent, with differences observed in almost 20% of published studies.",
+   "quote": "data in the subsequent publication are often inconsistent, with differences observed in almost 20% of published studies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "AD is more commonly available (e.g. from the literature) and typically represents summary estimates such as odds ratios or relative risks.",
+   "quote": "AD is more commonly available (e.g. from the literature) and typically represents summary estimates such as odds ratios or relative risks.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Indirect aggregate data measures the effect of two treatments that were each compared against a similar control group in a meta-analysis.",
+   "quote": "on the other hand, indirect aggregate data measures the effect of two treatments that were each compared against a similar control group in a meta-analysis.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The distinction between IPD and AD has led to the development of one-stage and two-stage methods.",
+   "quote": "This distinction has raised the need for different meta-analytic methods when evidence synthesis is desired, and has led to the development of one-stage and two-stage methods.",
+   "kind": "fact"
+  },
+  {
+   "statement": "By reducing IPD to AD, two-stage methods can also be applied when IPD is available.",
+   "quote": "By reducing IPD to AD, two-stage methods can also be applied when IPD is available",
+   "kind": "fact"
+  },
+  {
+   "statement": "Recent studies have shown that one-stage and two-stage methods may occasionally lead to different conclusions.",
+   "quote": "recent studies have shown that they may occasionally lead to different conclusions.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The inverse of the estimates' variance is commonly used as study weight.",
+   "quote": "The inverse of the estimates' variance is commonly used as study weight",
+   "kind": "fact"
+  },
+  {
+   "statement": "Larger studies tend to contribute more than smaller studies to the weighted average.",
+   "quote": "larger studies tend to contribute more than smaller studies to the weighted average.",
+   "kind": "fact"
+  },
+  {
+   "statement": "When studies within a meta-analysis are dominated by a very large study, the findings from smaller studies are practically ignored.",
+   "quote": "Consequently, when studies within a meta-analysis are dominated by a very large study, the findings from smaller studies are practically ignored.",
+   "kind": "fact"
+  },
+  {
+   "term": "heterogeneity",
+   "definition": "Differences in the methods and sample characteristics may introduce variability (\"heterogeneity\") among the true effects.",
+   "quote": "Differences in the methods and sample characteristics may introduce variability (\"heterogeneity\") among the true effects.",
+   "kind": "definition"
+  },
+  {
+   "term": "heterogeneity",
+   "definition": "The greater this variability in effect sizes (otherwise known as heterogeneity), the greater the un-weighting.",
+   "quote": "This means that the greater this variability in effect sizes (otherwise known as heterogeneity), the greater the un-weighting",
+   "kind": "definition"
+  },
+  {
+   "statement": "The fixed effects model assumes that all included studies investigate the same population, use the same variable and outcome definitions, etc.",
+   "quote": "Most importantly, the fixed effects model assumes that all included studies investigate the same population, use the same variable and outcome definitions, etc.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This assumption is typically unrealistic as research is often prone to several sources of heterogeneity.",
+   "quote": "This assumption is typically unrealistic as research is often prone to several sources of heterogeneity.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The y i 's are assumed to be unbiased and normally distributed estimates of their corresponding true effects.",
+   "quote": "Therefore, the y _i {\\displaystyle y_{i}} 's are assumed to be unbiased and normally distributed estimates of their corresponding true effects.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The sampling variances (i.e., v i values) are assumed to be known.",
+   "quote": "The sampling variances (i.e., v _i {\\displaystyle v_{i}} values) are assumed to be known.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Most meta-analyses are based on sets of studies that are not exactly identical in their methods and/or the characteristics of the included samples.",
+   "quote": "Most meta-analyses are based on sets of studies that are not exactly identical in their methods and/or the characteristics of the included samples.",
+   "kind": "fact"
+  },
+  {
+   "statement": "One way to model the heterogeneity is to treat it as purely random.",
+   "quote": "One way to model the heterogeneity is to treat it as purely random.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The weight that is applied in this process of weighted averaging with a random effects meta-analysis is achieved in two steps: Step 1: Inverse variance weighting Step 2: Un-weighting of this inverse variance weighting by applying a random effects variance component (REVC) that is simply derived from the extent of variability of the effect sizes of the underlying studies.",
+   "quote": "The weight that is applied in this process of weighted averaging with a random effects meta-analysis is achieved in two steps: Step 1: Inverse variance weighting Step 2: Un-weighting of this inverse variance weighting by applying a random effects variance component (REVC) that is simply derived from the extent of variability of the effect sizes of the underlying studies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This can reach a point when the random effects meta-analysis result becomes simply the un-weighted average effect size across the studies.",
+   "quote": "this can reach a point when the random effects meta-analysis result becomes simply the un-weighted average effect size across the studies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "At the other extreme, when all effect sizes are similar (or variability does not exceed sampling error), no REVC is applied and the random effects meta-analysis defaults to simply a fixed effect meta-analy",
+   "quote": "At the other extreme, when all effect sizes are similar (or variability does not exceed sampling error), no REVC is applied and the random effects meta-analysis defaults to simply a fixed effect meta-analy",
+   "kind": "fact"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "statement": "If we start with a collection of independent effect size estimates, each estimate a corresponding effect size i = 1 , \u2026 , k we can assume that y i = \u03b8 i + e i where y i denotes the observed effect in the i -th study, \u03b8 i the corresponding (unknown) true effect, e i is the sampling error, and e i \u223c N ( 0 , v i ).",
+    "quote": "If we start with a collection of independent effect size estimates, each estimate a corresponding effect size i = 1 , \u2026 , k {\\displaystyle i=1,\\ldots ,k} we can assume that y i = \\theta _i + e _i {\\style y_{i}=\\theta _{i}+e_{i}} where y i {\\displaystyle y_{i}} denotes the observed effect in the i {\\displaystyle i} -th study, \\theta _i {\\displaystyle \\theta _{i}} the corresponding (unknown) true effect, e _i {\\displaystyle e_{i}} is the sampling error, and e _i \\sim N ( 0 , v _i ) {\\displaystyle e_{i}\\thicksim N(0,v_{i})} .",
+    "kind": "fact"
+   },
+   "reason": "quote is not a passage of the document"
+  }
+ ],
+ "chunks": 4,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 98.0
+}

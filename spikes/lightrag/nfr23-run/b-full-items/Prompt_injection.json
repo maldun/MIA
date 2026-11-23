@@ -1,0 +1,518 @@
+{
+ "accepted": [
+  {
+   "name": "Prompt injection",
+   "quote": "Prompt injection is a cybersecurity exploit and an attack vector in which innocuous-looking inputs (i.e. prompts) are designed to cause unintended behavior in machine learning models, particularly large language models (LLMs).",
+   "kind": "entity"
+  },
+  {
+   "name": "machine learning models",
+   "quote": "Prompt injection is a cybersecurity exploit and an attack vector in which innocuous-looking inputs (i.e. prompts) are designed to cause unintended behavior in machine learning models, particularly large language models (LLMs).",
+   "kind": "entity"
+  },
+  {
+   "name": "large language models (LLMs)",
+   "quote": "Prompt injection is a cybersecurity exploit and an attack vector in which innocuous-looking inputs (i.e. prompts) are designed to cause unintended behavior in machine learning models, particularly large language models (LLMs).",
+   "kind": "entity"
+  },
+  {
+   "name": "indirect prompt injection",
+   "quote": "LLMs with web browsing capabilities can be targeted by indirect prompt injection, where adversarial prompts are embedded within website content.",
+   "kind": "entity"
+  },
+  {
+   "name": "code injection attack",
+   "quote": "Prompt injection is a type of code injection attack that leverages adversarial prompt engineering to manipulate AI models.",
+   "kind": "entity"
+  },
+  {
+   "name": "AI models",
+   "quote": "Prompt injection is a type of code injection attack that leverages adversarial prompt engineering to manipulate AI models.",
+   "kind": "entity"
+  },
+  {
+   "name": "Jonathan Cefalu",
+   "quote": "In May 2022, Jonathan Cefalu of Preamble identified prompt injection (referring to it as \"command injection\") as a security vulnerability and reported it to OpenAI.",
+   "kind": "entity"
+  },
+  {
+   "name": "Preamble",
+   "quote": "In May 2022, Jonathan Cefalu of Preamble identified prompt injection (referring to it as \"command injection\") as a security vulnerability and reported it to OpenAI.",
+   "kind": "entity"
+  },
+  {
+   "name": "OpenAI",
+   "quote": "In May 2022, Jonathan Cefalu of Preamble identified prompt injection (referring to it as \"command injection\") as a security vulnerability and reported it to OpenAI.",
+   "kind": "entity"
+  },
+  {
+   "name": "@himbodhisattva",
+   "quote": "The term \"prompt injection\" proper was first used by the Twitter user @himbodhisattva in May 2022, and was independently used and popularized by Simon Willison in September 2022.",
+   "kind": "entity"
+  },
+  {
+   "name": "Simon Willison",
+   "quote": "The term \"prompt injection\" proper was first used by the Twitter user @himbodhisattva in May 2022, and was independently used and popularized by Simon Willison in September 2022.",
+   "kind": "entity"
+  },
+  {
+   "name": "jailbreaking",
+   "quote": "Willison distinguished it from jailbreaking, which bypasses an AI model's safeguards, whereas prompt injection exploits its inability to differentiate system instructions from user inputs.",
+   "kind": "entity"
+  },
+  {
+   "name": "Kai Greshake",
+   "quote": "In the paper, Kai Greshake and his team at sequire technology, described a series of successful attacks against multiple AI models including GPT-4 and OpenAI Codex.",
+   "kind": "entity"
+  },
+  {
+   "name": "sequire technology",
+   "quote": "In the paper, Kai Greshake and his team at sequire technology, described a series of successful attacks against multiple AI models including GPT-4 and OpenAI Codex.",
+   "kind": "entity"
+  },
+  {
+   "name": "GPT-4",
+   "quote": "In the paper, Kai Greshake and his team at sequire technology, described a series of successful attacks against multiple AI models including GPT-4 and OpenAI Codex.",
+   "kind": "entity"
+  },
+  {
+   "name": "OpenAI Codex",
+   "quote": "In the paper, Kai Greshake and his team at sequire technology, described a series of successful attacks against multiple AI models including GPT-4 and OpenAI Codex.",
+   "kind": "entity"
+  },
+  {
+   "source": "Prompt injection",
+   "relation": "designed to cause unintended behavior in",
+   "target": "machine learning models",
+   "quote": "Prompt injection is a cybersecurity exploit and an attack vector in which innocuous-looking inputs (i.e. prompts) are designed to cause unintended behavior in machine learning models, particularly large language models (LLMs).",
+   "kind": "relation"
+  },
+  {
+   "source": "Prompt injection",
+   "relation": "is a type of",
+   "target": "code injection attack",
+   "quote": "Prompt injection is a type of code injection attack that leverages adversarial prompt engineering to manipulate AI models.",
+   "kind": "relation"
+  },
+  {
+   "source": "Prompt injection",
+   "relation": "leverages adversarial prompt engineering to manipulate",
+   "target": "AI models",
+   "quote": "Prompt injection is a type of code injection attack that leverages adversarial prompt engineering to manipulate AI models.",
+   "kind": "relation"
+  },
+  {
+   "source": "Jonathan Cefalu",
+   "relation": "of",
+   "target": "Preamble",
+   "quote": "In May 2022, Jonathan Cefalu of Preamble identified prompt injection (referring to it as \"command injection\") as a security vulnerability and reported it to OpenAI.",
+   "kind": "relation"
+  },
+  {
+   "source": "Jonathan Cefalu",
+   "relation": "reported it to",
+   "target": "OpenAI",
+   "quote": "In May 2022, Jonathan Cefalu of Preamble identified prompt injection (referring to it as \"command injection\") as a security vulnerability and reported it to OpenAI.",
+   "kind": "relation"
+  },
+  {
+   "source": "Kai Greshake",
+   "relation": "and his team at",
+   "target": "sequire technology",
+   "quote": "In the paper, Kai Greshake and his team at sequire technology, described a series of successful attacks against multiple AI models including GPT-4 and OpenAI Codex.",
+   "kind": "relation"
+  },
+  {
+   "source": "Kai Greshake",
+   "relation": "described a series of successful attacks against",
+   "target": "GPT-4",
+   "quote": "In the paper, Kai Greshake and his team at sequire technology, described a series of successful attacks against multiple AI models including GPT-4 and OpenAI Codex.",
+   "kind": "relation"
+  },
+  {
+   "source": "Kai Greshake",
+   "relation": "described a series of successful attacks against",
+   "target": "OpenAI Codex",
+   "quote": "In the paper, Kai Greshake and his team at sequire technology, described a series of successful attacks against multiple AI models including GPT-4 and OpenAI Codex.",
+   "kind": "relation"
+  },
+  {
+   "name": "Indirect injection",
+   "quote": "Indirect injection happens when the prompt is located in external data sources such as emails and documents.",
+   "kind": "entity"
+  },
+  {
+   "name": "prompt",
+   "quote": "Indirect injection happens when the prompt is located in external data sources such as emails and documents.",
+   "kind": "entity"
+  },
+  {
+   "name": "external data sources",
+   "quote": "Indirect injection happens when the prompt is located in external data sources such as emails and documents.",
+   "kind": "entity"
+  },
+  {
+   "name": "AI",
+   "quote": "This external data may include an instruction that the AI mistakes as coming from the user or the developer.",
+   "kind": "entity"
+  },
+  {
+   "name": "user",
+   "quote": "This external data may include an instruction that the AI mistakes as coming from the user or the developer.",
+   "kind": "entity"
+  },
+  {
+   "name": "developer",
+   "quote": "This external data may include an instruction that the AI mistakes as coming from the user or the developer.",
+   "kind": "entity"
+  },
+  {
+   "name": "author of the document",
+   "quote": "Indirect injections can be intentional as a way to evade filters, or be unintentional (from the user's perspective) as a way for the author of the document to manipulate what result is presented to the user.",
+   "kind": "entity"
+  },
+  {
+   "name": "unintentional indirect injection",
+   "quote": "While intentional and direct injection represents a threat to the developer from the user, unintentional indirect injection represents a threat from the data-author to the user.",
+   "kind": "entity"
+  },
+  {
+   "name": "data-author",
+   "quote": "While intentional and direct injection represents a threat to the developer from the user, unintentional indirect injection represents a threat from the data-author to the user.",
+   "kind": "entity"
+  },
+  {
+   "name": "OWASP report",
+   "quote": "A November 2024 OWASP report identified security challenges in multimodal AI, which processes multiple data types, such as text and images.",
+   "kind": "entity"
+  },
+  {
+   "name": "multimodal AI",
+   "quote": "A November 2024 OWASP report identified security challenges in multimodal AI, which processes multiple data types, such as text and images.",
+   "kind": "entity"
+  },
+  {
+   "name": "Adversarial prompts",
+   "quote": "Adversarial prompts can be embedded in non-textual elements, such as hidden instructions within images, influencing model responses when processed alongside text.",
+   "kind": "entity"
+  },
+  {
+   "name": "model responses",
+   "quote": "Adversarial prompts can be embedded in non-textual elements, such as hidden instructions within images, influencing model responses when processed alongside text.",
+   "kind": "entity"
+  },
+  {
+   "name": "The Alan Turing Institute",
+   "quote": "A November 2024 report by The Alan Turing Institute highlights growing risks, stating that 75% of business employees use generative artificial intelligence, with 46% adopting it within the past six months.",
+   "kind": "entity"
+  },
+  {
+   "name": "McKinsey",
+   "quote": "McKinsey identified accuracy as the top generative AI risk, yet only 38% of organizations are taking steps to mitigate it.",
+   "kind": "entity"
+  },
+  {
+   "name": "Microsoft",
+   "quote": "Leading AI providers, including Microsoft, Google, and Amazon, integrate LLMs into enterprise applications.",
+   "kind": "entity"
+  },
+  {
+   "name": "Google",
+   "quote": "Leading AI providers, including Microsoft, Google, and Amazon, integrate LLMs into enterprise applications.",
+   "kind": "entity"
+  },
+  {
+   "name": "Amazon",
+   "quote": "Leading AI providers, including Microsoft, Google, and Amazon, integrate LLMs into enterprise applications.",
+   "kind": "entity"
+  },
+  {
+   "name": "LLMs",
+   "quote": "Leading AI providers, including Microsoft, Google, and Amazon, integrate LLMs into enterprise applications.",
+   "kind": "entity"
+  },
+  {
+   "source": "prompt",
+   "relation": "is located in",
+   "target": "external data sources",
+   "quote": "Indirect injection happens when the prompt is located in external data sources such as emails and documents.",
+   "kind": "relation"
+  },
+  {
+   "source": "AI",
+   "relation": "mistakes instruction as coming from",
+   "target": "user",
+   "quote": "This external data may include an instruction that the AI mistakes as coming from the user or the developer.",
+   "kind": "relation"
+  },
+  {
+   "source": "AI",
+   "relation": "mistakes instruction as coming from",
+   "target": "developer",
+   "quote": "This external data may include an instruction that the AI mistakes as coming from the user or the developer.",
+   "kind": "relation"
+  },
+  {
+   "source": "unintentional indirect injection",
+   "relation": "represents a threat from",
+   "target": "data-author",
+   "quote": "While intentional and direct injection represents a threat to the developer from the user, unintentional indirect injection represents a threat from the data-author to the user.",
+   "kind": "relation"
+  },
+  {
+   "source": "unintentional indirect injection",
+   "relation": "represents a threat to",
+   "target": "user",
+   "quote": "While intentional and direct injection represents a threat to the developer from the user, unintentional indirect injection represents a threat from the data-author to the user.",
+   "kind": "relation"
+  },
+  {
+   "source": "OWASP report",
+   "relation": "identified security challenges in",
+   "target": "multimodal AI",
+   "quote": "A November 2024 OWASP report identified security challenges in multimodal AI, which processes multiple data types, such as text and images.",
+   "kind": "relation"
+  },
+  {
+   "source": "Adversarial prompts",
+   "relation": "influencing",
+   "target": "model responses",
+   "quote": "Adversarial prompts can be embedded in non-textual elements, such as hidden instructions within images, influencing model responses when processed alongside text.",
+   "kind": "relation"
+  },
+  {
+   "source": "Microsoft",
+   "relation": "integrate",
+   "target": "LLMs",
+   "quote": "Leading AI providers, including Microsoft, Google, and Amazon, integrate LLMs into enterprise applications.",
+   "kind": "relation"
+  },
+  {
+   "source": "Google",
+   "relation": "integrate",
+   "target": "LLMs",
+   "quote": "Leading AI providers, including Microsoft, Google, and Amazon, integrate LLMs into enterprise applications.",
+   "kind": "relation"
+  },
+  {
+   "source": "Amazon",
+   "relation": "integrate",
+   "target": "LLMs",
+   "quote": "Leading AI providers, including Microsoft, Google, and Amazon, integrate LLMs into enterprise applications.",
+   "kind": "relation"
+  },
+  {
+   "name": "UK National Cyber Security Centre (NCSC)",
+   "quote": "Cybersecurity agencies, including the UK National Cyber Security Centre (NCSC) and US National Institute for Standards and Technology (NIST), classify prompt injection as a critical security threat, with potential consequences such as data manipulation, phishing, misinformation, and denial-of-service attacks.",
+   "kind": "entity"
+  },
+  {
+   "name": "US National Institute for Standards and Technology (NIST)",
+   "quote": "Cybersecurity agencies, including the UK National Cyber Security Centre (NCSC) and US National Institute for Standards and Technology (NIST), classify prompt injection as a critical security threat, with potential consequences such as data manipulation, phishing, misinformation, and denial-of-service attacks.",
+   "kind": "entity"
+  },
+  {
+   "name": "Bing Chat (Microsoft Copilot)",
+   "quote": "=== Bing Chat (Microsoft Copilot) ===",
+   "kind": "entity"
+  },
+  {
+   "name": "ChatGPT",
+   "quote": "=== ChatGPT ===",
+   "kind": "entity"
+  },
+  {
+   "name": "DeepSeek-R1",
+   "quote": "In January 2025, Infosecurity Magazine reported that DeepSeek-R1, a large language model (LLM) developed by Chinese AI startup DeepSeek, exhibited vulnerabilities to direct and indirect prompt injection attacks.",
+   "kind": "entity"
+  },
+  {
+   "name": "DeepSeek",
+   "quote": "In January 2025, Infosecurity Magazine reported that DeepSeek-R1, a large language model (LLM) developed by Chinese AI startup DeepSeek, exhibited vulnerabilities to direct and indirect prompt injection attacks.",
+   "kind": "entity"
+  },
+  {
+   "name": "Gemini AI",
+   "quote": "=== Gemini AI ===",
+   "kind": "entity"
+  },
+  {
+   "name": "Grok",
+   "quote": "=== Grok ===",
+   "kind": "entity"
+  },
+  {
+   "name": "X",
+   "quote": "In July 2025, NeuralTrust reported a successful jailbreak of X's Grok4.",
+   "kind": "entity"
+  },
+  {
+   "name": "Grok4",
+   "quote": "In July 2025, NeuralTrust reported a successful jailbreak of X's Grok4.",
+   "kind": "entity"
+  },
+  {
+   "source": "UK National Cyber Security Centre (NCSC)",
+   "relation": "classify prompt injection as a critical security threat",
+   "target": "prompt injection",
+   "quote": "Cybersecurity agencies, including the UK National Cyber Security Centre (NCSC) and US National Institute for Standards and Technology (NIST), classify prompt injection as a critical security threat, with potential consequences such as data manipulation, phishing, misinformation, and denial-of-service attacks.",
+   "kind": "relation"
+  },
+  {
+   "source": "US National Institute for Standards and Technology (NIST)",
+   "relation": "classify prompt injection as a critical security threat",
+   "target": "prompt injection",
+   "quote": "Cybersecurity agencies, including the UK National Cyber Security Centre (NCSC) and US National Institute for Standards and Technology (NIST), classify prompt injection as a critical security threat, with potential consequences such as data manipulation, phishing, misinformation, and denial-of-service attacks.",
+   "kind": "relation"
+  },
+  {
+   "source": "Microsoft",
+   "relation": "AI-powered",
+   "target": "Bing Chat (Microsoft Copilot)",
+   "quote": "In February 2023, a Stanford student discovered a method to bypass safeguards in Microsoft's AI-powered Bing Chat by instructing it to ignore prior directives, which led to the revelation of internal guidelines and its codename, \"Sydney\".",
+   "kind": "relation"
+  },
+  {
+   "source": "OpenAI",
+   "relation": "ChatGPT search tool",
+   "target": "ChatGPT",
+   "quote": "In December 2024, The Guardian reported that OpenAI's ChatGPT search tool was vulnerable to indirect prompt injection attacks, allowing hidden webpage content to manipulate its responses.",
+   "kind": "relation"
+  },
+  {
+   "source": "DeepSeek",
+   "relation": "developed",
+   "target": "DeepSeek-R1",
+   "quote": "In January 2025, Infosecurity Magazine reported that DeepSeek-R1, a large language model (LLM) developed by Chinese AI startup DeepSeek, exhibited vulnerabilities to direct and indirect prompt injection attacks.",
+   "kind": "relation"
+  },
+  {
+   "source": "Google",
+   "relation": "Gemini AI",
+   "target": "Gemini AI",
+   "quote": "In February 2025, Ars Technica reported vulnerabilities in Google's Gemini AI to indirect prompt injection attacks that manipulated its long-term memory.",
+   "kind": "relation"
+  },
+  {
+   "source": "X",
+   "relation": "Grok4",
+   "target": "Grok4",
+   "quote": "In July 2025, NeuralTrust reported a successful jailbreak of X's Grok4.",
+   "kind": "relation"
+  },
+  {
+   "name": "LLM applications",
+   "quote": "Prompt injection has been identified as a significant security risk in LLM applications, prompting the development of various mitigation strategies.",
+   "kind": "entity"
+  },
+  {
+   "name": "OWASP",
+   "quote": "Additional techniques outlined by OWASP include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak.",
+   "kind": "entity"
+  },
+  {
+   "name": "garak",
+   "quote": "Additional techniques outlined by OWASP include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak.",
+   "kind": "entity"
+  },
+  {
+   "name": "Retrieval-Augmented Generation (RAG)",
+   "quote": "While these measures help reduce risks, OWASP notes that prompt injection remains a persistent challenge, as methods like Retrieval-Augmented Generation (RAG) and fine-tuning do not eliminate the threat.",
+   "kind": "entity"
+  },
+  {
+   "name": "fine-tuning",
+   "quote": "While these measures help reduce risks, OWASP notes that prompt injection remains a persistent challenge, as methods like Retrieval-Augmented Generation (RAG) and fine-tuning do not eliminate the threat.",
+   "kind": "entity"
+  },
+  {
+   "name": "Data hygiene",
+   "quote": "Data hygiene is a key defense against prompt injection in generative AI systems, ensuring that AI models access only well-regulated data.",
+   "kind": "entity"
+  },
+  {
+   "name": "generative AI systems",
+   "quote": "Data hygiene is a key defense against prompt injection in generative AI systems, ensuring that AI models access only well-regulated data.",
+   "kind": "entity"
+  },
+  {
+   "name": "Alan Turing Institute",
+   "quote": "A November 2024 report by the Alan Turing Institute outlines best practices, including restricting unverified external inputs, such as emails, until reviewed by authorized users.",
+   "kind": "entity"
+  },
+  {
+   "name": "RAG systems",
+   "quote": "Approval processes for new data sources, particularly RAG systems, help prevent malicious content from influencing AI outputs.",
+   "kind": "entity"
+  },
+  {
+   "name": "Technical guardrails",
+   "quote": "Technical guardrails mitigate prompt injection attacks by distinguishing between task instructions and retrieved data.",
+   "kind": "entity"
+  },
+  {
+   "source": "Prompt injection",
+   "relation": "is a significant security risk in",
+   "target": "LLM applications",
+   "quote": "Prompt injection has been identified as a significant security risk in LLM applications, prompting the development of various mitigation strategies.",
+   "kind": "relation"
+  },
+  {
+   "source": "OWASP",
+   "relation": "outlines techniques including",
+   "target": "garak",
+   "quote": "Additional techniques outlined by OWASP include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak.",
+   "kind": "relation"
+  },
+  {
+   "source": "Retrieval-Augmented Generation (RAG)",
+   "relation": "and fine-tuning do not eliminate the threat of",
+   "target": "prompt injection",
+   "quote": "While these measures help reduce risks, OWASP notes that prompt injection remains a persistent challenge, as methods like Retrieval-Augmented Generation (RAG) and fine-tuning do not eliminate the threat.",
+   "kind": "relation"
+  },
+  {
+   "source": "UK National Cyber Security Centre (NCSC)",
+   "relation": "stated research into",
+   "target": "prompt injection",
+   "quote": "The UK National Cyber Security Centre (NCSC) stated in August 2023 that while research into prompt injection is ongoing, it \"may simply be an inherent issue with LLM technology.\"",
+   "kind": "relation"
+  },
+  {
+   "source": "Data hygiene",
+   "relation": "is a key defense against prompt injection in",
+   "target": "generative AI systems",
+   "quote": "Data hygiene is a key defense against prompt injection in generative AI systems, ensuring that AI models access only well-regulated data.",
+   "kind": "relation"
+  },
+  {
+   "source": "Alan Turing Institute",
+   "relation": "outlines best practices including",
+   "target": "restricting unverified external inputs",
+   "quote": "A November 2024 report by the Alan Turing Institute outlines best practices, including restricting unverified external inputs, such as emails, until reviewed by authorized users.",
+   "kind": "relation"
+  },
+  {
+   "source": "Technical guardrails",
+   "relation": "mitigate",
+   "target": "prompt injection attacks",
+   "quote": "Technical guardrails mitigate prompt injection attacks by distinguishing between task instructions and retrieved data.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "Simon Willison",
+    "relation": "distinguished it from",
+    "target": "jailbreaking",
+    "quote": "Willison distinguished it from jailbreaking, which bypasses an AI model's safeguards, whereas prompt injection exploits its inability to differentiate system instructions from user inputs.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 4,
+ "model": "gemma4:26b",
+ "seconds": 264.5
+}

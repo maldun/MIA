@@ -1,0 +1,88 @@
+{
+ "accepted": [
+  {
+   "name": "large pre-trained language models",
+   "quote": "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks.",
+   "kind": "entity"
+  },
+  {
+   "name": "retrieval-augmented generation (RAG)",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "kind": "entity"
+  },
+  {
+   "name": "RAG models",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "parametric memory",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "pre-trained seq2seq model",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "non-parametric memory",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "dense vector index of Wikipedia",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "pre-trained neural retriever",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "parametric-only seq2seq baseline",
+   "quote": "For language generation tasks, we find that RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline.",
+   "kind": "entity"
+  },
+  {
+   "source": "retrieval-augmented generation (RAG)",
+   "relation": "combine",
+   "target": "pre-trained parametric and non-parametric memory",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG models",
+   "relation": "have parametric memory as",
+   "target": "pre-trained seq2seq model",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG models",
+   "relation": "have non-parametric memory as",
+   "target": "dense vector index of Wikipedia",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  },
+  {
+   "source": "non-parametric memory",
+   "relation": "is accessed with",
+   "target": "pre-trained neural retriever",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG models",
+   "relation": "generate more specific, diverse and factual language than",
+   "target": "parametric-only seq2seq baseline",
+   "quote": "For language generation tasks, we find that RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [],
+ "chunks": 1,
+ "model": "gemma4:26b",
+ "seconds": 158.4
+}

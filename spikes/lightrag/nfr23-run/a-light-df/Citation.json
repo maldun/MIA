@@ -1,0 +1,380 @@
+{
+ "accepted": [
+  {
+   "term": "citation",
+   "definition": "A citation is a reference to a source.",
+   "quote": "A citation is a reference to a source.",
+   "kind": "definition"
+  },
+  {
+   "term": "citation",
+   "definition": "A citation is an abbreviated alphanumeric expression embedded in the body of an intellectual work that denotes an entry in the bibliographic references section of the work, for the purpose of acknowledging the relevance of the works of others to the topic of discussion at the spot where the citation appears.",
+   "quote": "More precisely, a citation is an abbreviated alphanumeric expression embedded in the body of an intellectual work that denotes an entry in the bibliographic references section of the work, for the purpose of acknowledging the relevance of the works of others to the topic of discussion at the spot where the citation appears.",
+   "kind": "definition"
+  },
+  {
+   "term": "bibliographic citation",
+   "definition": "A bibliographic citation is a reference to a book, article, web page, or other published item.",
+   "quote": "A bibliographic citation is a reference to a book, article, web page, or other published item.",
+   "kind": "definition"
+  },
+  {
+   "statement": "The combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation.",
+   "quote": "Generally, the combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation (whereas bibliographic entries by themselves are not).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Citations have several important purposes.",
+   "quote": "Citations have several important purposes.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Correct attribution of insights to previous sources is one of the purposes of citations.",
+   "quote": "correct attribution of insights to previous sources is just one of these purposes.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Linguistic analysis of citation practices has indicated that they also serve critical roles in orchestrating the state of knowledge on a particular topic, identifying gaps in the existing knowledge that should be filled or describing areas where inquiries should be continued or replicated.",
+   "quote": "Linguistic analysis of citation practices has indicated that they also serve critical roles in orchestrating the state of knowledge on a particular topic, identifying gaps in the existing knowledge that should be filled or describing areas where inquiries should be continued or replicated.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Citation has also been identified as a critical means by which researchers establish stance: aligning themselves with or against subgroups of fellow researchers working on similar projects and staking out opportunities for creating new knowledge.",
+   "quote": "Citation has also been identified as a critical means by which researchers establish stance: aligning themselves with or against subgroups of fellow researchers working on similar projects and staking out opportunities for creating new knowledge.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Conventions of citation vary by the citation system used.",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Each system is associated with different academic disciplines.",
+   "quote": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "quote": "academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Citations should supply sufficient detail to identify the item uniquely.",
+   "quote": "Citations should supply sufficient detail to identify the item uniquely.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Different citation systems and styles are used in scientific citation, legal citation, prior art, the arts, and the humanities.",
+   "quote": "Different citation systems and styles are used in scientific citation, legal citation, prior art, the arts, and the humanities.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Some scholars also put forward \"the right to refuse unwanted citations\" in certain situations deemed inappropriate regarding the use of citations in the scientific literature.",
+   "quote": "Regarding the use of citations in the scientific literature, some scholars also put forward \"the right to refuse unwanted citations\" in certain situations deemed inappropriate.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Citation content can vary depending on the type of source.",
+   "quote": "Citation content can vary depending on the type of source and may include: Book: authors, book title, place of publication, publisher, date of publication, and page numbers if appropriate.",
+   "kind": "fact"
+  },
+  {
+   "term": "Play",
+   "definition": "Play: inline citations offer part, scene, and line numbers, the latter separated by periods: 4.452 refers to scene 4, line 452.",
+   "quote": "Play: inline citations offer part, scene, and line numbers, the latter separated by periods: 4.452 refers to scene 4, line 452.",
+   "kind": "definition"
+  },
+  {
+   "term": "Poem",
+   "definition": "Poem: spaced slashes are normally used to indicate separate lines of a poem, and parenthetical citations usually include the line numbers.",
+   "quote": "Poem: spaced slashes are normally used to indicate separate lines of a poem, and parenthetical citations usually include the line numbers.",
+   "kind": "definition"
+  },
+  {
+   "term": "Interview",
+   "definition": "Interview: name of interviewer, interview descriptor (ex. personal interview), and date of interview.",
+   "quote": "Interview: name of interviewer, interview descriptor (ex. personal interview), and date of interview.",
+   "kind": "definition"
+  },
+  {
+   "term": "Data",
+   "definition": "Data: authors, dataset title, date of publication, and publisher.",
+   "quote": "Data: authors, dataset title, date of publication, and publisher.",
+   "kind": "definition"
+  },
+  {
+   "term": "footnotes",
+   "definition": "footnotes (notes at the end of the page)",
+   "quote": "The numbers refer to either footnotes (notes at the end of the page) or endnotes (notes on a page at the end of the paper) that provide source detail.",
+   "kind": "definition"
+  },
+  {
+   "term": "endnotes",
+   "definition": "endnotes (notes on a page at the end of the paper)",
+   "quote": "The numbers refer to either footnotes (notes at the end of the page) or endnotes (notes on a page at the end of the paper) that provide source detail.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Citations of books may include an International Standard Book Number (ISBN).",
+   "quote": "Citations of books may include an International Standard Book Number (ISBN).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Specific volumes, articles, or other identifiable parts of a periodical, may have an associated Serial Item and Contribution Identifier (SICI) or an International Standard Serial Number (ISSN).",
+   "quote": "Specific volumes, articles, or other identifiable parts of a periodical, may have an associated Serial Item and Contribution Identifier (SICI) or an International Standard Serial Number (ISSN).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Electronic documents may have a digital object identifier (DOI).",
+   "quote": "Electronic documents may have a digital object identifier (DOI).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Biomedical research articles may have a PubMed Identifier (PMID).",
+   "quote": "Biomedical research articles may have a PubMed Identifier (PMID).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Broadly speaking, there are two types of citation systems, the Vancouver system and parenthetical referencing.",
+   "quote": "Broadly speaking, there are two types of citation systems, the Vancouver system and parenthetical referencing.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Council of Science Editors (CSE) adds a third, the citation-name system.",
+   "quote": "However, the Council of Science Editors (CSE) adds a third, the citation-name system.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Vancouver system uses sequential numbers in the text, either bracketed or superscript or both.",
+   "quote": "The Vancouver system uses sequential numbers in the text, either bracketed or superscript or both.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The notes system may or may not require a full bibliography, depending on whether the writer has used a full-note form or a shortened-note form.",
+   "quote": "The notes system may or may not require a full bibliography, depending on whether the writer has used a full-note form or a shortened-note form.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The organizational logic of the bibliography is that sources are listed in their order of appearance in-text, rather than alphabetically by author last name.",
+   "quote": "The organizational logic of the bibliography is that sources are listed in their order of appearance in-text, rather than alphabetically by author last name.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In the humanities, many authors also use footnotes or endnotes to supply anecdotal information.",
+   "quote": "In the humanities, many authors also use footnotes or endnotes to supply anecdotal information.",
+   "kind": "fact"
+  },
+  {
+   "term": "Parenthetical referencing",
+   "definition": "Parenthetical referencing, also known as Harvard referencing, has full or partial, in-text, citations enclosed in circular brackets and embedded in the paragraph.",
+   "quote": "Parenthetical referencing, also known as Harvard referencing, has full or partial, in-text, citations enclosed in circular brackets and embedded in the paragraph.",
+   "kind": "definition"
+  },
+  {
+   "term": "References",
+   "definition": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "quote": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "kind": "definition"
+  },
+  {
+   "term": "Citation styles",
+   "definition": "Citation styles can be broadly divided into styles common to the humanities and the sciences, though there is considerable overlap.",
+   "quote": "Citation styles can be broadly divided into styles common to the humanities and the sciences, though there is considerable overlap.",
+   "kind": "definition"
+  },
+  {
+   "term": "citation formats",
+   "definition": "These may be referred to as citation formats as well as citation styles.",
+   "quote": "These may be referred to as citation formats as well as citation styles.",
+   "kind": "definition"
+  },
+  {
+   "term": "The Citation Style Language (CSL)",
+   "definition": "The Citation Style Language (CSL) is an open XML-based language to describe the formatting of citations and bibliographies.",
+   "quote": "The Citation Style Language (CSL) is an open XML-based language to describe the formatting of citations and bibliographies.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Depending on the choice of style, fully cited parenthetical references may require no end section.",
+   "quote": "Depending on the choice of style, fully cited parenthetical references may require no end section.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In-text references for online publications may differ from conventional parenthetical referencing.",
+   "quote": "In-text references for online publications may differ from conventional parenthetical referencing.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A full reference can be hidden, only displayed when wanted by the reader, in the form of a tooltip.",
+   "quote": "A full reference can be hidden, only displayed when wanted by the reader, in the form of a tooltip.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Some style guides, such as the Chicago Manual of Style, are quite flexible and cover both parenthetical and note citation systems.",
+   "quote": "Some style guides, such as the Chicago Manual of Style, are quite flexible and cover both parenthetical and note citation systems.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Others, such as MLA and APA styles, specify formats within the context of a single citation system.",
+   "quote": "Others, such as MLA and APA styles, specify formats within the context of a single citation system.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The various guides thus specify order of appearance, for example, of publication date, title, and page numbers following the author name, in addition to conventions of punctuation, use of italics, emphasis, parenthesis, quotation marks, etc., particular to their style.",
+   "quote": "The various guides thus specify order of appearance, for example, of publication date, title, and page numbers following the author name, in addition to conventions of punctuation, use of italics, emphasis, parenthesis, quotation marks, etc., particular to their style.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A number of organizations have created styles to fit their needs; consequently, a number of different guides exist.",
+   "quote": "A number of organizations have created styles to fit their needs; consequently, a number of different guides exist.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Individual publishers often have their own in-house variations as well, and some works are so long-established as to have their own citation methods too: Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+   "quote": "Individual publishers often have their own in-house variations as well, and some works are so long-established as to have their own citation methods too: Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Chicago style (CMOS) was developed and its guide is The Chicago Manual of Style.",
+   "quote": "The Chicago style (CMOS) was developed and its guide is The Chicago Manual of Style.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It is most widely used in history and economics as well as some social sciences.",
+   "quote": "It is most widely used in history and economics as well as some social sciences.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The closely related Turabian style\u2014which derives from it\u2014is for student references, and is distinguished from the CMOS by omission of quotation marks in reference lists, and mandatory access date citation.",
+   "quote": "The closely related Turabian style\u2014which derives from it\u2014is for student references, and is distinguished from the CMOS by omission of quotation marks in reference lists, and mandatory access date citation.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+   "quote": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Columbia style offers models for both the humanities and the sciences.",
+   "quote": "Columbia style offers models for both the humanities and the sciences.",
+   "kind": "fact"
+  },
+  {
+   "term": "Harvard referencing (or author-date system)",
+   "definition": "Harvard referencing (or author-date system) is a specific kind of parenthetical referencing.",
+   "quote": "Harvard referencing (or author-date system) is a specific kind of parenthetical referencing.",
+   "kind": "definition"
+  },
+  {
+   "term": "Parenthetical referencing",
+   "definition": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "quote": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "kind": "definition"
+  },
+  {
+   "term": "footnote",
+   "definition": "In some areas of the humanities, the term footnote is actually used as a synonym for reference.",
+   "quote": "In these areas, the term footnote is actually used as a synonym for reference, and care must be taken by editors and typesetters to ensure that they understand how the term is being used by their authors.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Evidence Explained: Citing History Sources from Artifacts to Cyberspace by Elizabeth Shown Mills covers primary sources not included in CMOS, such as censuses, court, land, government, business, and church records.",
+   "quote": "Evidence Explained: Citing History Sources from Artifacts to Cyberspace by Elizabeth Shown Mills covers primary sources not included in CMOS, such as censuses, court, land, government, business, and church records.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The book includes sources in electronic format.",
+   "quote": "Includes sources in electronic format.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The book is used by genealogists and historians.",
+   "quote": "Used by genealogists and historians.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Harvard referencing involves a short author-date reference, e.g., \"(Smith, 2000)\", being inserted after the cited text within parentheses and the full reference to the source being listed at the end of the article.",
+   "quote": "Harvard referencing involves a short author-date reference, e.g., \"(Smith, 2000)\", being inserted after the cited text within parentheses and the full reference to the source being listed at the end of the article.",
+   "kind": "fact"
+  },
+  {
+   "statement": "MLA style was developed by the Modern Language Association.",
+   "quote": "MLA style was developed by the Modern Language Association and is most often used in the arts and the humanities, particularly in English studies, other literary studies, including comparative literature and literary criticism in languages other than English (\"foreign languages\"), and some interdisciplinary studies, such as cultural studies, drama and theatre, film, and other media, including television.",
+   "kind": "fact"
+  },
+  {
+   "statement": "MLA style is most often used in the arts and the humanities, particularly in English studies, other literary studies, including comparative literature and literary criticism in languages other than English (\"foreign languages\"), and some interdisciplinary studies, such as cultural studies, drama and theatre, film, and other media, including television.",
+   "quote": "MLA style was developed by the Modern Language Association and is most often used in the arts and the humanities, particularly in English studies, other literary studies, including comparative literature and literary criticism in languages other than English (\"foreign languages\"), and some interdisciplinary studies, such as cultural studies, drama and theatre, film, and other media, including television.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This style of citations and bibliographical format uses parenthetical referencing with author-page (Smith 395) or author-[short] title-page (Smith, Contingencies 42) in the case of more than one work by the same author within parentheses in the text, keyed to an alphabetical list of sources on a \"works cited\" page at the end of the paper, as well as notes (footnotes or endnotes).",
+   "quote": "This style of citations and bibliographical format uses parenthetical referencing with author-page (Smith 395) or author-[short] title-page (Smith, Contingencies 42) in the case of more than one work by the same author within parentheses in the text, keyed to an alphabetical list of sources on a \"works cited\" page at the end of the paper, as well as notes (footnotes or endnotes).",
+   "kind": "fact"
+  },
+  {
+   "statement": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA).",
+   "quote": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA) and most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The MHRA Style Guide is most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "quote": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA) and most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The MHRA Style Guide is available for sale both in the UK and in the United States.",
+   "quote": "It is available for sale both in the UK and in the United States.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The MHRA Style Guide is similar to MLA style, but has some differences.",
+   "quote": "It is similar to MLA style, but has some differences.",
+   "kind": "fact"
+  },
+  {
+   "statement": "MHRA style uses footnotes that reference a citation fully while also providing a bibliography.",
+   "quote": "For example, MHRA style uses footnotes that reference a citation fully while also providing a bibliography.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In some areas of the humanities, footnotes are used exclusively for references, and their use for conventional footnotes (explanations or examples) is avoided.",
+   "quote": "In some areas of the humanities, footnotes are used exclusively for references, and their use for conventional footnotes (explanations or examples) is avoided.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Bluebook is a citation system traditionally used in American academic legal writing.",
+   "quote": "The Bluebook is a citation system traditionally used in American academic legal writing, and the Bluebook (or similar systems derived from it) are used by many courts.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Bluebook (or similar systems derived from it) are used by many courts.",
+   "quote": "The Bluebook is a citation system traditionally used in American academic legal writing, and the Bluebook (or similar systems derived from it) are used by many courts.",
+   "kind": "fact"
+  },
+  {
+   "statement": "At present, academic legal articles are always footnoted.",
+   "quote": "At present, academic legal articles are always footnoted, but motions submitted to courts and court opinions traditionally use inline citations, which are either separate sentences or separate clauses.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Motions submitted to courts and court opinions traditionally use inline citations, which are either separate sentences or separate clauses.",
+   "quote": "At present, academic legal articles are always footnoted, but motions submitted to courts and court opinions traditionally use inline citations, which are either separate sentences or separate clauses.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The legal citation style used almost universally in Canada is based on the Canadian Guide to Uniform Legal Citation (AKA McGill Guide), published by McGill Law Journal.",
+   "quote": "The legal citation style used almost universally in Canada is based on the Canadian Guide to Uniform Legal Citation (AKA McGill Guide), published by McGill Law Journal.",
+   "kind": "fact"
+  },
+  {
+   "statement": "British legal citation almost universally follows the Oxford",
+   "quote": "British legal citation almost universally follows the Oxford",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 5,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 110.6
+}

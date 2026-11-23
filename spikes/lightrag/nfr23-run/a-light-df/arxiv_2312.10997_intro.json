@@ -1,0 +1,259 @@
+{
+ "accepted": [
+  {
+   "term": "Retrieval-Augmented Generation (RAG)",
+   "definition": "Retrieval-Augmented Generation (RAG) enhances LLMs by retrieving relevant document chunks from external knowledge base through semantic similarity calculation.",
+   "quote": "To overcome challenges, Retrieval-Augmented Generation (RAG) enhances LLMs by retrieving relevant document chunks from external knowledge base through semantic similarity calculation.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Large language models (LLMs) have achieved remarkable success.",
+   "quote": "Large language models (LLMs) have achieved remarkable success, though they still face significant limitations, especially in domain-specific or knowledge-intensive tasks [1], notably producing \u201challucinations\u201d [2] when handling queries beyond their training data or requiring current information.",
+   "kind": "fact"
+  },
+  {
+   "statement": "LLMs produce hallucinations when handling queries beyond their training data or requiring current information.",
+   "quote": "Large language models (LLMs) have achieved remarkable success, though they still face significant limitations, especially in domain-specific or knowledge-intensive tasks [1], notably producing \u201challucinations\u201d [2] when handling queries beyond their training data or requiring current information.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG effectively reduces the problem of generating factually incorrect content.",
+   "quote": "By referencing external knowledge, RAG effectively reduces the problem of generating factually incorrect content.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The integration of RAG into LLMs has resulted in widespread adoption.",
+   "quote": "Its integration into LLMs has resulted in widespread adoption, establishing RAG as a key technology in advancing chatbots and enhancing the suitability of LLMs for real-world applications.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The stages of involving RAG mainly include pre-training, fine-tuning, and inference.",
+   "quote": "The stages of involving RAG mainly include pre-training, fine-tuning, and inference.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Research on RAG initially focused on leveraging the powerful in context learning abilities of LLMs, primarily concentrating on the inference stage.",
+   "quote": "With the emergence of LLMs, research on RAG initially focused on leveraging the powerful in context learning abilities of LLMs, primarily concentrating on the inference stage.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Subsequent research has delved deeper, gradually integrating more with the fine-tuning of LLMs.",
+   "quote": "Subsequent research has delved deeper, gradually integrating more with the fine-tuning of LLMs.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Researchers have also been exploring ways to enhance language models in the pre-training stage through retrieval-augmented techniques.",
+   "quote": "Researchers have also been exploring ways to enhance language models in the pre-training stage through retrieval-augmented techniques.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG technology has rapidly developed in recent years.",
+   "quote": "RAG technology has rapidly developed in recent years, and the technology tree summarizing related research is shown in Figure 1.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG\u2019s inception coincided with the rise of the Transformer architecture.",
+   "quote": "Initially, RAG\u2019s inception coincided with the rise of the Transformer architecture, focusing on enhancing language models by incorporating additional knowledge through Pre-Training Models (PTM).",
+   "kind": "fact"
+  },
+  {
+   "statement": "The arrival of ChatGPT marked a pivotal moment, with LLM demonstrating powerful in context learning (ICL) capabilities.",
+   "quote": "The subsequent arrival of ChatGPT [6] marked a pivotal moment, with LLM demonstrating powerful in context learning (ICL) capabilities.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG research shifted towards providing better information for LLMs to answer more complex and knowledge-intensive tasks during the inference stage.",
+   "quote": "RAG research shifted towards providing better information for LLMs to answer more complex and knowledge-intensive tasks during the inference stage, leading to rapid development in RAG studies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The enhancement of RAG began to incorporate more with LLM fine-tuning techniques.",
+   "quote": "As research progressed, the enhancement of RAG was no longer limited to the inference stage but began to incorporate more with LLM fine-tuning techniques.",
+   "kind": "fact"
+  },
+  {
+   "term": "Retrieval",
+   "definition": "The paper analyzes key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "quote": "analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "definition"
+  },
+  {
+   "term": "Generation",
+   "definition": "The paper analyzes key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "quote": "analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "definition"
+  },
+  {
+   "term": "Augmentation",
+   "definition": "The paper analyzes key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "quote": "analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "definition"
+  },
+  {
+   "statement": "The paper summarizes three main research paradigms from over 100 RAG studies.",
+   "quote": "summarizing three main research paradigms from over 100 RAG studies",
+   "kind": "fact"
+  },
+  {
+   "statement": "Current research tends to focus more on methods, lacking analysis and summarization of how to evaluate RAG.",
+   "quote": "current research tends to focus more on methods, lacking analysis and summarization of how to evaluate RAG.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The paper reviews the downstream tasks, datasets, benchmarks, and evaluation methods applicable to RAG.",
+   "quote": "This paper comprehensively reviews the downstream tasks, datasets, benchmarks, and evaluation methods applicable to RAG.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The paper delineates the evolution of RAG through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "quote": "delineating its evolution through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The paper summarizes the current assessment methods of RAG, covering 26 tasks, nearly 50 datasets.",
+   "quote": "We have summarized the current assessment methods of RAG, covering 26 tasks, nearly 50 datasets",
+   "kind": "fact"
+  },
+  {
+   "statement": "Section III focuses on optimization methods in retrieval, including indexing, query and embedding optimization.",
+   "quote": "Section III focuses on optimization methods in retrieval,including indexing, query and embedding optimization.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Section IV concentrates on post-retrieval process and LLM fine-tuning in generation.",
+   "quote": "Section IV concentrates on post-retrieval process and LLM fine-tuning in generation.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Section V analyzes the three augmentation processes.",
+   "quote": "Section V analyzes the three augmentation processes.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Section VI focuses on RAG\u2019s downstream tasks and evaluation system.",
+   "quote": "Section VI focuses on RAG\u2019s downstream tasks and evaluation system.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Section VII mainly discusses the challenges that RAG currently faces and its future development directions.",
+   "quote": "Section VII mainly discusses the challenges that RAG currently faces and its future development directions.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The paper concludes in Section VIII.",
+   "quote": "At last, the paper concludes in Section VIII.",
+   "kind": "fact"
+  },
+  {
+   "statement": "ChatGPT relies on pre-training data.",
+   "quote": "Given ChatGPT\u2019s reliance on pre-training data",
+   "kind": "fact"
+  },
+  {
+   "statement": "ChatGPT initially lacks the capacity to provide updates on recent developments.",
+   "quote": "it initially lacks the capacity to provide updates on recent developments.",
+   "kind": "fact"
+  },
+  {
+   "term": "Naive RAG",
+   "definition": "The Naive RAG research paradigm represents the earliest methodology, which gained prominence shortly after the widespread adoption of ChatGPT.",
+   "quote": "The Naive RAG research paradigm represents the earliest methodology, which gained prominence shortly after the widespread adoption of ChatGPT.",
+   "kind": "definition"
+  },
+  {
+   "term": "Retrieve-Read",
+   "definition": "The Naive RAG follows a traditional process that includes indexing, retrieval, and generation, which is also characterized as a \u201cRetrieve-Read\u201d framework [7].",
+   "quote": "The Naive RAG follows a traditional process that includes indexing, retrieval, and generation, which is also characterized as a \u201cRetrieve-Read\u201d framework [7].",
+   "kind": "definition"
+  },
+  {
+   "statement": "RAG bridges this information gap by sourcing and incorporating knowledge from external databases.",
+   "quote": "RAG bridges this information gap by sourcing and incorporating knowledge from external databases.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In this case, it gathers relevant news articles related to the user\u2019s query.",
+   "quote": "In this case, it gathers relevant news articles related to the user\u2019s query.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These articles, combined with the original question, form a comprehensive prompt that empowers LLMs to generate a well-informed answer.",
+   "quote": "These articles, combined with the original question, form a comprehensive prompt that empowers LLMs to generate a well-informed answer.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Fig. 2: A representative instance of the RAG process applied to question answering.",
+   "quote": "Fig. 2: A representative instance of the RAG process applied to question answering.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It mainly consists of 3 steps.",
+   "quote": "It mainly consists of 3 steps.",
+   "kind": "fact"
+  },
+  {
+   "statement": "1) Indexing. Documents are split into chunks, encoded into vectors, and stored in a vector database.",
+   "quote": "1) Indexing. Documents are split into chunks, encoded into vectors, and stored in a vector database.",
+   "kind": "fact"
+  },
+  {
+   "statement": "2) Retrieval. Retrieve the Top k chunks most relevant to the question based on semantic similarity.",
+   "quote": "2) Retrieval. Retrieve the Top k chunks most relevant to the question based on semantic similarity.",
+   "kind": "fact"
+  },
+  {
+   "statement": "3) Generation. Input the original question and the retrieved chunks together into LLM to generate the final answer.",
+   "quote": "3) Generation. Input the original question and the retrieved chunks together into LLM to generate the final answer.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The RAG research paradigm is continuously evolving, and we categorize it into three stages: Naive RAG, Advanced RAG, and Modular RAG, as showed in Figure 3.",
+   "quote": "The RAG research paradigm is continuously evolving, and we categorize it into three stages: Naive RAG, Advanced RAG, and Modular RAG, as showed in Figure 3.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Despite RAG method are cost-effective and surpass the performance of the native LLM, they also exhibit several limitations.",
+   "quote": "Despite RAG method are cost-effective and surpass the performance of the native LLM, they also exhibit several limitations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The development of Advanced RAG and Modular RAG is a response to these specific shortcomings in Naive RAG.",
+   "quote": "The development of Advanced RAG and Modular RAG is a response to these specific shortcomings in Naive RAG.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Indexing starts with the cleaning and extraction of raw data in diverse formats like PDF, HTML, Word, and Markdown, which is then converted into a uniform plain text format.",
+   "quote": "Indexing starts with the cleaning and extraction of raw data in diverse formats like PDF, HTML, Word, and Markdown, which is then converted into a uniform plain text format.",
+   "kind": "fact"
+  },
+  {
+   "statement": "To accommodate the context limitations of language models, text is segmented into smaller, digestible chunks.",
+   "quote": "To accommodate the context limitations of language models, text is segmented into smaller, digestible chunks.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Chunks are then encoded into vector representations using an embedding model and stored in vector database.",
+   "quote": "Chunks are then encoded into vector representations using an embedding model and stored in vector database.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This step is crucial for enabling efficient similarity searches in the subsequent retrieval phase.",
+   "quote": "This step is crucial for enabling efficient similarity searches in the subsequent retrieval phase.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Upon receipt of a user query, the RAG system employs the same encoding model utilized during the indexing phase to transform the query into a vector representation.",
+   "quote": "Upon receipt of a user query, the RAG system employs the same encoding model utilized during the indexing phase to transform the query into a vector representation.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It then computes the similarity scores between the query vector and the vector of chunks within the indexed corpus.",
+   "quote": "It then computes the similarity scores between the query vector and the vector of chunks within the indexed corpus.",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 3,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 65.0
+}

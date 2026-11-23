@@ -1,0 +1,175 @@
+{
+ "accepted": [
+  {
+   "term": "Search",
+   "definition": "Search is backends in order, search_backends (default [\"searxng\", \"duckduckgo\"]).",
+   "quote": "Search: backends in order, search_backends (default [\"searxng\", \"duckduckgo\"]).",
+   "kind": "definition"
+  },
+  {
+   "term": "SearXNG",
+   "definition": "SearXNG is self-hosted, the first choice.",
+   "quote": "SearXNG (self-hosted, the first choice):",
+   "kind": "definition"
+  },
+  {
+   "term": "DuckDuckGo",
+   "definition": "DuckDuckGo is the fallback.",
+   "quote": "DuckDuckGo (the fallback):",
+   "kind": "definition"
+  },
+  {
+   "term": "Fetching",
+   "definition": "Fetching (WebClient) is only http(s) to public addresses on ports 80, 443, 8080, 8443.",
+   "quote": "Fetching (WebClient): only http(s) to public addresses on ports 80, 443, 8080, 8443;",
+   "kind": "definition"
+  },
+  {
+   "statement": "web_tools.py gives the pipelines two tools, web_search (budget key search_calls) and fetch_page (fetch_calls).",
+   "quote": "web_tools.py gives the pipelines two tools, web_search (budget key search_calls) and fetch_page (fetch_calls);",
+   "kind": "fact"
+  },
+  {
+   "statement": "A skill lists them under tools:.",
+   "quote": "a skill lists them under tools:.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A backend that fails or finds nothing hands over to the next.",
+   "quote": "A backend that fails or finds nothing hands over to the next;",
+   "kind": "fact"
+  },
+  {
+   "statement": "The answer says which one was used, what failed and which engines SearXNG could not reach.",
+   "quote": "the answer says which one was used, what failed and which engines SearXNG could not reach.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Duplicates (same page with tracking parameters, www., fragments) are merged.",
+   "quote": "Duplicates (same page with tracking parameters, www., fragments) are merged,",
+   "kind": "fact"
+  },
+  {
+   "statement": "Results that point to private addresses are dropped.",
+   "quote": "results that point to private addresses are dropped.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Nothing found is an answer, not an error.",
+   "quote": "\"Nothing found\" is an answer, not an error;",
+   "kind": "fact"
+  },
+  {
+   "statement": "Only no backend answered is an error.",
+   "quote": "only \"no backend answered\" is an error.",
+   "kind": "fact"
+  },
+  {
+   "statement": "tools/searxng/run.sh starts it with podman or docker on 127.0.0.1:8590 (stop, check also exist).",
+   "quote": "tools/searxng/run.sh starts it with podman or docker on 127.0.0.1:8590 (stop, check also exist).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Its settings enable the JSON output.",
+   "quote": "Its settings enable the JSON output.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Upstream engines (Brave, DuckDuckGo, ...) sometimes throttle it.",
+   "quote": "Upstream engines (Brave, DuckDuckGo, ...) sometimes throttle it;",
+   "kind": "fact"
+  },
+  {
+   "statement": "check and the status block show that.",
+   "quote": "check and the status block show that.",
+   "kind": "fact"
+  },
+  {
+   "statement": "searxng_port (default 8590, used by MIA and by run.sh; 8888 is taken by too many other programs) or searxng_url for another address.",
+   "quote": "Settings: searxng_port (default 8590, used by MIA and by run.sh; 8888 is taken by too many other programs) or searxng_url for another address.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It is not started by MIA and does not restart with the machine unless you set that up.",
+   "quote": "It is not started by MIA and does not restart with the machine unless you set that up",
+   "kind": "fact"
+  },
+  {
+   "statement": "The image is about 270 MB.",
+   "quote": "the image is about 270 MB.",
+   "kind": "fact"
+  },
+  {
+   "statement": "DuckDuckGo has no install.",
+   "quote": "no install;",
+   "kind": "fact"
+  },
+  {
+   "statement": "It reads the HTML result page (there is no official free API).",
+   "quote": "it reads the HTML result page (there is no official free API),",
+   "kind": "fact"
+  },
+  {
+   "statement": "It waits at least 1.5 s between requests and reports a CAPTCHA or rate limit.",
+   "quote": "waits at least 1.5 s between requests and reports a CAPTCHA or rate limit.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The address is checked before the connection, at every redirect (at most 4) and for the address that was really connected.",
+   "quote": "the address is checked before the connection, at every redirect (at most 4) and for the address that was really connected.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Blocked: localhost, the LAN, the tailnet (100.64.0.0/10, .ts.net), link-local and cloud metadata addresses (169.254.169.254), IPv6 private ranges, names without a dot or ending in .local/.internal, addresses with a user name.",
+   "quote": "Blocked: localhost, the LAN, the tailnet (100.64.0.0/10, .ts.net), link-local and cloud metadata addresses (169.254.169.254), IPv6 private ranges, names without a dot or ending in .local/.internal, addresses with a user name.",
+   "kind": "fact"
+  },
+  {
+   "term": "hidden elements",
+   "definition": "hidden elements (`display:none`, `hidden`, `aria-hidden`, font size 0) are dropped, because hidden text is a favourite place for instructions aimed at models.",
+   "quote": "scripts, styles, menus and hidden elements (`display:none`, `hidden`, `aria-hidden`, font size 0) are dropped, because hidden text is a favourite place for instructions aimed at models.",
+   "kind": "definition"
+  },
+  {
+   "term": "chunk_text",
+   "definition": "chunk_text cuts long pages at paragraph breaks.",
+   "quote": "chunk_text cuts long pages at paragraph breaks.",
+   "kind": "definition"
+  },
+  {
+   "term": "Web text is data",
+   "definition": "Web text is data (X1): untrusted() wraps it in delimiters that the page cannot close, injection_signals() flags phrases like \"ignore previous instructions\" (shown in the status block and logged; a hint, not the protection: the protection is narrow tools and schemas in the stages that read the web).",
+   "quote": "Web text is data (X1): untrusted() wraps it in delimiters that the page cannot close, injection_signals() flags phrases like \"ignore previous instructions\" (shown in the status block and logged; a hint, not the protection: the protection is narrow tools and schemas in the stages that read the web).",
+   "kind": "definition"
+  },
+  {
+   "statement": "The limits are 5 s connect, 15 s read, 2 MB, content types html/plain/json/xml, no cookies, no scripts.",
+   "quote": "Limits: 5 s connect, 15 s read, 2 MB, content types html/plain/json/xml, no cookies, no scripts.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Every search and fetch is a line in data/runs/web-YYYY-MM.jsonl (query, backend, results, errors, URL, status, bytes, timing).",
+   "quote": "every search and fetch is a line in data/runs/web-YYYY-MM.jsonl (query, backend, results, errors, URL, status, bytes, timing).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Other keys (optional) include web_timeout ([5, 15]), web_max_bytes, web_max_chars, search_results.",
+   "quote": "Other keys (optional): web_timeout ([5, 15]), web_max_bytes, web_max_chars, search_results.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The check of the connected address uses the socket of the connection when the library gives it, and the name is resolved by the system a second time when the connection is made.",
+   "quote": "the check of the connected address uses the socket of the connection when the library gives it, and the name is resolved by the system a second time when the connection is made.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A name that changes its address between the two lookups is therefore caught by the connected-address check, not by the first one.",
+   "quote": "A name that changes its address between the two lookups is therefore caught by the connected-address check, not by the first one.",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 2,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 46.6
+}

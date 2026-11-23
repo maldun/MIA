@@ -25,4 +25,10 @@ If a sample then holds fewer than 120, it is topped up from the accepted proposa
 Two pages like the n6 page (`specs/mia/explore-skill-rework/forms/`): each card shows the proposal, the model's quote and the paragraph around it; the owner marks right, right but useless, wrong (the text says otherwise), invented (not in the text). The running tally on the page shows the NFR-23 rule (right of the marked, invented of the marked). The saved answers are scored with `score_marks.py`, which prints the NFR-23 verdict for a sample of at least 120 (at most 4 invented and at least 91 right) besides the old spike bar. A larger sample is a new written decision before extra marks are looked at (NFR-23).
 
 ## 6. Results
-(filled after the runs and the owner's marking)
+**Runs (2026-11-23/24, one per document, no failed model step; outputs in `spikes/lightrag/nfr23-run/`):**
+- B, `gemma4:26b`, items and relations: 689 accepted (451 entities, 238 relations), 30 refused (22 relation quotes without both ends, 6 quotes not a passage of the document, 1 name not in the document, 1 quote without the name); 13 documents in about 36 minutes.
+- A, `gemma4:12b-it-qat`, definitions and facts: 678 accepted (123 definitions, 555 facts), 3 refused (2 quotes without the term, 1 quote not a passage); about 19 minutes.
+
+**Draw (seed 20261123, section 4):** sample A 120 cards (53 definitions, 67 facts; topped up, since definitions were short in several documents); sample B 128 cards (78 entities, 50 relations; no top-up). Pages: `specs/mia/explore-skill-rework/forms/nfr23-a-marking.html`, `nfr23-b-marking.html`; answers saved as `nfr23-a-marks.json`, `nfr23-b-marks.json`, scored with `score_marks.py`.
+
+**Marks:** (the owner's; not yet given)

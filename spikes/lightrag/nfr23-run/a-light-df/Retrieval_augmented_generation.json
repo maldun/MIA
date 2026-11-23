@@ -1,0 +1,392 @@
+{
+ "accepted": [
+  {
+   "term": "Retrieval-augmented generation (RAG)",
+   "definition": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources.",
+   "quote": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources.",
+   "kind": "definition"
+  },
+  {
+   "statement": "With RAG, LLMs first refer to a specified set of documents, then respond to user queries.",
+   "quote": "With RAG, LLMs first refer to a specified set of documents, then respond to user queries.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These documents supplement information from the LLM's pre-existing training data.",
+   "quote": "These documents supplement information from the LLM's pre-existing training data.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This allows LLMs to use domain-specific and/or updated information that is not available in the training data.",
+   "quote": "This allows LLMs to use domain-specific and/or updated information that is not available in the training data.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The technique was first proposed in 2020 and has since become a widely adopted approach in modern AI systems.",
+   "quote": "The technique was first proposed in 2020 and has since become a widely adopted approach in modern AI systems.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG improves LLMs by incorporating information retrieval before generating responses.",
+   "quote": "RAG improves LLMs by incorporating information retrieval before generating responses.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Unlike LLMs that rely on static training data, RAG pulls relevant text from databases, uploaded documents, or web sources.",
+   "quote": "Unlike LLMs that rely on static training data, RAG pulls relevant text from databases, uploaded documents, or web sources.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG is a way of improving LLM performance, in essence by blending the LLM process with a web search or other document look-up process to help LLMs stick to the facts.",
+   "quote": "RAG is a way of improving LLM performance, in essence by blending the LLM process with a web search or other document look-up process to help LLMs stick to the facts.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This method helps reduce AI hallucinations, which have caused chatbots to describe policies that don't exist, or recommend nonexistent legal cases to lawyers that are looking for citations to support their arguments.",
+   "quote": "This method helps reduce AI hallucinations, which have caused chatbots to describe policies that don't exist, or recommend nonexistent legal cases to lawyers that are looking for citations to support their arguments.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG also reduces the need to retrain LLMs with new data, saving on computational and financial costs.",
+   "quote": "RAG also reduces the need to retrain LLMs with new data, saving on computational and financial costs.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Beyond efficiency gains, RAG also allows LLMs to include sources in their responses, so users can verify the cited sources.",
+   "quote": "Beyond efficiency gains, RAG also allows LLMs to include sources in their responses, so users can verify the cited sources.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This provides greater transparency, as users can cross-check retrieved content to ensure accuracy and relevance.",
+   "quote": "This provides greater transparency, as users can cross-check retrieved content to ensure accuracy and relevance.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The term retrieval-augmented generation (RAG) was introduced in a 2020 paper that described combining a parametric language model with a non-parametric external memory accessed through retrieval at inference time.",
+   "quote": "The term retrieval-augmented generation (RAG) was introduced in a 2020 paper that described combining a parametric language model with a non-parametric external memory accessed through retrieval at inference time.",
+   "kind": "fact"
+  },
+  {
+   "statement": "LLMs can provide incorrect information.",
+   "quote": "LLMs can provide incorrect information.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This error contributed to a $100 billion decline in Google's stock value.",
+   "quote": "This error contributed to a $100 billion decline in Google's stock value.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG can reduce factual errors, but it does not solve all the problems.",
+   "quote": "RAG can reduce factual errors, but it does not solve all the problems.",
+   "kind": "fact"
+  },
+  {
+   "statement": "LLMs can generate misinformation even when pulling from factually correct sources if they misinterpret the context.",
+   "quote": "LLMs can generate misinformation even when pulling from factually correct sources if they misinterpret the context.",
+   "kind": "fact"
+  },
+  {
+   "statement": "LLMs with RAG are programmed to prioritize new information.",
+   "quote": "LLMs with RAG are programmed to prioritize new information.",
+   "kind": "fact"
+  },
+  {
+   "term": "prompt stuffing",
+   "definition": "With prompt stuffing, additional relevant context is added to this input to guide the model's response.",
+   "quote": "with prompt stuffing, additional relevant context is added to this input to guide the model's response.",
+   "kind": "definition"
+  },
+  {
+   "term": "Retrieval-augmented generation (RAG)",
+   "definition": "Retrieval-augmented generation (RAG) enhances large language models (LLMs) by incorporating an information-retrieval mechanism that allows models to access and utilize additional data beyond their original training set.",
+   "quote": "Retrieval-augmented generation (RAG) enhances large language models (LLMs) by incorporating an information-retrieval mechanism that allows models to access and utilize additional data beyond their original training set.",
+   "kind": "definition"
+  },
+  {
+   "term": "augmentation",
+   "definition": "Augmentation is the act of augmenting the model's external knowledge base with the updated information.",
+   "quote": "all that's needed is to augment the model's external knowledge base with the updated information (\"augmentation\").",
+   "kind": "definition"
+  },
+  {
+   "term": "LLM embeddings",
+   "definition": "LLM embeddings are numerical representations in the form of a large vector space.",
+   "quote": "Typically, the data to be referenced is converted into LLM embeddings, numerical representations in the form of a large vector space.",
+   "kind": "definition"
+  },
+  {
+   "term": "Sparse vectors",
+   "definition": "Sparse vectors, which encode the identity of a word, are typically dictionary-length and contain mostly zeros.",
+   "quote": "Sparse vectors, which encode the identity of a word, are typically dictionary-length and contain mostly zeros.",
+   "kind": "definition"
+  },
+  {
+   "term": "Dense vectors",
+   "definition": "Dense vectors, which encode meaning, are more compact and contain fewer zeros.",
+   "quote": "Dense vectors, which encode meaning, are more compact and contain fewer zeros.",
+   "kind": "definition"
+  },
+  {
+   "statement": "This technique has been called \"prompt stuffing.\"",
+   "quote": "This technique has been called \"prompt stuffing.\"",
+   "kind": "fact"
+  },
+  {
+   "statement": "This approach provides the LLM with key information early in the prompt, encouraging it to prioritize the supplied data over pre-existing training knowledge.",
+   "quote": "This approach provides the LLM with key information early in the prompt, encouraging it to prioritize the supplied data over pre-existing training knowledge.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Ars Technica notes that \"when new information becomes available, rather than having to retrain the model, all that's needed is to augment the model's external knowledge base with the updated information (\"augmentation\").\"",
+   "quote": "Ars Technica notes that \"when new information becomes available, rather than having to retrain the model, all that's needed is to augment the model's external knowledge base with the updated information (\"augmentation\").\"",
+   "kind": "fact"
+  },
+  {
+   "statement": "IBM states that \"in the generative phase, the LLM draws from the augmented prompt and its internal representation of its training data to synthesize\" an answer.",
+   "quote": "IBM states that \"in the generative phase, the LLM draws from the augmented prompt and its internal representation of its training data to synthesize\" an answer.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG can be used on unstructured (usually text), semi-structured, or structured data.",
+   "quote": "RAG can be used on unstructured (usually text), semi-structured, or structured data (for example knowledge graphs).",
+   "kind": "fact"
+  },
+  {
+   "statement": "These embeddings are then stored in a vector database to allow for document retrieval.",
+   "quote": "These embeddings are then stored in a vector database to allow for document retrieval.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Given a user query, a document retriever is first called to select the most relevant documents that will be used to augment the query.",
+   "quote": "Given a user query, a document retriever is first called to select the most relevant documents that will be used to augment the query.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This comparison can be done using a variety of methods, which depend in part on the type of indexing used.",
+   "quote": "This comparison can be done using a variety of methods, which depend in part on the type of indexing used.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The model feeds this relevant retrieved information into the LLM via prompt engineering of the user's original query.",
+   "quote": "The model feeds this relevant retrieved information into the LLM via prompt engineering of the user's original query.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Newer implementations (as of 2023) can also incorporate specific augmentation modules with abilities such as expanding queries into multiple domains and using memory and self-improvement to learn from previous retrievals.",
+   "quote": "Newer implementations (as of 2023) can also incorporate specific augmentation modules with abilities such as expanding queries into multiple domains and using memory and self-improvement to learn from previous retrievals.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Finally, the LLM can generate output based on both the query and the retrieved documents.",
+   "quote": "Finally, the LLM can generate output based on both the query and the retrieved documents.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Some models incorporate extra steps to improve output, such as the re-ranking of retrieved information, context selection, and fine-tuning.",
+   "quote": "Some models incorporate extra steps to improve output, such as the re-ranking of retrieved information, context selection, and fine-tuning.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Retrieval-augmented generation is used in applications where generated responses need to be grounded in external or frequently updated information.",
+   "quote": "Retrieval-augmented generation is used in applications where generated responses need to be grounded in external or frequently updated information.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In healthcare, RAG has been studied as a way to ground large language model outputs in external medical knowledge sources, although reviews have noted continuing challenges around evaluation, ethics, and clinical reliability.",
+   "quote": "In healthcare, RAG has been studied as a way to ground large language model outputs in external medical knowledge sources, although reviews have noted continuing challenges around evaluation, ethics, and clinical reliability.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Improvements to the basic process above can be applied at different stages in the RAG flow.",
+   "quote": "Improvements to the basic process above can be applied at different stages in the RAG flow.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These methods focus on the encoding of text as either dense or sparse vectors.",
+   "quote": "These methods focus on the encoding of text as either dense or sparse vectors.",
+   "kind": "fact"
+  },
+  {
+   "term": "approximate nearest neighbor (ANN) searches",
+   "definition": "approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "quote": "approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "kind": "definition"
+  },
+  {
+   "term": "Late Interactions",
+   "definition": "Late Interactions allow the system to compare words more precisely after retrieval.",
+   "quote": "Accuracy may be improved with Late Interactions, which allow the system to compare words more precisely after retrieval.",
+   "kind": "definition"
+  },
+  {
+   "term": "Inverse Cloze Task (ICT)",
+   "definition": "the Inverse Cloze Task (ICT) is a technique that helps the model learn retrieval patterns by predicting masked text within documents.",
+   "quote": "Pre-training the retriever using the Inverse Cloze Task (ICT), a technique that helps the model learn retrieval patterns by predicting masked text within documents.",
+   "kind": "definition"
+  },
+  {
+   "term": "Chunking",
+   "definition": "Chunking involves various strategies for breaking up the data into vectors so the retriever can find details in it.",
+   "quote": "Chunking involves various strategies for breaking up the data into vectors so the retriever can find details in it.",
+   "kind": "definition"
+  },
+  {
+   "term": "vector database searches",
+   "definition": "vector database searches (aka semantic search technique) can miss key facts needed to answer a user's question.",
+   "quote": "Sometimes vector database searches (aka semantic search technique) can miss key facts needed to answer a user's question.",
+   "kind": "definition"
+  },
+  {
+   "term": "traditional text search",
+   "definition": "traditional text search (aka full text search) can be combined with vector search results.",
+   "quote": "One way to mitigate this is to do a traditional text search (aka full text search), combine those results to the text chunks linked to the retrieved vectors from the vector search, and feed the combined hybrid text (using effective scoring or reranking scoring) into the language model for generation.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Performance improves by optimizing how vector similarities are calculated.",
+   "quote": "Performance improves by optimizing how vector similarities are calculated.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Dot products enhance similarity scoring.",
+   "quote": "Dot products enhance similarity scoring",
+   "kind": "fact"
+  },
+  {
+   "statement": "Late Interactions help refine document ranking and improve search relevance.",
+   "quote": "This helps refine document ranking and improve search relevance.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors.",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors",
+   "kind": "fact"
+  },
+  {
+   "statement": "Sparse dot products have computational efficiency over dense vector operations.",
+   "quote": "taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Some retrieval methods combine sparse representations, such as SPLADE, with query expansion strategies to improve search accuracy and recall.",
+   "quote": "Some retrieval methods combine sparse representations, such as SPLADE, with query expansion strategies to improve search accuracy and recall.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Supervised retriever optimization aligns retrieval probabilities with the generator model's likelihood distribution.",
+   "quote": "Supervised retriever optimization aligns retrieval probabilities with the generator model's likelihood distribution.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Supervised retriever optimization involves retrieving the top-k vectors for a given prompt, scoring the generated response's perplexity, and minimizing KL divergence between the retriever's selections and the model's likelihoods to refine retrieval.",
+   "quote": "This involves retrieving the top-k vectors for a given prompt, scoring the generated response's perplexity, and minimizing KL divergence between the retriever's selections and the model's likelihoods to refine retrieval.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Reranking techniques can refine retriever performance by prioritizing the most relevant retrieved documents during training.",
+   "quote": "Reranking techniques can refine retriever performance by prioritizing the most relevant retrieved documents during training.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A 25-time smaller network can get comparable perplexity as its much larger counterparts by redesigning the language model with the retriever in mind.",
+   "quote": "By redesigning the language model with the retriever in mind, a 25-time smaller network can get comparable perplexity as its much larger counterparts.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The method Retro incurs the high cost of training runs that the original RAG scheme avoided.",
+   "quote": "Because it is trained from scratch, this method (Retro) incurs the high cost of training runs that the original RAG scheme avoided.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Retro is not reproducible.",
+   "quote": "It has been reported that Retro is not reproducible",
+   "kind": "fact"
+  },
+  {
+   "statement": "The more reproducible version is called Retro++ and includes in-context RAG.",
+   "quote": "The more reproducible version is called Retro++ and includes in-context RAG.",
+   "kind": "fact"
+  },
+  {
+   "term": "hasbara",
+   "definition": "hasbara is a more favourable view of the country.",
+   "quote": "a more favourable view of the country (hasbara)",
+   "kind": "definition"
+  },
+  {
+   "statement": "RAG does not prevent hallucinations in LLMs.",
+   "quote": "RAG does not prevent hallucinations in LLMs.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It is not a direct solution because the LLM can still hallucinate around the source material in its response.",
+   "quote": "It is not a direct solution because the LLM can still hallucinate around the source material in its response.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG improves the accuracy of large language models (LLMs).",
+   "quote": "While RAG improves the accuracy of large language models (LLMs), it does not eliminate all challenges.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG reduces the need for frequent model retraining.",
+   "quote": "one limitation is that while RAG reduces the need for frequent model retraining, it does not remove it entirely.",
+   "kind": "fact"
+  },
+  {
+   "statement": "LLMs may struggle to recognize when they lack sufficient information to provide a reliable response.",
+   "quote": "Additionally, LLMs may struggle to recognize when they lack sufficient information to provide a reliable response.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Without specific training, models may generate answers even when they should indicate uncertainty.",
+   "quote": "Without specific training, models may generate answers even when they should indicate uncertainty.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This issue can arise when the model lacks the ability to assess its own knowledge limitations.",
+   "quote": "According to IBM, this issue can arise when the model lacks the ability to assess its own knowledge limitations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG systems may retrieve factually correct but misleading sources, leading to errors in interpretation.",
+   "quote": "RAG systems may retrieve factually correct but misleading sources, leading to errors in interpretation.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In some cases, an LLM may extract statements from a source without considering its context, resulting in an incorrect conclusion.",
+   "quote": "In some cases, an LLM may extract statements from a source without considering its context, resulting in an incorrect conclusion.",
+   "kind": "fact"
+  },
+  {
+   "statement": "When faced with conflicting information, RAG models may struggle to determine which source is accurate.",
+   "quote": "Additionally, when faced with conflicting information, RAG models may struggle to determine which source is accurate.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The worst case outcome of this limitation is that the model may combine details from multiple sources producing responses that merge outdated and updated information in a misleading manner.",
+   "quote": "The worst case outcome of this limitation is that the model may combine details from multiple sources producing responses that merge outdated and updated information in a misleading manner.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These issues occur because RAG systems may misinterpret the data they retrieve.",
+   "quote": "According to the MIT Technology Review, these issues occur because RAG systems may misinterpret the data they retrieve.",
+   "kind": "fact"
+  },
+  {
+   "statement": "On September 2025, Israel paid Clock Tower X $6 million in order to sway public opinion to a more favourable view of the country (hasbara) after support plummeted due to its genocidal conduct during the Gaza war.",
+   "quote": "On September 2025, Israel paid Clock Tower X $6 million in order to sway public opinion to a more favourable view of the country (hasbara) after support plummeted due to its genocidal conduct during the Gaza war.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Clock Tower X used RAG poisoning to flood the information space with sites and content sympathetic to Israel.",
+   "quote": "Clock Tower X used RAG poisoning to flood the information space with sites and content sympathetic to Israel.",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 4,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 103.6
+}

@@ -1,0 +1,331 @@
+{
+ "accepted": [
+  {
+   "term": "ontology",
+   "definition": "In information science, an ontology encompasses a representation, formal naming, and definitions of the categories, properties, and relations between the concepts, data, or entities that pertain to one, many, or all domains of discourse.",
+   "quote": "In information science, an ontology encompasses a representation, formal naming, and definitions of the categories, properties, and relations between the concepts, data, or entities that pertain to one, many, or all domains of discourse.",
+   "kind": "definition"
+  },
+  {
+   "term": "ontology",
+   "definition": "An ontology is a way of showing the properties of a subject area and how they are related, by defining a set of terms and relational expressions that represent the entities in that subject area.",
+   "quote": "More simply, an ontology is a way of showing the properties of a subject area and how they are related, by defining a set of terms and relational expressions that represent the entities in that subject area.",
+   "kind": "definition"
+  },
+  {
+   "term": "applied ontology",
+   "definition": "The field which studies ontologies so conceived is sometimes referred to as applied ontology.",
+   "quote": "The field which studies ontologies so conceived is sometimes referred to as applied ontology.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Every academic discipline or field, in creating its terminology, thereby lays the groundwork for an ontology.",
+   "quote": "Every academic discipline or field, in creating its terminology, thereby lays the groundwork for an ontology.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Each uses ontological assumptions to frame explicit theories, research and applications.",
+   "quote": "Each uses ontological assumptions to frame explicit theories, research and applications.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Improved ontologies may improve problem solving within that domain, interoperability of data systems, and discoverability of data.",
+   "quote": "Improved ontologies may improve problem solving within that domain, interoperability of data systems, and discoverability of data.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Translating research papers within every field is a problem made easier when experts from different countries maintain a controlled vocabulary of jargon between each of their languages.",
+   "quote": "Translating research papers within every field is a problem made easier when experts from different countries maintain a controlled vocabulary of jargon between each of their languages.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The definition and ontology of economics is a primary concern in Marxist economics, but also in other subfields of economics.",
+   "quote": "For instance, the definition and ontology of economics is a primary concern in Marxist economics, but also in other subfields of economics.",
+   "kind": "fact"
+  },
+  {
+   "statement": "What ontologies in both information science and philosophy have in common is the attempt to represent entities, including both objects and events, with all their interdependent properties and relations, according to a system of categories.",
+   "quote": "What ontologies in both information science and philosophy have in common is the attempt to represent entities, including both objects and events, with all their interdependent properties and relations, according to a system of categories.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Applied ontology is considered by some as a successor to prior work in philosophy.",
+   "quote": "Applied ontology is considered by some as a successor to prior work in philosophy.",
+   "kind": "fact"
+  },
+  {
+   "statement": "However many current efforts are more concerned with establishing controlled vocabularies of narrow domains than with philosophical first principles, or with questions such as the mode of existence of fixed essences or whether enduring objects (e.g., perdurantism and endurantism) may be ontologically more primary than processes.",
+   "quote": "However many current efforts are more concerned with establishing controlled vocabularies of narrow domains than with philosophical first principles, or with questions such as the mode of existence of fixed essences or whether enduring objects (e.g., perdurantism and endurantism) may be ontologically more primary than processes.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "quote": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Such efforts often use ontology editing tools such as Prot\u00e9g\u00e9.",
+   "quote": "Such efforts often use ontology editing tools such as Prot\u00e9g\u00e9.",
+   "kind": "fact"
+  },
+  {
+   "term": "Ontology",
+   "definition": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "quote": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "kind": "definition"
+  },
+  {
+   "term": "Metaphysics",
+   "definition": "Metaphysics is concerned with exploring existence through properties, entities and relations such as those between particulars and universals, intrinsic and extrinsic properties, or essence and existence.",
+   "quote": "One of five traditional branches of philosophy, metaphysics is concerned with exploring existence through properties, entities and relations such as those between particulars and universals, intrinsic and extrinsic properties, or essence and existence.",
+   "kind": "definition"
+  },
+  {
+   "term": "ontology",
+   "definition": "The AI community began to use the term ontology to refer to both a theory of a modeled world and a component of knowledge-based systems.",
+   "quote": "In the 1980s, the AI community began to use the term ontology to refer to both a theory of a modeled world and a component of knowledge-based systems.",
+   "kind": "definition"
+  },
+  {
+   "term": "ontology",
+   "definition": "Gruber introduced the term as a specification of a conceptualization: An ontology is a description (like a formal specification of a program) of the concepts and relationships that can formally exist for an agent or a community of agents.",
+   "quote": "Gruber introduced the term as a specification of a conceptualization: An ontology is a description (like a formal specification of a program) of the concepts and relationships that can formally exist for an agent or a community of agents.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Metaphysics has been an ongoing topic of discussion since recorded history.",
+   "quote": "Metaphysics has been an ongoing topic of discussion since recorded history.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus).",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus)",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Neo-Latin form ontologia appeared in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "quote": "and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "kind": "fact"
+  },
+  {
+   "statement": "The first occurrence in English of ontology as recorded by the OED (Oxford English Dictionary, online edition, 2008) came in Archeologia Philosophica Nova or New Principles of Philosophy (1663) by Gideon Harvey.",
+   "quote": "The first occurrence in English of ontology as recorded by the OED (Oxford English Dictionary, online edition, 2008) came in Archeologia Philosophica Nova or New Principles of Philosophy (1663) by Gideon Harvey.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Since the mid-1970s, researchers in the field of artificial intelligence (AI) have recognized that knowledge engineering is the key to building large and powerful AI systems.",
+   "quote": "Since the mid-1970s, researchers in the field of artificial intelligence (AI) have recognized that knowledge engineering is the key to building large and powerful AI systems.",
+   "kind": "fact"
+  },
+  {
+   "statement": "David Powers introduced the word ontology to AI to refer to real world or robotic grounding, publishing in 1990 literature reviews.",
+   "quote": "In particular, David Powers introduced the word ontology to AI to refer to real world or robotic grounding, publishing in 1990 literature reviews emphasizing grounded ontology in association with the call for papers for a AAAI Summer Symposium Machine Learning of Natural Language and Ontology, with an expanded version published in SIGART Bulletin and included as a preface to the proceedings.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 1993, the widely cited web page and paper \"Toward Principles for the Design of Ontologies Used for Knowledge Sharing\" by Tom Gruber used ontology as a technical term in computer science closely related to earlier idea of semantic networks and taxonomies.",
+   "quote": "In 1993, the widely cited web page and paper \"Toward Principles for the Design of Ontologies Used for Knowledge Sharing\" by Tom Gruber used ontology as a technical term in computer science closely related to earlier idea of semantic networks and taxonomies.",
+   "kind": "fact"
+  },
+  {
+   "term": "ontology",
+   "definition": "An ontology is a formal, explicit specification of a shared conceptualization that is characterized by high semantic expressiveness required for increased complexity.",
+   "quote": "An ontology is a formal, explicit specification of a shared conceptualization that is characterized by high semantic expressiveness required for increased complexity.",
+   "kind": "definition"
+  },
+  {
+   "term": "domain ontology (or domain-specific ontology)",
+   "definition": "A domain ontology (or domain-specific ontology) represents concepts which belong to a realm of the world, such as biology or politics.",
+   "quote": "A domain ontology (or domain-specific ontology) represents concepts which belong to a realm of the world, such as biology or politics.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Gruber stated in 1993 that ontologies are often equated with taxonomic hierarchies of classes, class definitions, and the subsumption relation, but ontologies need not be limited to these forms.",
+   "quote": "Gruber stated (1993): Ontologies are often equated with taxonomic hierarchies of classes, class definitions, and the subsumption relation, but ontologies need not be limited to these forms.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Ontologies are also not limited to conservative definitions, that is, definitions in the traditional logic sense that only introduce terminology and do not add any knowledge about the world.",
+   "quote": "Ontologies are also not limited to conservative definitions, that is, definitions in the traditional logic sense that only introduce terminology and do not add any knowledge about the world (Enderton, 1972).",
+   "kind": "fact"
+  },
+  {
+   "statement": "To specify a conceptualization, one needs to state axioms that do constrain the possible interpretations for the defined terms.",
+   "quote": "To specify a conceptualization, one needs to state axioms that do constrain the possible interpretations for the defined terms.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "quote": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Though not yet widely adopted in academic discourse, such models propose phased approaches to ethical harmonization and structural emergence.",
+   "quote": "Though not yet widely adopted in academic discourse, such models propose phased approaches to ethical harmonization and structural emergence.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Contemporary ontologies share many structural similarities, regardless of the language in which they are expressed.",
+   "quote": "Contemporary ontologies share many structural similarities, regardless of the language in which they are expressed.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Most ontologies describe individuals (instances), classes (concepts), attributes and relations.",
+   "quote": "Most ontologies describe individuals (instances), classes (concepts), attributes and relations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Each domain ontology typically models domain-specific definitions of terms.",
+   "quote": "Each domain ontology typically models domain-specific definitions of terms.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Since domain ontologies are written by different people, they represent concepts in very specific and unique ways, and are often incompatible within the same project.",
+   "quote": "Since domain ontologies are written by different people, they represent concepts in very specific and unique ways, and are often incompatible within the same project.",
+   "kind": "fact"
+  },
+  {
+   "statement": "As systems that rely on domain ontologies expand, they often need to merge domain ontologies by hand-tuning each entity or using a combination of software merging and hand-tuning.",
+   "quote": "As systems that rely on domain ontologies expand, they often need to merge domain ontologies by hand-tuning each entity or using a combination of software merging and hand-tuning.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Different ontologies in the same domain arise due to different languages, different intended usage of the ontologies, and different perceptions of the domain (based on cultural background, education, ideology, etc.).",
+   "quote": "Different ontologies in the same domain arise due to different languages, different intended usage of the ontologies, and different perceptions of the domain (based on cultural background, education, ideology, etc.).",
+   "kind": "fact"
+  },
+  {
+   "term": "upper ontology",
+   "definition": "An upper ontology (or foundation ontology) is a model of the commonly shared relations and objects that are generally applicable across a wide range of domain ontologies.",
+   "quote": "An upper ontology (or foundation ontology) is a model of the commonly shared relations and objects that are generally applicable across a wide range of domain ontologies.",
+   "kind": "definition"
+  },
+  {
+   "term": "Ontology engineering",
+   "definition": "Ontology engineering (also called ontology building) is a set of tasks related to the development of ontologies for a particular domain.",
+   "quote": "Ontology engineering (also called ontology building) is a set of tasks related to the development of ontologies for a particular domain.",
+   "kind": "definition"
+  },
+  {
+   "term": "Ontology editors",
+   "definition": "Ontology editors are applications designed to assist in the creation or manipulation of ontologies.",
+   "quote": "Ontology editors are applications designed to assist in the creation or manipulation of ontologies.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Merging ontologies that are not developed from a common upper ontology is a largely manual process and therefore time-consuming and expensive.",
+   "quote": "At present, merging ontologies that are not developed from a common upper ontology is a largely manual process and therefore time-consuming and expensive.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Domain ontologies that use the same upper ontology to provide a set of basic elements with which to specify the meanings of the domain ontology entities can be merged with less effort.",
+   "quote": "Domain ontologies that use the same upper ontology to provide a set of basic elements with which to specify the meanings of the domain ontology entities can be merged with less effort.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There are studies on generalized techniques for merging ontologies.",
+   "quote": "There are studies on generalized techniques for merging ontologies, but this area of research is still ongoing, and it is a recent event to see the issue sidestepped by having multiple domain ontologies using the same upper ontology like the OBO Foundry.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "fact"
+  },
+  {
+   "statement": "WordNet has been considered an upper ontology by some and has been used as a linguistic tool for learning domain ontologies.",
+   "quote": "WordNet has been considered an upper ontology by some and has been used as a linguistic tool for learning domain ontologies.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A survey of ontology visualization methods is presented by Katifori et al.",
+   "quote": "A survey of ontology visualization methods is presented by Katifori et al.",
+   "kind": "fact"
+  },
+  {
+   "statement": "An updated survey of ontology visualization methods and tools was published by Dud\u00e1s et al.",
+   "quote": "An updated survey of ontology visualization methods and tools was published by Dud\u00e1s et al.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The most established ontology visualization methods, namely indented tree and graph visualization are evaluated by Fu et al.",
+   "quote": "The most established ontology visualization methods, namely indented tree and graph visualization are evaluated by Fu et al.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A visual language for ontologies represented in OWL is specified by the Visual Notation for OWL Ontologies (VOWL).",
+   "quote": "A visual language for ontologies represented in OWL is specified by the Visual Notation for OWL Ontologies (VOWL).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Ontology engineering is a subfield of knowledge engineering that studies the ontology development process, the ontology life cycle, the methods and methodologies for building ontologies, and the tools and languages that support them.",
+   "quote": "It is a subfield of knowledge engineering that studies the ontology development process, the ontology life cycle, the methods and methodologies for building ontologies, and the tools and languages that support them.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Ontology engineering aims to make explicit the knowledge contained in software applications, and organizational procedures for a particular domain.",
+   "quote": "Ontology engineering aims to make explicit the knowledge contained in software applications, and organizational procedures for a particular domain.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Ontology engineering offers a direction for overcoming semantic obstacles, such as those related to the definitions of business terms and software classes.",
+   "quote": "Ontology engineering offers a direction for overcoming semantic obstacles, such as those related to the definitions of business terms and software classes.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Known challenges with ontology engineering include: Ensuring the ontology is current with domain knowledge and term use.",
+   "quote": "Known challenges with ontology engineering include: Ensuring the ontology is current with domain knowledge and term use",
+   "kind": "fact"
+  },
+  {
+   "statement": "Known challenges with ontology engineering include: Providing sufficient specificity and concept coverage for the domain of interest, thus minimizing the content completeness problem.",
+   "quote": "Providing sufficient specificity and concept coverage for the domain of interest, thus minimizing the content completeness problem",
+   "kind": "fact"
+  },
+  {
+   "statement": "Known challenges with ontology engineering include: Ensuring the ontology can support its use cases.",
+   "quote": "Ensuring the ontology can support its use cases",
+   "kind": "fact"
+  },
+  {
+   "statement": "It is common for ontology editors to use one or more ontology languages.",
+   "quote": "It is common for ontology editors to use one or more ontology languages.",
+   "kind": "fact"
+  },
+  {
+   "term": "Ontology learning",
+   "definition": "Ontology learning is the automatic or semi-automatic creation of ontologies, including",
+   "quote": "Ontology learning is the automatic or semi-automatic creation of ontologies, including",
+   "kind": "definition"
+  },
+  {
+   "statement": "Aspects of ontology editors include visual navigation possibilities within the knowledge model, inference engines and information extraction.",
+   "quote": "Aspects of ontology editors include: visual navigation possibilities within the knowledge model, inference engines and information extraction;",
+   "kind": "fact"
+  },
+  {
+   "statement": "Aspects of ontology editors include support for modules.",
+   "quote": "support for modules;",
+   "kind": "fact"
+  },
+  {
+   "statement": "Aspects of ontology editors include the import and export of foreign knowledge representation languages for ontology matching.",
+   "quote": "the import and export of foreign knowledge representation languages for ontology matching;",
+   "kind": "fact"
+  },
+  {
+   "statement": "Aspects of ontology editors include the support of meta-ontologies such as OWL-S, Dublin Core, etc.",
+   "quote": "and the support of meta-ontologies such as OWL-S, Dublin Core, etc.",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 5,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 105.2
+}

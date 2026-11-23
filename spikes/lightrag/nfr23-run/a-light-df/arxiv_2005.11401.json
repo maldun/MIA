@@ -1,0 +1,69 @@
+{
+ "accepted": [
+  {
+   "term": "retrieval-augmented generation (RAG)",
+   "definition": "retrieval-augmented generation (RAG) are models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Large pre-trained language models have been shown to store factual knowledge in their parameters.",
+   "quote": "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Large pre-trained language models achieve state-of-the-art results when fine-tuned on downstream NLP tasks.",
+   "quote": "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The ability of large pre-trained language models to access and precisely manipulate knowledge is still limited.",
+   "quote": "However, their ability to access and precisely manipulate knowledge is still limited, and hence on knowledge-intensive tasks, their performance lags behind task-specific architectures.",
+   "kind": "fact"
+  },
+  {
+   "statement": "On knowledge-intensive tasks, the performance of large pre-trained language models lags behind task-specific architectures.",
+   "quote": "However, their ability to access and precisely manipulate knowledge is still limited, and hence on knowledge-intensive tasks, their performance lags behind task-specific architectures.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Providing provenance for the decisions of large pre-trained language models and updating their world knowledge remain open research problems.",
+   "quote": "Additionally, providing provenance for their decisions and updating their world knowledge remain open research problems.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Pre-trained models with a differentiable access mechanism to explicit non-parametric memory have so far been only investigated for extractive downstream tasks.",
+   "quote": "Pre-trained models with a differentiable access mechanism to explicit non-parametric memory can overcome this issue, but have so far been only investigated for extractive downstream tasks.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The parametric memory in the introduced RAG models is a pre-trained seq2seq model.",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The non-parametric memory in the introduced RAG models is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The models set the state-of-the-art on three open domain QA tasks.",
+   "quote": "We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state-of-the-art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The models outperform parametric seq2seq models and task-specific retrieve-and-extract architectures on three open domain QA tasks.",
+   "quote": "We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state-of-the-art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures.",
+   "kind": "fact"
+  },
+  {
+   "statement": "RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline for language generation tasks.",
+   "quote": "For language generation tasks, we find that RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline.",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 1,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 114.9
+}

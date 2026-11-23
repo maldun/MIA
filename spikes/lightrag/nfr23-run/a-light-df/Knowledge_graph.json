@@ -1,0 +1,352 @@
+{
+ "accepted": [
+  {
+   "term": "knowledge graph",
+   "definition": "A knowledge graph is a knowledge base that uses a graph-structured data model or topology to represent and operate on data.",
+   "quote": "In knowledge representation and reasoning, a knowledge graph is a knowledge base that uses a graph-structured data model or topology to represent and operate on data.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Knowledge graphs are often used to store interlinked descriptions of entities.",
+   "quote": "Knowledge graphs are often used to store interlinked descriptions of entities \u2013 objects, events, situations or abstract concepts \u2013 while also encoding the free-form semantics or relationships underlying these entities.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Knowledge graphs have often been associated with linked open data projects.",
+   "quote": "Since the development of the Semantic Web, knowledge graphs have often been associated with linked open data projects, focusing on the connections between concepts and entities.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Knowledge graphs are historically associated with and used by search engines such as Google, Bing, and Yahoo.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Knowledge graphs are increasingly used in scientific research.",
+   "quote": "They are increasingly used in scientific research, with notable applications in fields such as genomics, proteomics, and systems biology.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting.",
+   "quote": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 1972, the Austrian linguist Edgar W. Schneider coined the term \"Knowledge Graph.\"",
+   "quote": "In 1972, the Austrian linguist Edgar W. Schneider cited HumRRO's presentation in his discussion of how to build modular instructional systems for courses, and coined the term \"Knowledge Graph.\"",
+   "kind": "fact"
+  },
+  {
+   "statement": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs.",
+   "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 1985, Wordnet was founded.",
+   "quote": "In 1985, Wordnet was founded, capturing semantic relationships between words and meanings \u2013 an application of this idea to language itself.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 2005, Marc Wirk founded Geonames.",
+   "quote": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase.",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "quote": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "kind": "fact"
+  },
+  {
+   "statement": "DBpedia focused exclusively on data extracted from Wikipedia.",
+   "quote": "DBpedia focused exclusively on data extracted from Wikipedia, while Freebase also included a range of public datasets.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 2012, Google introduced their Knowledge Graph.",
+   "quote": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+   "kind": "fact"
+  },
+  {
+   "term": "knowledge graph",
+   "definition": "A knowledge graph (i) defines abstract classes and relations of entities in a schema, (ii) mainly describes real world entities and their interrelations, organized in a graph, (iii) allows for potentially interrelating arbitrary entities with each other, and (iv) covers various topical domains.",
+   "quote": "A knowledge graph (i) defines abstract classes and relations of entities in a schema, (ii) mainly describes real world entities and their interrelations, organized in a graph, (iii) allows for potentially interrelating arbitrary entities with each other, and (iv) covers various topical domains.",
+   "kind": "definition"
+  },
+  {
+   "statement": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Entity and relationship types associated with this knowledge graph have been further organized using terms from the schema.org vocabulary.",
+   "quote": "Entity and relationship types associated with this knowledge graph have been further organized using terms from the schema.org vocabulary.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Google Knowledge Graph became a complement to string-based search within Google, and its popularity online brought the term into more common use.",
+   "quote": "The Google Knowledge Graph became a complement to string-based search within Google, and its popularity online brought the term into more common use.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term.",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "quote": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The development of large language models expanded interest in knowledge graphs as a way to structure information from unstructured text, with advances in language processing enabling their automatic or semi-automatic generation and expansion.",
+   "quote": "The development of large language models expanded interest in knowledge graphs as a way to structure information from unstructured text, with advances in language processing enabling their automatic or semi-automatic generation and expansion.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The term knowledge graph has since broadened to include the dynamically constructed and adaptive graph structures, which support retrieval, reasoning, and summarization in generative systems.",
+   "quote": "The term knowledge graph has since broadened to include the dynamically constructed and adaptive graph structures, which support retrieval, reasoning, and summarization in generative systems.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Microsoft Research's GraphRAG (2024) exemplified this development by integrating LLM-generated graphs into retrieval-augmented generation.",
+   "quote": "Microsoft Research's GraphRAG (2024) exemplified this development by integrating LLM-generated graphs into retrieval-augmented generation.",
+   "kind": "fact"
+  },
+  {
+   "statement": "To represent properties, categorical or numerical values are often used.",
+   "quote": "To represent properties, categorical or numerical values are often used.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A knowledge graph acquires and integrates information into an ontology and applies a reasoner to derive new knowledge.",
+   "quote": "A knowledge graph acquires and integrates information into an ontology and applies a reasoner to derive new knowledge.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A knowledge graph can include an ontology that allows both humans and machines to understand and reason about its contents.",
+   "quote": "A knowledge graph can include an ontology that allows both humans and machines to understand and reason about its contents.",
+   "kind": "fact"
+  },
+  {
+   "term": "virtual knowledge graphs",
+   "definition": "virtual knowledge graphs do not store information in specialized databases.",
+   "quote": "In contrast, virtual knowledge graphs do not store information in specialized databases.",
+   "kind": "definition"
+  },
+  {
+   "term": "knowledge graph",
+   "definition": "A knowledge graph formally represents semantics by describing entities and their relationships.",
+   "quote": "A knowledge graph formally represents semantics by describing entities and their relationships.",
+   "kind": "definition"
+  },
+  {
+   "term": "knowledge graph embeddings",
+   "definition": "These knowledge graph embeddings allow them to be connected to machine learning methods that require feature vectors like word embeddings.",
+   "quote": "These knowledge graph embeddings allow them to be connected to machine learning methods that require feature vectors like word embeddings.",
+   "kind": "definition"
+  },
+  {
+   "term": "GNNs",
+   "definition": "GNNs are deep learning architectures that comprise edges and nodes, which correspond well to the entities and relationships of knowledge graphs.",
+   "quote": "GNNs are deep learning architectures that comprise edges and nodes, which correspond well to the entities and relationships of knowledge graphs.",
+   "kind": "definition"
+  },
+  {
+   "statement": "The popularization of knowledge graphs and their accompanying methods have led to the development of graph databases.",
+   "quote": "The popularization of knowledge graphs and their accompanying methods have led to the development of graph databases.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These graph databases allow users to easily store data as entities and their interrelationships, and facilitate operations such as data reasoning, node embedding, and ontology development on knowledge bases.",
+   "quote": "These graph databases allow users to easily store data as entities and their interrelationships, and facilitate operations such as data reasoning, node embedding, and ontology development on knowledge bases.",
+   "kind": "fact"
+  },
+  {
+   "statement": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Such a virtual knowledge graph system must be properly configured in order to answer the queries correctly.",
+   "quote": "Such a virtual knowledge graph system must be properly configured in order to answer the queries correctly.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This specific configuration is done through a set of mappings that define the relationship between the elements of the data source and the structure and ontology of the virtual knowledge graph.",
+   "quote": "This specific configuration is done through a set of mappings that define the relationship between the elements of the data source and the structure and ontology of the virtual knowledge graph.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "quote": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "kind": "fact"
+  },
+  {
+   "statement": "By doing this, they allow logical inference for retrieving implicit knowledge rather than only allowing queries requesting explicit knowledge.",
+   "quote": "By doing this, they allow logical inference for retrieving implicit knowledge rather than only allowing queries requesting explicit knowledge.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In order to allow the use of knowledge graphs in various machine learning tasks, several methods for deriving latent feature representations of entities and relations have been devised.",
+   "quote": "In order to allow the use of knowledge graphs in various machine learning tasks, several methods for deriving latent feature representations of entities and relations have been devised.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Models for generating useful knowledge graph embeddings are commonly the domain of graph neural networks (GNNs).",
+   "quote": "Models for generating useful knowledge graph embeddings are commonly the domain of graph neural networks (GNNs).",
+   "kind": "fact"
+  },
+  {
+   "statement": "The topology and data structures afforded by GNNs provide a convenient domain for semi-supervised learning, wherein the network is trained to predict the value of a node embedding (provided a group of adjacent nodes and their edges) or edge (provided a pair of nodes).",
+   "quote": "The topology and data structures afforded by GNNs provide a convenient domain for semi-supervised learning, wherein the network is trained to predict the value of a node embedding (provided a group of adjacent nodes and their edges) or edge (provided a pair of nodes).",
+   "kind": "fact"
+  },
+  {
+   "statement": "These tasks serve as fundamental abstractions for more complex tasks such as knowledge graph reasoning and alignment.",
+   "quote": "These tasks serve as fundamental abstractions for more complex tasks such as knowledge graph reasoning and alignment.",
+   "kind": "fact"
+  },
+  {
+   "statement": "As new knowledge graphs are produced across a variety of fields and contexts, the same entity will inevitably be represented in multiple graphs.",
+   "quote": "As new knowledge graphs are produced across a variety of fields and contexts, the same entity will inevitably be represented in multiple graphs.",
+   "kind": "fact"
+  },
+  {
+   "term": "knowledge graph entity alignment",
+   "definition": "This task is known as knowledge graph entity alignment.",
+   "quote": "This task is known as knowledge graph entity alignment, and is an active area of research.",
+   "kind": "definition"
+  },
+  {
+   "term": "Concept map",
+   "definition": "Concept map is a diagram showing relationships among concepts.",
+   "quote": "Concept map \u2013 Diagram showing relationships among concepts",
+   "kind": "definition"
+  },
+  {
+   "term": "Formal semantics (natural language)",
+   "definition": "Formal semantics (natural language) is the formal study of linguistic meaning.",
+   "quote": "Formal semantics (natural language) \u2013 Formal study of linguistic meaning",
+   "kind": "definition"
+  },
+  {
+   "term": "Graph database",
+   "definition": "Graph database is a database using graph structures for queries.",
+   "quote": "Graph database \u2013 Database using graph structures for queries",
+   "kind": "definition"
+  },
+  {
+   "term": "Knowledge base",
+   "definition": "Knowledge base is an information repository with multiple applications.",
+   "quote": "Knowledge base \u2013 Information repository with multiple applications",
+   "kind": "definition"
+  },
+  {
+   "term": "Knowledge graph embedding",
+   "definition": "Knowledge graph embedding is dimensionality reduction of graph-based semantic data objects [machine learning task].",
+   "quote": "Knowledge graph embedding \u2013 Dimensionality reduction of graph-based semantic data objects [machine learning task]",
+   "kind": "definition"
+  },
+  {
+   "term": "Logical graph",
+   "definition": "Logical graph is a type of diagrammatic notation for propositional logic.",
+   "quote": "Logical graph \u2013 Type of diagrammatic notation for propositional logic",
+   "kind": "definition"
+  },
+  {
+   "term": "Semantic integration",
+   "definition": "Semantic integration is interrelating info from diverse sources.",
+   "quote": "Semantic integration \u2013 Interrelating info from diverse sources",
+   "kind": "definition"
+  },
+  {
+   "term": "Semantic technology",
+   "definition": "Semantic technology is technology to help machines understand data.",
+   "quote": "Semantic technology \u2013 Technology to help machines understand data",
+   "kind": "definition"
+  },
+  {
+   "term": "Topic map",
+   "definition": "Topic map is a knowledge organization system.",
+   "quote": "Topic map \u2013 Knowledge organization system",
+   "kind": "definition"
+  },
+  {
+   "term": "Vadalog",
+   "definition": "Vadalog is a type of Knowledge Graph Management System.",
+   "quote": "Vadalog \u2013 Type of Knowledge Graph Management System",
+   "kind": "definition"
+  },
+  {
+   "term": "Wikibase",
+   "definition": "Wikibase is Mediawiki Software extensions for creating knowledge bases.",
+   "quote": "Wikibase- Mediawiki Software extensions for creating knowledge bases",
+   "kind": "definition"
+  },
+  {
+   "term": "Wikidata",
+   "definition": "Wikidata is a Free Knowledge Database Project.",
+   "quote": "Wikidata - Free Knowledge Database Project",
+   "kind": "definition"
+  },
+  {
+   "term": "YAGO (database)",
+   "definition": "YAGO (database) is an open-source information repository.",
+   "quote": "YAGO (database) \u2013 Open-source information repository",
+   "kind": "definition"
+  },
+  {
+   "statement": "Knowledge graph entity alignment is an active area of research.",
+   "quote": "This task is known as knowledge graph entity alignment, and is an active area of research.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 2023, researchers found success in using large language models (LLMs) in the task of entity alignment.",
+   "quote": "In 2023, researchers found success in using large language models (LLMs) in the task of entity alignment.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Large language models (LLMs) were effective at producing syntactically meaningful embeddings.",
+   "quote": "This was in particular thanks to their effectiveness at producing syntactically meaningful embeddings.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Diffbot is building the biggest-ever knowledge graph by applying image recognition and natural-language processing to billions of web pages.",
+   "quote": "Diffbot is building the biggest-ever knowledge graph by applying image recognition and natural-language processing to billions of web pages.",
+   "kind": "fact"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "term": "knowledge graph",
+    "definition": "A knowledge graph is a network of entities, their semantic types, properties, and relationships.",
+    "quote": "General structure: A network of entities, their semantic types, properties, and relationships.",
+    "kind": "definition"
+   },
+   "reason": "quote does not contain the term"
+  },
+  {
+   "item": {
+    "term": "knowledge graph",
+    "definition": "A knowledge graph is a digital structure that represents knowledge as concepts and the relationships between them (facts).",
+    "quote": "A digital structure that represents knowledge as concepts and the relationships between them (facts).",
+    "kind": "definition"
+   },
+   "reason": "quote does not contain the term"
+  }
+ ],
+ "chunks": 4,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 87.8
+}

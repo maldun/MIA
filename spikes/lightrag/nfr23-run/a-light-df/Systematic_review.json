@@ -1,0 +1,376 @@
+{
+ "accepted": [
+  {
+   "term": "A systematic review",
+   "definition": "A systematic review is a scholarly synthesis of the evidence on a clearly presented topic using critical methods to identify, define and assess research on the topic.",
+   "quote": "A systematic review is a scholarly synthesis of the evidence on a clearly presented topic using critical methods to identify, define and assess research on the topic.",
+   "kind": "definition"
+  },
+  {
+   "term": "a meta-analysis",
+   "definition": "a meta-analysis uses statistical methods to induce a single number from the pooled data set (such as an effect size)",
+   "quote": "the distinction between the two is that a meta-analysis uses statistical methods to induce a single number from the pooled data set (such as an effect size)",
+   "kind": "definition"
+  },
+  {
+   "term": "literature review",
+   "definition": "the term literature review without further specification refers to a narrative review.",
+   "quote": "but the term literature review without further specification refers to a narrative review.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Systematic reviews, sometimes along with meta-analyses, are generally considered the highest level in the hierarchy of evidence in scientific and medical research.",
+   "quote": "Systematic reviews, sometimes along with meta-analyses, are generally considered the highest level in the hierarchy of evidence in scientific and medical research.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A systematic review may be applied in the biomedical or health care context.",
+   "quote": "While a systematic review may be applied in the biomedical or health care context, it may also be used where an assessment of a precisely defined subject can advance understanding in a field of research.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A systematic review may be used where an assessment of a precisely defined subject can advance understanding in a field of research.",
+   "quote": "it may also be used where an assessment of a precisely defined subject can advance understanding in a field of research.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A systematic review may examine clinical tests, public health interventions, environmental interventions, health technologies, social interventions, adverse effects, qualitative evidence syntheses, methodological reviews, policy reviews, and economic evaluations.",
+   "quote": "A systematic review may examine clinical tests, public health interventions, environmental interventions, health technologies, social interventions, adverse effects, qualitative evidence syntheses, methodological reviews, policy reviews, and economic evaluations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Systematic reviews are closely related to meta-analyses, and often the same instance will combine both (being published with a subtitle of \"a systematic review and meta-analysis\").",
+   "quote": "Systematic reviews are closely related to meta-analyses, and often the same instance will combine both (being published with a subtitle of \"a systematic review and meta-analysis\").",
+   "kind": "fact"
+  },
+  {
+   "statement": "The strict definition of a systematic review excludes that step [using statistical methods to induce a single number from the pooled data set].",
+   "quote": "whereas the strict definition of a systematic review excludes that step.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It takes a systematic review to assemble the information that a meta-analysis analyzes.",
+   "quote": "it takes a systematic review to assemble the information that a meta-analysis analyzes",
+   "kind": "fact"
+  },
+  {
+   "statement": "An understanding of systematic reviews and how to implement them in practice is common for professionals in health care, public health, and public policy.",
+   "quote": "An understanding of systematic reviews and how to implement them in practice is common for professionals in health care, public health, and public policy.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Systematic reviews and narrative reviews both review the literature (the scientific literature).",
+   "quote": "Systematic reviews and narrative reviews both review the literature (the scientific literature)",
+   "kind": "fact"
+  },
+  {
+   "statement": "A systematic review can be designed to provide a thorough summary of current literature relevant to a research question.",
+   "quote": "A systematic review can be designed to provide a thorough summary of current literature relevant to a research question.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A systematic review uses a rigorous and transparent approach for research synthesis, with the aim of assessing and, where possible, minimizing bias in the findings.",
+   "quote": "A systematic review uses a rigorous and transparent approach for research synthesis, with the aim of assessing and, where possible, minimizing bias in the findings.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Many systematic reviews are based on an explicit quantitative meta-analysis of available data.",
+   "quote": "While many systematic reviews are based on an explicit quantitative meta-analysis of available data, there are also qualitative reviews and other types of mixed-methods reviews that adhere to standards for gathering, analyzing, and reporting evidence.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There are also qualitative reviews and other types of mixed-methods reviews that adhere to standards for gathering, analyzing, and reporting evidence.",
+   "quote": "there are also qualitative reviews and other types of mixed-methods reviews that adhere to standards for gathering, analyzing, and reporting evidence.",
+   "kind": "fact"
+  },
+  {
+   "term": "meta-analysis",
+   "definition": "Systematic reviews of quantitative data or mixed-method reviews sometimes use statistical techniques (meta-analysis) to combine results of eligible studies.",
+   "quote": "Systematic reviews of quantitative data or mixed-method reviews sometimes use statistical techniques (meta-analysis) to combine results of eligible studies.",
+   "kind": "definition"
+  },
+  {
+   "term": "PRISMA",
+   "definition": "PRISMA does not provide guidance for conducting systematic reviews, but rather is a guideline for reporting the systematic review process, results, analysis, and synthesis.",
+   "quote": "PRISMA does not provide guidance for conducting systematic reviews, but rather is a guideline for reporting the systematic review process, results, analysis, and synthesis.",
+   "kind": "definition"
+  },
+  {
+   "statement": "The Cochrane Library discourages the use of scoring levels to rate the quality of the evidence.",
+   "quote": "Scoring levels are sometimes used to rate the quality of the evidence depending on the methodology used, although this is discouraged by the Cochrane Library.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The EPPI-Centre, Cochrane, and the Joanna Briggs Institute have been influential in developing methods for combining both qualitative and quantitative research in systematic reviews.",
+   "quote": "The EPPI-Centre, Cochrane, and the Joanna Briggs Institute have been influential in developing methods for combining both qualitative and quantitative research in systematic reviews.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Several reporting guidelines exist to standardise reporting about how systematic reviews are conducted.",
+   "quote": "Several reporting guidelines exist to standardise reporting about how systematic reviews are conducted.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Such reporting guidelines are not quality assessment or appraisal tools.",
+   "quote": "Such reporting guidelines are not quality assessment or appraisal tools.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement is now required for this kind of research by more than 170 medical journals worldwide.",
+   "quote": "The Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement suggests a standardized way to ensure a transparent and complete reporting of systematic reviews, and is now required for this kind of research by more than 170 medical journals worldwide.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The latest version of this commonly used statement corresponds to PRISMA 2020.",
+   "quote": "The latest version of this commonly used statement corresponds to PRISMA 2020 (the respective article was published in 2021).",
+   "kind": "fact"
+  },
+  {
+   "statement": "The respective article for PRISMA 2020 was published in 2021.",
+   "quote": "the respective article was published in 2021",
+   "kind": "fact"
+  },
+  {
+   "statement": "Several specialized PRISMA guideline extensions have been developed to support particular types of studies or aspects of the review process, including PRISMA-P for review protocols and PRISMA-ScR for scoping reviews.",
+   "quote": "Several specialized PRISMA guideline extensions have been developed to support particular types of studies or aspects of the review process, including PRISMA-P for review protocols and PRISMA-ScR for scoping reviews.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A list of PRISMA guideline extensions is hosted by the EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network.",
+   "quote": "A list of PRISMA guideline extensions is hosted by the EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The PRISMA guidelines have been found to be limited to intervention research.",
+   "quote": "However, the PRISMA guidelines have been found to be limited to intervention research and the guidelines have to be changed in order to fit non-intervention research.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews was created to counter this limitation.",
+   "quote": "As a result, Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews was created to counter this limitation.",
+   "kind": "fact"
+  },
+  {
+   "statement": "For qualitative reviews, reporting guidelines include ENTREQ (Enhancing transparency in reporting the synthesis of qualitative research) for qualitative evidence syntheses.",
+   "quote": "For qualitative reviews, reporting guidelines include ENTREQ (Enhancing transparency in reporting the synthesis of qualitative research) for qualitative evidence syntheses;",
+   "kind": "fact"
+  },
+  {
+   "statement": "For qualitative reviews, reporting guidelines include RAMESES (Realist And MEta-narrative Evidence Syntheses: Evolving Standards) for meta-narrative and realist reviews.",
+   "quote": "RAMESES (Realist And MEta-narrative Evidence Syntheses: Evolving Standards) for meta-narrative and realist reviews;",
+   "kind": "fact"
+  },
+  {
+   "statement": "For qualitative reviews, reporting guidelines include eMERGe (Improving reporting of Meta-Ethnography) for meta-ethnograph.",
+   "quote": "and eMERGe (Improving reporting of Meta-Ethnography) for meta-ethnograph.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Developments in systematic reviews during the 21st century included realist reviews and the meta-narrative approach.",
+   "quote": "Developments in systematic reviews during the 21st century included realist reviews and the meta-narrative approach, both of which addressed problems of variation in methods and heterogeneity existing on some subjects.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There are over 30 types of systematic review.",
+   "quote": "There are over 30 types of systematic review and Table 1 below non-exhaustingly summarises some of these.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Scoping reviews are distinct from systematic reviews in several ways.",
+   "quote": "Scoping reviews are distinct from systematic reviews in several ways.",
+   "kind": "fact"
+  },
+  {
+   "term": "scoping review",
+   "definition": "A scoping review is an attempt to search for concepts by mapping the language and data which surrounds those concepts and adjusting the search method iteratively to synthesize evidence and assess the scope of an area of inquiry.",
+   "quote": "A scoping review is an attempt to search for concepts by mapping the language and data which surrounds those concepts and adjusting the search method iteratively to synthesize evidence and assess the scope of an area of inquiry.",
+   "kind": "definition"
+  },
+  {
+   "term": "PICO",
+   "definition": "PICO stands for 'Population or Problem', 'Intervention or Exposure', 'Comparison', and 'Outcome'.",
+   "quote": "Clinical reviews of quantitative data are often structured using the mnemonic PICO, which stands for 'Population or Problem', 'Intervention or Exposure', 'Comparison', and 'Outcome', with other variations existing for other kinds of research.",
+   "kind": "definition"
+  },
+  {
+   "term": "PICo",
+   "definition": "PICo is 'Population or Problem', 'Interest', and 'Context'.",
+   "quote": "For qualitative reviews, PICo is 'Population or Problem', 'Interest', and 'Context'.",
+   "kind": "definition"
+  },
+  {
+   "statement": "The concept search and method (including data extraction, organisation and analysis) are refined throughout the process, sometimes requiring deviations from any protocol or original research plan.",
+   "quote": "This can mean that the concept search and method (including data extraction, organisation and analysis) are refined throughout the process, sometimes requiring deviations from any protocol or original research plan.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A scoping review may often be a preliminary stage before a systematic review.",
+   "quote": "A scoping review may often be a preliminary stage before a systematic review, which 'scopes' out an area of inquiry and maps the language and key concepts to determine if a systematic review is possible or appropriate, or to lay the groundwork for a full systematic review.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The goal can be to assess how much data or evidence is available regarding a certain area of interest.",
+   "quote": "The goal can be to assess how much data or evidence is available regarding a certain area of interest.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This process is further complicated if it is mapping concepts across multiple languages or cultures.",
+   "quote": "This process is further complicated if it is mapping concepts across multiple languages or cultures.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Some academic publishers categorize them as a kind of 'systematic review', which may cause confusion.",
+   "quote": "As a scoping review should be systematically conducted and reported (with a transparent and repeatable method), some academic publishers categorize them as a kind of 'systematic review', which may cause confusion.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Scoping reviews are helpful when it is not possible to carry out a systematic synthesis of research findings.",
+   "quote": "Scoping reviews are helpful when it is not possible to carry out a systematic synthesis of research findings, for example, when there are no published clinical trials in the area of inquiry.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Scoping reviews are helpful when determining if it is possible or appropriate to carry out a systematic review.",
+   "quote": "Scoping reviews are helpful when determining if it is possible or appropriate to carry out a systematic review, and are a useful method when an area of inquiry is very broad, for example, exploring how the public are involved in all stages systematic reviews.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There is still a lack of clarity when defining the exact method of a scoping review as it is both an iterative process and is still relatively new.",
+   "quote": "There is still a lack of clarity when defining the exact method of a scoping review as it is both an iterative process and is still relatively new.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There have been several attempts to improve the standardisation of the method, for example via a Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) guideline extension for scoping reviews (PRISMA-ScR).",
+   "quote": "There have been several attempts to improve the standardisation of the method, for example via a Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) guideline extension for scoping reviews (PRISMA-ScR).",
+   "kind": "fact"
+  },
+  {
+   "statement": "PROSPERO (the International Prospective Register of Systematic Reviews) does not permit the submission of protocols of scoping reviews.",
+   "quote": "PROSPERO (the International Prospective Register of Systematic Reviews) does not permit the submission of protocols of scoping reviews, although some journals will publish protocols for scoping reviews.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Some journals will publish protocols for scoping reviews.",
+   "quote": "PROSPERO (the International Prospective Register of Systematic Reviews) does not permit the submission of protocols of scoping reviews, although some journals will publish protocols for scoping reviews.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Some reported that the 'best practices' involve 'defining an answerable question' and publishing the protocol of the review before initiating it to reduce the risk of unplanned research duplication and to enable transparency and consistency between methodology and protocol.",
+   "quote": "Some reported that the 'best practices' involve 'defining an answerable question' and publishing the protocol of the review before initiating it to reduce the risk of unplanned research duplication and to enable transparency and consistency between methodology and protocol.",
+   "kind": "fact"
+  },
+  {
+   "term": "pearl growing",
+   "definition": "Reference list checking is related to a search method called 'pearl growing'.",
+   "quote": "reference list checking (related to a search method called 'pearl growing')",
+   "kind": "definition"
+  },
+  {
+   "term": "hand-searching",
+   "definition": "Manually searching information sources not indexed in the major electronic databases is sometimes called 'hand-searching'.",
+   "quote": "manually searching information sources not indexed in the major electronic databases (sometimes called 'hand-searching')",
+   "kind": "definition"
+  },
+  {
+   "term": "intervention",
+   "definition": "Data about how the research was done is often called the method or 'intervention'.",
+   "quote": "how the research was done (often called the method or 'intervention')",
+   "kind": "definition"
+  },
+  {
+   "term": "outcomes",
+   "definition": "Data about what happened is called the outcomes.",
+   "quote": "what happened (the outcomes)",
+   "kind": "definition"
+  },
+  {
+   "statement": "Relevant criteria can include selecting research that is of good quality and answers the defined question.",
+   "quote": "Relevant criteria can include selecting research that is of good quality and answers the defined question.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The search strategy should be designed to retrieve literature that matches the protocol's specified inclusion and exclusion criteria.",
+   "quote": "The search strategy should be designed to retrieve literature that matches the protocol's specified inclusion and exclusion criteria.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The methodology section of a systematic review should list all of the databases and citation indices that were searched.",
+   "quote": "The methodology section of a systematic review should list all of the databases and citation indices that were searched.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The titles and abstracts of identified articles can be checked against predetermined criteria for eligibility and relevance.",
+   "quote": "The titles and abstracts of identified articles can be checked against predetermined criteria for eligibility and relevance.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Each included study may be assigned an objective assessment of methodological quality, preferably by using methods conforming to the Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement, or the standards of Cochrane.",
+   "quote": "Each included study may be assigned an objective assessment of methodological quality, preferably by using methods conforming to the Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement, or the standards of Cochrane.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Key references can also be yielded through additional methods such as citation searching, reference list checking (related to a search method called 'pearl growing'), manually searching information sources not indexed in the major electronic databases (sometimes called 'hand-searching'), and directly contacting experts in the field.",
+   "quote": "Key references can also be yielded through additional methods such as citation searching, reference list checking (related to a search method called 'pearl growing'), manually searching information sources not indexed in the major electronic databases (sometimes called 'hand-searching'), and directly contacting experts in the field.",
+   "kind": "fact"
+  },
+  {
+   "statement": "To be systematic, searchers must use a combination of search skills and tools such as database subject headings, keyword searching, Boolean operators, and proximity searching while attempting to balance sensitivity (systematicity) and precision (accuracy).",
+   "quote": "To be systematic, searchers must use a combination of search skills and tools such as database subject headings, keyword searching, Boolean operators, and proximity searching while attempting to balance sensitivity (systematicity) and precision (accuracy).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Inviting and involving an experienced information professional or librarian can improve the quality of systematic review search strategies and reporting.",
+   "quote": "Inviting and involving an experienced information professional or librarian can improve the quality of systematic review search strategies and reporting.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Relevant data are 'extracted' from the data sources according to the review method.",
+   "quote": "Relevant data are 'extracted' from the data sources according to the review method.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The data extraction method is specific to the kind of data, and data extracted on 'outcomes' is only relevant to certain types of reviews.",
+   "quote": "The data extraction method is specific to the kind of data, and data extracted on 'outcomes' is only relevant to certain types of reviews.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Relevant data are being extracted and 'combined' in an intervention effect review, where a meta-analysis is possible.",
+   "quote": "Relevant data are being extracted and 'combined' in an intervention effect review, where a meta-analysis is possible.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This stage involves assessing the eligibility of data for inclusion in the review by judging it against criteria identified at the first stage.",
+   "quote": "This stage involves assessing the eligibility of data for inclusion in the review by judging it against criteria identified at the first stage.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This can include assessing if a data source meets the eligibility criteria and recording why decisions about inclusion or exclusion in the review were made.",
+   "quote": "This can include assessing if a data source meets the eligibility criteria and recording why decisions about inclusion or exclusion in the review were made.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "quote": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "kind": "fact"
+  },
+  {
+   "term": "Systematic Review Toolbox",
+   "definition": "The 'Systematic Review Toolbox' is a community-driven, web-based catalog of tools, to help reviewers chose appropriate tools for reviews.",
+   "quote": "The 'Systematic Review Toolbox' is a community-driven, web-based catalog of tools, to help reviewers chose appropriate tools for reviews.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Analysing and combining data can provide an overall result from all the data.",
+   "quote": "Analysing and combining data can provide an overall result from all the data.",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 5,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 111.0
+}

@@ -1,0 +1,383 @@
+{
+ "accepted": [
+  {
+   "term": "Peer review",
+   "definition": "Peer review is the evaluation of work by one or more people with similar competencies as the producers of the work (peers).",
+   "quote": "Peer review is the evaluation of work by one or more people with similar competencies as the producers of the work (peers).",
+   "kind": "definition"
+  },
+  {
+   "term": "Professional peer review",
+   "definition": "Professional peer review focuses on the performance of professionals, with a view to improving quality, upholding standards, or providing certification.",
+   "quote": "Professional peer review focuses on the performance of professionals, with a view to improving quality, upholding standards, or providing certification.",
+   "kind": "definition"
+  },
+  {
+   "term": "Clinical peer review",
+   "definition": "Clinical peer review is a procedure for assessing a patient's involvement with experiences of care.",
+   "quote": "Clinical peer review is a procedure for assessing a patient's involvement with experiences of care.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Peer review functions as a form of self-regulation by qualified members of a profession within the relevant field.",
+   "quote": "It functions as a form of self-regulation by qualified members of a profession within the relevant field.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Peer review methods are used to maintain quality standards, improve performance, and provide credibility.",
+   "quote": "Peer review methods are used to maintain quality standards, improve performance, and provide credibility.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In academia, scholarly peer review is typically used to determine an academic paper's suitability for publication.",
+   "quote": "In academia, scholarly peer review is typically used to determine an academic paper's suitability for publication.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The reviewers are experts in the topic at hand and anonymous.",
+   "quote": "The reviewers are experts in the topic at hand and anonymous.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It can also be used as a teaching tool.",
+   "quote": "It can also be used as a teaching tool.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Henry Oldenburg (1619\u20131677) was a German-born British philosopher who is seen as the 'father' of modern scientific peer review.",
+   "quote": "Henry Oldenburg (1619\u20131677) was a German-born British philosopher who is seen as the 'father' of modern scientific peer review.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.",
+   "quote": "It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The term \"peer review\" was first used in the early 1970s.",
+   "quote": "The term \"peer review\" was first used in the early 1970s.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A monument to peer review has been at the Higher School of Economics in Moscow since 2017.",
+   "quote": "A monument to peer review has been at the Higher School of Economics in Moscow since 2017.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In academia, peer review is used to inform decisions related to faculty advancement and tenure.",
+   "quote": "In academia, peer review is used to inform decisions related to faculty advancement and tenure.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "quote": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "kind": "fact"
+  },
+  {
+   "statement": "He stated that a visiting physician had to make duplicate notes of a patient's condition on every visit.",
+   "quote": "He stated that a visiting physician had to make duplicate notes of a patient's condition on every visit.",
+   "kind": "fact"
+  },
+  {
+   "statement": "When the patient was cured or had died, the notes of the physician were examined by a local medical council of other physicians, who would decide whether the treatment had met the required standards of medical care.",
+   "quote": "When the patient was cured or had died, the notes of the physician were examined by a local medical council of other physicians, who would decide whether the treatment had met the required standards of medical care.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Professional peer review is common in the field of health care, where it is usually called clinical peer review.",
+   "quote": "Professional peer review is common in the field of health care, where it is usually called clinical peer review.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Further, since peer review activity is commonly segmented by clinical discipline, there is also physician peer review, nursing peer review, dentistry peer review, etc.",
+   "quote": "Further, since peer review activity is commonly segmented by clinical discipline, there is also physician peer review, nursing peer review, dentistry peer review, etc.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Many other professional fields have some level of peer review process: accounting, law, engineering (e.g., software peer review, technical peer review), aviation, and even forest fire management.",
+   "quote": "Many other professional fields have some level of peer review process: accounting, law, engineering (e.g., software peer review, technical peer review), aviation, and even forest fire management.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Peer review is used in education to achieve certain learning objectives, particularly as a tool to reach higher order processes in the affective and cognitive domains as defined by Bloom's taxonomy.",
+   "quote": "Peer review is used in education to achieve certain learning objectives, particularly as a tool to reach higher order processes in the affective and cognitive domains as defined by Bloom's taxonomy.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Top journals reject over 90% of submitted papers.",
+   "quote": "Top journals reject over 90% of submitted papers.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Medical peer review may be distinguished in four classifications:",
+   "quote": "Medical peer review may be distinguished in four classifications:",
+   "kind": "fact"
+  },
+  {
+   "term": "medical peer review",
+   "definition": "The American Medical Association has used \"medical peer review\" to refer to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "quote": "\"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "kind": "definition"
+  },
+  {
+   "term": "technical peer review",
+   "definition": "In engineering, technical peer review is a type of engineering review.",
+   "quote": "In engineering, technical peer review is a type of engineering review.",
+   "kind": "definition"
+  },
+  {
+   "term": "peer learning",
+   "definition": "The United Nations Economic Commission for Europe uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "quote": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Technical peer reviews are a well-defined review process for finding and fixing defects, conducted by a team of peers with assigned roles.",
+   "quote": "Technical peer reviews are a well-defined review process for finding and fixing defects, conducted by a team of peers with assigned roles.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Technical peer reviews are carried out by peers representing areas of life cycle affected by material being reviewed (usually limited to 6 or fewer people).",
+   "quote": "Technical peer reviews are carried out by peers representing areas of life cycle affected by material being reviewed (usually limited to 6 or fewer people).",
+   "kind": "fact"
+  },
+  {
+   "statement": "Technical peer reviews are held within development phases, between milestone reviews, on completed products or completed portions of products.",
+   "quote": "Technical peer reviews are held within development phases, between milestone reviews, on completed products or completed portions of products.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "quote": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 2004, a program of peer reviews started in social inclusion.",
+   "quote": "In 2004, a program of peer reviews started in social inclusion.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Each program sponsors about eight peer review meetings in each year.",
+   "quote": "Each program sponsors about eight peer review meetings in each year",
+   "kind": "fact"
+  },
+  {
+   "statement": "A \"host country\" lays a given policy or initiative open to examination by half a dozen other countries and the relevant European-level NGOs.",
+   "quote": "a \"host country\" lays a given policy or initiative open to examination by half a dozen other countries and the relevant European-level NGOs.",
+   "kind": "fact"
+  },
+  {
+   "statement": "These usually meet over two days and include visits to local sites where the policy can be seen in operation.",
+   "quote": "These usually meet over two days and include visits to local sites where the policy can be seen in operation.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The meeting is preceded by the compilation of an expert report on which participating \"peer countries\" submit comments.",
+   "quote": "The meeting is preceded by the compilation of an expert report on which participating \"peer countries\" submit comments.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The results are published on the web.",
+   "quote": "The results are published on the web.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The State of California is the only U.S. state to mandate scientific peer review.",
+   "quote": "The State of California is the only U.S. state to mandate scientific peer review.",
+   "kind": "fact"
+  },
+  {
+   "statement": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "kind": "fact"
+  },
+  {
+   "term": "Peer review, or student peer assessment",
+   "definition": "Peer review, or student peer assessment, is the method by which editors and writers work together in hopes of helping the author establish and further flesh out and develop their own writing.",
+   "quote": "Peer review, or student peer assessment, is the method by which editors and writers work together in hopes of helping the author establish and further flesh out and develop their own writing.",
+   "kind": "definition"
+  },
+  {
+   "term": "This collaborative learning tool",
+   "definition": "This collaborative learning tool involves groups of students reviewing each other's work and providing feedback and suggestions for revision.",
+   "quote": "This collaborative learning tool involves groups of students reviewing each other's work and providing feedback and suggestions for revision.",
+   "kind": "definition"
+  },
+  {
+   "statement": "This requirement is incorporated into the California Health and Safety Code Section 57004.",
+   "quote": "This requirement is incorporated into the California Health and Safety Code Section 57004.",
+   "kind": "fact"
+  },
+  {
+   "statement": "A particular concern in peer review is \"role duality\" as people are in parallel in the role of being an evaluator and being evaluated.",
+   "quote": "A particular concern in peer review is \"role duality\" as people are in parallel in the role of being an evaluator and being evaluated.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Research illustrates that taking on both roles in parallel biases people in their role as evaluators as they engage in strategic actions to increase the chance of being evaluated positively themselves.",
+   "quote": "Research illustrates that taking on both roles in parallel biases people in their role as evaluators as they engage in strategic actions to increase the chance of being evaluated positively themselves.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The editorial peer review process has been found to be strongly biased against studies with null results.",
+   "quote": "The editorial peer review process has been found to be strongly biased against studies with null results.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This publication bias then biases the information base of science and medicine.",
+   "quote": "This publication bias then biases the information base of science and medicine.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Peer reviewing can lead to conflicts between peer reviewers.",
+   "quote": "Peer reviewing can lead to conflicts between peer reviewers.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The (possibly not declared) use of artificial intelligence to assist or perform the process of peer review has been confirmed by interviews in a survey by Nature.",
+   "quote": "The (possibly not declared) use of artificial intelligence to assist or perform the process of peer review has been confirmed by interviews in a survey by Nature.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There are a few documented cases of scholars who inserted human-invisible prompts in their preprints in order to favour a positive review in case of an automated refereeing process.",
+   "quote": "There are a few documented cases of scholars who inserted human-invisible prompts in their preprints in order to favour a positive review in case of an automated refereeing process.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "quote": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Adversarial systems can reduce ideological biases.",
+   "quote": "Adversarial systems can reduce ideological biases.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Peer review is widely used in secondary and post-secondary education as part of the writing process.",
+   "quote": "Peer review is widely used in secondary and post-secondary education as part of the writing process.",
+   "kind": "fact"
+  },
+  {
+   "statement": "While widely used in English and composition classrooms, peer review has gained popularity in other disciplines that require writing as part of the curriculum including the social and natural sciences.",
+   "quote": "While widely used in English and composition classrooms, peer review has gained popularity in other disciplines that require writing as part of the curriculum including the social and natural sciences.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The concept of peer review has been extended to other practices, including the use of visual peer review for evaluating peer-produced data visualizations.",
+   "quote": "The concept of peer review has been extended to other practices, including the use of visual peer review for evaluating peer-produced data visualizations.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Peer review in classrooms helps students become more invested in their work, and the classroom environment at large.",
+   "quote": "Peer review in classrooms helps students become more invested in their work, and the classroom environment at large.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Understanding how their work is read by a diverse readership before it is graded by the teacher may also help students clarify ideas and understand how to persuasively reach different audience members via their writing.",
+   "quote": "Understanding how their work is read by a diverse readership before it is graded by the teacher may also help students clarify ideas and understand how to persuasively reach different audience members via their writing.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It also gives students professional experience that they might draw on later when asked to review the work of a colleague prior to publication.",
+   "quote": "It also gives students professional experience that they might draw on later when asked to review the work of a colleague prior to publication.",
+   "kind": "fact"
+  },
+  {
+   "term": "Peer seminar",
+   "definition": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+   "quote": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+   "kind": "definition"
+  },
+  {
+   "term": "Peer review in writing",
+   "definition": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "quote": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "kind": "definition"
+  },
+  {
+   "statement": "Students are more positive than negative when reviewing their classmates' writing.",
+   "quote": "It has been found that students are more positive than negative when reviewing their classmates' writing.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Peer review can help students not get discouraged but rather feel determined to improve their writing.",
+   "quote": "Peer review can help students not get discouraged but rather feel determined to improve their writing.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The process is shown to improve writing performance from giving feedback rather than only receiving it because giving feedback fosters self-reflection.",
+   "quote": "The process is shown to improve writing performance from giving feedback rather than only receiving it because giving feedback fosters self-reflection.",
+   "kind": "fact"
+  },
+  {
+   "statement": "There are multiple speakers that are called out one at a time and given an amount of time to present the topic that they have researched.",
+   "quote": "To further elaborate, there are multiple speakers that are called out one at a time and given an amount of time to present the topic that they have researched.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Each speaker may or may not talk about the same topic but each speaker has something to gain or lose which can foster a competitive atmosphere.",
+   "quote": "Each speaker may or may not talk about the same topic but each speaker has something to gain or lose which can foster a competitive atmosphere.",
+   "kind": "fact"
+  },
+  {
+   "statement": "This approach allows speakers to present in a more personal tone while trying to appeal to the audience while explaining their topic.",
+   "quote": "This approach allows speakers to present in a more personal tone while trying to appeal to the audience while explaining their topic.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Peer seminars may be somewhat similar to what conference speakers do, however, there is more time to present their points, and speakers can be interrupted by audience members to provide questions and feedback upon the topic or how well the speaker did in presenting their topic.",
+   "quote": "Peer seminars may be somewhat similar to what conference speakers do, however, there is more time to present their points, and speakers can be interrupted by audience members to provide questions and feedback upon the topic or how well the speaker did in presenting their topic.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Professional peer review focuses on the performance of professionals, with a view to improving quality, upholding standards, or providing certification.",
+   "quote": "Professional peer review focuses on the performance of professionals, with a view to improving quality, upholding standards, or providing certification.",
+   "kind": "fact"
+  },
+  {
+   "statement": "It constitutes a fundamental process in academic and professional writing, serving as a systematic means to ensure the quality, effectiveness, and credibility of scholarly work.",
+   "quote": "It constitutes a fundamental process in academic and professional writing, serving as a systematic means to ensure the quality, effectiveness, and credibility of scholarly work.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Despite its widespread use, it is one of the most scattered, inconsistent, and ambiguous practices associated with writing instruction.",
+   "quote": "However, despite its widespread use, it is one of the most scattered, inconsistent, and ambiguous practices associated with writing instruction.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+   "quote": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Across four writing projects, she observed changes in each group, with surprising results showing significant improvement only in the self-assessment group.",
+   "quote": "Across four writing projects, she observed changes in each group, with surprising results showing significant improvement only in the self-assessment group.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The author's analysis suggests that self-assessment allows individuals to clearly understand the revision goals at each stage, as the author is the most familiar with their writing.",
+   "quote": "The author's analysis suggests that self-assessment allows individuals to clearly understand the revision goals at each stage, as the author is the most familiar with their writing.",
+   "kind": "fact"
+  },
+  {
+   "statement": "Self-checking naturally follows a systematic and planned approach to revision.",
+   "quote": "Thus, self-checking naturally follows a systematic and planned approach to revision.",
+   "kind": "fact"
+  },
+  {
+   "statement": "The effectiveness of peer review is often limited due to the lack of structured feedback.",
+   "quote": "the effectiveness of peer review is often limited due to the lack of structured feedback",
+   "kind": "fact"
+  },
+  {
+   "statement": "Structured feedback is characterized by scattered, meaningless summaries and evaluations that fail to meet the author's expectations for revising their work.",
+   "quote": "characterized by scattered, meaningless summaries and evaluations that fail to meet the author's expectations for revising their work",
+   "kind": "fact"
+  }
+ ],
+ "refused": [],
+ "chunks": 5,
+ "model": "gemma4:12b-it-qat",
+ "seconds": 108.2
+}

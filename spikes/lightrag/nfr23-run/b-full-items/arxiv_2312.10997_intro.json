@@ -1,0 +1,258 @@
+{
+ "accepted": [
+  {
+   "name": "Large language models (LLMs)",
+   "quote": "Large language models (LLMs) have achieved remarkable success, though they still face significant limitations, especially in domain-specific or knowledge-intensive tasks [1], notably producing \u201challucinations\u201d [2] when handling queries beyond their training data or requiring current information.",
+   "kind": "entity"
+  },
+  {
+   "name": "Retrieval-Augmented Generation (RAG)",
+   "quote": "To overcome challenges, Retrieval-Augmented Generation (RAG) enhances LLMs by retrieving relevant document chunks from external knowledge base through semantic similarity calculation.",
+   "kind": "entity"
+  },
+  {
+   "name": "external knowledge base",
+   "quote": "To overcome challenges, Retrieval-Augmented Generation (RAG) enhances LLMs by retrieving relevant document chunks from external knowledge base through semantic similarity calculation.",
+   "kind": "entity"
+  },
+  {
+   "name": "ChatGPT",
+   "quote": "The subsequent arrival of ChatGPT [6] marked a pivotal moment, with LLM demonstrating powerful in context learning (ICL) capabilities.",
+   "kind": "entity"
+  },
+  {
+   "name": "Transformer architecture",
+   "quote": "Initially, RAG\u2019s inception coincided with the rise of the Transformer architecture, focusing on enhancing language models by incorporating additional knowledge through Pre-Training Models (PTM).",
+   "kind": "entity"
+  },
+  {
+   "source": "Retrieval-Augmented Generation (RAG)",
+   "relation": "enhances",
+   "target": "Large language models (LLMs)",
+   "quote": "To overcome challenges, Retrieval-Augmented Generation (RAG) enhances LLMs by retrieving relevant document chunks from external knowledge base through semantic similarity calculation.",
+   "kind": "relation"
+  },
+  {
+   "source": "Retrieval-Augmented Generation (RAG)",
+   "relation": "retrieves relevant document chunks from",
+   "target": "external knowledge base",
+   "quote": "To overcome challenges, Retrieval-Augmented Generation (RAG) enhances LLMs by retrieving relevant document chunks from external knowledge base through semantic similarity calculation.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG\u2019s inception",
+   "relation": "coincided with the rise of",
+   "target": "Transformer architecture",
+   "quote": "Initially, RAG\u2019s inception coincided with the rise of the Transformer architecture, focusing on enhancing language models by incorporating additional knowledge through Pre-Training Models (PTM).",
+   "kind": "relation"
+  },
+  {
+   "name": "RAG",
+   "quote": "This paper considers both technical paradigms and research methods, summarizing three main research paradigms from over 100 RAG studies, and analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "entity"
+  },
+  {
+   "name": "\u201cRetrieval\u201d",
+   "quote": "This paper considers both technical paradigms and research methods, summarizing three main research paradigms from over 100 RAG studies, and analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "entity"
+  },
+  {
+   "name": "\u201cGeneration\u201d",
+   "quote": "This paper considers both technical paradigms and research methods, summarizing three main research paradigms from over 100 RAG studies, and analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "entity"
+  },
+  {
+   "name": "\u201cAugmentation\u201d",
+   "quote": "This paper considers both technical paradigms and research methods, summarizing three main research paradigms from over 100 RAG studies, and analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "entity"
+  },
+  {
+   "name": "naive RAG",
+   "quote": "In this survey, we present a thorough and systematic review of the state-of-the-art RAG methods, delineating its evolution through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "kind": "entity"
+  },
+  {
+   "name": "advanced RAG",
+   "quote": "In this survey, we present a thorough and systematic review of the state-of-the-art RAG methods, delineating its evolution through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "kind": "entity"
+  },
+  {
+   "name": "modular RAG",
+   "quote": "In this survey, we present a thorough and systematic review of the state-of-the-art RAG methods, delineating its evolution through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "kind": "entity"
+  },
+  {
+   "name": "LLMs",
+   "quote": "This review contextualizes the broader scope of RAG research within the landscape of LLMs.",
+   "kind": "entity"
+  },
+  {
+   "source": "RAG",
+   "relation": "includes core stages of",
+   "target": "\u201cRetrieval\u201d",
+   "quote": "This paper considers both technical paradigms and research methods, summarizing three main research paradigms from over 100 RAG studies, and analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG",
+   "relation": "includes core stages of",
+   "target": "\u201cGeneration\u201d",
+   "quote": "This paper considers both technical paradigms and research methods, summarizing three main research paradigms from over 100 RAG studies, and analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG",
+   "relation": "includes core stages of",
+   "target": "\u201cAugmentation\u201d",
+   "quote": "This paper considers both technical paradigms and research methods, summarizing three main research paradigms from over 100 RAG studies, and analyzing key technologies in the core stages of \u201cRetrieval,\u201d \u201cGeneration,\u201d and \u201cAugmentation.\u201d",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG",
+   "relation": "evolves through paradigms including",
+   "target": "naive RAG",
+   "quote": "In this survey, we present a thorough and systematic review of the state-of-the-art RAG methods, delineating its evolution through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG",
+   "relation": "evolves through paradigms including",
+   "target": "advanced RAG",
+   "quote": "In this survey, we present a thorough and systematic review of the state-of-the-art RAG methods, delineating its evolution through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG",
+   "relation": "evolves through paradigms including",
+   "target": "modular RAG",
+   "quote": "In this survey, we present a thorough and systematic review of the state-of-the-art RAG methods, delineating its evolution through paradigms including naive RAG, advanced RAG, and modular RAG.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG",
+   "relation": "is contextualized within the landscape of",
+   "target": "LLMs",
+   "quote": "This review contextualizes the broader scope of RAG research within the landscape of LLMs.",
+   "kind": "relation"
+  },
+  {
+   "name": "external databases",
+   "quote": "RAG bridges this information gap by sourcing and incorporating knowledge from external databases.",
+   "kind": "entity"
+  },
+  {
+   "name": "news articles",
+   "quote": "In this case, it gathers relevant news articles related to the user\u2019s query.",
+   "kind": "entity"
+  },
+  {
+   "name": "user\u2019s query",
+   "quote": "In this case, it gathers relevant news articles related to the user\u2019s query.",
+   "kind": "entity"
+  },
+  {
+   "name": "original question",
+   "quote": "These articles, combined with the original question, form a comprehensive prompt that empowers LLMs to generate a well-informed answer.",
+   "kind": "entity"
+  },
+  {
+   "name": "chunks",
+   "quote": "Documents are split into chunks, encoded into vectors, and stored in a vector database.",
+   "kind": "entity"
+  },
+  {
+   "name": "vector database",
+   "quote": "Documents are split into chunks, encoded into vectors, and stored in a vector database.",
+   "kind": "entity"
+  },
+  {
+   "name": "question",
+   "quote": "Retrieve the Top k chunks most relevant to the question based on semantic similarity.",
+   "kind": "entity"
+  },
+  {
+   "name": "RAG research paradigm",
+   "quote": "The RAG research paradigm is continuously evolving, and we categorize it into three stages: Naive RAG, Advanced RAG, and Modular RAG, as showed in Figure 3.",
+   "kind": "entity"
+  },
+  {
+   "name": "embedding model",
+   "quote": "Chunks are then encoded into vector representations using an embedding model and stored in vector database.",
+   "kind": "entity"
+  },
+  {
+   "source": "RAG",
+   "relation": "sources and incorporates knowledge from",
+   "target": "external databases",
+   "quote": "RAG bridges this information gap by sourcing and incorporating knowledge from external databases.",
+   "kind": "relation"
+  },
+  {
+   "source": "news articles",
+   "relation": "related to",
+   "target": "user\u2019s query",
+   "quote": "In this case, it gathers relevant news articles related to the user\u2019s query.",
+   "kind": "relation"
+  },
+  {
+   "source": "original question",
+   "relation": "empowers",
+   "target": "LLMs",
+   "quote": "These articles, combined with the original question, form a comprehensive prompt that empowers LLMs to generate a well-informed answer.",
+   "kind": "relation"
+  },
+  {
+   "source": "chunks",
+   "relation": "stored in",
+   "target": "vector database",
+   "quote": "Documents are split into chunks, encoded into vectors, and stored in a vector database.",
+   "kind": "relation"
+  },
+  {
+   "source": "chunks",
+   "relation": "most relevant to",
+   "target": "question",
+   "quote": "Retrieve the Top k chunks most relevant to the question based on semantic similarity.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG research paradigm",
+   "relation": "categorize it into three stages",
+   "target": "Naive RAG, Advanced RAG, and Modular RAG",
+   "quote": "The RAG research paradigm is continuously evolving, and we categorize it into three stages: Naive RAG, Advanced RAG, and Modular RAG, as showed in Figure 3.",
+   "kind": "relation"
+  },
+  {
+   "source": "chunks",
+   "relation": "encoded into vector representations using",
+   "target": "embedding model",
+   "quote": "Chunks are then encoded into vector representations using an embedding model and stored in vector database.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "RAG",
+    "relation": "gathers",
+    "target": "news articles",
+    "quote": "In this case, it gathers relevant news articles related to the user\u2019s query.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "news articles",
+    "relation": "combined with",
+    "target": "original question",
+    "quote": "These articles, combined with the original question, form a comprehensive prompt that empowers LLMs to generate a well-informed answer.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 3,
+ "model": "gemma4:26b",
+ "seconds": 140.0
+}
