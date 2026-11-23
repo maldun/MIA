@@ -241,6 +241,6 @@ V-6, V-7, V-11, V-12, V-13 and the items of V-14. V-3 also qualifies if the owne
 | V-3 | handed to G-V4.GRAPHSTORE.TRANSFER (makes the database store live); an accepted deviation of VIEW |
 | V-8, V-9, V-10, V-13 | back to Implement |
 | V-6, V-7, V-11, V-12, V-14 | accepted deviations; V-7, V-11 and the V-14 items written into the specification at Commit |
-| V-15 | the owner builds the image once with network; then the reviewer re-runs `tests/test_delivery_on_stack.py` |
+| V-15 | the owner builds the image once with network; then the reviewer re-runs `tests/test_delivery_on_stack.py`. **Done 2026-11-24:** the owner built `mia-view-check` (`podman build -f deploy/Containerfile`, psycopg 3.3.9 installed in the release stage); the offline delivery test then ran 5 tests in 50 s: OK. V-15 closed |
 
 Re-verify after the fixes: the automated checks in full (protected diff, trace, goal and model checks, unit suite, every acceptance script, `tests/js`, Firefox checks three times), my reproductions `repro_f1.py`, `repro_f2.py`, `repro_f3.py` again, and a review of the fix commits only.

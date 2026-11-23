@@ -18,7 +18,9 @@ For every item: a failing test first (log it as a finding), then the fix. Protec
 
 Not in Implement: V-3 goes to TRANSFER (note it in TRANSFER's handover); V-6, V-7, V-11, V-12 and V-14 are accepted (V-7, V-11 and V-14 are written into the specification at Commit).
 
-## The owner (V-15)
+## The owner (V-15) – done 2026-11-24
+The image was built and `tests/test_delivery_on_stack.py` is OK (5 tests). Keep the tag `mia-view-check` until the merge: removing it can drop the cached pip layer, and the offline build would fail again.
+
 Build the release image once with network, so that the offline build of `tests/test_delivery_on_stack.py` finds the new pip layer:
 `podman build -f deploy/Containerfile -t mia-view-check .` (in the worktree; downloads Python packages; remove the tag afterwards with `podman rmi mia-view-check`).
 
