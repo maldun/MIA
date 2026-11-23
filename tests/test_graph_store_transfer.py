@@ -1,4 +1,5 @@
-"""Moving the whole store (G-V4.GRAPHSTORE.TRANSFER T-01, REQ-SLY-016 to 021, REQ-SLY-009): unit checks on files only.
+"""Moving the whole store, the lag and sync, the one-graph move (G-V4.GRAPHSTORE.TRANSFER T-01, T-03, T-04; REQ-SLY-009, 016 to 031, 038, 039):
+unit checks on files only.
 Run with: python tests/test_graph_store_transfer.py"""
 import contextlib
 import io
@@ -7,6 +8,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
@@ -215,6 +217,82 @@ class Sync(unittest.TestCase):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as stopped:
             migrate.main(["sync", "--data", self.live.root])
         self.assertEqual(stopped.exception.code, 2)
+
+
+class OneGraph(unittest.TestCase):
+    def setUp(self):
+        self.base = tempfile.mkdtemp(prefix="transfer-unit-")
+        self.addCleanup(shutil.rmtree, self.base, True)
+        self.live = ts.small_store(FileBackend(os.path.join(self.base, "live")))
+        self.copy = FileBackend(os.path.join(self.base, "copy"))
+        ts.equalize(self.live, self.copy)
+
+    @mark.req("REQ-SLY-031", "REQ-SLY-019")
+    def test_the_lacking_versions_arrive_with_the_header_last(self):
+        """Example: two new live versions of cp2.multi: the copy gets var.in 2, 3 and headers 5, 6, the headers written last; sample.code untouched."""
+        # Given: two new live versions of cp2.multi and a version of sample.code the copy lacks too
+        ts.new_multi_version(self.live, "a")
+        ts.new_multi_version(self.live, "b")
+        ts.new_code_version(self.live, "not moved", "elsewhere")
+        target = ts.RecordingBackend(self.copy)
+        # When: cp2.multi is moved alone
+        answer = transfer.move_graph(self.live, target, ts.MULTI)
+        # Then: exactly its lacking versions, headers last, and nothing of sample.code
+        self.assertEqual(answer, {"graphs": 1, "records": 4})
+        self.assertEqual(target.log, [("graph_nodes", ts.MULTI + "/var.in", 2), ("graph_nodes", ts.MULTI + "/var.in", 3),
+                                      ("graphs", ts.MULTI, 5), ("graphs", ts.MULTI, 6)])
+        self.assertEqual(len(self.copy.versions("graphs", ts.CODE)), 1)
+
+    @mark.req("REQ-SLY-031")
+    def test_a_member_of_the_copys_own_is_a_conflict_too(self):
+        """Example: the copy holds its own version 2 of cp2.multi/var.in (header unchanged): conflict naming cp2.multi, nothing written."""
+        # Given: a step version only the copy has, and a new live version
+        own = dict(self.copy.versions("graph_nodes", ts.MULTI + "/var.in")[0], version=2, author="copy-writer")
+        self.copy.append("graph_nodes", ts.MULTI + "/var.in", own)
+        ts.new_multi_version(self.live, "a")
+        before = ts.entries(self.copy)
+        # When / Then: refused, the copy unchanged
+        with self.assertRaises(StorageError) as refused:
+            transfer.move_graph(self.live, self.copy, ts.MULTI)
+        self.assertEqual((refused.exception.code, refused.exception.detail), ("conflict", {"graph": ts.MULTI}))
+        self.assertEqual(ts.entries(self.copy), before)
+
+    @mark.req("REQ-SLY-021")
+    def test_a_graph_of_an_unknown_kind_is_not_moved_alone_either(self):
+        """Example: move_graph of `alien` (kind swarm): move_refused {alien: [unknown_kind swarm]}, the copy unchanged."""
+        # Given: alien on the live store
+        alien = ts.add_alien(self.live)
+        before = ts.entries(self.copy)
+        # When / Then: refused by the graph check, nothing written
+        with self.assertRaises(StorageError) as refused:
+            transfer.move_graph(self.live, self.copy, alien)
+        self.assertEqual(refused.exception.detail, {"graphs": {alien: [{"rule": "unknown_kind", "detail": "swarm"}]}})
+        self.assertEqual(ts.entries(self.copy), before)
+
+    @mark.req("REQ-SLY-028")
+    def test_a_move_into_a_locked_copy_is_refused(self):
+        """Example: move_graph while this process holds the copy's lock: StorageError locked."""
+        # Given: a new live version and the copy's lock held
+        ts.new_multi_version(self.live, "a")
+        with transfer.copy_lock(self.copy.root):
+            # When / Then: the move is refused naming the lock
+            with self.assertRaises(StorageError) as refused:
+                transfer.move_graph(self.live, self.copy, ts.MULTI)
+        self.assertEqual(refused.exception.detail, {"lock": transfer.LOCK})
+
+    @mark.req("REQ-SLY-030")
+    def test_the_side_records_belong_to_the_graph_where_their_tables_exist(self):
+        """Example: with graph_changes and arrangements defined: cp2.multi/1 to /4 and arrangements cp2.multi come before the header;
+        without them, members and the header only."""
+        # Given: the records of cp2.multi as the module lists them, without and with VIEW's side tables
+        without = transfer._graph_records(self.live, self.copy, ts.MULTI)
+        defined = dict(transfer.table_definitions(), graph_changes={}, arrangements={})
+        with mock.patch.object(transfer, "table_definitions", lambda: defined):
+            records = transfer._graph_records(self.live, self.copy, ts.MULTI)
+        # Then: no side record without the tables; with them, one change record per version and the arrangement, the header still last
+        self.assertFalse([key for key in without if key[0] in ("graph_changes", "arrangements")])
+        side = [("graph_changes", "%s/%d" % (ts.MULTI, v)) for v in range(1, 5)] + [("arrangements", ts.MULTI)]
+        self.assertEqual(records, without[:-1] + side + [("graphs", ts.MULTI)])
 
 
 class Export(unittest.TestCase):

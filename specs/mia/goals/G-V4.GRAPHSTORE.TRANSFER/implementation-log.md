@@ -7,6 +7,7 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | T-01 Move integrity and order | done | see `git log` ("feat: T-01 move integrity and order") | TC-SLY-016 to 020, TC-SLY-009 (`tests/acceptance/test_transfer_move.py` 6 of 7); the move half of TC-SLY-021; `tests/test_graph_store_transfer.py` (9 unit tests); `tests/test_storage_copy.py`, `tests/test_migrate.py` kept | TC-SLY-021 stays red at its sync half (line 156, `sync_store` is still the stub) until T-03 |
 | T-02 Durable files, cut back, the same answers | done | see `git log` ("feat: T-02 durable files, cut back") | TC-SLY-023; TC-SLY-022 kept (`tests/acceptance/test_transfer_sync.py` class SameBehaviour 2 of 2); `tests/test_storage_files.py` (6 new unit tests); `tests/test_storage_postgres.py` 44 (1 new) | the format marker is left to T-05 (decision below) |
 | T-03 Lag, sync, aside, lock, commands | done | see `git log` ("feat: T-03 lag, sync, aside, lock, commands") | TC-SLY-024 to 028, TC-SLY-038, TC-SLY-039, TC-SLY-021 whole; `tests/test_graph_store_transfer.py` 14 (5 new) | TC-SLY-033 and 037 (T-05) green early through the sync |
+| T-04 Side records, one-graph move, interruptions | done | see `git log` ("feat: T-04 side records, one-graph move, interruptions") | TC-SLY-031, TC-SLY-029, TC-SLY-036 (all cases); `tests/test_graph_store_transfer.py` 19 (5 new) | TC-SLY-030 skipped until VIEW is merged; must be green before Verify |
 
 ## T-01: Move integrity and order
 
@@ -75,6 +76,25 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **Traceability:** `trace_check.py --spec-dir specs/mia --tests-dir tests` gives the same 549 ERROR lines as the export (compared line by line); none new.
 
+## T-04: Side records, one-graph move, interruptions
+
+**What was done**
+- `graph_store_transfer.py`: `move_graph(source, target, graph_id)` under the copy's lock when the target is a files folder (`_lock_of`; a database target has no copy lock): the graph checked first (`check_graphs`, REQ-SLY-021); every record of the graph (`_graph_records`: members named by any header version in either store, side records, header last) compared with the target: a target holding versions of its own of any of them is `StorageError("conflict", detail={"graph": id})`, and each record's source versions pass `storage_copy._check_entries` (what put would refuse), both before any write; then the lacking versions are appended record by record, header last. Answer `{"graphs": 1, "records": versions appended}`.
+- Side records (REQ-SLY-030): `_side_records` adds, only where VIEW's tables are defined, one `graph_changes` record per header version (`<graph>/<version>`; a version kept without one has no record and none is made) and the `arrangements` record of the graph, before the header. Through `_graph_records` they also belong to the lag, the aside file, the cut back and the conflict check of the sync, so the T-03 question about differing records outside every graph now concerns only records no graph names (members of no header, `skills`).
+- Unit tests in `tests/test_graph_store_transfer.py`, class OneGraph (5), **written first and seen red** (5 of 5 against the stub): lacking versions with the headers last and another graph untouched, a member of the copy's own is a conflict, an unknown kind is refused, a locked copy refuses the move, the side records listed only where their tables exist (table list patched in the test).
+
+**Tests green (my runs, feedback only):** `test_transfer_sync.py` OK (1 skipped: TC-SLY-030, TR-TRANSFER-010); `test_transfer_interrupt.py` OK (every write position of the move, the one-graph move and the sync, files and postgres); `test_transfer_move.py` OK; `tests/test_graph_store_transfer.py` 19/19.
+
+**Regression set (2026-11-23, sequential, runner `/home/maldun/.claude-work/jobs/85fdeba4/tmp/regress04.sh`):** unit suite 2580 tests OK (skipped 5, expected failures 2). Acceptance scripts compared with a `git archive` export of the T-03 state (`/home/maldun/.claude-work/jobs/85fdeba4/tmp/acc04_new.txt`, `acc04_base.txt`): only `test_transfer_interrupt.py` and `test_transfer_sync.py` turned OK; `test_rules_rule_set.py` red only in the export (it asks git); `test_skill_run_view_browser.py` OK this time. Unchanged reds: `test_decide_guard.py`, `test_judge_calibration.py` (known), `test_transfer_sets.py` 3 (T-05). No new red.
+
+**Deliberate-defect check (TR-TRANSFER-008),** runner `/home/maldun/.claude-work/jobs/85fdeba4/tmp/mutate_t04.py`:
+
+| Defect | Check | Result |
+|---|---|---|
+| one-graph move overwrites (the copy's own versions cut back and replaced, no conflict) | TC-SLY-031 | fails at its conflict assertion ("StorageError not raised") |
+
+**Traceability:** 549 ERROR lines, the same as the export (compared line by line); none new.
+
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
@@ -97,7 +117,8 @@ None.
 | The sync answer's `graphs` counts the graphs that were not current before the sync | `sync_store` | none: the plan fixes the field, not its meaning; Verify may ask for it in REQ-SLY-025's answer |
 | `sync` prints one more line per set-aside graph (`  <graph>: versions [..] set aside in <copy>/<file> (<reason>)`); `lag` prints nothing when the copy is current | `migrate._copy_command` | proposed for REQ-SLY-039's command texts at the next amendment: the plan names only the summary line; the extra line names the aside file to the owner as FR-93 asks |
 | `--data` is required per command, not by argparse, so `lag`/`sync` can take the live store from `--database-url` alone | `migrate.main` | none: follows the plan's `--data DIR` or `--database-url URL` |
-| A differing record of the graph group that no graph names is refused (`conflict`) by the sync, not overwritten | `_refuse_other_conflicts` | open for Phase 4: REQ-SLY-025 says the copy equals the live store for every record of the group; T-04 (side records, REQ-SLY-030) revisits it |
+| A differing record of the graph group that no graph names is refused (`conflict`) by the sync, not overwritten | `_refuse_other_conflicts` | open for Phase 4: REQ-SLY-025 says the copy equals the live store for every record of the group; since T-04 the side records belong to their graph, so this concerns only steps or connections no header names and `skills` records |
+| `move_graph` takes the copy's lock only when the target is a files folder | `_lock_of` | none: REQ-SLY-028 locks the copy, which is always a files folder; a database has no lock file |
 
 ## Decisions
 - T-01: `library-seed` does not run the per-graph check of the move; it keeps `copy_records`' checks and the write order (members first). REQ-SLY-009 asks for identical entries and the order, not for the graph check; a damaged library folder is refused by `copy_records` only where a record breaks put's rules.

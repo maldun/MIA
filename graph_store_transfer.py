@@ -1,7 +1,7 @@
 """
 Moving graphs between stores and keeping a copy in sync with the live store (G-V4.GRAPHSTORE.TRANSFER; REQ-SLY-016 to 039).
 
-Built so far: move_store (T-01), lag, sync_store and copy_lock (T-03). move_graph is still the stub of Plan step 4 (T-04); the
+Built: move_store (T-01), lag, sync_store and copy_lock (T-03), move_graph and the side records (T-04); the format marker follows (T-05). The
 prototype's graph_store_move.py and graph_store_sync.py (prototype/g-v4, rounds 02 and 03) are the basis.
 
 Stores are backends (storage_files.FileBackend, storage_postgres.PostgresBackend: versions, append, ids, remove, cut, close); a copy is always a
@@ -19,6 +19,7 @@ FileBackend, its root holds the aside folder, the lock and the format marker.
 - An older set (no marker) with an unscoped record: StorageError("invalid", rule="older_format", detail={"table", "id", "conversion": CONVERSION_STEP})
   (REQ-SLY-034). A newer set: the FileBackend refuses to open it, StorageError("format", detail={"found": n, "known": FORMAT}) (REQ-SLY-035).
 """
+import contextlib
 import fcntl
 import json
 import os
@@ -27,12 +28,12 @@ import time
 try:
     from . import graph_rule_set, graph_tables
     from .storage import StorageError, table_definitions
-    from .storage_copy import GRAPH_GROUP, copy_records, ordered_tables  # noqa: F401  GRAPH_GROUP: the group's write order, named here too
+    from .storage_copy import GRAPH_GROUP, _check_entries, copy_records, ordered_tables
 except ImportError:  # used as plain script / in tests
     import graph_rule_set
     import graph_tables
     from storage import StorageError, table_definitions
-    from storage_copy import GRAPH_GROUP, copy_records, ordered_tables  # noqa: F401
+    from storage_copy import GRAPH_GROUP, _check_entries, copy_records, ordered_tables
 
 FORMAT = 1                     # the format of a set of files this code writes and reads (REQ-SLY-032)
 MARKER = "mia-store.json"       # the format marker in the root of a set of files
@@ -125,8 +126,29 @@ def move_store(source, target):
     return copy_records(source, target, ordered_tables(table_definitions()))
 
 
+def _lock_of(target):
+    """the copy's lock for a files target (REQ-SLY-028); a database target has no copy lock"""
+    root = getattr(target, "root", None)
+    return copy_lock(root) if root else contextlib.nullcontext()
+
+
 def move_graph(source, target, graph_id):
-    return {"graphs": 1, "records": 0}
+    """The versions of one graph, its members and its side records that the target lacks, header last (REQ-SLY-031, 030, 019); every other
+    record untouched. The graph is checked first (REQ-SLY-021); a target holding versions of its own of any of these records is
+    StorageError("conflict", detail={"graph": graph_id}); both before any write. A stop at any write leaves the target's graph at its last
+    complete version, and a rerun appends the rest (REQ-SLY-029, 036)."""
+    with _lock_of(target):
+        check_graphs(source, [graph_id])
+        plan = []
+        for table, record_id in _graph_records(source, target, graph_id):
+            have, wanted = target.versions(table, record_id), source.versions(table, record_id)
+            if len(have) > _shared(have, wanted):
+                raise StorageError("conflict", detail={"graph": graph_id})
+            _check_entries(table, record_id, wanted)
+            plan += [(table, record_id, entry) for entry in wanted[len(have):]]
+        for table, record_id, entry in plan:
+            target.append(table, record_id, entry)
+        return {"graphs": 1, "records": len(plan)}
 
 
 def _shared(have, wanted):
@@ -139,8 +161,20 @@ def _shared(have, wanted):
     return n
 
 
+def _side_records(stores, graph_id):
+    """VIEW's side records of the graph where their tables are defined (REQ-SLY-030): one record of changes per header version
+    (`<graph>/<version>`, absent for a version kept without one) and the arrangement (`<graph>`)"""
+    defined, out = table_definitions(), []
+    if "graph_changes" in defined:
+        newest = max(len(store.versions(HEADERS, graph_id)) for store in stores)
+        out += [("graph_changes", "%s/%d" % (graph_id, version)) for version in range(1, newest + 1)]
+    if "arrangements" in defined:
+        out.append(("arrangements", graph_id))
+    return out
+
+
 def _graph_records(live, copy, graph_id):
-    """[(table, record ID)] of the graph: its members named by any header version in either store, the header last"""
+    """[(table, record ID)] of the graph: its members named by any header version in either store, its side records, the header last"""
     found = []
     for store in (copy, live):
         for header in store.versions(HEADERS, graph_id):
@@ -150,11 +184,11 @@ def _graph_records(live, copy, graph_id):
                 for member in data.get(part) or []:
                     if (table, member.get("id")) not in found:
                         found.append((table, member.get("id")))
-    return found + [(HEADERS, graph_id)]
+    return found + _side_records((live, copy), graph_id) + [(HEADERS, graph_id)]
 
 
 def _state(live, copy, graph_id):
-    """(state, {(table, record ID): (copy entries, shared count)}) of one graph that the live store can give: current, behind, differs, copy_only"""
+    """(state, {(table, record ID): (copy entries, live entries, shared count)}) of one graph that the live store can give: current, behind, differs, copy_only"""
     records = {}
     for key in _graph_records(live, copy, graph_id):
         have, wanted = copy.versions(*key), live.versions(*key)
