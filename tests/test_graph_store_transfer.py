@@ -133,6 +133,90 @@ class Commands(unittest.TestCase):
         self.assertEqual(ts.entries(FileBackend(back)), ts.entries(FileBackend(self.data)))
 
 
+class Sync(unittest.TestCase):
+    def setUp(self):
+        self.base = tempfile.mkdtemp(prefix="transfer-unit-")
+        self.addCleanup(shutil.rmtree, self.base, True)
+        self.live = ts.small_store(FileBackend(os.path.join(self.base, "live")))
+        self.copy = FileBackend(os.path.join(self.base, "copy"))
+        ts.equalize(self.live, self.copy)
+
+    def run_command(self, *argv):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = migrate.main(list(argv))
+        return code, out.getvalue().splitlines()
+
+    @mark.req("REQ-SLY-026", "REQ-SLY-038")
+    def test_a_graph_only_on_the_copy_is_set_aside_and_leaves_header_first(self):
+        """Example: `own` (only on the copy) is in the aside file with its header and step; the copy's first removal is its header."""
+        # Given: a graph saved on the copy only
+        graph = ts.multi_graph()
+        graph["id"] = "own"
+        ts.save(self.copy, graph, "copy-writer")
+        header, step = self.copy.versions("graphs", "own"), self.copy.versions("graph_nodes", "own/var.in")
+        logged = ts.WriteLog(self.copy)
+        # When: the copy is synced
+        answer = transfer.sync_store(self.live, logged)
+        # Then: it is named, its aside file holds all its versions, and it is gone from the copy, header first
+        named = answer["set_aside"]["own"]
+        self.assertEqual((named["versions"], named["reason"]), ([1], "the graph exists only on the copy"))
+        aside = ts.read_json(os.path.join(self.copy.root, named["file"]))
+        self.assertEqual((aside["header"], aside["members"]["graph_nodes|own/var.in"]), (header, step))
+        self.assertEqual(logged.log[:2], [("file", named["file"]), ("cut", "graphs|own")])
+        self.assertNotIn("own", self.copy.ids("graphs"))
+        self.assertEqual(ts.graph_group(self.copy), ts.graph_group(self.live))
+
+    @mark.req("REQ-SLY-025")
+    def test_a_differing_record_outside_every_graph_is_a_conflict_before_any_write(self):
+        """Example: graph_nodes `loose/x` differs and no header names it: StorageError conflict naming it; the copy is unchanged."""
+        # Given: a step no graph names, with another history on each side, and a live graph the copy lacks
+        for store, author in ((self.live, "ann"), (self.copy, "bob")):
+            store.append("graph_nodes", "loose/x", {"id": "loose/x", "version": 1, "author": author, "time": ts.STAMP,
+                                                    "doc": {"id": "loose/x", "data": {"type": "data"}}})
+        ts.new_multi_version(self.live, "new")
+        before = ts.entries(self.copy)
+        # When / Then: the sync is refused naming the record, and nothing is written
+        with self.assertRaises(StorageError) as refused:
+            transfer.sync_store(self.live, self.copy)
+        self.assertEqual((refused.exception.code, refused.exception.detail), ("conflict", {"table": "graph_nodes", "id": "loose/x"}))
+        self.assertEqual(ts.entries(self.copy), before)
+
+    @mark.req("REQ-SLY-028")
+    def test_the_lock_is_refused_while_held_and_free_after(self):
+        """Example: a sync inside `with copy_lock(copy)` is refused `locked`; after the block the sync runs."""
+        # Given: this process holds the copy's lock
+        with transfer.copy_lock(self.copy.root):
+            # When / Then: a sync is refused naming the lock
+            with self.assertRaises(StorageError) as refused:
+                transfer.sync_store(self.live, self.copy)
+            self.assertEqual(refused.exception.detail, {"lock": transfer.LOCK})
+        # And: once released, a sync runs
+        self.assertEqual(transfer.sync_store(self.live, self.copy)["records"], 0)
+
+    @mark.req("REQ-SLY-027", "REQ-SLY-039")
+    def test_the_sync_command_names_the_aside_file(self):
+        """Example: "synced 2 records, set aside 1 graphs", then "  sample.code: versions [2] set aside in <copy>/aside/... (the live store won)"."""
+        # Given: AC-007 on the small store
+        ts.ac007(self.live, self.copy, with_store=False)
+        # When: the owner runs the sync
+        code, lines = self.run_command("sync", "--data", self.live.root, "--copy", self.copy.root)
+        # Then: the summary line and one line naming the graph, its version and the aside file in the copy folder
+        self.assertEqual(code, 0)
+        self.assertEqual(lines[0], "synced 2 records, set aside 1 graphs")
+        self.assertRegex(lines[1], r"^  sample\.code: versions \[2\] set aside in %s/aside/sample\.code__\d{8}T\d{6}Z\.json \(the live store won\)$"
+                         % self.copy.root)
+        self.assertEqual(len(lines), 2)
+
+    @mark.req("REQ-SLY-039")
+    def test_lag_and_sync_need_the_copy(self):
+        """Example: `sync --data DIR` without --copy is a usage error (exit 2)."""
+        # When / Then: argparse stops the command
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as stopped:
+            migrate.main(["sync", "--data", self.live.root])
+        self.assertEqual(stopped.exception.code, 2)
+
+
 class Export(unittest.TestCase):
     @mark.req("REQ-SLY-009")
     def test_the_export_holds_the_graph_group(self):

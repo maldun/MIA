@@ -1,7 +1,7 @@
 """
 Moving graphs between stores and keeping a copy in sync with the live store (G-V4.GRAPHSTORE.TRANSFER; REQ-SLY-016 to 039).
 
-Built so far: move_store (T-01). The other functions are still the stubs of Plan step 4 and answer "nothing done" (T-03 to T-05); the
+Built so far: move_store (T-01), lag, sync_store and copy_lock (T-03). move_graph is still the stub of Plan step 4 (T-04); the
 prototype's graph_store_move.py and graph_store_sync.py (prototype/g-v4, rounds 02 and 03) are the basis.
 
 Stores are backends (storage_files.FileBackend, storage_postgres.PostgresBackend: versions, append, ids, remove, cut, close); a copy is always a
@@ -19,6 +19,11 @@ FileBackend, its root holds the aside folder, the lock and the format marker.
 - An older set (no marker) with an unscoped record: StorageError("invalid", rule="older_format", detail={"table", "id", "conversion": CONVERSION_STEP})
   (REQ-SLY-034). A newer set: the FileBackend refuses to open it, StorageError("format", detail={"found": n, "known": FORMAT}) (REQ-SLY-035).
 """
+import fcntl
+import json
+import os
+import time
+
 try:
     from . import graph_rule_set, graph_tables
     from .storage import StorageError, table_definitions
@@ -89,15 +94,26 @@ def check_graphs(source, graph_ids):
 
 class copy_lock:
     """`with copy_lock(root):` holds the copy's lock (an operating-system lock on <root>/sync.lock, released when the process ends); a second
-    holder gets StorageError("locked", detail={"lock": LOCK}). The sync and a move into the copy take it (REQ-SLY-028). STUB: locks nothing."""
+    holder gets StorageError("locked", detail={"lock": LOCK}). The sync and a move into the copy take it (REQ-SLY-028). flock, not a lock file
+    that exists or not: the system drops it with the process, so a killed sync never leaves the copy locked."""
 
     def __init__(self, root):
         self.root = root
+        self.handle = None
 
     def __enter__(self):
+        os.makedirs(self.root, exist_ok=True)
+        self.handle = open(os.path.join(self.root, LOCK), "a")
+        try:
+            fcntl.flock(self.handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            self.handle.close()
+            raise StorageError("locked", detail={"lock": LOCK}) from None
         return self
 
     def __exit__(self, *exc):
+        fcntl.flock(self.handle, fcntl.LOCK_UN)
+        self.handle.close()
         return False
 
 
@@ -113,9 +129,123 @@ def move_graph(source, target, graph_id):
     return {"graphs": 1, "records": 0}
 
 
+def _shared(have, wanted):
+    """how many of the first entries of `have` equal those of `wanted` (author and time included)"""
+    n = 0
+    for a, b in zip(have, wanted):
+        if a != b:
+            break
+        n += 1
+    return n
+
+
+def _graph_records(live, copy, graph_id):
+    """[(table, record ID)] of the graph: its members named by any header version in either store, the header last"""
+    found = []
+    for store in (copy, live):
+        for header in store.versions(HEADERS, graph_id):
+            data = (header.get("doc") or {}).get("data") or {}
+            tables, _ = _members(data.get("kind"))
+            for part, table in zip(("nodes", "edges"), tables):
+                for member in data.get(part) or []:
+                    if (table, member.get("id")) not in found:
+                        found.append((table, member.get("id")))
+    return found + [(HEADERS, graph_id)]
+
+
+def _state(live, copy, graph_id):
+    """(state, {(table, record ID): (copy entries, shared count)}) of one graph that the live store can give: current, behind, differs, copy_only"""
+    records = {}
+    for key in _graph_records(live, copy, graph_id):
+        have, wanted = copy.versions(*key), live.versions(*key)
+        records[key] = (have, wanted, _shared(have, wanted))
+    if not live.versions(HEADERS, graph_id):
+        return "copy_only", records
+    if any(len(have) > shared for have, _, shared in records.values()):
+        return "differs", records
+    if any(len(wanted) > len(have) for have, wanted, _ in records.values()):
+        return "behind", records
+    return "current", records
+
+
+def _graphs(live, copy):
+    return sorted(set(live.ids(HEADERS)) | set(copy.ids(HEADERS)))
+
+
 def lag(live, copy):
-    return {}
+    """Every graph that is not current on the copy, with its header versions in both stores, its state and its reason (REQ-SLY-024): behind
+    (the copy lacks live versions), differs (the copy holds versions of the graph or a member the live store does not), copy_only, refused (the
+    live store's graph cannot be moved, reason: its rules, REQ-SLY-021)."""
+    node_ids = {table: set(live.ids(table)) for table in ("graph_nodes", "context_nodes")}
+    out = {}
+    for graph_id in _graphs(live, copy):
+        row = {"live": len(live.versions(HEADERS, graph_id)), "copy": len(copy.versions(HEADERS, graph_id)), "reason": None}
+        problems = graph_problems(live, graph_id, node_ids) if row["live"] else []
+        if problems:
+            row.update(state="refused", reason=", ".join(p["rule"] for p in problems))
+        else:
+            row["state"] = _state(live, copy, graph_id)[0]
+        if row["state"] != "current":
+            out[graph_id] = row
+    return out
+
+
+def _aside_path(copy, graph_id, stamp):
+    """a path under the aside folder, relative to the copy (REQ-SLY-027), that no earlier aside file uses"""
+    base = "%s/%s__%s" % (ASIDE, graph_id.replace("/", "_"), stamp)
+    path, n = base + ".json", 1
+    while os.path.exists(os.path.join(copy.root, path)):
+        n += 1
+        path = "%s_%d.json" % (base, n)
+    return path
+
+
+def _set_aside(copy, graph_id, records, state):
+    """Writes the copy's versions of the graph and its members that the live store does not hold to one aside file, durably (REQ-SLY-026), and
+    returns what the answer names of it (REQ-SLY-027)."""
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    reason = "the live store won" if state == "differs" else "the graph exists only on the copy"
+    header = records[HEADERS, graph_id]
+    doc = {"graph": graph_id, "set_aside_at": stamp, "reason": reason, "header": header[0][header[2]:],
+           "members": {"%s|%s" % key: have[shared:] for key, (have, _, shared) in records.items() if key[0] != HEADERS and len(have) > shared}}
+    path = _aside_path(copy, graph_id, stamp)
+    copy.put_file(path, json.dumps(doc, ensure_ascii=False, indent=1, sort_keys=True))
+    return {"versions": [e["version"] for e in doc["header"]], "file": path, "reason": reason}
+
+
+def _cut_back(copy, records):
+    """Cuts every record of the graph back to the versions the live store shares, the header first, so the copy lists the graph at its last
+    shared version, complete, at every step (REQ-SLY-038); a graph without a shared version leaves header first."""
+    for (table, record_id), (have, _, shared) in sorted(records.items(), key=lambda item: item[0][0] != HEADERS):
+        if len(have) > shared:
+            copy.cut(table, record_id, shared)
+
+
+def _refuse_other_conflicts(live, copy, handled):
+    """A record of the graph group outside every graph whose history on the copy is not the start of the live one: refused before any write."""
+    for table in [t for t in GRAPH_GROUP if t in table_definitions()]:
+        for record_id in live.ids(table):
+            have = copy.versions(table, record_id)
+            if (table, record_id) not in handled and have != live.versions(table, record_id)[:len(have)]:
+                raise StorageError("conflict", detail={"table": table, "id": record_id})
 
 
 def sync_store(live, copy):
-    return {"graphs": 0, "records": 0, "set_aside": {}}
+    """Makes the copy's graph group equal the live store's (REQ-SLY-025); the live store wins. Under the copy's lock (REQ-SLY-028), after every
+    graph of the live store is checked (REQ-SLY-021): each graph that differs or exists only on the copy is written to an aside file first
+    (REQ-SLY-026, 027), then cut back (REQ-SLY-038); then the live versions the copy lacks follow, members before headers (REQ-SLY-019).
+    "graphs" counts the graphs that were not current, "records" the versions appended."""
+    with copy_lock(copy.root):
+        check_graphs(live, live.ids(HEADERS))
+        states = {graph_id: _state(live, copy, graph_id) for graph_id in _graphs(live, copy)}
+        states = {graph_id: found for graph_id, found in states.items() if found[0] != "current"}
+        _refuse_other_conflicts(live, copy, {key for _, records in states.values() for key in records})
+        answer = {"graphs": len(states), "records": 0, "set_aside": {}}
+        for graph_id, (state, records) in sorted(states.items()):
+            if state in ("differs", "copy_only"):
+                answer["set_aside"][graph_id] = _set_aside(copy, graph_id, records, state)
+                _cut_back(copy, records)
+        tables = [t for t in GRAPH_GROUP if t in table_definitions()]
+        answer["records"] = sum(len(live.versions(t, i)) - len(copy.versions(t, i)) for t in tables for i in live.ids(t))
+        copy_records(live, copy, tables)
+        return answer

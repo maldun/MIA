@@ -655,7 +655,8 @@ package MIA_Architecture {
                    G-V4.GRAPHSTORE.TRANSFER, in graph_store_transfer.py (REQ-SLY-016 to 039): built (T-01) the whole-store move checked per
                    graph with members before headers; built (T-02) durable file writes and, in both backends, the cut back of a record to a
                    version and, in the file backend, put_file for a plain file below the root (backend operations beside IF-102, for the
-                   sync only); planned the lag, the one-way sync with the aside folder, the one-graph move, the format marker. */
+                   sync only); built (T-03) the lag and the one-way sync under the copy's lock, the aside file before the cut back, and
+                   the lag and sync commands of migrate; planned the one-graph move, the side records, the format marker. */
             @Implementation { :>> status = ImplementationStatus::partly;
                               :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py",
                                              "graph_store_transfer.py"); }
