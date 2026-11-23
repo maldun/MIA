@@ -6,6 +6,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 |---|---|---|---|---|
 | T-01 Record tables | done | see `git log` ("feat: T-01 record tables arrangements and graph_changes") | TC-IF-302-13, 14 (mock and real); `tests/test_record_tables_view.py` (6 unit tests) | `tests/test_record_tables.py`: the expected table set gets the two new tables (A-172) |
 | T-02 Store setting, provider, access, image | done | see `git log` ("feat: T-02 store setting, v2 provider, access and image") | TC-API-019, 024, TC-OPR-011; TC-IF-104-26 (mock, files, postgres); `tests/test_graph_api_v2.py` (7 unit tests) | TC-API-018, 020 and TC-IF-104-27 wait for T-03 (they need the list, read and versions routes) |
+| T-03 Read routes | done | see `git log` ("feat: T-03 read routes") | TC-IF-104-17, 18, 19, 26, 27 (mock, files, postgres); read parts of TC-IF-104-24, 25; TC-API-018, 020; `tests/test_graph_api_v2.py` (10 unit tests) | the write parts of TC-IF-104-24, 25 stop at 501 `not_built` (T-05) |
 
 ## T-01: Record tables
 
@@ -59,3 +60,29 @@ The plan's defect for TC-OPR-011 ("the line moved to the builder stage") does no
 1. `store: database` without `MIA_DATABASE_URL` stops the start with a message naming the setting and the variable. No requirement says this; REQ-API-020 covers only an unknown value. Proposal: keep it, and add it to REQ-API-020 at the merge (or a small amendment).
 2. With `store: database` and the database down when MIA starts, `PostgresBackend` cannot connect and the start fails. REQ-API-050 covers a store that stops answering while MIA runs. Proposal: decide in Deploy (preflight checks the database) or by an amendment; SMOKE-VIEW-001 starts with the database up.
 3. A foreign `Origin` on a GET is refused too, as everywhere in MIA (the existing guard); IF-104 v2 names the origin only for routes 8 to 11. Kept as the existing guard does.
+
+## T-03: Read routes
+
+**What was done**
+- `graph_api_v2.py`: `GraphReader` on the `Storage` layer of the backend, with `GraphModel` of CORE for reading a graph and the toolbox's `look_up` for the marks; routes `GET /graphs` (id, kind, version, author, time, description, step and connection counts), `GET /graphs/<id>` (current or `?version=n`; graph, version, current, author, time, `problems`, `steps`), `GET /graphs/<id>/versions`, `GET /graphs/<id>/arrangement` (`{"positions": null}` when never arranged). The remaining five routes still answer 501 `not_built` (T-04 to T-06).
+- `problems_of(graph)`: what cannot be drawn (REQ-API-026): a connection to a step the graph does not have (`missing_step` with the connection, the step and the end), a step ID used twice (`duplicate_step`, named once); never a rule report (D-425 A).
+- `steps_of(graph, toolbox)`: the kind per step; for a processing or loop-controlling step (`transform`, `master`) trust, lifecycle and reason of its toolbox entry, or `untrusted` with "it is not in the toolbox"; `code` when a code connection leads to it; `changed_since_trusted` fixed `false` until G-V4.GRAPHAPI.CODE (REQ-API-028). A context graph's steps carry the kind only.
+- Not found (REQ-API-049): an unknown graph is 404 `not_found` on every read; a version that is not stored, or is not a whole number of at least 1, is 404 `not_found` with `detail: "version"`.
+- Unit tests `tests/test_graph_api_v2.py` +4 (`Reading`): versions 0, 2, -1, `abc`; an unknown graph on the three reads; a step ID used three times plus a missing end; a context graph. Written after the code (the code was drafted in the session before), so a deviation from test-first as in T-02.
+
+**Tests green (my runs, feedback only):** IF-104 v2 suite TC-IF-104-17, 18, 19, 26, 27 on mock, files and postgres (33 cases: 21 OK); TC-IF-104-24, 25 pass their read parts and stop at the first write (501 `not_built`, T-05); `test_view_backend.py` TC-API-018, 019, 020, 024, TC-OPR-011 OK, the `Writes` checks (TC-API-021, 022, 023, 025) wait for T-04 to T-06; `tests/test_graph_api_v2.py` 10/10.
+
+**Regression set (2026-11-23, sequential):** unit suite `discover -s tests` exit 0 (2570 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 186 pass; acceptance scripts all OK except the VIEW checks of later tasks (`test_view_backend.py` 5, the IF-104 v2 suite 12 on the real side, `test_graph_view_files.py` 2, `test_graph_view_browser.py` 7 errors, `graph_view_page.test.mjs` 14) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Deliberate defects (TR-VIEW-021), the two carried over from T-02; run once each, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| the store default changed to `database` (`store_setting`) | TC-API-018 | fails (the start stops: `MIA_DATABASE_URL` not set) |
+| the v2 blueprint registered on a Flask app of its own in `web_app.py` (no shared session) | TC-API-020 | fails (`/api/v2/me` 404 instead of anna, owner) |
+
+The contract cases TC-IF-104-17 to 19 got no defect run, as in T-01 (TR-VIEW-021 does not ask for one on contract cases).
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. A step without stored data or type is given the kind `unknown`; REQ-API-027 names no value for that case. Proposal: keep, and name it at the merge.
+2. A version that is not a whole number (`?version=abc`) is 404 `not_found` with `detail: "version"`, the same as a version that is not stored (REQ-API-049 names only the second). Proposal: keep.

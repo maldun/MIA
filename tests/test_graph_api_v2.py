@@ -1,4 +1,4 @@
-"""The provider of IF-104 v2 (G-V4.VIEW T-02): store setting, session, origin, owner and an unreachable store. Run with: python tests/test_graph_api_v2.py"""
+"""The provider of IF-104 v2 (G-V4.VIEW T-02, T-03): store setting, session, origin, owner, an unreachable store and the read routes. Run with: python tests/test_graph_api_v2.py"""
 import os
 import shutil
 import sys
@@ -12,6 +12,7 @@ from flask import Flask                      # noqa: E402
 
 import accounts                              # noqa: E402
 import graph_api_v2                          # noqa: E402
+import graph_model                           # noqa: E402
 from markers import mark                     # noqa: E402
 from storage import Storage                  # noqa: E402
 from storage_files import FileBackend        # noqa: E402
@@ -107,6 +108,67 @@ class Provider(unittest.TestCase):
         answers = [app.test_client().get(p) for p in ("/api/v2/me", "/api/v2/store")]
         # Then both need a session
         self.assertEqual([(a.status_code, a.get_json()["error"]) for a in answers], [(401, "unauthenticated")] * 2)
+
+
+def small(graph_id):
+    return {"id": graph_id, "context_graph_id": "ctx", "testbench_id": "tb", "description": "small",
+            "nodes": [{"id": "var.in", "data": {"type": "data", "value": "x"}}, {"id": "step.a", "data": {"type": "transform", "toolbox_id": "tool.a"}}],
+            "edges": [{"id": "e1", "from": "var.in", "to": "step.a", "data": {}}]}
+
+
+class Reading(unittest.TestCase):
+    """the read routes of T-03 beyond the contract cases: bad versions, unknown graphs, duplicate steps, context graphs"""
+
+    def setUp(self):
+        root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, root, True)
+        self.accounts_store = Storage(FileBackend(os.path.join(root, "accounts")))
+        accounts.create(self.accounts_store, "anna", "pw-anna-x", "test")
+        self.backend = FileBackend(os.path.join(root, "graphs"))
+        graph_model.GraphModel(Storage(self.backend), author="anna").save_graph(small("g.one"))
+        self.web = graph_api_v2.create_app(self.backend, self.accounts_store, "files", (ORIGIN,)).test_client()
+        self.web.post("/api/login", json={"user": "anna", "password": "pw-anna-x"}, headers={"Origin": ORIGIN})
+
+    @mark.req("REQ-API-049")
+    def test_a_version_that_is_not_stored_is_not_found(self):
+        """Example: g.one has version 1; ?version=0, 2, -1 and abc each answer 404 not_found with detail version."""
+        # Given g.one with one version
+        # When versions that do not exist or are no number are asked for
+        answers = [self.web.get("/api/v2/graphs/g.one?version=" + v) for v in ("0", "2", "-1", "abc")]
+        # Then each is not found, naming the version
+        self.assertEqual([(a.status_code, a.get_json()["error"], a.get_json().get("detail")) for a in answers], [(404, "not_found", "version")] * 4)
+
+    @mark.req("REQ-API-049")
+    def test_an_unknown_graph_is_not_found_on_every_read(self):
+        """Example: g.none read, its versions and its arrangement -> 404 not_found without detail."""
+        # Given no graph g.none
+        # When it is read three ways
+        answers = [self.web.get("/api/v2/graphs/g.none" + p) for p in ("", "/versions", "/arrangement")]
+        # Then each is not found
+        self.assertEqual([(a.status_code, a.get_json()["error"], a.get_json().get("detail")) for a in answers], [(404, "not_found", None)] * 3)
+
+    @mark.req("REQ-API-026")
+    def test_a_step_id_used_twice_is_one_problem(self):
+        """Example: step.a three times -> one duplicate_step problem; a connection to var.gone -> missing_step at its end."""
+        # Given a graph with one step ID three times and a connection to a missing step
+        graph = small("g.dup")
+        graph["nodes"] += [dict(graph["nodes"][1]), dict(graph["nodes"][1])]
+        graph["edges"].append({"id": "e2", "from": "step.a", "to": "var.gone", "data": {}})
+        # When its problems are named
+        found = graph_api_v2.problems_of(graph)
+        # Then the duplicate is named once and the missing end once
+        self.assertEqual(found, [{"problem": "duplicate_step", "step": "step.a"},
+                                 {"problem": "missing_step", "connection": "e2", "step": "var.gone", "end": "to"}])
+
+    @mark.req("REQ-API-027")
+    def test_a_context_graph_names_the_kind_only(self):
+        """Example: a context graph with a transform step -> {"kind": "transform"} without trust marks."""
+        # Given a context graph
+        graph = {"kind": "context", "nodes": [{"id": "c.a", "data": {"type": "transform", "toolbox_id": "tool.a"}}, {"id": "c.b", "data": None}], "edges": []}
+        # When its steps are described
+        steps = graph_api_v2.steps_of(graph, toolbox=None)
+        # Then only the kind is given, unknown where none is stored
+        self.assertEqual(steps, {"c.a": {"kind": "transform"}, "c.b": {"kind": "unknown"}})
 
 
 if __name__ == "__main__":
