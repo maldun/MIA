@@ -11,6 +11,7 @@ Goal: G-V4.VIEW   Line of work: goal/v4.view   Supervision: supervised (plan gat
 | T-05 Check, restore, arrangement save | done | see `git log` ("feat: T-05 check, restore, arrangement save") | TC-IF-104-23, 25 (mock, files, postgres); the restore part of TC-IF-104-24; TC-API-021 (T-04's), TC-API-025; `tests/test_graph_api_v2.py` (23 unit tests) | TC-IF-104-24 stops at the changes route (T-06) |
 | T-06 Record of changes | done | see `git log` ("feat: T-06 record of changes") | every Track A check: IF-104 v2 suite 33/33 (mock, files, postgres), `test_view_backend.py` 9/9 (TC-API-018 to 025, TC-OPR-011); `tests/test_graph_api_v2.py` (28 unit tests) | Track A complete |
 | T-07 Tokens, frame, status | done | see `git log` ("feat: T-07 tokens, frame, status") | TC-GA-021, TC-GA-031, 032; `tests/js/store-note.test.mjs` (2), `tests/js/graph-viewer-frame.test.mjs` (3) | Track B started; the list is text only until T-08, the picture empty until T-09 |
+| T-08 List and opening | done | see `git log` ("feat: T-08 list and opening") | TC-GA-018, 019, 020 (TC-GA-021 stays green); `tests/js/list-filter.test.mjs` (3), `tests/js/graph-viewer-list.test.mjs` (5) | TC-GA-017 stops at `selectStep` (the left column, T-11) |
 
 ## T-01: Record tables
 
@@ -194,3 +195,31 @@ A first try that only bypassed CORE's `_first_refusal` still ended refused, by t
 **Open questions for Verify / the owner (behaviour only in the code, P25):**
 1. The words of the later areas, the area labels ("Graphs", "Search and chat", "Other things", "Selection", "Picture", "Actions", "History and replay", "Graph status") and the status line form (`cp2.multi · workflow · version 4 · stored by ben · <time> · read-only`, `version 2 of 4` for an older one) are mine; no requirement fixes them. Proposal: the owner looks at the screenshots and changes words as he likes.
 2. The list says `1 connections` for one connection (the interface note fixes `<n> connections`). Proposal: decide at T-08 (singular for one would need the note's form widened).
+
+## T-08: List and opening
+
+**What was done**
+- `graph_app/list-filter.js` (R6, written again): `filterGraphs(graphs, text)` keeps the graphs whose ID or description holds every typed word, case ignored (REQ-GA-020; the prototype also searched the kind, which the requirement does not name, so the kind is left out); `entryLabel(g)` in the words of the interface note.
+- `graph_app/viewer.js`: the filter field `#graph-filter` above the list; each `li[data-graph-id]` a tab stop of its own (`tabindex=0`), Enter or a click opens the graph, ArrowDown and ArrowUp move to the next or previous shown entry, the open entry carries `aria-current="true"` (REQ-GA-019, 021); `filter(text)` hides the entries that do not match; `open(id)` reads the current version (no version asked), names it in the status bar and hands the drawing every step and every directed connection (`{id, label}`, `{id, from, to, arrows: 'to'}`; T-09 adds shapes, kinds and marks); the drawing is made on the first opening.
+- Refusals (REQ-GA-022, 023): 401 on any read empties the list, hides the picture, resets the status bar and puts `[data-login]` with a link to `/` into the list area; 503 keeps the list, the picture and the status bar and adds the one line `[data-notice=store_unreachable]` to the status bar, removed again at the next answer; any other failure is passed on to the caller.
+- `tests/js/graph-app-files.test.mjs`: the expected file list gets `list-filter.js`.
+- Unit tests written first and seen red (5 of 6; the sixth, "other failures are not swallowed", already held): `tests/js/list-filter.test.mjs` (3) and `tests/js/graph-viewer-list.test.mjs` (5: click and Enter open and mark the entry; tab stops and arrow keys; a session that ends after opening; the store notice once and gone again; a 500 passed on). Finding on the way: the fake DOM does not match a class in a descendant selector, so the drawing container got the hook `data-drawing` (the test reads that).
+
+**Tests green (my runs, feedback only):** TC-GA-018, 019, 020 (and TC-GA-021) of `graph_view_page.test.mjs`; `node --test "tests/js/*.test.mjs"` 199 pass. TC-GA-017 passes the list, the opening and `version 4`, then stops at `viewer.selectStep` (the left column, REQ-GA-036, T-11), as T-02 left checks for later tasks.
+
+**Regression set (2026-11-23, sequential):** unit suite exit 0 (2588 tests, 5 skipped, 2 expected failures); `node --test "tests/js/*.test.mjs"` 199 pass; acceptance scripts all OK except the page checks of later tasks (`graph_view_page.test.mjs` 10, `test_graph_view_browser.py` 7 errors) and the known reds `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Known gap until T-09:** `drawing.js` is still the stub, so in the browser the first opening throws `not written` (the node checks use the recording drawing). The browser checks wait for T-09 to T-12 anyway.
+
+**Deliberate defects (TR-VIEW-021), run once each, then restored (`cmp` against the copy):**
+
+| Defect | Check | Result |
+|---|---|---|
+| opening asks for version 1 instead of the current | TC-GA-017 | fails at line 30 (`version 4` in the status bar), before the `selectStep` it waits for |
+| the filter ignores the description | TC-GA-018 | fails |
+| 401 empties the list without the login link | TC-GA-019 | fails |
+| the picture cleared on 503 | TC-GA-020 | fails |
+
+**Open questions for Verify / the owner (behaviour only in the code, P25):**
+1. The filter does not search the kind (the prototype did; REQ-GA-020 names ID and description only). Proposal: keep as the requirement says.
+2. The words of the login note ("Not logged in. Log in through the main app.") and of the store notice ("The store does not answer now; what is shown stays as it was.") are mine. Proposal: keep; the owner may change them.
