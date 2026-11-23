@@ -18,7 +18,7 @@ Proposed 2026-11-20 by the owner (maldun), D-392: G-V4.GRAPHSTORE is cut into th
 |---|---|---|
 | OC-1 | Given the graphs stored today, when they are moved to the new form, then each reads back as before and the owner can compare old and new before anything old is removed | OC-2 of G-V4.GRAPHSTORE |
 | OC-2 | Given a snapshot taken before and one after the change, when the owner restores either, then the graphs are as they were at that snapshot | OC-3 of G-V4.GRAPHSTORE |
-| OC-3 | Given a skill with a stored graph, when the owner runs it, then the run follows that graph and says which graph and version it used; a skill without one runs as before until it is imported | OC-6 of G-V4.GRAPHSTORE |
+| OC-3 | Given a skill with a stored graph, when the owner runs it, then the run follows that graph and says which graph and version it used; a skill without one runs on its converted graph until it is imported (reworded by the owner, D-473: the path from a stored graph to a run is G-V4.GRAPHAPI.RUN's, and RUN removes the old runner) | OC-6 of G-V4.GRAPHSTORE |
 
 ## Scope
 Inside the scope of G-V4.GRAPHSTORE (`../G-V4.GRAPHSTORE/goal.md`). The new requirements of the group's top-level spec that this part takes are named in "Source"; they are listed here when Plan step 1b writes them into `requirements.md`.
