@@ -22,6 +22,10 @@ Proposed 2026-11-23 by the agent on the owner's split decision (D-474): G-V4.GRA
 ## Scope
 Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`); the items are named when Plan step 1b writes them.
 
+| Item | In/Out | Reason |
+|---|---|---|
+| FR-37 | out | the graph model, the order and the run are G-V4.GRAPHAPI.RUN's; SWITCH uses them |
+
 Its items are named in its Plan, after RUN's plan is approved (D-474); SWITCH starts only after RUN, so no item is shared while both run and nothing needs freezing. In words: the nine skills without suites on their graph (NFR-17 of the group spec, by scripted replies, D-473 (3)); skills run on their graph (part of FR-6; live trust, lifecycle, budgets and stop stay parked in G-V5); the order and the run (FR-65 of the group spec) and the six skills with suites are RUN's.
 
 ## Split check
