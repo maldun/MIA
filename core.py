@@ -28,11 +28,12 @@ except ImportError:  # used as plain script / in tests
 
 class Core:
     def __init__(self, skills_dir, library, runs_dir, model=None, tools=None, functions=None, rng=None, sandbox=None, broker_factory=None, environment=None, store=None, store_texts=None,
-                 tool_calls=None, door_tools=None, run_events=None, conversion_dir=None):
+                 tool_calls=None, door_tools=None, run_events=None, conversion_dir=None, graph_store=None):
         """conversion_dir: the folder of the acceptance records (accept_conversion.py, D-256): a skill with a record runs on the graph path, see run; None = every skill on the old runner;
         sandbox: a sandbox.SandboxRouter (None = no scripts can run); broker_factory: makes a web broker per script (broker.WebBroker), None = scripts have no web"""
         self.skills = SkillStore(skills_dir)
         self.conversion_dir = conversion_dir
+        self.graph_store = graph_store      # a GraphModel: a skill whose graph is stored runs from it (REQ-RUN-042, D-480); not built yet, the red tests of G-V4.GRAPHAPI.RUN
         self.library = library
         self.run_log = RunLog(runs_dir)
         tools = dict(tools or {})
