@@ -60,10 +60,10 @@ Group spec FR-65, NFR-17; `../G-V4.GRAPHAPI/spikes.md` (networkx spike); D-375; 
 | N-2.4.2 Tools and sandbox | stand-in | scripted tools |
 
 ## Agreement
-| Subgoal | Agreed by | Date |
-|---|---|---|
-| G-V4.GRAPHAPI.RUN | [x] Stefan Reiterer (owner) | 2026-11-20 |
-| G-V4.GRAPHAPI.RUN, update of 2026-11-23 (D-473, D-474) | [ ] Stefan Reiterer (owner) | |
+| Subgoal                                                | Agreed by                   |       Date |
+|--------------------------------------------------------|-----------------------------|------------|
+| G-V4.GRAPHAPI.RUN                                      | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHAPI.RUN, update of 2026-11-23 (D-473, D-474) | [x] Stefan Reiterer (owner) |            |
 
 ## Phases
 | Phase | State | Record or reason |

@@ -14,7 +14,7 @@ Worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-run`, branch `g
 ## Waiting for the owner (state at the end of the session, 2026-11-24)
 | Item | State | How the owner signs |
 |---|---|---|
-| `goal.md` Agreement "update of 2026-11-23" | box ticked in the working tree, **date empty, not committed** (the owner's edit) | `C-c r S`; then commit it with the owner's OK |
+| `goal.md` Agreement "update of 2026-11-23" | box ticked and committed 2026-11-24 (date cell empty: the owner fills it) | – |
 | `high-level-spec.md` approval line | `[ ]` open (HR-007 changed, D-477) | `C-c r S` |
 | `requirements.md` | 0 Approved, 24 Draft | `C-c r s` per item, pick Approved (`C-c r S` signs only the document status line, boxes and labels, not the item Status lines) |
 | `test-requirements.md` | 0 Approved, 12 Draft | `C-c r s` per item |
