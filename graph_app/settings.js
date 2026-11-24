@@ -12,6 +12,15 @@ export function validSettings(found) {
   return Object.fromEntries(Object.entries(CHOICES).filter(([k, values]) => values.includes(found?.[k])).map(([k]) => [k, found[k]]));
 }
 
+/** the window's localStorage, or null when the browser refuses it (cookies and site data blocked: the getter throws SecurityError, V-9) */
+export function pageStorage(win) {
+  try {
+    return win.localStorage;
+  } catch {
+    return null;
+  }
+}
+
 /** the saved settings, or the defaults where there are none, they are damaged, or the storage is blocked (REQ-GA-035) */
 export function loadSettings(storage) {
   try {

@@ -1,7 +1,7 @@
 // The view settings of the graph viewer (graph_app/settings.js, R6, REQ-GA-034, REQ-GA-035). Run: node --test tests/js/graph-settings.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { KEY, DEFAULTS, loadSettings, saveSettings, drawingOptions } from '../../graph_app/settings.js';
+import { KEY, DEFAULTS, loadSettings, saveSettings, drawingOptions, pageStorage } from '../../graph_app/settings.js';
 
 const memory = (init = {}) => { const m = new Map(Object.entries(init)); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), m }; };
 const blocked = { getItem() { throw new Error('blocked'); }, setItem() { throw new Error('blocked'); } };
@@ -40,4 +40,16 @@ test('REQ-GA-031, REQ-GA-034: the drawing options carry the settings and the fix
   assert.deepEqual([b.edges, b.physics, b.layout], ['rounded', true, 'layered']);
   assert.deepEqual([a.seed, a.solver], [b.seed, b.solver]);
   assert.ok(Number.isInteger(a.seed) && typeof a.solver === 'string');
+});
+
+test('V-9, REQ-GA-035: the page storage is null when reading localStorage throws, so the viewer starts with its defaults', () => {
+  // Example: a window whose localStorage getter throws SecurityError -> null; a normal window -> its localStorage.
+  // Given a window with site data blocked and one without
+  const blocked = Object.defineProperty({}, 'localStorage', { get() { throw new Error('SecurityError: The operation is insecure.'); } });
+  const store = { getItem: () => null, setItem() {} };
+  // When the page asks each for its storage
+  // Then the blocked one hands in null and the defaults load from it, the other its storage
+  assert.equal(pageStorage(blocked), null);
+  assert.deepEqual(loadSettings(pageStorage(blocked)), DEFAULTS);
+  assert.equal(pageStorage({ localStorage: store }), store);
 });

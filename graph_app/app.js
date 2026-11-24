@@ -2,11 +2,12 @@
 import { createViewer } from './viewer.js';
 import { httpApi } from './api.js';
 import { visDrawing } from './drawing.js';
+import { pageStorage } from './settings.js';
 
 createViewer({
   document,
   root: document.getElementById('app'),
   api: httpApi((url, init) => fetch(url, { credentials: 'same-origin', ...init })),
-  storage: localStorage,
+  storage: pageStorage(globalThis),
   makeDrawing: (container) => visDrawing(container, globalThis.vis),
 }).start();

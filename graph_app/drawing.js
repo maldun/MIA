@@ -114,7 +114,15 @@ export function visDrawing(container, vis, win = globalThis) {
     }
   });
   network.on('click', ({ nodes: picked, edges: links }) => select(picked[0] ? { step: picked[0] } : links[0] ? { connection: links[0] } : {}));
-  win.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', () => { colours = tokens(doc); drawing.show(drawing.data, options); });
+  // a light/dark change re-colours what is shown in place; a new show() would settle the graph again and lose the dropped places (V-2, REQ-GA-032)
+  win.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+    colours = tokens(doc);
+    nodes.update(drawing.data.nodes.map((n) => {
+      const { id, font, color, ctxRenderer } = visNode(n, colours);
+      return ctxRenderer ? { id, font, color, ctxRenderer } : { id, font, color };
+    }));
+    network.setOptions({ edges: visOptions(options, colours).edges });
+  });
 
   const drawing = {
     data: { nodes: [], edges: [] },
