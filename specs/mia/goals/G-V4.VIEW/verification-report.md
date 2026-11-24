@@ -244,3 +244,41 @@ V-6, V-7, V-11, V-12, V-13 and the items of V-14. V-3 also qualifies if the owne
 | V-15 | the owner builds the image once with network; then the reviewer re-runs `tests/test_delivery_on_stack.py`. **Done 2026-11-24:** the owner built `mia-view-check` (`podman build -f deploy/Containerfile`, psycopg 3.3.9 installed in the release stage); the offline delivery test then ran 5 tests in 50 s: OK. V-15 closed |
 
 Re-verify after the fixes: the automated checks in full (protected diff, trace, goal and model checks, unit suite, every acceptance script, `tests/js`, Firefox checks three times), my reproductions `repro_f1.py`, `repro_f2.py`, `repro_f3.py` again, and a review of the fix commits only.
+
+## Re-verify of the fixes (D-501, 2026-11-24)
+**Reviewer:** an independent AI reviewer (Opus 5.5, a fresh session that did not write the fixes and never saw the implementation chat). **Branch:** `goal/v4.view` @ 673bdedc (fix range `f02c8f00..d8df65cf`, then two docs-only commits). Python 3.12 venv `mia312`, node, Playwright Firefox. All checks ran one after another in the worktree, which had no local changes.
+
+**Automated checks (rerun in full)**
+| Check | Result |
+|---|---|
+| Protected material since b961c573 | `tests/acceptance/graph_view_page.test.mjs`, `tests/fixtures/graph_view/graphs.json` and VIEW's `test-requirements.md` are byte-identical to `specs/mia/amendments/A-175/`. `.claude/settings.json` has the owner's +2 deny rules (D-446 (2)). The fix range touches no protected file |
+| `test_view_backend.py` / `test_graph_view_files.py` | 9/9 / 2/2 |
+| IF-104 v2 contract (Python) | 33/33: mock, files and PostgreSQL 16 under podman; none skipped |
+| `graph_view_page.test.mjs` | 15/15 |
+| `test_graph_view_browser.py` | 7/7 in each of three runs in a row (13, 12, 14 s) |
+| `tests/js/*.test.mjs` | 230/230 (225 + 5 new) |
+| Unit suite | Ran 2590 in 483 s, OK (5 skipped, 2 expected failures). The fifth skip is `test_delivery_on_stack`: "no model server answers" (Ollama was not running). V-15 stays closed on the owner's run of 2026-11-24, since the fix range does not touch `deploy/` |
+| Every acceptance script, one at a time | 76 scripts: 74 exit 0. The 2 reds are the known `test_decide_guard.py` and `test_judge_calibration.py` (`behaviour` has no `FUNCTIONS`; G-V3.REPORT F-3) |
+| `check_sysml.sh` (all models) / `check_sysml_model.py` | 4 files, 0 errors, 0 warnings / OK |
+| `trace_check.py` / `goal_check.py` | 549 ERROR lines / 82 errors. Each is the same set, line for line, as a run on the plan gate's tree (39a47d7f) |
+
+**The new tests are real regression tests.** I ran the 5 new JS tests and the 2 new backend tests against the tree before the fixes (`git archive f02c8f00`). All 7 fail there (`graph-settings.test.mjs` fails as a file, because `pageStorage` does not exist yet), and all pass on HEAD. Each test follows its Given / When / Then.
+
+**Findings**
+| Finding | Re-verify | Evidence |
+|---|---|---|
+| V-1 | **closed** | `Array.from(list.children)`. `repro_f1.py`: ArrowDown moves the focus `chain.fifty` → `chat`, no page error |
+| V-2 | **closed** | The scheme listener updates `font`, `color` and `ctxRenderer` of the nodes and the edge options in place. These are all the colour-dependent properties `visNode` and `visOptions` set, so nothing keeps the old colour. No `setData`, the solver is not restarted. `repro_f3.py`: x 966.9 → 1066.7 (dropped) → 1066.7 after the theme switch, no error |
+| V-4 | **closed** | `apply_change` compares each entry's `before` with the value `derive` would write. My probe: an addition with `before` null or missing is kept; with `{}` or `0` it is refused with `changes_do_not_match` |
+| V-5 | **closed, in the narrowed form** (handover point 1) | A connection object without a text `id` now gets 422 `invalid`, detail `graph`, on save and check. My probe sent 16 malformed bodies (step id a list, object, number or missing; a step that is text or null; step data text or a list; a connection id that is a number; a connection without `from`; `from` a list or an object; a connection that is text; connection data a list or text; `description` a number). **None gives a 500**: save answers `invalid`, `rules_broken` or `refused`, and check answers 200 with the rule report or `invalid`. REQ-API-048's promise that a bad request is refused, writes nothing and is never a crash is met. Which error code binds for a wrong *type* (`rules_broken` or `refused` instead of `invalid`, e.g. connection data that is a list → `refused`) is the open question of V-7, already an accepted deviation; the V-5 question goes to Commit with it, as the log proposes |
+| V-8 | **closed** | A 401 also empties the problem list, step list, selection and history, and switches the history buttons off. The new unit test sees no read of `null` |
+| V-9 | **closed** | `repro_f2.py` cannot show it (it blocks every cookie, so `GET /graph/` answers 401: 0 areas before and after; the implementer reported the same). My own variant, `verify-repro/repro_f2_storage.py`, keeps the cookies and makes only the `localStorage` getter throw `SecurityError`. Before the fix: 0 areas, page error "The operation is insecure.". At HEAD: 8 areas, 6 entries, no error, and a graph opens |
+| V-10 | **closed** | A 503 sets the entry to "not reachable" and the next answer sets it back. Without a 503 the entry keeps what the store route said at start, as the existing test expects (handover point 3) |
+| V-13 | **closed** | `GraphApp` parts `built`. Every module the model names exists in `graph_app/`; `graph-view.js` is no longer named (D-500). Model checks 0/0 |
+| V-15 | closed (unchanged) | owner's build and run, 2026-11-24 |
+
+**New findings:** none. The fix commits change only the files of their tasks plus `architecture.sysml` (V-13), and add no behaviour beyond the finding they fix.
+
+**Proposal: verified with accepted deviations** (V-3 handed to TRANSFER; V-6, V-7, V-11, V-12, V-14 accepted, D-501). For Commit: V-7, V-11, the V-14 items and the V-5 question go into the specification; then the close look at the page by the list in "Notes for Commit, Deploy and Validate".
+
+- [ ] Re-verify accepted by the owner. Date:
