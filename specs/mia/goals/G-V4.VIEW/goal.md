@@ -89,7 +89,7 @@ Thirteen top-level items in scope (FR-48 to FR-55, NFR-10 to NFR-14) plus the IF
 |---|---|---|
 | Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
 | Plan | done | plan package approved, plan gate ticked by the owner 2026-11-23 (D-447); red tests `82327296`, tag `plan-baseline-g-v4-view`; `plan.md` |
-| Implement | done | T-01 to T-12 committed 2026-11-23, one commit each (`3b7b8fb3` … T-12); `implementation-log.md` (finding F-1 closed by A-175, installed; F-2 kept by D-500; layout after the owner's look D-459; open questions for Verify); every VIEW check green on the branch (my runs) |
+| Implement | done | T-01 to T-12 committed 2026-11-23, one commit each (`3b7b8fb3` … T-12); `implementation-log.md` (finding F-1 closed by A-175, installed; F-2 kept by D-500; layout after the owner's look D-459; open questions for Verify); every VIEW check green on the branch (my runs). Fixes after Verify (D-501) 2026-11-24: V-1, V-8 (T-08), V-10 (T-07), V-2, V-9 (T-10), V-5 (T-04), V-4 (T-06), V-13 (T-12), one commit per task, see the log |
 | Verify | in progress | `verification-report.md` drafted 2026-11-23 (proposal: not yet verified); D-501: V-1, V-2, V-4, V-5, V-8, V-9, V-10, V-13 back to Implement, V-3 to TRANSFER, V-15 the owner's networked image build, the rest accepted; then re-verify of the fix commits |
 | Commit | open | |
 | Deploy | open | |

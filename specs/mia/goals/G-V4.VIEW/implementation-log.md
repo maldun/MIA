@@ -360,3 +360,22 @@ Open for Verify: REQ-GA-012 says each area is "visible by its label"; the store 
 ## Finding F-2 decided (D-500)
 
 `graph_app/graph-view.js` and `tests/js/graph-view.test.mjs` stay as they are (the protected smoke check names the file); the page does not load it. The removal named in T-12 is not done, by the owner's decision.
+
+## Fixes after Verify (2026-11-24, D-501)
+
+Each finding was first reproduced in a failing unit test (red on the code before the fix), then fixed; one commit per reopened task. No protected check, interface field or file outside the tasks changed (apart from `architecture.sysml` for V-13).
+
+| Finding | Task | Commit | Test (red before, green after) | Fix |
+|---|---|---|---|---|
+| V-1 | T-08 | `80c43641` | `tests/js/graph-viewer-fixes.test.mjs` "V-1": the list hands out an HTMLCollection stand-in (the fake DOM's Array hid it) | `Array.from(list.children)` |
+| V-8 | T-08 | `80c43641` | same file, "V-8": cp2.multi open, step selected, history open, then 401 | a 401 also empties the problem list, step list, selection and history; the history buttons go off; no read of `null` |
+| V-10 | T-07 | `4fccc9c8` | same file, "V-10": 503 during the session, then an answer | a 503 sets the store entry to "not reachable", the next answer back to "reachable"; without a 503 it stays as the store route said |
+| V-2 | T-10 | `af76fb51` | `tests/js/graph-drawing-scheme.test.mjs`: a recording vis stand-in; drop, then a scheme change: no second `setData`, the place kept | the scheme listener re-colours nodes (`nodes.update`) and edges (`setOptions`) in place |
+| V-9 | T-10 | `af76fb51` | `tests/js/graph-settings.test.mjs` "V-9": a `localStorage` getter that throws | `pageStorage()` in `settings.js` hands in `null`; `app.js` uses it |
+| V-5 | T-04 | `7b945c1e` | `tests/test_graph_api_v2.py` `test_a_connection_id_of_the_wrong_form_is_invalid_on_save_and_check` | save and check refuse a connection object without a text `id` with 422 `invalid`, detail `graph` |
+| V-4 | T-06 | `e86ce702` | `tests/test_graph_api_v2.py` `test_an_entry_whose_before_is_not_the_stored_value_is_refused` | the play-back compares each entry's `before` with the value in the version it is played on |
+| V-13 | T-12 | `976348e4` | `check_sysml.sh` 0/0, `check_sysml_model.py` OK | `GraphApp` parts `built` with their modules; `graph-view.js` no longer named (D-500) |
+
+**Reproduction scripts (my runs):** `repro_f1.py`: the focus moves `chain.fifty` → `chat`, no page error. `repro_f3.py`: x 967 → 1067 (dropped) → 1067 after the theme switch, no error. `repro_f2.py` cannot show the fix as written: it blocks every cookie, so the login cookie is not sent and the server answers `GET /graph/` with 401 before any script runs (0 areas with and without the fix; the report's V-9 line notes the same). A variant that keeps cookies and only makes the `localStorage` getter throw `SecurityError` (an init script; my scratch copy, not committed) gives 0 areas and the page error "The operation is insecure." on the old `app.js`, and 8 areas, 6 entries, no error with the fix.
+
+**Open question for the owner (V-5, narrower than the handover's table):** the handover's test list named "a step that is a string" as `invalid`. The old code already answers that, and every other wrong form of a step or of a connection's ends, with the rule report (422 `rules_broken`), and the T-04 unit test `test_a_broken_rule_is_refused_with_the_report` decides it so. Only a connection whose `id` is missing or not text gave the 500. I fixed that case only and kept the rule report for the rest. If every wrong form should be `invalid` instead, that changes T-04's decided answer (and V-7 is about the same question of which text binds): a decision at Commit together with V-7.
