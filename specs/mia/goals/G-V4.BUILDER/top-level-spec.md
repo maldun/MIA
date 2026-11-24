@@ -4,7 +4,7 @@
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal BUILDER of G-V4 (decided by the owner 2026-11-20, D-380). Requirement IDs are provisional (continuing after FR-97 and NFR-22); Plan assigns them in `requirements.md`. Refines FR-41 and FR-42 (their approved text stays, D-362).
 **Amendment proposed 2026-11-24 (D-520), not yet approved:** FR-110 (the builder is itself a workflow), the container row of 3.3 revisited, AC-4, two risk rows. Provisional ID FR-110: FR-106 to FR-109 are reserved for the parked G-V5.
-- [ ] Amendment approved by the owner. Date:
+- [X] Amendment approved by the owner. Date: 2026-11-24
 
 ## 1. Context and goal
 A context graph is the knowledge a skill reads when it runs. Today the owner would have to write it by hand. The owner wants a tool that builds it up from material the owner adds, proposes items with the passage they come from, and lets only items the owner has confirmed reach a skill. The earlier spike showed that a general off-the-shelf builder invents too many items (7.7 % against a bar of 5 %), so this builder is MIA's own and is held to the owner's bar.
