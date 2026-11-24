@@ -1,6 +1,6 @@
 # Handover: G-V4.GRAPHSTORE.TRANSFER Implement, T-06 (2026-11-23)
 
-For a new session in the worktree `/home/maldun/prog/Python/MIA-goal-v4-transfer` (branch `goal/v4.graphstore.transfer`). Read `CLAUDE.md`, this file, and load `dev-workflow`, `implement-phase`, `agent-app` (no eval path in TRANSFER: pure storage logic and backend wiring). Decisions: questionnaire, recommended option first; full absolute paths.
+For a new session in the worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer` (branch `goal/v4.graphstore.transfer`). Read `CLAUDE.md`, this file, and load `dev-workflow`, `implement-phase`, `agent-app` (no eval path in TRANSFER: pure storage logic and backend wiring). Decisions: questionnaire, recommended option first; full absolute paths.
 
 ## State
 - T-01 `bc2b100a`, T-02 `dc373458`, T-03 `901d7763`, T-04 `355c8826`, T-05 `73a32730` ("feat: T-05 portable sets"); details, regression sets, deliberate-defect runs and decisions in `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/implementation-log.md`.
@@ -8,9 +8,9 @@ For a new session in the worktree `/home/maldun/prog/Python/MIA-goal-v4-transfer
 - No plan amendment, no stop condition. Open for Phase 4 (logged): the sync refuses, rather than overwrites, a differing graph-group record that no graph names; the extra `sync` output line proposed for REQ-SLY-039's command texts.
 
 ## T-06 is blocked: VIEW first (D-469, D-470)
-T-06 depends on T-04, T-05 (done) **and VIEW merged into `goal/v4`**. On 2026-11-23 VIEW (`goal/v4.view`, worktree `/home/maldun/prog/Python/MIA-goal-v4-view`) is in Implement at T-08 of 12; its Verify and Commit are open, and `goal/v4` does not contain it. TRANSFER holds `goal/v4` fully (nothing to bring in today). Order once VIEW is merged:
+T-06 depends on T-04, T-05 (done) **and VIEW merged into `goal/v4`**. On 2026-11-23 VIEW (`goal/v4.view`, worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-view`) is in Implement at T-08 of 12; its Verify and Commit are open, and `goal/v4` does not contain it. TRANSFER holds `goal/v4` fully (nothing to bring in today). Order once VIEW is merged:
 
-1. Bring `goal/v4` into this branch (`git -C /home/maldun/prog/Python/MIA-goal-v4-transfer merge goal/v4`, only with `git status` clean). Then:
+1. Bring `goal/v4` into this branch (`git -C /home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer merge goal/v4`, only with `git status` clean). Then:
    - TC-SLY-030 (`test_transfer_sync.py`, class SideRecords) is no longer skipped and must be green: the side records are carried through `_side_records` (T-04, only where `graph_changes` and `arrangements` are defined); if it fails, it is a finding of T-04, test first.
    - re-run the TRANSFER acceptance files and the regression set: VIEW's files stores now carry the format marker of T-05 (every write into a set without one adds `mia-store.json`); VIEW's checks that compare folders file by file are the place to look.
 2. **Red tests of TC-API-060 to 064, before any code (D-469).** Written on the merged VIEW, staged in `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/red-tests/` with an owner script `tools/apply_transfer_api_red_tests.sh` (pattern: `tools/apply_transfer_red_tests.sh`), installed and committed by the owner ("test: TRANSFER API acceptance tests (red)"); protected afterwards. Contents:
@@ -33,7 +33,7 @@ T-06 depends on T-04, T-05 (done) **and VIEW merged into `goal/v4`**. On 2026-11
 - Done when: every TRANSFER check green (TC-SLY-030 included), the regression set holds with no known red of TRANSFER left; then Implement is recorded done in `goal.md` (Phases) and the hand-over to Verify (fresh context) follows.
 
 ## How to work here (lessons of T-01 to T-05)
-- `EnterWorktree` refuses this folder. Work with absolute paths; Edit needs a Read of the file in the session first. Git only as plain `git -C /home/maldun/prog/Python/MIA-goal-v4-transfer ...` commands, paths named. Do not push; the owner pushes.
+- `EnterWorktree` refuses this folder. Work with absolute paths; Edit needs a Read of the file in the session first. Git only as plain `git -C /home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer ...` commands, paths named. Do not push; the owner pushes.
 - Venv `/home/maldun/prog/Python/venvs/mia312/bin/python`. Regression set as one background script, strictly sequential (example `/home/maldun/.claude-work/jobs/85fdeba4/tmp/regress05.sh`: unit suite about 9 minutes, then `run_acceptance.sh` on the branch and on a `git archive` export of the previous commit). Do not edit files in the worktree while it runs (`test_checkout_untouched`). In the export `test_rules_rule_set.py` is red only because it asks git.
 - Deliberate defects: a runner patches the module in the test process (examples `mutate_t03.py`, `mutate_t04.py` in the same folder); make the mutation fail at the check's own assertion, not by an error of the mutation. For T-06 the plan names no defect; an obvious one is "AutoSync only at start" against TC-API-062.
 - Unit tests first and seen red (T-03's were written after the code; logged as a deviation).
@@ -42,4 +42,4 @@ T-06 depends on T-04, T-05 (done) **and VIEW merged into `goal/v4`**. On 2026-11
 - PostgreSQL in tests: throw-away `postgres:16` under podman only. Before a long run, look at `ListAgents`: VIEW's session may run browser or database checks at the same time.
 
 ## Start prompt for the new session
-> Continue Implement of G-V4.GRAPHSTORE.TRANSFER with T-06. Work in `/home/maldun/prog/Python/MIA-goal-v4-transfer` (branch `goal/v4.graphstore.transfer`). Read `CLAUDE.md` and `specs/mia/handover-2026-11-23-g-v4-transfer-t06.md`, load `dev-workflow`, `implement-phase` and `agent-app`. First check whether VIEW is merged into `goal/v4`; if not, stop and report. Otherwise follow the order in the handover, starting with the merge of `goal/v4` and the red tests of TC-API-060 to 064.
+> Continue Implement of G-V4.GRAPHSTORE.TRANSFER with T-06. Work in `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer` (branch `goal/v4.graphstore.transfer`). Read `CLAUDE.md` and `specs/mia/handover-2026-11-23-g-v4-transfer-t06.md`, load `dev-workflow`, `implement-phase` and `agent-app`. First check whether VIEW is merged into `goal/v4`; if not, stop and report. Otherwise follow the order in the handover, starting with the merge of `goal/v4` and the red tests of TC-API-060 to 064.
