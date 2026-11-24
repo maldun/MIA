@@ -69,7 +69,7 @@ Group spec FR-65, NFR-17; `../G-V4.GRAPHAPI/spikes.md` (networkx spike); D-375; 
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
-| Plan | open | step 0 (goal update, D-473, D-474) and step 1a (`high-level-spec.md`, D-475, D-476) reviewed, the owner's boxes open; step 1b (`requirements.md`) reviewed by group 2026-11-24 (D-477, D-478), the owner's signatures open; step 2 (A-187 text staged, `architecture.sysml`) drafted; step 3 (`test-spec.md`, `test-requirements.md`) drafted by the agent 2026-11-24, for review by group |
+| Plan | open | step 0 (goal update, D-473, D-474) and step 1a (`high-level-spec.md`, D-475, D-476) reviewed, the owner's boxes open; step 1b (`requirements.md`) reviewed by group 2026-11-24 (D-477, D-478), the owner's signatures open; step 2 (A-187 text staged, `architecture.sysml`) drafted; step 3 (`test-spec.md`, `test-requirements.md`) reviewed by group 2026-11-24 (D-479), the owner's signatures open; next step 4 (oracle, red tests, A-187's suite and mock) |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
