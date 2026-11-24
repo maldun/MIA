@@ -54,7 +54,7 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
-| Plan | open | |
+| Plan | open | waits until the plans of G-V4.GRAPHAPI.RUN and G-V4.CONTEXT are approved (D-521); then step 0 on `goal/v4.builder`, branched off `explore/builder-workflow` |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
