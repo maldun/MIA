@@ -1,5 +1,5 @@
 // Fixes after Verify of G-V4.VIEW (D-501) in graph_app/viewer.js: V-1 (keys in a real HTMLCollection), V-8 (a session ending with a graph
-// open). Run: node --test tests/js/graph-viewer-fixes.test.mjs
+// open), V-10 (the store entry follows the store). Run: node --test tests/js/graph-viewer-fixes.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { installDocument, flush } from './fake-dom.mjs';
@@ -75,4 +75,25 @@ test('V-8, REQ-GA-022: a session ending while a graph is open empties the left c
   assert.deepEqual(['#history-open', '#history-previous', '#history-next'].map((s) => root.querySelector(s).getAttribute('disabled')), ['', '', '']);
   assert.equal(reads.length, readsAfter);
   assert.ok(!reads.some(([id]) => id === null));
+});
+
+test('V-10, REQ-GA-018: the store entry says when the store stops answering and when it answers again', async () => {
+  // Example: start -> "database, reachable"; 503 on opening -> "database, not reachable"; the next opening answers -> reachable again.
+  // Given the started page
+  const state = {};
+  const { root, viewer } = page(state);
+  await viewer.start();
+  const entry = () => root.querySelector('[data-store]').textContent;
+  const atStart = entry();
+  // When the store stops answering during the session, then answers again
+  state.unreachable = true;
+  await viewer.open('a');
+  const down = entry();
+  state.unreachable = false;
+  await viewer.open('a');
+  await flush();
+  // Then the entry followed the store
+  assert.equal(atStart, 'store: database, reachable');
+  assert.equal(down, 'store: database, not reachable');
+  assert.equal(entry(), 'store: database, reachable');
 });

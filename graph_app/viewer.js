@@ -75,6 +75,8 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
   let moved = {};          // where the owner dropped steps while this graph is open (REQ-GA-032)
   let shown = null;        // the read answer of the version shown (REQ-GA-036, 039)
   let versions = null;     // the versions of the open graph, once its history is opened (REQ-GA-038)
+  let storeAnswer = null;  // what the store route said at start (REQ-GA-018)
+  let storeFailed = false; // a later route answered 503: the entry says so until a route answers again (V-10)
 
   /** a list entry: a tab stop of its own; Enter or a click opens it, the arrow keys move to the next or previous shown entry */
   function entry(g) {
@@ -122,13 +124,21 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
       return;
     }
     if (err?.status === 503) {
+      storeFailed = true;
+      noteStore(false);
       if (!notice.isConnected) statusBar.append(notice);
       return;
     }
     throw err;
   }
 
+  function noteStore(reachable) {
+    if (storeAnswer) store.textContent = `store: ${storeEntry({ ...storeAnswer, reachable })}`;
+  }
+
   function answered() {
+    if (storeFailed) noteStore(true);
+    storeFailed = false;
     notice.remove();
     canvas.hidden = false;
   }
@@ -209,7 +219,8 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     async start() {
       try {
         await api.me();
-        store.textContent = `store: ${storeEntry(await api.store())}`;
+        storeAnswer = await api.store();
+        noteStore(storeAnswer.reachable);
         graphs = await api.listGraphs();
       } catch (err) {
         return refused(err);
