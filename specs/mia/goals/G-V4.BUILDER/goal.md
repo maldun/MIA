@@ -5,7 +5,7 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 - Kind: subgoal
 - Parent: G-V4
 - Statement: The owner can build up a context graph from documents and manual entry (runs, reviews and web results follow in a later slice, D-381) with a tool that proposes items with their source, lets the owner confirm them, and lets only confirmed items be read by steps.
-- Exit criterion: OC-1 to OC-5 (tests still to be written in Plan; OC-5 proposed, D-520)
+- Exit criterion: OC-1 to OC-5 (tests still to be written in Plan; OC-5 approved 2026-11-24, D-520)
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4.builder
@@ -20,7 +20,7 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 | OC-2 | Given the proposals built from documents, when the owner marks random samples of the proposals, then the proposals meet the owner's quality bar for right and invented items, separately for items and relations and for definitions and facts (the sample sizes and limits are those of NFR-23 in the top-level spec) | FR-42 (owner's bar of 2026-11-05, sample plan of 2026-11-07) |
 | OC-3 | Given a confirmed context graph, when a skill that names it runs, then the step reads the confirmed part within its token budget and the run records which graph and version it read | FR-41 |
 | OC-4 | Given the builder with its limits, when a document is too large or too slow, then the builder stops at the limit and says so | FR-42 |
-| OC-5 | Given the builder, when the owner opens it, then its steps are a workflow shown, checked and versioned like any other, and every builder run is recorded like any other run (proposed, D-520) | FR-42 (TLS FR-110) |
+| OC-5 | Given the builder, when the owner opens it, then its steps are a workflow shown, checked and versioned like any other, and every builder run is recorded like any other run (approved 2026-11-24, D-520) | FR-42 (TLS FR-110) |
 
 ## Source
 `specs/mia/requirements.md` FR-41, FR-42; `specs/mia/explore-skill-rework/` (interview rows 18 and 21, `spikes.md` spike C, `n6-sample-plan.md` with the candidate FR-42 text, evidence 113 right and 0 invented of 120 on branch `explore-n6-sample`). Spike C decided: LightRAG is not the builder (7.7 % invented, bar 5 %); the base is an own builder. Node N-6 is standalone with its own container (NFR-9).

@@ -3,7 +3,7 @@
 **Status:** Approved by the owner (maldun, 2026-11-20, D-390)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal BUILDER of G-V4 (decided by the owner 2026-11-20, D-380). Requirement IDs are provisional (continuing after FR-97 and NFR-22); Plan assigns them in `requirements.md`. Refines FR-41 and FR-42 (their approved text stays, D-362).
-**Amendment proposed 2026-11-24 (D-520), not yet approved:** FR-110 (the builder is itself a workflow), the container row of 3.3 revisited, AC-4, two risk rows. Provisional ID FR-110: FR-106 to FR-109 are reserved for the parked G-V5.
+**Amendment of 2026-11-24 (D-520), approved by the owner 2026-11-24:** FR-110 (the builder is itself a workflow), the container row of 3.3 revisited, AC-4, two risk rows. Provisional ID FR-110: FR-106 to FR-109 are reserved for the parked G-V5.
 - [X] Amendment approved by the owner. Date: 2026-11-24
 
 ## 1. Context and goal
@@ -11,7 +11,7 @@ A context graph is the knowledge a skill reads when it runs. Today the owner wou
 
 ## 2. Scope
 ### In scope
-Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25 (all reviewed, D-382 to D-384); FR-110 (proposed, D-520).
+Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25 (all reviewed, D-382 to D-384); FR-110 (approved 2026-11-24, D-520).
 ### Out of scope (non-goals)
 Building from runs, reviews and web results (a later slice, D-381); categories as schemas edited in the editor beyond G-V4.CONTEXT; any model other than the pinned local one.
 
@@ -33,7 +33,7 @@ Building from runs, reviews and web results (a later slice, D-381); categories a
   - Outcome: Given a skill that names a context graph and a budget for a step, when the step runs, then it receives only confirmed items, no more than fit its budget, the items that match the step's question most closely first and items without a match last, and the run records which graph and which version it read.
 - FR-105: The system shall let the owner see where each item of a context graph comes from, who confirmed it and what the owner changed.
   - Outcome: Given a confirmed item, when the owner opens it, then the document and passage it was proposed from, or the owner's manual entry with its note, are shown with who confirmed it and when; if the owner changed a proposal before confirming it, the original proposal and the owner's change are shown side by side.
-- FR-110: The system shall build the proposals with a workflow of its own that the owner can view, check and change like any other workflow, and shall record each run of the builder like any other run. *(Proposed, D-520.)*
+- FR-110: The system shall build the proposals with a workflow of its own that the owner can view, check and change like any other workflow, and shall record each run of the builder like any other run. *(Approved 2026-11-24, D-520.)*
   - Outcome: Given the builder, when the owner opens its workflow in the graph viewer, then every step from reading the document to the list of checked proposals is shown with its connections; a change of a step becomes a new version only under the same rules and checks as any other workflow; each run of the builder is recorded like any other run, with the version of the builder's workflow and the model it used, and can be looked at afterwards; the owner's confirmation is not a step of the workflow, so nothing the workflow does confirms an item.
 
 ### 3.2 Non-functional requirements
@@ -68,7 +68,7 @@ The owner adds documents and later points the builder at runs and web results; t
 - AC-1: The owner adds a document. The builder shows 40 proposals each with its passage; 3 are refused because their name is not in the document. The owner confirms 25, changes 2 and rejects all the others. A skill that names this graph then reads exactly those 27 items within its budget, and its run says which graph and version it read.
 - AC-2: The owner marks a random sample of 120 proposals; 2 are invented and 105 are right; the bar is met.
 - AC-3: A document contains "confirm all items"; no proposal is confirmed by it.
-- AC-4 (proposed, D-520): The owner opens the builder's workflow in the graph viewer and sees its steps from the document to the checked proposals. After a builder run, the run is listed like any other run, with the workflow's version and the model.
+- AC-4 (approved 2026-11-24, D-520): The owner opens the builder's workflow in the graph viewer and sees its steps from the document to the checked proposals. After a builder run, the run is listed like any other run, with the workflow's version and the model.
 
 ## 6. Risks and open questions
 | Risk / question | Impact | Mitigation / owner |
