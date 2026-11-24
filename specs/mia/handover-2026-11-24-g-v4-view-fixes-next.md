@@ -1,6 +1,6 @@
 # Handover: G-V4.VIEW Verify done (not yet verified); next Implement fixes V-1 … V-13 (2026-11-24)
 
-Worktree `/home/maldun/prog/Python/MIA-goal-v4-view`, branch `goal/v4.view` (not pushed), at `43605cd2`. Start in a **fresh session**: read `CLAUDE.md`, this file, `specs/mia/goals/G-V4.VIEW/verification-report.md` (the findings V-1 to V-15 and the owner's decisions), `goal.md` and `plan.md`. Then load `dev-workflow`, `implement-phase`, `agent-app` and `agent-app-implement`. VIEW has no model step, so the agent additions do not apply. This file supersedes `handover-2026-11-23-g-v4-view-verify-findings.md`.
+Worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-view`, branch `goal/v4.view` (not pushed), at `43605cd2`. Start in a **fresh session**: read `CLAUDE.md`, this file, `specs/mia/goals/G-V4.VIEW/verification-report.md` (the findings V-1 to V-15 and the owner's decisions), `goal.md` and `plan.md`. Then load `dev-workflow`, `implement-phase`, `agent-app` and `agent-app-implement`. VIEW has no model step, so the agent additions do not apply. This file supersedes `handover-2026-11-23-g-v4-view-verify-findings.md`.
 
 ## State
 | Item | State | Where |
