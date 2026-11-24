@@ -112,8 +112,9 @@ class LoaderV5Contract(unittest.TestCase):
                 self.assertEqual([key for _, _, key in loaded.edges(keys=True)], edge_keys)
         # And: the second d1 is the first one, as stored
         self.assertEqual(rules.load(cases[3][1]).nodes["d1"]["data"], {"type": "data"})
-        # And: golden 31's connection with data [] raises nothing (whether it is kept is decided by the contract text, not asserted here)
-        rules.load(graph([data("a"), transform("t")], [{"id": "e1", "from": "a", "to": "t", "data": []}]))
+        # And: golden 31's connection with data [] is well-formed: kept, with empty data (D-481)
+        listed = rules.load(graph([data("a"), transform("t")], [{"id": "e1", "from": "a", "to": "t", "data": []}]))
+        self.assertEqual([(s, e, k, a["data"]) for s, e, k, a in listed.edges(keys=True, data=True)], [("a", "t", "e1", {})])
 
     @mark.req("IF-301", "REQ-GTB-058")
     @each_provider(IF, make=subject)

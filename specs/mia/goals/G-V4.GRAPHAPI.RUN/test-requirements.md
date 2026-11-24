@@ -25,7 +25,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Credibility aspect: reference accuracy
 - Verified by: known answer
 - Sign-off: skimmed as a group
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-002 – The oracle is recorded before any code changes
 - Applies to: TC-GTB-052, TC-WFM-186, TC-RUN-045
@@ -36,7 +36,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: "the same as before" (OC-2, HR-006) needs a record of before that the change cannot touch; recorded after a change it would confirm the change; the oracle file is protected material (a helper under `tests/helpers/`), changed only by an amendment.
 - Credibility aspect: reference accuracy
 - Verified by: inspection (git log of the oracle file, the commit named in its header)
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-003 – The 500 random graphs
 - Applies to: TC-GTB-052, TC-WFM-185, TC-WFM-186
@@ -47,7 +47,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: the networkx spike used 500 random graphs with seed 7 and self loops, but as scratch code; the generator is now fixed in the repository and its acyclic count is stored with the oracle, so a silently changed generator cannot make the check easier; the seed is fixed in Plan and never changed to make a check pass.
 - Credibility aspect: validity domain
 - Verified by: known answer (the counts stored with the oracle)
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-004 – The converted skills
 - Applies to: TC-GTB-048, TC-GTB-049, TC-GTB-052, TC-WFM-185
@@ -58,7 +58,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: built, not copied, so a change of a skill shows up; the three named skills carry the cases OC-3 names (six named inputs, master steps); a check over zero graphs passes.
 - Credibility aspect: reference accuracy
 - Verified by: known answer (15 skills on 2026-11-24)
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-005 – The fake model server
 - Applies to: TC-WFM-187, TC-RUN-044, TC-RUN-045, TC-RUN-046, TC-RUN-047
@@ -69,7 +69,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: the checks compare lists of calls, so the fake must record prompt and options as the real client sends them; the same scripted replies as G-V2 make a difference come from the stored-graph path, not from new replies.
 - Credibility aspect: stand-in fidelity
 - Verified by: contract suite
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-006 – No step ran, shown by markers that can fire
 - Applies to: TC-RUN-047, TC-RUN-041
@@ -80,7 +80,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: as TR-RULES-005: a count of zero proves nothing if the markers cannot be called.
 - Credibility aspect: power and false-alarm rate
 - Verified by: mutation (a runner that falls back to version 1 or runs the first step before the run check must fail TC-RUN-047)
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-007 – Each check is shown able to fail
 - Applies to: TC-GTB-048, TC-GTB-050, TC-GTB-051, TC-GTB-052, TC-WFM-185, TC-WFM-186, TC-RUN-042, TC-RUN-044, TC-RUN-046, TC-RUN-047, TC-WFM-187
@@ -91,7 +91,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: the defects: the loader keeps a second `d1` or drops a parallel connection; data shared, not copied; one rule answering from its old view with one changed branch; ties by ID instead of position; two steps run in a thread pool; the stored graph ignored (the in-memory converted graph runs); version 1 run instead of the newest; the run record without `graph_version`; one prompt changed in the stored graph.
 - Credibility aspect: reviewer independence
 - Verified by: mutation
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-008 – What the inspections check
 - Applies to: TC-GTB-051, TC-RUN-043
@@ -102,7 +102,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: REQ-GTB-059 and REQ-RUN-041 are about where the graph is read, which a test of the answers cannot see (the answers stay the same by TC-GTB-052); the search makes the inspection repeatable, the checklist covers what a search misses (a view built under another name).
 - Credibility aspect: reviewer independence
 - Verified by: inspection
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-009 – The throw-away store and the counted read
 - Applies to: TC-RUN-044, TC-RUN-045, TC-RUN-046, TC-RUN-047, TC-WFM-187, TC-WFM-115, TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114, SMOKE-RUN-001
@@ -113,7 +113,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: D-476: RUN's checks do not wait for MIGRATION's import; the save path, not a hand-written file, so a stored graph is one the rules accepted; a count proves the graph was read from the store and not taken from memory; a fresh store per check, so one check cannot feed another.
 - Credibility aspect: stand-in fidelity
 - Verified by: inspection
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-010 – The contract suites, both sides, older suites untouched
 - Applies to: TC-IF-301-35, TC-IF-301-36, TC-IF-301-37, TC-IF-301-38, TC-RUN-043
@@ -124,7 +124,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: EDIT, CONTEXT, VIEW and the runner test against the mock, so it must agree with the real side on every golden example (A-187 is a joint amendment); a suite edited to pass would hide a changed answer.
 - Credibility aspect: stand-in fidelity
 - Verified by: contract suite on both sides; inspection (git diff)
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-011 – The equivalence runs on the stored-graph path
 - Applies to: TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114
@@ -135,7 +135,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: the rule of G-V2 (pin, repeats, fresh seeds for the one re-run, power, dev cases) stays as it was, only the path changes (D-473 (3)); the baselines were recorded at 3 repeats before any converted run (A-122), so TR-CONVERT-004 is met without a new baseline; the header proves which path ran.
 - Credibility aspect: repetitions and seeds
 - Verified by: inspection of the run header and `eval_decide.py --rerun`
-- Status: Draft
+- Status: Approved
 
 ### TR-RUN-012 – One step at a time, measured on a monotonic clock
 - Applies to: TC-RUN-042
@@ -146,4 +146,4 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Rationale: a monotonic clock cannot step back; 0.05 s is long enough that two steps run at the same time overlap by far more than the clock's resolution, so the defect of TR-RUN-007 (a thread pool) fails the check on every run, and the check costs about 0.3 s.
 - Credibility aspect: numerical settings
 - Verified by: mutation
-- Status: Draft
+- Status: Approved
