@@ -14,7 +14,7 @@ The reasons for not verifying yet are things the owner would feel at the page:
 
 The protected checks do not see V-1 to V-5.
 
-- [ ] Verified by the owner. Date:
+- [X] Verified by the owner. Date: 2026-11-24
 
 ## Automated checks (all run by me; Python 3.12 venv `mia312`, node, Playwright 1.64.1 Firefox)
 | Check | Result |
@@ -281,4 +281,4 @@ Re-verify after the fixes: the automated checks in full (protected diff, trace, 
 
 **Proposal: verified with accepted deviations** (V-3 handed to TRANSFER; V-6, V-7, V-11, V-12, V-14 accepted, D-501). For Commit: V-7, V-11, the V-14 items and the V-5 question go into the specification; then the close look at the page by the list in "Notes for Commit, Deploy and Validate".
 
-- [ ] Re-verify accepted by the owner. Date:
+- [X] Re-verify accepted by the owner. Date: 2026-11-24
