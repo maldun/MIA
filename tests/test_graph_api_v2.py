@@ -299,6 +299,24 @@ class Saving(Stored):
         self.assertEqual(answers, [(422, {"error": "invalid", "detail": "graph"})] * 3 + [(404, {"error": "not_found"})])
         self.assertEqual(self.stored_versions(), 1)
 
+    @mark.req("REQ-API-048")
+    def test_a_connection_id_of_the_wrong_form_is_invalid_on_save_and_check(self):
+        """Example (V-5): a connection without id, a connection id that is an object -> save and check both 422 invalid detail graph;
+        still one version, no record. (A step that is no object stays a rule report, see test_a_broken_rule_is_refused_with_the_report.)"""
+        # Given two graphs whose connection ids have the wrong form
+        def broken(change):
+            graph = small("g.one")
+            change(graph)
+            return {"graph": sent(graph)}
+        bodies = [broken(lambda g: g["edges"][0].pop("id")), broken(lambda g: g["edges"][0].update(id={"x": 1}))]
+        # When each is saved and checked
+        saved = [self.save(b) for b in bodies]
+        checked = [self.web.post("/api/v2/graphs/g.one/check", json=b, headers={"Origin": ORIGIN}) for b in bodies]
+        # Then every one is refused as invalid and nothing is written
+        self.assertEqual(saved, [(422, {"error": "invalid", "detail": "graph"})] * 2)
+        self.assertEqual([(a.status_code, a.get_json()) for a in checked], [(422, {"error": "invalid", "detail": "graph"})] * 2)
+        self.assertEqual((self.stored_versions(), self.records()), (1, []))
+
 
 
 class CheckRestoreArrange(Stored):

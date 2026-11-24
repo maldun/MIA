@@ -237,10 +237,16 @@ class GraphReader:
         """the graph a request describes: the sent steps and connections under the stored header; `description` taken when sent (IF-104 v2 save body)"""
         stored = self.read_graph(graph_id)
         graph = body.get("graph") if isinstance(body, dict) else None
-        if not isinstance(graph, dict) or not isinstance(graph.get("nodes"), list) or not isinstance(graph.get("edges"), list):
+        if not isinstance(graph, dict) or not isinstance(graph.get("nodes"), list) or not _connections_with_ids(graph.get("edges")):
             raise Refused(422, "invalid", detail="graph")
         header = {k: v for k, v in stored["graph"].items() if k not in ("nodes", "edges", "description")}
         return stored, {**header, "description": graph.get("description", stored["graph"].get("description")), "nodes": graph["nodes"], "edges": graph["edges"]}
+
+
+def _connections_with_ids(edges):
+    """a list whose connection objects carry a text `id`: derive() keys them by it and broke with a 500 (REQ-API-048, V-5); every other
+    wrong form of a step or connection is answered by the rule report (`rules_broken`) as before"""
+    return isinstance(edges, list) and all(not isinstance(e, dict) or isinstance(e.get("id"), str) for e in edges)
 
 
 def a_place(xy):
