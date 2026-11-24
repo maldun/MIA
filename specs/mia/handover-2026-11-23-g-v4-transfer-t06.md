@@ -33,7 +33,7 @@ T-06 depends on T-04, T-05 (done) **and VIEW merged into `goal/v4`**. On 2026-11
 - Done when: every TRANSFER check green (TC-SLY-030 included), the regression set holds with no known red of TRANSFER left; then Implement is recorded done in `goal.md` (Phases) and the hand-over to Verify (fresh context) follows.
 
 ## How to work here (lessons of T-01 to T-05)
-- `EnterWorktree` refuses this folder. Work with absolute paths; Edit needs a Read of the file in the session first. Git only as plain `git -C /home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer ...` commands, paths named. Do not push; the owner pushes.
+- Enter this worktree with `EnterWorktree` (path `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer`); then plain `git` commands work, paths named. Edit needs a Read of the file in the session first. Do not push; the owner pushes.
 - Venv `/home/maldun/prog/Python/venvs/mia312/bin/python`. Regression set as one background script, strictly sequential (example `/home/maldun/.claude-work/jobs/85fdeba4/tmp/regress05.sh`: unit suite about 9 minutes, then `run_acceptance.sh` on the branch and on a `git archive` export of the previous commit). Do not edit files in the worktree while it runs (`test_checkout_untouched`). In the export `test_rules_rule_set.py` is red only because it asks git.
 - Deliberate defects: a runner patches the module in the test process (examples `mutate_t03.py`, `mutate_t04.py` in the same folder); make the mutation fail at the check's own assertion, not by an error of the mutation. For T-06 the plan names no defect; an obvious one is "AutoSync only at start" against TC-API-062.
 - Unit tests first and seen red (T-03's were written after the code; logged as a deviation).
