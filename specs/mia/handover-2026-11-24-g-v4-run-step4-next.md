@@ -11,10 +11,21 @@ Worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-run`, branch `g
 | 1b requirements | all six groups reviewed; REQ-WFM-167 rewritten ("when several steps are ready, the lowest position first"; the pairwise rule could not be met by `lexicographical_topological_sort`), term *ready* added | D-478 |
 | 3 test spec | `goals/G-V4.GRAPHAPI.RUN/test-spec.md` (23 checks with scenarios, edge inputs, five statistical rows, SMOKE-RUN-001) and `test-requirements.md` (TR-RUN-001 to 012) reviewed by group | D-479 |
 
-## Waiting for the owner
-1. **Signatures:** the 24 requirements in `requirements.md` were signed in Emacs but the file on disk still showed `Status: Draft` at the end of the session (buffer probably not saved). Check `grep -c 'Status: Approved' specs/mia/goals/G-V4.GRAPHAPI.RUN/requirements.md` first. Then `test-spec.md`, `test-requirements.md` (statuses Draft), the approval line of `high-level-spec.md` (HR-007 changed, back to review) and the Agreement box "update of 2026-11-23" in `goal.md`. Never set Approved yourself.
-2. After the signatures: `python tools/gen_node_requirements_model.py` (approved goal requirements enter the generated block), `python3 -I tools/check_sysml_model.py .`, `bash tools/check_sysml.sh`, `trace_check.py` (549 old ERROR lines are the baseline of `goal/v4`, none of them RUN's).
-3. G-V4.GRAPHAPI.SWITCH agreement box (`G-V4.GRAPHAPI.SWITCH/goal.md`).
+## Waiting for the owner (state at the end of the session, 2026-11-24)
+| Item | State | How the owner signs |
+|---|---|---|
+| `goal.md` Agreement "update of 2026-11-23" | box ticked in the working tree, **date empty, not committed** (the owner's edit) | `C-c r S`; then commit it with the owner's OK |
+| `high-level-spec.md` approval line | `[ ]` open (HR-007 changed, D-477) | `C-c r S` |
+| `requirements.md` | 0 Approved, 24 Draft | `C-c r s` per item, pick Approved (`C-c r S` signs only the document status line, boxes and labels, not the item Status lines) |
+| `test-requirements.md` | 0 Approved, 12 Draft | `C-c r s` per item |
+| `test-spec.md` | document status Draft | `C-c r S` |
+
+All five are in the Emacs review queue. A batch command "approve all Draft items of this file with one confirmation" is planned for requirement-mode: handover `/home/maldun/prog/Lisp/requirement-mode/handover-2026-11-24-approve-drafts.md` (not committed there). Never set Approved yourself; check with `grep -c 'Status: Approved' specs/mia/goals/G-V4.GRAPHAPI.RUN/requirements.md` before step 4 depends on it.
+
+After the signatures: `python tools/gen_node_requirements_model.py` (approved goal requirements enter the generated block), `python3 -I tools/check_sysml_model.py .`, `bash tools/check_sysml.sh`, `trace_check.py` (549 old ERROR lines are the baseline of `goal/v4`, none of them RUN's). Also open: the G-V4.GRAPHAPI.SWITCH agreement box (`G-V4.GRAPHAPI.SWITCH/goal.md`).
+
+## Other open threads of this session
+- **G-V4.BUILDER** waits (D-521 (1)): its Plan resumes only when the plans of RUN and CONTEXT are approved; CONTEXT's Plan has not started (it follows EDIT, which waits for VIEW's merge). Handover on `explore/builder-workflow`: `specs/mia/handover-2026-11-24-g-v4-builder-plan-waits.md`; that branch is not pushed either. The owner may mark samples A and B now (branch `spike/builder-samples`).
 
 ## Step 4: red tests (next)
 In this order; each test file in the readable shape of the conventions (ID-first docstring with `Example:`, `# Given / # When / # Then`), `test_doc_check.py` green before the red commit.
