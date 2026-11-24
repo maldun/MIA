@@ -96,6 +96,7 @@ class LoadedGraph(unittest.TestCase):
             ("a connection without from", graph([data("a"), transform("t")], [{"id": "e1", "to": "t", "data": {}}, connection("e2", "a", "t")]), ["a", "t"], ["e2"]),
             ("a second step d1", graph([data("d1"), transform("d1")], []), ["d1"], []),
             ("a connection to the step 5", graph([5, data("a")], [connection("e1", "a", 5)]), ["a"], []),
+            ("connection data is a list", graph([data("a"), transform("t")], [{"id": "e1", "from": "a", "to": "t", "data": []}]), ["a", "t"], ["e1"]),
             ("nodes is a text", {"id": "g", "nodes": "x", "edges": []}, [], []),
             ("nodes is None", {"id": "g", "nodes": None, "edges": []}, [], []),
             ("no steps", graph([], []), [], []),
@@ -106,6 +107,8 @@ class LoadedGraph(unittest.TestCase):
                 loaded = rules.load(given)
                 self.assertEqual(list(loaded.nodes), node_ids)
                 self.assertEqual([key for _, _, key in loaded.edges(keys=True)], edge_keys)
+        # And: the kept connection with data [] has empty data (D-481)
+        self.assertEqual(rules.load(cases[5][1]).edges["a", "t", "e1"]["data"], {})
         # And: a connection to the second d1 points at the first d1 and is kept
         kept = graph([data("d1"), transform("t1"), data("d1")], [connection("e1", "d1", "t1")])
         self.assertEqual(list(rules.load(kept).edges(keys=True)), [("d1", "t1", "e1")])

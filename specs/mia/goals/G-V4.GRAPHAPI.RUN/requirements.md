@@ -97,11 +97,11 @@
 - Level: low   Subject: Persistence
 - Group: LG
 - Text: If a step or connection of the given graph is not well-formed, then the Graph tables shall leave it out of the loaded graph and raise no exception.
-- Rationale: the rule report must never raise (REQ-GTB-040) and names such items itself from the stored form (`step_identity`, `connection_endpoints`); the loaded graph holds only what can be ordered and run
+- Rationale: the rule report must never raise (REQ-GTB-040) and names such items itself from the stored form (`step_identity`, `connection_endpoints`); the loaded graph holds only what can be ordered and run; a connection with `data` that is no object breaks no rule and the run check still counts it as an input, so it stays in the loaded graph (owner, D-481)
 - Parent: HR-001
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: an input that is not a stored form at all (`nodes` = `"x"`, `None`) gives an empty loaded graph and no exception; the malformed inputs of golden example 31 of IF-301 (a step `5`, connection data `[]`, a step without `id`, a connection without `from`, `nodes` = `"x"`) and a second step with an ID already used each give a loaded graph without that item and no exception (exact)
+- Acceptance criterion: an input that is not a stored form at all (`nodes` = `"x"`, `None`) gives an empty loaded graph and no exception; the malformed inputs of golden example 31 of IF-301 (a step `5`, a step without `id`, a connection without `from`, `nodes` = `"x"`) and a second step with an ID already used each give a loaded graph without that item and no exception; a connection whose `data` is a list is well-formed (its ID and ends are fine, the rules accept it): it is kept, with empty `data` (exact)
 - Verified by: TC-GTB-050
 - Status: Approved
 - History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24

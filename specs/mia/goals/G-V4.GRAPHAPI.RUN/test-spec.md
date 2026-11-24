@@ -88,9 +88,9 @@ None in this subgoal: RUN's Validate is the first test run of G-V5 (parked, D-38
 
 ### TC-GTB-050 – Malformed items are left out; loading copies
 - Verifies: REQ-GTB-057, REQ-GTB-058
-- Given: the malformed graphs of golden 31 (a step `5`, connection data `[]`, a step without `id`, a connection without `from`, `nodes` = `"x"`); a graph with two steps `d1`; `nodes` = `None`; golden 33
+- Given: the malformed graphs of golden 31 (a step `5`, a step without `id`, a connection without `from`, `nodes` = `"x"`); the connection with `data` `[]` of golden 31; a graph with two steps `d1`; `nodes` = `None`; golden 33
 - When: each is loaded
-- Then: no exception escapes; the malformed steps, the second `d1`, the connection without `from` and every connection to a left-out step are missing from the loaded graph; `"x"` and `None` give an empty graph
+- Then: no exception escapes; the malformed steps, the second `d1`, the connection without `from` and every connection to a left-out step are missing from the loaded graph; the connection with `data` `[]` is kept, with empty `data`; `"x"` and `None` give an empty graph
 - And: setting `value` = 9 in the data of `d1` on the loaded golden 33 leaves the stored form equal to a deep copy taken before; changing the stored form's `d1` afterwards leaves the loaded graph as it was
 
 ### TC-GTB-051 – The rules read the loaded graph (inspection)
