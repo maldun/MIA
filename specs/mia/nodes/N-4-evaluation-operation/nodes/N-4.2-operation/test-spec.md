@@ -23,3 +23,30 @@ Tests of installing, configuring, starting, stopping and securing MIA. Most of t
 
 - ASM-N4-002: podman and `postgres:16` are available on the development host (as ASM-N3-001); the stage 3 tests are skipped, never weakened, where they are not.
 - ASM-N4-003: the model server (Ollama) and the search service run as containers of the stack as they do today (`deploy/compose.yaml`).
+
+## Test cases of G-V4.VIEW (moved at the merge 2026-11-25)
+Unchanged from `specs/mia/goals/G-V4.VIEW/test-spec.md`; their test requirements TR-VIEW-001 to 021 are in `specs/mia/test-requirements.md`. All checks are exact. VAL-VIEW-01 stays in the goal record.
+
+| Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |
+|---|---|---|---|---|---|---|
+| TC-OPR-011 | REQ-OPR-011 | inspection (file check) | 0 | `deploy/Containerfile`, `requirements-db.txt` | the image build installs `requirements-db.txt` in the stage that makes the release image | exact |
+
+## Smoke tests of G-V4.VIEW (run in Phase 6, target environment)
+| Test ID | Verifies | Target | Conditions | Expected result |
+|---|---|---|---|---|
+| SMOKE-VIEW-001 | REQ-OPR-011 | the owner's host, the release image built by `deploy/` | the stack with the store setting pointing at the owner's PostgreSQL | `import psycopg` succeeds in the image; `GET /api/v2/store` answers `database`, reachable |
+
+## Scenarios (G-V4.VIEW, approved by the owner 2026-11-22, D-441)
+
+### TC-OPR-011 – The image installs the database driver
+- Verifies: REQ-OPR-011
+- Given: `deploy/Containerfile` and `requirements-db.txt` as committed
+- When: the Containerfile is read
+- Then: the stage that makes the release image installs `requirements-db.txt` (a `pip install` naming the file, after it is copied in)
+
+### SMOKE-VIEW-001 – The database store from the release image
+- Verifies: REQ-OPR-011
+- Given: the owner's host; the release image built from `deploy/`; the store setting naming the owner's PostgreSQL
+- When: the stack starts and `python -c "import psycopg"` runs in the MIA container; the owner asks `GET /api/v2/store`
+- Then: the import succeeds
+- And: the store route answers `database` and reachable
