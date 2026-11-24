@@ -276,3 +276,8 @@ def run_check(graph, given=None):
     if isinstance(graph, dict):
         broken += _unsupplied(graph, _given_ids(given))
     return {"status": "refused" if broken else "ready", "broken": broken}
+
+
+def load(graph):
+    """IF-301 v5: the stored form as one networkx MultiDiGraph (A-187). Not built yet: the stub of the red tests of G-V4.GRAPHAPI.RUN (REQ-GTB-053 to 058)."""
+    raise NotImplementedError("load of IF-301 v5 is built in the loader task of G-V4.GRAPHAPI.RUN")
