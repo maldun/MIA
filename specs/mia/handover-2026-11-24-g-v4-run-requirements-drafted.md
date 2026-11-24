@@ -1,6 +1,6 @@
 # Handover: G-V4.GRAPHAPI.RUN Plan, requirements drafted (2026-11-24), with the state of G-V4
 
-For a new session in the worktree `/home/maldun/prog/Python/MIA-goal-v4-run` (branch `goal/v4.graphapi.run`, pushed at `2686d483`). Read `CLAUDE.md` and this file; load `dev-workflow`, `plan-phase`, `agent-app`, `agent-app-plan` (RUN decides NFR-17 on eval suites). Decisions: questionnaire, recommended option first; full absolute paths; review by group (accept / waiver / discuss). RUN is one of the goals where the owner decides (D-423), but for the requirements he said "do them yourself" (2026-11-24): the agent drafts, the owner reviews by group.
+For a new session in the worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-run` (branch `goal/v4.graphapi.run`, pushed at `2686d483`). Read `CLAUDE.md` and this file; load `dev-workflow`, `plan-phase`, `agent-app`, `agent-app-plan` (RUN decides NFR-17 on eval suites). Decisions: questionnaire, recommended option first; full absolute paths; review by group (accept / waiver / discuss). RUN is one of the goals where the owner decides (D-423), but for the requirements he said "do them yourself" (2026-11-24): the agent drafts, the owner reviews by group.
 
 ## RUN: where it stands
 - Step 0: `specs/mia/goals/G-V4.GRAPHAPI.RUN/goal.md` updated by D-473 (RUN builds the path from a stored graph to a run; networkx; NFR-17 by G-V2's rule plus scripted replies) and D-474 (cut: the nine user-interface skills and the removal of the old runner go to the new sibling G-V4.GRAPHAPI.SWITCH, after RUN). **Owner's box open:** Agreement row "update of 2026-11-23".
@@ -19,14 +19,14 @@ For a new session in the worktree `/home/maldun/prog/Python/MIA-goal-v4-run` (br
 ## The rest of G-V4 (state 2026-11-24)
 | Goal | State | Next |
 |---|---|---|
-| TRANSFER (`../MIA-goal-v4-transfer`) | T-01 to T-05 done | T-06 waits for VIEW's merge into `goal/v4`; handover `specs/mia/handover-2026-11-23-g-v4-transfer-t06.md` on that branch |
+| TRANSFER (`/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer`) | T-01 to T-05 done | T-06 waits for VIEW's merge into `goal/v4`; handover `specs/mia/handover-2026-11-23-g-v4-transfer-t06.md` on that branch |
 | VIEW | Implement in its own session (`mia-goal-v4-view-37`), around T-09 of 12 | not ours; everything below waits for its merge |
 | EDIT | Plan waits for VIEW's merge (D-471: IF-104 v3 with copy-step, kinds, toolbox; live writes built by EDIT after TRANSFER; one goal) | Plan after VIEW's merge |
 | REPLAY | Plan after EDIT's plan is approved (D-472) | – |
 | CONTEXT | after EDIT; goal record's open items settled (D-379, D-380) | – |
 | SWITCH | goal record proposed (D-474), **owner's agreement box open** in `G-V4.GRAPHAPI.SWITCH/goal.md` and in G-V4.GRAPHAPI's Agreement | Plan after RUN's plan is approved |
 | MIGRATION | OC-3 reworded (D-473): a skill without a stored graph runs on its converted graph | stores the converted skills through RUN's loader |
-| BUILDER | NFR-23 samples prepared (branch `spike/builder-samples`, worktree `../MIA-builder-samples`): **the owner marks** `specs/mia/explore-skill-rework/forms/nfr23-a-marking.html` (120 definitions and facts, light model) and `nfr23-b-marking.html` (128 items and relations, full model); answers `nfr23-a-marks.json`, `nfr23-b-marks.json` | score with `spikes/lightrag/score_marks.py`, write section 6 of `specs/mia/goals/G-V4.BUILDER/nfr23-sample-plan.md`; Plan keeps its place after CONTEXT |
+| BUILDER | NFR-23 samples prepared (branch `spike/builder-samples`, worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/builder-samples`): **the owner marks** `specs/mia/explore-skill-rework/forms/nfr23-a-marking.html` (120 definitions and facts, light model) and `nfr23-b-marking.html` (128 items and relations, full model); answers `nfr23-a-marks.json`, `nfr23-b-marks.json` | score with `spikes/lightrag/score_marks.py`, write section 6 of `specs/mia/goals/G-V4.BUILDER/nfr23-sample-plan.md`; Plan keeps its place after CONTEXT |
 
 ## How to work here
 - One worktree per goal; git as plain `git -C <worktree> ...`, paths named in every `git add`; never edit another session's files. The owner pushes; suggest `git push -4` (IPv6 hangs on this host).
@@ -35,4 +35,4 @@ For a new session in the worktree `/home/maldun/prog/Python/MIA-goal-v4-run` (br
 - A Python block extraction from requirement files must stop at `## ` headings too, not only `### ` (it once dragged a foreign section along).
 
 ## Start prompt for the new session
-> Continue Plan of G-V4.GRAPHAPI.RUN. Work in `/home/maldun/prog/Python/MIA-goal-v4-run` (branch `goal/v4.graphapi.run`). Read `CLAUDE.md` and `specs/mia/handover-2026-11-24-g-v4-run-requirements-drafted.md`, load `dev-workflow`, `plan-phase`, `agent-app` and `agent-app-plan`. Start with the review of `requirements.md` group by group, the four points of the handover first.
+> Continue Plan of G-V4.GRAPHAPI.RUN. Work in `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-run` (branch `goal/v4.graphapi.run`). Read `CLAUDE.md` and `specs/mia/handover-2026-11-24-g-v4-run-requirements-drafted.md`, load `dev-workflow`, `plan-phase`, `agent-app` and `agent-app-plan`. Start with the review of `requirements.md` group by group, the four points of the handover first.
