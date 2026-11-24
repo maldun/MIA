@@ -34,7 +34,7 @@
 |---|---|---|---|
 | 1 | LG | The loader: the stored form becomes one loaded graph, in IF-301 v5 (HR-001, HR-003, HR-005) | REQ-GTB-053, REQ-GTB-054, REQ-GTB-055, REQ-GTB-056, REQ-GTB-057, REQ-GTB-058 |
 | 2 | RV | The rule set reads the loaded graph, with the same answers (HR-001, HR-006) | REQ-GTB-059, REQ-GTB-060 |
-| 3 | OR | The order of steps on the loaded graph, ties by position (FR-65, HR-002) | REQ-WFM-166, REQ-WFM-167, REQ-RUN-016 (changed) |
+| 3 | OR | The order of steps on the loaded graph, ties in the order steps became ready (FR-65, HR-002) | REQ-WFM-166, REQ-WFM-167, REQ-RUN-016 (changed) |
 | 4 | RN | The run reads the loaded graph, one step at a time (FR-65, HR-001, HR-002, HR-003) | REQ-RUN-040, REQ-RUN-041 (and REQ-RUN-030 to 035 taken in unchanged, below) |
 | 5 | SP | A skill runs from its stored graph, and its run record says which (HR-004) | REQ-RUN-042, REQ-RUN-043, REQ-RUN-044, REQ-RUN-045 |
 | 6 | EQ | The six skills give the same results from their stored graph (NFR-17, HR-007) | REQ-WFM-168, REQ-WFM-110 (changed), REQ-WFM-111 (changed), REQ-WFM-112 (changed), REQ-WFM-113 (changed), REQ-WFM-114 (changed), REQ-WFM-115 (changed) |
@@ -51,8 +51,8 @@
 - Verification method: Test
 - Acceptance criterion: for each of the 15 converted skill graphs, the loaded graph has exactly the step IDs as nodes and the connection IDs as edge keys of the stored form; a graph with two connections `e1`, `e2` from `d1` to `t1` gives two edges (exact)
 - Verified by: TC-GTB-048
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-GTB-054 – Steps keep their fields and their position
 - Level: low   Subject: Persistence
@@ -64,8 +64,8 @@
 - Verification method: Test
 - Acceptance criterion: for every step of the 15 converted skill graphs, including the master steps of research and verify_computable and the settings steps, `G.nodes[id]["data"] == step["data"]` and `position` is its index (exact)
 - Verified by: TC-GTB-049
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-GTB-055 – Connections keep their fields and their position
 - Level: low   Subject: Persistence
@@ -77,8 +77,8 @@
 - Verification method: Test
 - Acceptance criterion: for every connection of the 15 converted skill graphs, the edge from `from` to `to` with the connection ID as key has `data` equal to the connection's `data` and `position` its index; a step of review_full reads its six named inputs from six edges (exact)
 - Verified by: TC-GTB-049
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-GTB-056 – The graph's own fields
 - Level: low   Subject: Persistence
@@ -90,8 +90,8 @@
 - Verification method: Test
 - Acceptance criterion: a stored form with `kind`, `id` and `description` gives `G.graph` with the same three; the same form without `kind` gives `G.graph["kind"] == "workflow"` (exact)
 - Verified by: TC-GTB-049
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-GTB-057 – Malformed items are left out, never an error
 - Level: low   Subject: Persistence
@@ -103,8 +103,8 @@
 - Verification method: Test
 - Acceptance criterion: an input that is not a stored form at all (`nodes` = `"x"`, `None`) gives an empty loaded graph and no exception; the malformed inputs of golden example 31 of IF-301 (a step `5`, connection data `[]`, a step without `id`, a connection without `from`, `nodes` = `"x"`) and a second step with an ID already used each give a loaded graph without that item and no exception (exact)
 - Verified by: TC-GTB-050
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-GTB-058 – Loading changes nothing
 - Level: low   Subject: Persistence
@@ -116,8 +116,8 @@
 - Verification method: Test
 - Acceptance criterion: changing `G.nodes[id]["data"]` of a loaded graph leaves the stored form equal to a deep copy taken before; changing the stored form's step data leaves the loaded graph's equal to before (exact)
 - Verified by: TC-GTB-050
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ## Group RV – the rule set on the loaded graph
 
@@ -131,8 +131,8 @@
 - Verification method: Inspection
 - Acceptance criterion: in `graph_rule_set.py` no function builds its own adjacency, writer or cycle view; the rules named in the text take a loaded graph from `load`; no copy of a cycle finder remains (inspection, with the defect check of TC-GTB-051)
 - Verified by: TC-GTB-051
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-GTB-060 – The same rule answers as before
 - Level: low   Subject: Persistence
@@ -144,8 +144,8 @@
 - Verification method: Test
 - Acceptance criterion: on the 15 converted skill graphs, the 500 random graphs of the spike (seed 7, with self loops) and the golden examples 24 to 31 of IF-301, every `rule_report` and `run_check` answer equals the answer recorded from IF-301 v4 at `goal/v4` (0 differences, exact)
 - Verified by: TC-GTB-052
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ## Group OR – the order
 
@@ -159,21 +159,21 @@
 - Verification method: Test
 - Acceptance criterion: for the 15 converted skill graphs and the acyclic ones of the 500 random graphs, the order holds every step once and every edge points from an earlier to a later step (exact)
 - Verified by: TC-WFM-185
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
-### REQ-WFM-167 – Ties by position
+### REQ-WFM-167 – Ties in the order steps became ready
 - Level: low   Subject: TaskRuntime
 - Group: OR
-- Text: When several steps are ready to run next, the Workflow management shall order first the ready step with the lowest position in the stored form.
-- Rationale: refines FR-65 "the same graph with the same inputs runs the same steps in the same order" and HR-002 (owner, D-475 (2): today's order stays); networkx `lexicographical_topological_sort` keyed by position
+- Text: When the order of a workflow graph is asked, the Workflow management shall list first the steps that read from no step, in their position in the stored form, and then each further step as soon as the last step it reads from is listed, in the order in which the steps became ready.
+- Rationale: refines FR-65 "the same graph with the same inputs runs the same steps in the same order" and HR-002 (owner, D-475 (2): today's order stays); the rule is today's first-ready-first order (a queue), not "lowest position among the ready": that rule gives another order for 62 of the 159 acyclic random graphs and for research and verify_computable (found writing the red tests, D-480), so the walk over the loaded graph is a queue, not networkx `lexicographical_topological_sort`
 - Parent: HR-002
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: a graph with two independent steps listed `b`, `a` orders `b` before `a`; listed `a`, `b` it orders `a` before `b`; steps listed `x`, `y`, `z` where `x` reads from `z` order `y`, `z`, `x`; for the 15 converted skill graphs and the acyclic random graphs the order equals the order today's `order_of` gives, recorded before the change (0 differences, exact)
+- Acceptance criterion: a graph with two independent steps listed `b`, `a` orders `b` before `a`; listed `a`, `b` it orders `a` before `b`; steps listed `x`, `y`, `z` where `x` reads from `z` order `y`, `z`, `x`; steps listed `x`, `y`, `z` where `x` reads from `y` order `y`, `z`, `x` (`x` became ready after `z` was already waiting); for the 15 converted skill graphs and the acyclic random graphs the order equals the order today's `order_of` gives, recorded before the change (0 differences, exact)
 - Verified by: TC-WFM-186
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; review 2026-11-24 (D-478): text rewritten, the pairwise rule could not be met by the sort and could contradict indirect reads
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; review 2026-11-24 (D-478): text rewritten, the pairwise rule could not be met by the sort and could contradict indirect reads; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-RUN-016 – Run in topological order (changed)
 - Level: low-2   Subject: TaskRuntime
@@ -185,8 +185,8 @@
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with three transforms runs in an order that respects its edges and the output nodes hold the results (exact, in force); and the run order of two independent transforms follows their positions (exact)
 - Verified by: TC-RUN-016, TC-RUN-041
-- Status: Draft
-- History: Verified in G-V1; G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed (the one order, D-475 (2))
+- Status: Approved
+- History: Verified in G-V1; G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed (the one order, D-475 (2)); Approved in batch in Emacs on 2026-11-24
 
 ## Group RN – the run
 
@@ -200,8 +200,8 @@
 - Verification method: Test
 - Acceptance criterion: in a run of a graph with four independent transforms whose functions record their start and end times and sleep 0.05 s, every start is after the end of the step before in the order (exact)
 - Verified by: TC-RUN-042
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-RUN-041 – The run reads the loaded graph
 - Level: low-2   Subject: TaskRuntime
@@ -213,8 +213,8 @@
 - Verification method: Inspection
 - Acceptance criterion: `graph_run.py` reads steps and connections only through a loaded graph; no list of `graph["nodes"]` or `graph["edges"]` is scanned in it (inspection); TC-RUN-016 to 019 and 030 to 039 stay green unchanged (exact)
 - Verified by: TC-RUN-043
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output writes; plain callables unchanged; broken wiring refused before any node ran; start values; order edge) are taken in **unchanged** from G-V2 (Draft there, built and checked by TC-RUN-030 to 035) for approval with this group: they state what the run does with the loaded graph's roles and names (HR-003, OC-3). Their texts stay in `specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`; only their status changes, at the merge, to Approved.
 
@@ -230,8 +230,8 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - Verification method: Test
 - Acceptance criterion: with the converted graph of verify_claim saved through CORE's save path into a throw-away store, a run of verify_claim on scripted replies reads that graph (the read is recorded) and gives the answer of the in-memory converted run (exact)
 - Verified by: TC-RUN-044
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-RUN-043 – Without a stored graph, as before
 - Level: low-2   Subject: TaskRuntime
@@ -243,8 +243,8 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - Verification method: Test
 - Acceptance criterion: with an empty store, a run of each of the six skills on scripted replies gives the same model calls and answer as at `goal/v4` (exact)
 - Verified by: TC-RUN-045
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-RUN-044 – The run record names the graph and its version
 - Level: low-2   Subject: TaskRuntime
@@ -256,8 +256,8 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - Verification method: Test
 - Acceptance criterion: the run of TC-RUN-044 with the graph saved twice (versions 1 and 2) has a run record with `graph` = `verify.single@1` and `graph_version` = 2; a run with an empty store has neither field (exact)
 - Verified by: TC-RUN-046
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-RUN-045 – A stored graph that cannot run is refused, named
 - Level: low-2   Subject: TaskRuntime
@@ -269,8 +269,8 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - Verification method: Test
 - Acceptance criterion: with a stored version 2 of the graph of verify_claim that has a cycle, the run ends `refused` naming `cycle`, `verify.single@1` and version 2, and the marker of every step was called 0 times (exact)
 - Verified by: TC-RUN-047
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ## Group EQ – the six skills from their stored graph
 
@@ -284,8 +284,8 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - Verification method: Test
 - Acceptance criterion: per skill of the six, on the scripted replies of REQ-WFM-058, the list of model calls from the stored graph equals that of the old runner (exact, a diff is shown)
 - Verified by: TC-WFM-187
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
 ### The six equivalence requirements, changed
 Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha, false-alarm budget) and relaxation of G-V2 (Draft there; TD-88 keeps the holdout for later), with one change: the skill runs **from its stored graph** (HR-007, D-473 (3)). The thresholds were set from the old-runner baselines of commit `1fb0c35` (A-122); the decision is `eval_decide.py` with each `Eval criterion` line. REQ-WFM-115 compares the outputs from the stored graph with those of the old runner run on the same cases in the same check: no baseline file is needed (HR-007 corrected accordingly, D-477 (1)). A failing criterion is re-run once with fresh seeds, never more.
@@ -301,10 +301,10 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 - Acceptance criterion: AC-34: the share of right cases of the skill run from its stored graph on the dev split of EV-research is at least 0.85 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
 - Eval criterion: suite=EV-research; select=; metric=right; min=0.85; n=20; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0003; split=dev
 - Verified by: TC-WFM-110, EV-research
-- Status: Draft
+- Status: Approved
 - Relaxed: TD-88
 - Target: holdout suites for the five skills, decided once in a Verify (see TD-88)
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.85 on the recorded baseline (0.95), owner approved, back in review; Commit G-V2 (2026-11-20): Relaxed TD-88 (D-355); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.85 on the recorded baseline (0.95), owner approved, back in review; Commit G-V2 (2026-11-20): Relaxed TD-88 (D-355); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-WFM-111 – Same outcomes: plan_question (changed)
 - Level: low   Subject: TaskRuntime
@@ -317,8 +317,8 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 - Acceptance criterion: AC-34: the share of right cases of the skill run from its stored graph on the dev split of EV-plans is at least 0.54 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
 - Eval criterion: suite=EV-plans; select=; metric=right; min=0.54; n=36; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0122; split=dev
 - Verified by: TC-WFM-111, EV-plans
-- Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged
+- Status: Approved
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-WFM-112 – Same outcomes: verify_claim (changed)
 - Level: low   Subject: TaskRuntime
@@ -331,8 +331,8 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 - Acceptance criterion: AC-34: the share of right cases of the skill run from its stored graph on the dev split of EV-verdicts is at least 0.83 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
 - Eval criterion: suite=EV-verdicts; select=; metric=right; min=0.83; n=50; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0001; split=dev
 - Verified by: TC-WFM-112, EV-verdicts
-- Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged
+- Status: Approved
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged; Approved confirmed in Emacs on 2026-11-24
 
 ### REQ-WFM-113 – Same outcomes: verify_computable (changed)
 - Level: low   Subject: TaskRuntime
@@ -345,8 +345,8 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 - Acceptance criterion: AC-34: the share of right cases of the skill run from its stored graph on the dev split of EV-computable is at least 0.87 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
 - Eval criterion: suite=EV-computable; select=; metric=right; min=0.87; n=39; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0000; split=dev
 - Verified by: TC-WFM-113, EV-computable
-- Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.87 on the recorded baseline (0.974), owner approved, back in review; G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged
+- Status: Approved
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.87 on the recorded baseline (0.974), owner approved, back in review; G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-WFM-114 – Same outcomes: extract_claims (changed)
 - Level: low   Subject: TaskRuntime
@@ -359,8 +359,8 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 - Acceptance criterion: AC-34: the share of right cases of the skill run from its stored graph on the dev split of EV-extraction is at least 0.59 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
 - Eval criterion: suite=EV-extraction; select=; metric=right; min=0.59; n=51; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0064; split=dev
 - Verified by: TC-WFM-114, EV-extraction
-- Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged
+- Status: Approved
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged; Approved in batch in Emacs on 2026-11-24
 
 ### REQ-WFM-115 – Same outputs: extract_claims_rules (changed)
 - Level: low   Subject: TaskRuntime
@@ -372,5 +372,5 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 - Verification method: Test
 - Acceptance criterion: AC-34: the 51 outputs from the stored graph and of the old runner on the dev cases of EV-extraction are equal (exact, a diff is shown)
 - Verified by: TC-WFM-115
-- Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged
+- Status: Approved
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, changed: run from the stored graph (HR-007, D-473 (3)); criterion, eval line and relaxation unchanged; Approved in batch in Emacs on 2026-11-24

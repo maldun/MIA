@@ -19,7 +19,7 @@ Almost every check is exact: the expected value is an ID, an order, a list of ca
 | TC-IF-301-37 | REQ-GTB-057 | contract | 0 | golden 34, both sides | as golden 34 | exact |
 | TC-IF-301-38 | REQ-GTB-058 | contract | 0 | golden 35, both sides | as golden 35 | exact |
 | TC-WFM-185 | REQ-WFM-166 | component | 1 | the 15 converted skill graphs and the acyclic ones of the 500 random graphs | each order holds every step once; every edge points from an earlier to a later step | exact |
-| TC-WFM-186 | REQ-WFM-167, HR-006 | component | 1 | two independent steps listed `b`, `a` and `a`, `b`; steps `x`, `y`, `z` where `x` reads from `z`; the recorded orders of the oracle | `b`, `a`; `a`, `b`; `y`, `z`, `x`; every order of the converted and the acyclic random graphs equals the recorded one | 0 differences |
+| TC-WFM-186 | REQ-WFM-167, HR-006 | component | 1 | two independent steps listed `b`, `a` and `a`, `b`; steps `x`, `y`, `z` where `x` reads from `z`; the same where `x` reads from `y`; the recorded orders of the oracle | `b`, `a`; `a`, `b`; `y`, `z`, `x`; `y`, `z`, `x`; every order of the converted and the acyclic random graphs equals the recorded one | 0 differences |
 | TC-RUN-041 | REQ-RUN-016 | component | 0 | two independent transforms `t2`, `t1` (listed in this order), each with a marker that records its call | `t2` is called before `t1`; listed `t1`, `t2`, `t1` first | exact |
 | TC-RUN-042 | REQ-RUN-040 | component | 1 | a graph with four independent transforms whose functions record start and end (monotonic clock) and sleep 0.05 s | every start is at or after the end of the step before it in the order | exact order of times |
 | TC-RUN-043 | REQ-RUN-041 | inspection and regression | 1 | `graph_run.py` after the change; TC-RUN-016 to 019 and 030 to 039 unchanged | `graph_run.py` scans no `graph["nodes"]` or `graph["edges"]`; it reads steps and connections only through a loaded graph; the named checks are green and their files unchanged against `goal/v4` | inspection yes; all green |
@@ -121,11 +121,11 @@ None in this subgoal: RUN's Validate is the first test run of G-V5 (parked, D-38
 - Then: each order lists every step of the graph exactly once
 - And: for every connection, the step it comes from is earlier in the order than the step it goes to
 
-### TC-WFM-186 – Ties by position, and the order as before
+### TC-WFM-186 – Ties in the order steps became ready, and the order as before
 - Verifies: REQ-WFM-167, HR-006
-- Given: two independent steps listed `b`, `a`; the same listed `a`, `b`; steps listed `x`, `y`, `z`, where `x` reads from `z` and `y` reads from nothing; the orders recorded in the oracle (TR-RUN-002)
+- Given: two independent steps listed `b`, `a`; the same listed `a`, `b`; steps listed `x`, `y`, `z`, where `x` reads from `z` and `y` reads from nothing; steps listed `x`, `y`, `z`, where `x` reads from `y`; the orders recorded in the oracle (TR-RUN-002)
 - When: the order of each is asked
-- Then: `b`, `a`; `a`, `b`; `y`, `z`, `x` (when several steps are ready, the one with the lowest position goes first)
+- Then: `b`, `a`; `a`, `b`; `y`, `z`, `x`; `y`, `z`, `x` (the ready steps go in the order in which they became ready, not by position: `z` was ready before `x`)
 - And: the order of every converted and acyclic random graph equals the recorded order of today's `order_of` (0 differences)
 
 ### TC-RUN-041 – The run follows the positions
