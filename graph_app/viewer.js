@@ -83,7 +83,7 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     item.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') controller.open(g.id);
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-      const shown = list.children.filter((e) => !e.hidden);
+      const shown = Array.from(list.children).filter((e) => !e.hidden);
       shown[shown.indexOf(item) + (event.key === 'ArrowDown' ? 1 : -1)]?.focus();
       event.preventDefault?.();
     });
@@ -107,6 +107,14 @@ export function createViewer({ document, root, api, storage, makeDrawing }) {
     if (err?.status === 401) {
       graphs = [];
       openId = null;
+      shown = null;
+      picture = null;
+      versions = null;
+      problemList.replaceChildren();
+      stepList.replaceChildren();
+      selection.replaceChildren(hint);
+      historyList.replaceChildren();
+      showHistory();
       list.replaceChildren(el('li', { 'data-login': '', class: 'login' }, 'Not logged in. ', el('a', { href: '/' }, 'Log in through the main app'), '.'));
       canvas.hidden = true;
       status.textContent = 'No graph open · read-only';
