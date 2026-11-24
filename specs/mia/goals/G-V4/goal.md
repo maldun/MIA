@@ -107,7 +107,7 @@ Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for th
 | N-3.3 Memories, history, feedback (record tables) | real | new tables for the edit log and the arrangement |
 | N-4.1 Evaluation (suites, harness) | real | the equivalence suites |
 | N-5 Graph app (page, vendored vis-network) | real |  |
-| N-6 Context-graph builder (new, own container) | real | new part |
+| N-6 Context-graph builder (new; a workflow on the runner, no container of its own, D-520) | real | new part |
 | local model server with the pinned models (Ollama) | real | the pinned models; scripted replies in the unit tests |
 | compose stack and web routing (Caddy) | real | one origin for page and backend |
 

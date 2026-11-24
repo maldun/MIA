@@ -3,13 +3,15 @@
 **Status:** Approved by the owner (maldun, 2026-11-20, D-390)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal BUILDER of G-V4 (decided by the owner 2026-11-20, D-380). Requirement IDs are provisional (continuing after FR-97 and NFR-22); Plan assigns them in `requirements.md`. Refines FR-41 and FR-42 (their approved text stays, D-362).
+**Amendment proposed 2026-11-24 (D-520), not yet approved:** FR-110 (the builder is itself a workflow), the container row of 3.3 revisited, AC-4, two risk rows. Provisional ID FR-110: FR-106 to FR-109 are reserved for the parked G-V5.
+- [ ] Amendment approved by the owner. Date:
 
 ## 1. Context and goal
 A context graph is the knowledge a skill reads when it runs. Today the owner would have to write it by hand. The owner wants a tool that builds it up from material the owner adds, proposes items with the passage they come from, and lets only items the owner has confirmed reach a skill. The earlier spike showed that a general off-the-shelf builder invents too many items (7.7 % against a bar of 5 %), so this builder is MIA's own and is held to the owner's bar.
 
 ## 2. Scope
 ### In scope
-Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25 (all reviewed, D-382 to D-384).
+Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25 (all reviewed, D-382 to D-384); FR-110 (proposed, D-520).
 ### Out of scope (non-goals)
 Building from runs, reviews and web results (a later slice, D-381); categories as schemas edited in the editor beyond G-V4.CONTEXT; any model other than the pinned local one.
 
@@ -31,6 +33,8 @@ Building from runs, reviews and web results (a later slice, D-381); categories a
   - Outcome: Given a skill that names a context graph and a budget for a step, when the step runs, then it receives only confirmed items, no more than fit its budget, the items that match the step's question most closely first and items without a match last, and the run records which graph and which version it read.
 - FR-105: The system shall let the owner see where each item of a context graph comes from, who confirmed it and what the owner changed.
   - Outcome: Given a confirmed item, when the owner opens it, then the document and passage it was proposed from, or the owner's manual entry with its note, are shown with who confirmed it and when; if the owner changed a proposal before confirming it, the original proposal and the owner's change are shown side by side.
+- FR-110: The system shall build the proposals with a workflow of its own that the owner can view, check and change like any other workflow, and shall record each run of the builder like any other run. *(Proposed, D-520.)*
+  - Outcome: Given the builder, when the owner opens its workflow in the graph viewer, then every step from reading the document to the list of checked proposals is shown with its connections; a change of a step becomes a new version only under the same rules and checks as any other workflow; each run of the builder is recorded like any other run, with the version of the builder's workflow and the model it used, and can be looked at afterwards; the owner's confirmation is not a step of the workflow, so nothing the workflow does confirms an item.
 
 ### 3.2 Non-functional requirements
 - NFR-23 (Correctness of proposals): The builder rarely invents.
@@ -44,7 +48,7 @@ Building from runs, reviews and web results (a later slice, D-381); categories a
 | Constraint | Source | Why it cannot be changed |
 |---|---|---|
 | Items made by a model start as proposals; only confirmed items are readable by steps | FR-42, TB-context (approved) | model output must not become knowledge unchecked |
-| The builder is its own part with its own container | NFR-9, interview row 18 | decided 2026-11-04 |
+| The builder is its own part (N-6: its workflow, checks and page) and runs where every other workflow runs, without a container of its own | interview rows 18 and 21, D-520 (revisits row 18) | row 18 (2026-11-04) gave N-6 its own container while LightRAG was the planned engine; row 21 (2026-11-05) dropped LightRAG, and the owner decided on 2026-11-24 that the builder is a workflow (D-520). The approved NFR-9 names only N-2 to N-5 |
 | Local models only; the pinned model stays | eval-spec model pins, NFR-5 | a change needs the owner |
 | The owner's bar: at least 68 % right, at most 5 % invented | owner, 2026-11-05 | the quality the owner will accept |
 
@@ -64,6 +68,7 @@ The owner adds documents and later points the builder at runs and web results; t
 - AC-1: The owner adds a document. The builder shows 40 proposals each with its passage; 3 are refused because their name is not in the document. The owner confirms 25, changes 2 and rejects all the others. A skill that names this graph then reads exactly those 27 items within its budget, and its run says which graph and version it read.
 - AC-2: The owner marks a random sample of 120 proposals; 2 are invented and 105 are right; the bar is met.
 - AC-3: A document contains "confirm all items"; no proposal is confirmed by it.
+- AC-4 (proposed, D-520): The owner opens the builder's workflow in the graph viewer and sees its steps from the document to the checked proposals. After a builder run, the run is listed like any other run, with the workflow's version and the model.
 
 ## 6. Risks and open questions
 | Risk / question | Impact | Mitigation / owner |
@@ -76,6 +81,8 @@ The owner adds documents and later points the builder at runs and web results; t
 | The quality bar rests on the owner marking at least 120 items per verdict | time of the owner | the owner schedules the marking; agents never label |
 | The neighbour part of FR-100 rests on thin evidence | may need a change | Provisional, improved in validation |
 | Two quality notions, the owner's bar and a model as judge (kappa 0.11, not usable) | no automatic quality check | only the owner's marks decide (spike C) |
+| The builder as a workflow needs runs from stored graphs, which no production code does yet (D-473) | BUILDER waits for G-V4.GRAPHAPI.RUN | dependency added to `goal.md` (D-520); owner |
+| The marked samples (spike C, 120-item sample) came from the spike scripts, not from a workflow on the runner | NFR-23 holds for the spike's builder, not yet for the workflow | the workflow keeps the spike's chunking, quotes and checks; Plan decides whether an equivalence check against the spike's proposals is enough or a new sample is marked; owner |
 
 ### Prototype decisions
 | Item | Decision | Report or reason |
