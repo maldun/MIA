@@ -38,7 +38,7 @@ Also out: the nine user-interface skills and the removal of the old runner (G-V4
 |---|---|---|
 | networkx (new dependency, owner D-473 (2)) | real | the loaded graph; version pinned in the high-level spec |
 | MP-light `gemma4:12b-it-qat` (eval-spec.md) | real | the equivalence runs of OC-4; scripted replies in unit tests |
-| the old-runner baselines of commit `1fb0c35` (A-122, D-244) | real | the reference of OC-4; extract.rules first gets its missing baseline run |
+| the old-runner baselines of commit `1fb0c35` (A-122, D-244) | real | the reference of OC-4 for the five skills with a model; extract_claims_rules is compared with the old runner in the same check (D-477 (1)) |
 
 ## Split check
 | Suggestion | Decision (split / keep together) | Reason | Date |
@@ -69,7 +69,7 @@ Group spec FR-65, NFR-17; `../G-V4.GRAPHAPI/spikes.md` (networkx spike); D-375; 
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
-| Plan | open | step 0 (goal update, D-473, D-474) and step 1a (`high-level-spec.md`, D-475, D-476) reviewed, the owner's boxes open; step 1b (`requirements.md`, 2026-11-24) and step 2 (A-187 text staged, `architecture.sysml`) drafted by the agent, for review group by group |
+| Plan | open | step 0 (goal update, D-473, D-474) and step 1a (`high-level-spec.md`, D-475, D-476) reviewed, the owner's boxes open; step 1b (`requirements.md`) reviewed by group 2026-11-24 (D-477, D-478), the owner's signatures open; step 2 (A-187 text staged, `architecture.sysml`) drafted; step 3 (`test-spec.md`, `test-requirements.md`) drafted by the agent 2026-11-24, for review by group |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
