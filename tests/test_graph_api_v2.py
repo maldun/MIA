@@ -454,6 +454,23 @@ class RecordOfChanges(Stored):
         self.assertEqual(answers, [(422, {"error": "changes_do_not_match"})] * 5)
         self.assertEqual((self.stored_versions(), self.records()), (1, []))
 
+    @mark.req("REQ-API-038", "REQ-API-051")
+    def test_an_entry_whose_before_is_not_the_stored_value_is_refused(self):
+        """Example (V-4): change_step step.a with before tool.x and the right after tool.b -> 422 changes_do_not_match, still one version;
+        the same entry with before tool.a -> version 2."""
+        # Given g.one with step.a on tool.b, and an entry whose before is false
+        graph = small("g.one")
+        graph["nodes"][1]["data"]["toolbox_id"] = "tool.b"
+        entry = lambda tool: {"op": "change_step", "target": "step.a", "before": {"type": "transform", "toolbox_id": tool},      # noqa: E731
+                              "after": {"type": "transform", "toolbox_id": "tool.b"}}
+        # When anna saves with the false before, then with the true one
+        wrong = self.save({"graph": sent(graph), "changes": [entry("tool.x")]})
+        versions_after_wrong = self.stored_versions()
+        right = self.save({"graph": sent(graph), "changes": [entry("tool.a")]})
+        # Then the false one is refused and writes nothing; the true one is kept
+        self.assertEqual((wrong, versions_after_wrong), ((422, {"error": "changes_do_not_match"}), 1))
+        self.assertEqual(right[0], 200)
+
     @mark.req("REQ-API-039")
     def test_a_record_that_exists_is_not_written_again(self):
         """Example: a record g.one/2 already there -> the save of version 2 keeps it, logged false."""

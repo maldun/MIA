@@ -146,9 +146,11 @@ def derive(before, after):
 
 
 def apply_change(graph, change):
-    """the graph after one entry of the editor; ValueError when the entry does not fit the graph (REQ-API-038)"""
+    """the graph after one entry of the editor; ValueError when the entry does not fit the graph, its `before` included (REQ-API-038, V-4)"""
     op, target = change["op"], change["target"]
     nodes, edges = {n["id"]: n for n in graph["nodes"]}, {e["id"]: e for e in graph["edges"]}
+    if change.get("before") != _value_before(op, target, nodes, edges):
+        raise ValueError("%s %s: before is not the stored value" % (op, target))
     if op == "add_step" and target not in nodes:
         return {**graph, "nodes": graph["nodes"] + [{"id": target, "data": change["after"]}]}
     if op == "remove_step" and target in nodes:
@@ -162,6 +164,15 @@ def apply_change(graph, change):
     if op == "change_connection" and target in edges:
         return {**graph, "edges": [{"id": target, **_link(change["after"])} if e["id"] == target else e for e in graph["edges"]]}
     raise ValueError("%s %s does not fit" % (op, target))
+
+
+def _value_before(op, target, nodes, edges):
+    """what an entry's `before` must be: the step's data or the connection's ends and data as derive() writes them, none for an addition"""
+    if op in ("remove_step", "change_step") and target in nodes:
+        return _member(nodes[target])["data"]
+    if op in ("remove_connection", "change_connection") and target in edges:
+        return _link(edges[target])
+    return None
 
 
 def editor_entries(current, graph, changes):
