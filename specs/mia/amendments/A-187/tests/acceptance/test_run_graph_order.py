@@ -1,7 +1,7 @@
 """Acceptance tests of the order of steps and the run order (G-V4.GRAPHAPI.RUN, protected after the Plan gate): TC-WFM-185, TC-WFM-186 (REQ-WFM-166,
 REQ-WFM-167) against `graph_model.order_of`, and TC-RUN-041, TC-RUN-042, TC-RUN-043 (REQ-RUN-016, REQ-RUN-040, REQ-RUN-041) against GraphRunner. They guard
 the order of today (the oracle): green from the start, except TC-RUN-043 (the run reads the loaded graph), which is red until the runner task.
-Run with: python tests/acceptance/test_graph_order.py
+Run with: python tests/acceptance/test_run_graph_order.py
 """
 import os
 import sys

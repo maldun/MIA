@@ -20,13 +20,13 @@ copy "$A/tests/helpers/run_graphs.py" tests/helpers/run_graphs.py
 copy "$A/tests/helpers/run_oracle.json" tests/helpers/run_oracle.json
 copy "$A/tests/helpers/run_store.py" tests/helpers/run_store.py
 copy "$A/tests/acceptance/test_graph_loader.py" tests/acceptance/test_graph_loader.py
-copy "$A/tests/acceptance/test_graph_order.py" tests/acceptance/test_graph_order.py
+copy "$A/tests/acceptance/test_run_graph_order.py" tests/acceptance/test_run_graph_order.py
 copy "$A/tests/acceptance/test_stored_graph_run.py" tests/acceptance/test_stored_graph_run.py
 finish
 
 echo
 echo "== the v5 suite (expected until the loader task of the RUN plan: networkx is not installed, so the mock side errors on import; the real side raises NotImplementedError) and the older IF-301 suites (green)"
 PY=${MIA_PYTHON:-/home/maldun/prog/Python/venvs/mia312/bin/python}
-for f in tests/acceptance/test_graph_loader.py tests/acceptance/test_graph_order.py tests/acceptance/test_stored_graph_run.py tests/acceptance/contract/test_if_301_v5_load.py tests/acceptance/contract/test_if_301_v4_rule_set.py tests/acceptance/contract/test_if_301_v2_graph_tables.py tests/acceptance/contract/test_if_301_graph_tables.py; do
+for f in tests/acceptance/test_graph_loader.py tests/acceptance/test_run_graph_order.py tests/acceptance/test_stored_graph_run.py tests/acceptance/contract/test_if_301_v5_load.py tests/acceptance/contract/test_if_301_v4_rule_set.py tests/acceptance/contract/test_if_301_v2_graph_tables.py tests/acceptance/contract/test_if_301_graph_tables.py; do
     printf '%-62s ' "$f"; "$PY" "$f" 2>&1 | tail -1
 done
