@@ -356,25 +356,25 @@ package MIA_Architecture {
             doc /* Target (G-V4.VIEW): top band, left column, picture, actions, history and replay row, graph status; the areas of EDIT, REPLAY
                    and RUN present and empty, each with one quiet line; the main app's tokens.css copied unchanged and kept identical by a check,
                    own styles only from its tokens; light and dark; keyboard reach; no outside request; the page sends only GET (REQ-GA-012 to 016, 022, 041 to 043). */
-            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_app/index.html", "graph_app/app.js", "graph_app/graph.css"); }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/index.html", "graph_app/app.js", "graph_app/viewer.js", "graph_app/api.js", "graph_app/graph.css", "graph_app/tokens.css"); }
         }
         part graphList {
             doc /* Target (G-V4.VIEW): the list of stored graphs with kind, the filter by name or description, the store shown read-only, opening a graph in its current version (REQ-GA-017 to 021, 023). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/viewer.js", "graph_app/list-filter.js", "graph_app/store-note.js"); }
         }
         part graphView {
             doc /* Node-and-edge view with a vendored graph library (plain HTML and JavaScript, no build step).
                    G-V4.VIEW: every step and connection, what cannot be drawn, kinds and attention marks, text as text, the saved arrangement or
                    physics with a fixed seed and solver, moved steps stay, the layered reset, the settings in one place (REQ-GA-024 to 035). */
-            @Implementation { :>> status = ImplementationStatus::partly; :>> modules = ("graph_app/graph-view.js", "graph_app/vendor"); }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/drawing.js", "graph_app/adapter.js", "graph_app/step-marks.js", "graph_app/problems.js", "graph_app/arrangement.js", "graph_app/settings.js", "graph_app/vendor"); }
         }
         part detailsColumn {
             doc /* Target (G-V4.VIEW): the left column: content of the selected step or connection as read-only fields and stored text, trust and lifecycle in words, empty when nothing is selected (REQ-GA-036, 037, 044). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/viewer.js", "graph_app/panel.js"); }
         }
         part historyList {
             doc /* Target (G-V4.VIEW): the versions of the open graph newest first, an earlier version shown read-only with its number and time, previous and next (REQ-GA-038 to 040). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/viewer.js", "graph_app/history.js"); }
         }
         part nodeEditor {
             doc /* Edits one node or edge as a JSON document; saving creates a new version. */
