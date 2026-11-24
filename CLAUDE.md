@@ -37,7 +37,7 @@ Host: Fedora, Ryzen 9 5900X, RX 7800 XT with 16 GB, 62 GB RAM, podman. Models th
 - the same test still fails after 3 serious attempts.
 
 ## Several sessions
-- Each session works in its own git worktree on its own branch (`git worktree add ../MIA-<topic> -b <branch>`); the main checkout stays clean. Never edit or stage files that this session did not change; name the paths in every `git add`.
+- Each session works in its own git worktree on its own branch (`git worktree add .claude/worktrees/<topic> -b <branch>`); the main checkout stays clean. Never edit or stage files that this session did not change; name the paths in every `git add`.
 - Merge through git only. Before a merge, `git status` must show no changes of another session.
 - Before a long real model run (`/review`, `/lookup`, evals), look at `ListAgents` and send a short message to a running session ("real run for about 20 minutes, please hold model tests"): the Ollama server is shared and has no queue between sessions.
 
