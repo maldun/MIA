@@ -20,7 +20,7 @@ Proposed 2026-11-20 by the owner (maldun), D-369: editing context graphs is its 
 | OC-2 | Given a finished run, when the owner chooses to see its context graph, then the graph rebuilt from the run's events is drawn read-only and each item can be traced to the event that made it | OC-8 of G-V4 |
 
 ## Source
-`../G-V4.EDIT/top-level-spec.md` (FR-75 moved here), REQ-GA-006 (approved in G-V1, assigned to EDIT by D-367, now to this subgoal). Open for the owner: whether viewing and storing context graphs (FR-48 of VIEW, FR-57 of GRAPHSTORE) stay where they are, and whether goal C (builder, categories as schemas) joins this subgoal later.
+`../G-V4.EDIT/top-level-spec.md` (FR-75 moved here), REQ-GA-006 (approved in G-V1, assigned to EDIT by D-367, now to this subgoal). Settled by the owner: viewing stored context graphs stays in VIEW (FR-48) and storing them in GRAPHSTORE (FR-57); CONTEXT adds only the run's rebuilt context graph, read-only (FR-97; D-379, `../G-V4/consistency-review.md`). Goal C (builder, categories as schemas) does not join: it is G-V4.BUILDER, after CONTEXT (D-379, D-380).
 
 ## Scope
 Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
