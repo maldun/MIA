@@ -23,6 +23,7 @@
 | well-formed step | a step whose ID is a non-empty text and that is the first step with that ID in the list |
 | well-formed connection | a connection whose ID is a non-empty text, that is the first connection with that ID, and whose `from` and `to` name well-formed steps |
 | reads from (step A reads from step B) | the loaded graph has an edge from B to A; a processing step reads from its input data steps, a data step from its writer |
+| ready (step) | while the order is built: a step not yet ordered whose every step it reads from is already ordered |
 | stored-graph path | a skill run from a graph in the store: read (N-2.3), load (N-3.2), the step functions from the toolbox, run (N-2.4.1) |
 | graph of a skill | the stored workflow graph whose ID is `<pipeline name>@<pipeline version>` of the skill, as the converted graphs are named today (`verify.single@1`) |
 | the six skills | research, plan_question, verify_claim, verify_computable, extract_claims, extract_claims_rules: the skills with an equivalence suite (`SUITE_OF`, `eval-spec.md`) |
@@ -164,15 +165,15 @@
 ### REQ-WFM-167 – Ties by position
 - Level: low   Subject: TaskRuntime
 - Group: OR
-- Text: Where neither of two steps reads from the other, the Workflow management shall place first the step with the lower position in the stored form.
+- Text: When several steps are ready to run next, the Workflow management shall order first the ready step with the lowest position in the stored form.
 - Rationale: refines FR-65 "the same graph with the same inputs runs the same steps in the same order" and HR-002 (owner, D-475 (2): today's order stays); networkx `lexicographical_topological_sort` keyed by position
 - Parent: HR-002
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: a graph with two independent steps listed `b`, `a` orders `b` before `a`; listed `a`, `b` it orders `a` before `b`; for the 15 converted skill graphs and the acyclic random graphs the order equals the order today's `order_of` gives, recorded before the change (0 differences, exact)
+- Acceptance criterion: a graph with two independent steps listed `b`, `a` orders `b` before `a`; listed `a`, `b` it orders `a` before `b`; steps listed `x`, `y`, `z` where `x` reads from `z` order `y`, `z`, `x`; for the 15 converted skill graphs and the acyclic random graphs the order equals the order today's `order_of` gives, recorded before the change (0 differences, exact)
 - Verified by: TC-WFM-186
 - Status: Draft
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; review 2026-11-24 (D-478): text rewritten, the pairwise rule could not be met by the sort and could contradict indirect reads
 
 ### REQ-RUN-016 – Run in topological order (changed)
 - Level: low-2   Subject: TaskRuntime
@@ -287,7 +288,7 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new
 
 ### The six equivalence requirements, changed
-Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha, false-alarm budget) and relaxation of G-V2 (Draft there; TD-88 keeps the holdout for later), with one change: the skill runs **from its stored graph** (HR-007, D-473 (3)). The thresholds were set from the old-runner baselines of commit `1fb0c35` (A-122); the decision is `eval_decide.py` with each `Eval criterion` line. REQ-WFM-115 compares the outputs from the stored graph with those of the old runner run on the same cases in the same check: no baseline file is needed (this corrects the high-level spec, HR-007, which asked for a baseline run first). A failing criterion is re-run once with fresh seeds, never more.
+Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha, false-alarm budget) and relaxation of G-V2 (Draft there; TD-88 keeps the holdout for later), with one change: the skill runs **from its stored graph** (HR-007, D-473 (3)). The thresholds were set from the old-runner baselines of commit `1fb0c35` (A-122); the decision is `eval_decide.py` with each `Eval criterion` line. REQ-WFM-115 compares the outputs from the stored graph with those of the old runner run on the same cases in the same check: no baseline file is needed (HR-007 corrected accordingly, D-477 (1)). A failing criterion is re-run once with fresh seeds, never more.
 
 ### REQ-WFM-110 – Same outcomes: research (changed)
 - Level: low   Subject: TaskRuntime
@@ -322,7 +323,7 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 ### REQ-WFM-112 – Same outcomes: verify_claim (changed)
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall run the skill verify_claim from its stored graph so that it behaves as expected in at least 83 % of the dev cases of EV-verdicts.
-- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.93 (verdicts-single.md, 50 claims, 1 run, verify.single@1) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline has one repeat; it is re-recorded at 3 repeats before any converted run; the suites EV-verdicts_injection and EV-verdicts_wikidata are run and reported, not decided
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.93 (verdicts-single.md, 50 claims, 1 run, verify.single@1) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline had one repeat and was re-recorded at 3 repeats (A-122); the suites EV-verdicts_injection and EV-verdicts_wikidata are run and reported, not decided
 - Parent: FR-45
 - Group: EQ
 - Priority: Must
@@ -350,7 +351,7 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 ### REQ-WFM-114 – Same outcomes: extract_claims (changed)
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall run the skill extract_claims from its stored graph so that it behaves as expected in at least 59 % of the dev cases of EV-extraction.
-- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.69 (extraction-llm-light.md, 51 texts, 1 run, extract.llm@1) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline has one repeat; it is re-recorded at 3 repeats before any converted run
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.69 (extraction-llm-light.md, 51 texts, 1 run, extract.llm@1) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline had one repeat and was re-recorded at 3 repeats (A-122)
 - Parent: FR-45
 - Group: EQ
 - Priority: Must
@@ -364,7 +365,7 @@ Each keeps its threshold, `Eval criterion` line (rule, MP-light, repeats, alpha,
 ### REQ-WFM-115 – Same outputs: extract_claims_rules (changed)
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall run the skill extract_claims_rules from its stored graph so that it gives the same output as the old runner on every dev case of EV-extraction.
-- Rationale: refines FR-45 and AC-34; the skill is rule-based, no model: the same input gives the same output, so equality is checked instead of a rate (Suggestion of the agent, the owner decides at review)
+- Rationale: refines FR-45 and AC-34; the skill is rule-based, no model: the same input gives the same output, so equality is checked instead of a rate (owner, D-477 (1), D-478)
 - Parent: FR-45
 - Group: EQ
 - Priority: Must

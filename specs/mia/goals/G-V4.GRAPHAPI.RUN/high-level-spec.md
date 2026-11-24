@@ -94,7 +94,8 @@ Hard bounds: **none** (owner, D-475 (4)); a smoke number for loading and orderin
 - Kind: measure
 - Parent: NFR-17
 - Text: Each of the six skills with an equivalence suite, run from its stored graph, shall meet its equivalence criterion of G-V2 against its old-runner baseline.
-- Method: `tools/eval.py run <suite> --pin MP-light --repeats 3` on the stored-graph path for research, plan_question, verify_claim, verify_computable, extract_claims, extract_claims_rules; `eval_decide.py` with the criteria of REQ-WFM-110 to 115 against the baselines of commit `1fb0c35`; extract.rules first gets its baseline run on the old runner (the file is missing); a failing criterion is re-run once with fresh seeds, never more.
+- Method: `tools/eval.py run <suite> --pin MP-light --repeats 3` on the stored-graph path for research, plan_question, verify_claim, verify_computable, extract_claims; `eval_decide.py` with the criteria of REQ-WFM-110 to 114 against the baselines of commit `1fb0c35`; extract_claims_rules (rule-based, no model) is compared output for output with the old runner run on the same dev cases in the same check (REQ-WFM-115), so it needs no baseline file; a failing criterion is re-run once with fresh seeds, never more.
+- Changed: 2026-11-24, D-477 (1): the baseline run of extract_claims_rules dropped (the comparison runs both paths in one check); back to review
 - Metric: the decision of each criterion (PASS required for all six).
 - Rationale: NFR-17 for the six (D-473 (3)); the same rule as G-V2, now on the stored path.
 - Reference: the owner's host, MP-light with its digest, Ollama as pinned in `eval-spec.md`.
