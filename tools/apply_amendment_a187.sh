@@ -3,6 +3,7 @@
 # of N-3.2: the stored form as one networkx MultiDiGraph; the operations of v4 are unchanged (REQ-GTB-060). The contract suite gets TC-IF-301-35 to 38
 # (golden 32 to 35) in a file of its own, run against the new mock and the real module. Also installed: the helpers of the RUN checks, the red acceptance tests of RUN (loader and rules, order and run order, stored-graph path), their helper run_store.py, the generator of
 # the 500 random graphs (TR-RUN-003) and the oracle recorded at goal/v4 before any code changed (TR-RUN-002, tools/record_run_oracle.py).
+# Added 2026-11-25 (before the plan gate): the smoke check SMOKE-RUN-001, tests/smoke/smoke_run.py (needs the model; not run by this script, run in T-04 and Deploy).
 # Drafts in specs/mia/amendments/A-187/.
 # INSTALL IT ON THE LINE OF WORK goal/v4.graphapi.run.
 #   bash tools/apply_amendment_a187.sh           show the diff (changes nothing); add --report for the readable form
@@ -22,6 +23,7 @@ copy "$A/tests/helpers/run_store.py" tests/helpers/run_store.py
 copy "$A/tests/acceptance/test_graph_loader.py" tests/acceptance/test_graph_loader.py
 copy "$A/tests/acceptance/test_run_graph_order.py" tests/acceptance/test_run_graph_order.py
 copy "$A/tests/acceptance/test_stored_graph_run.py" tests/acceptance/test_stored_graph_run.py
+copy "$A/tests/smoke/smoke_run.py" tests/smoke/smoke_run.py
 finish
 
 echo
