@@ -87,7 +87,7 @@ class LoadedGraph(unittest.TestCase):
     def test_malformed_items_are_left_out_and_loading_copies(self):
         """TC-GTB-050: malformed steps and connections are left out and nothing raises; non-graphs give an empty graph; the loaded graph is a copy.
 
-        Example: nodes "x" and nodes None give no nodes; setting value 9 on the loaded d1 leaves the stored d1 without it.
+        Example: nodes "x" and nodes None give no nodes; two steps d1 give the first d1 at position 0; setting value 9 on the loaded d1 leaves the stored d1 without it.
         """
         # Given: the malformed graphs of golden 31, a graph with two steps d1, a connection to a step that was left out, inputs that are no graph
         cases = [  # label, the input, node IDs, edge keys
@@ -107,6 +107,9 @@ class LoadedGraph(unittest.TestCase):
                 loaded = rules.load(given)
                 self.assertEqual(list(loaded.nodes), node_ids)
                 self.assertEqual([key for _, _, key in loaded.edges(keys=True)], edge_keys)
+        # And: the second d1 is left out, so d1 keeps the first step's data and position 0 (networkx's add_node would overwrite them; A-188, F-1)
+        twice = cases[3][1]
+        self.assertEqual(dict(rules.load(twice).nodes(data=True)), {"d1": {"data": twice["nodes"][0]["data"], "position": 0}})
         # And: the kept connection with data [] has empty data (D-481)
         self.assertEqual(rules.load(cases[5][1]).edges["a", "t", "e1"]["data"], {})
         # And: a connection to the second d1 points at the first d1 and is kept
