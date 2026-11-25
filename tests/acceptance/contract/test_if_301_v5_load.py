@@ -137,5 +137,27 @@ class LoaderV5Contract(unittest.TestCase):
         self.assertEqual((loaded.nodes["d1"]["data"], loaded.edges["d1", "t1", "e2"]["data"]), ({"type": "data", "value": 9}, {"as": "changed"}))
 
 
+    @mark.req("IF-301", "REQ-GTB-043", "REQ-GTB-057")
+    @each_provider(IF, make=subject)
+    def test_golden_36_connection_ids(self, rules):
+        """TC-IF-301-39: a connection whose ID is not a non-empty text is rule 3, named by its ID as text, and load leaves it out (A-189).
+
+        Example: a connection a -> t without id gives [connection_endpoints ["None"]] and a loaded graph without edges.
+        """
+        cases = [  # label, the connection, the part named
+            ("no id", {"from": "a", "to": "t", "data": {}}, "None"),
+            ("the id 5", {"id": 5, "from": "a", "to": "t", "data": {}}, "5"),
+            ("the empty id", {"id": "", "from": "a", "to": "t", "data": {}}, ""),
+        ]
+        for label, edge, part in cases:
+            with self.subTest(case=label):
+                # Given: golden 36, a data step a and a transform t joined by that one connection
+                given = graph([data("a"), transform("t")], [edge])
+                # When: it is checked and loaded; Then: exactly rule 3 naming the ID as text, and no edge in the loaded graph
+                self.assertEqual(rules.rule_report(given), [{"rule": "connection_endpoints", "parts": [part],
+                                                             "text": "a connection leads to or from a step that does not exist"}])
+                self.assertEqual(rules.load(given).number_of_edges(), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

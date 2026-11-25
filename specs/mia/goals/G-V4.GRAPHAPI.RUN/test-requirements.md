@@ -16,7 +16,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 | 5 | EV | The equivalence runs on the stored-graph path | TR-RUN-011 |
 
 ### TR-RUN-001 – Exact values
-- Applies to: TC-GTB-048, TC-GTB-049, TC-GTB-050, TC-IF-301-35, TC-IF-301-36, TC-IF-301-37, TC-IF-301-38, TC-WFM-186, TC-RUN-041, TC-RUN-046, TC-WFM-115
+- Applies to: TC-GTB-048, TC-GTB-049, TC-GTB-050, TC-GTB-053, TC-IF-301-35, TC-IF-301-36, TC-IF-301-37, TC-IF-301-38, TC-IF-301-39, TC-WFM-186, TC-RUN-041, TC-RUN-046, TC-WFM-115
 - Requirement: REQ-GTB-053
 - Group: EX
 - Kind: unit
@@ -83,7 +83,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Status: Approved
 
 ### TR-RUN-007 – Each check is shown able to fail
-- Applies to: TC-GTB-048, TC-GTB-050, TC-GTB-051, TC-GTB-052, TC-WFM-185, TC-WFM-186, TC-RUN-042, TC-RUN-044, TC-RUN-046, TC-RUN-047, TC-WFM-187
+- Applies to: TC-GTB-048, TC-GTB-050, TC-GTB-051, TC-GTB-052, TC-GTB-053, TC-WFM-185, TC-WFM-186, TC-RUN-042, TC-RUN-044, TC-RUN-046, TC-RUN-047, TC-WFM-187
 - Requirement: REQ-GTB-060
 - Group: CR
 - Kind: setup
@@ -116,7 +116,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Status: Approved
 
 ### TR-RUN-010 – The contract suites, both sides, older suites untouched
-- Applies to: TC-IF-301-35, TC-IF-301-36, TC-IF-301-37, TC-IF-301-38, TC-RUN-043
+- Applies to: TC-IF-301-35, TC-IF-301-36, TC-IF-301-37, TC-IF-301-38, TC-IF-301-39, TC-RUN-043
 - Requirement: REQ-GTB-053
 - Group: CR
 - Kind: setup

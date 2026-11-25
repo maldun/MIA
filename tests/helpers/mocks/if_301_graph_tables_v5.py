@@ -11,7 +11,7 @@ load(graph) -> networkx.MultiDiGraph (contract text: contracts/IF-301-graph-tabl
 """
 import copy
 
-from if_301_graph_tables_v4 import RuleSetV4Mock
+from if_301_graph_tables_v4 import RuleSetV4Mock, _text
 
 
 def _id(item):
@@ -25,6 +25,26 @@ def _data(item):
 
 
 class LoaderV5Mock(RuleSetV4Mock):
+    def _broken(self, graph):
+        """v5 (A-189, D-483): rule 3 also names a connection whose ID is not a non-empty text, in the order of the connections; `load` leaves it out."""
+        found = super()._broken(graph)
+        nodes, edges = graph.get("nodes", []), graph.get("edges", [])
+        if not isinstance(edges, list):
+            return found
+        steps, seen = set(), set()
+        for n in nodes if isinstance(nodes, list) else []:
+            sid = n.get("id") if isinstance(n, dict) else n
+            if isinstance(n, dict) and isinstance(sid, str) and sid and sid not in seen:
+                steps.add(sid)
+            if isinstance(sid, str):
+                seen.add(sid)
+
+        def known(end):
+            return isinstance(end, str) and end in steps
+        found["connection_endpoints"] = [_text(e.get("id") if isinstance(e, dict) else e) for e in edges
+                                         if not isinstance(e, dict) or _id(e) is None or not known(e.get("from")) or not known(e.get("to"))]
+        return found
+
     def load(self, graph):
         import networkx
         loaded = networkx.MultiDiGraph()

@@ -14,10 +14,12 @@ Almost every check is exact: the expected value is an ID, an order, a list of ca
 | TC-GTB-050 | REQ-GTB-057, REQ-GTB-058 | unit | 0 | the malformed graphs of golden 31; a graph with two steps `d1`; `nodes` = `"x"`; `nodes` = `None`; golden 33 for the copies | no exception; the malformed items and every connection to a left-out step are not in the loaded graph; of two steps `d1` the first is kept with its data and position 0 (A-188); `"x"` and `None` give an empty graph; a change of the loaded graph leaves the stored form unchanged and a change of the stored form leaves the loaded graph unchanged | exact |
 | TC-GTB-051 | REQ-GTB-059 | inspection | 0 | `graph_rule_set.py` after the change; the defect check of TR-RUN-008 | no function builds its own adjacency, writer or cycle view; no copy of a cycle finder; the rules about adjacency, one writer, session setting and stop limit, cycle and unsupplied inputs take the loaded graph from `load` | inspection checklist, every line yes |
 | TC-GTB-052 | REQ-GTB-060, HR-006 | component | 1 | the oracle of TR-RUN-002: `rule_report` and `run_check` answers of IF-301 v4 on the 15 converted skill graphs, the 500 random graphs (TR-RUN-003) and golden 24 to 31 | every answer of the changed code equals the recorded answer | 0 differences |
+| TC-GTB-053 | REQ-GTB-043 (changed), REQ-GTB-060 | component | 0 | a data step `a` and a transform `t` joined by one connection without `id`, with `id` 5, with the empty `id`; a throw-away files store | `rule_report` is exactly `connection_endpoints` naming `None`, `5`, the empty text; `save_graph` refuses each graph naming that part; no exception (A-189) | exact |
 | TC-IF-301-35 | REQ-GTB-053, REQ-GTB-054, REQ-GTB-055 | contract | 1 | golden 32, real side and mock side | as golden 32 | exact |
 | TC-IF-301-36 | REQ-GTB-053, REQ-GTB-056 | contract | 0 | golden 33, both sides | as golden 33 | exact |
 | TC-IF-301-37 | REQ-GTB-057 | contract | 0 | golden 34, both sides | as golden 34 | exact |
 | TC-IF-301-38 | REQ-GTB-058 | contract | 0 | golden 35, both sides | as golden 35 | exact |
+| TC-IF-301-39 | REQ-GTB-043 (changed), REQ-GTB-057 | contract | 0 | golden 36, both sides | as golden 36 (A-189) | exact |
 | TC-WFM-185 | REQ-WFM-166 | component | 1 | the 15 converted skill graphs and the acyclic ones of the 500 random graphs | each order holds every step once; every edge points from an earlier to a later step | exact |
 | TC-WFM-186 | REQ-WFM-167, HR-006 | component | 1 | two independent steps listed `b`, `a` and `a`, `b`; steps `x`, `y`, `z` where `x` reads from `z`; the same where `x` reads from `y`; the recorded orders of the oracle | `b`, `a`; `a`, `b`; `y`, `z`, `x`; `y`, `z`, `x`; every order of the converted and the acyclic random graphs equals the recorded one | 0 differences |
 | TC-RUN-041 | REQ-RUN-016 | component | 0 | two independent transforms `t2`, `t1` (listed in this order), each with a marker that records its call | `t2` is called before `t1`; listed `t1`, `t2`, `t1` first | exact |
@@ -107,9 +109,16 @@ None in this subgoal: RUN's Validate is the first test run of G-V5 (parked, D-38
 - When: the changed code answers the same inputs
 - Then: every answer equals the recorded one: the same items, rule by rule, with the same parts in the same order and the same sentences (0 differences)
 
+### TC-GTB-053 – A connection without a text ID is rule 3, and the save refuses it (A-189)
+- Verifies: REQ-GTB-043 (changed), REQ-GTB-060
+- Given: a data step `a` and a transform `t` joined by one connection that has no `id`, the `id` 5 or the empty `id`; a throw-away files store with GraphModel on it
+- When: each graph is checked with `rule_report` and saved with `save_graph`
+- Then: the report is exactly `connection_endpoints` naming `None`, `5` or the empty text
+- And: the save is refused naming that part, and nothing raises (before A-189 the save of the graph without `id` raised `KeyError` once the rules read the loaded graph)
+
 ### TC-IF-301-35 to TC-IF-301-38 – Contract suite IF-301 v5
 - Verifies: REQ-GTB-053 to REQ-GTB-058
-- Given: golden 32 (`review_full`), 33 (parallel connections), 34 (left out), 35 (copies) of A-187; the real module and the IF-301 v5 mock
+- Given: golden 32 (`review_full`), 33 (parallel connections), 34 (left out), 35 (copies) of A-187, and 36 (connection IDs, TC-IF-301-39) of A-189; the real module and the IF-301 v5 mock
 - When: the contract suite runs against each side
 - Then: both sides give the results the golden examples state, case by case
 - And: the suites of IF-301 v1 to v4 run unchanged and green (TR-RUN-010)

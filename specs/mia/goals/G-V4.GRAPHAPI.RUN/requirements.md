@@ -33,7 +33,7 @@
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | LG | The loader: the stored form becomes one loaded graph, in IF-301 v5 (HR-001, HR-003, HR-005) | REQ-GTB-053, REQ-GTB-054, REQ-GTB-055, REQ-GTB-056, REQ-GTB-057, REQ-GTB-058 |
-| 2 | RV | The rule set reads the loaded graph, with the same answers (HR-001, HR-006) | REQ-GTB-059, REQ-GTB-060 |
+| 2 | RV | The rule set reads the loaded graph, with the same answers (HR-001, HR-006) | REQ-GTB-059, REQ-GTB-060, REQ-GTB-043 (changed) |
 | 3 | OR | The order of steps on the loaded graph, ties in the order steps became ready (FR-65, HR-002) | REQ-WFM-166, REQ-WFM-167, REQ-RUN-016 (changed) |
 | 4 | RN | The run reads the loaded graph, one step at a time (FR-65, HR-001, HR-002, HR-003) | REQ-RUN-040, REQ-RUN-041 (and REQ-RUN-030 to 035 taken in unchanged, below) |
 | 5 | SP | A skill runs from its stored graph, and its run record says which (HR-004) | REQ-RUN-042, REQ-RUN-043, REQ-RUN-044, REQ-RUN-045 |
@@ -137,15 +137,28 @@
 ### REQ-GTB-060 – The same rule answers as before
 - Level: low   Subject: Persistence
 - Group: RV
-- Text: The Graph tables shall give, through the loaded graph, the same `rule_report` and `run_check` answers as IF-301 v4 gave before this change, for every stored form.
-- Rationale: refines HR-006 (OC-2 "every result is the same as before"); the answers of v4 are recorded as an oracle before the code changes
+- Text: The Graph tables shall give, through the loaded graph, the same `rule_report` and `run_check` answers as IF-301 v4 gave before this change, for every stored form whose connections have unique non-empty text IDs.
+- Rationale: refines HR-006 (OC-2 "every result is the same as before"); the answers of v4 are recorded as an oracle before the code changes; a stored form with another connection is refused on the stored form by rule 3 (REQ-GTB-043, changed) or rule 4, as in v4, and may name fewer further items, because `load` leaves that connection out (A-189, D-483; no input of the oracle has such a connection)
 - Parent: HR-006
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: on the 15 converted skill graphs, the 500 random graphs of the spike (seed 7, with self loops) and the golden examples 24 to 31 of IF-301, every `rule_report` and `run_check` answer equals the answer recorded from IF-301 v4 at `goal/v4` (0 differences, exact)
-- Verified by: TC-GTB-052
+- Verified by: TC-GTB-052, TC-GTB-053
 - Status: Approved
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24; Implement T-02, 2026-11-25, changed: unique text connection IDs (A-189, D-483)
+
+### REQ-GTB-043 – Rule 3, connection ends (changed)
+- Level: low   Subject: Persistence
+- Group: RV
+- Text: The Graph tables shall report the rule `connection_endpoints` for every connection whose start or end names no step of the graph, or whose ID is not a non-empty text, naming those connections.
+- Rationale: in force: "…for every connection whose start or end names no step of the graph, naming those connections"; changed because `load` leaves out a connection without a non-empty text ID (REQ-GTB-057), so the rules on the loaded graph would not see it and the save would reach the record checks with it and raise (T-02 finding, A-189, D-483); the part is the ID as text, `"None"` when missing, as for a step (REQ-GTB-040)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: a connection `e2` from `a` to the missing step `z` gives `connection_endpoints` naming `e2` (exact, in force); a connection from the data step `a` to the transform `t` without `id` gives `connection_endpoints` naming `None`, with `id` 5 naming `5`, with the empty `id` naming the empty text, and saving each graph is refused naming that part, with no exception (exact)
+- Verified by: TC-GTB-042, TC-GTB-053, TC-IF-301-39
+- Status: Draft
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); G-V4.GRAPHAPI.RUN Implement T-02, 2026-11-25, changed (A-189, D-483)
 
 ## Group OR – the order
 

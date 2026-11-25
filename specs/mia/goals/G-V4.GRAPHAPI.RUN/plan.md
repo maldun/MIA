@@ -45,8 +45,8 @@ Regression set: after every task the unit suite (`discover -s tests`) and every 
 - Done when: the listed tests green, the regression set holds; each defect of TR-RUN-007 makes its check fail (logged): the loader keeps a second `d1`, drops a parallel connection, shares data instead of copying
 
 ### T-02: The order and the rule set on the loaded graph
-- Implements: REQ-GTB-059, REQ-GTB-060, REQ-WFM-166, REQ-WFM-167
-- Tests to turn green: TC-GTB-051 (`test_graph_loader.py`, the search; the checklist of TR-RUN-008 is read by a person); to keep green: TC-GTB-052, TC-WFM-185, TC-WFM-186 (`test_run_graph_order.py`), the IF-301 v4 suite
+- Implements: REQ-GTB-059, REQ-GTB-060, REQ-WFM-166, REQ-WFM-167, REQ-GTB-043 (changed, A-189)
+- Tests to turn green: TC-GTB-051 (`test_graph_loader.py`, the search; the checklist of TR-RUN-008 is read by a person); TC-GTB-053 (`test_graph_loader.py`) and the real side of TC-IF-301-39 (`contract/test_if_301_v5_load.py`), both A-189; to keep green: TC-GTB-052, TC-WFM-185, TC-WFM-186 (`test_run_graph_order.py`), the IF-301 v4 suite
 - Touches: `graph_rule_set.py` (the rules about adjacency, one writer, session setting and stop limit, cycle and unsupplied inputs read `load`; the copied `_find_cycle` and the adjacency maps go; the rules about step identity, kind of step, connection ends and duplicate connections stay on the stored form, REQ-GTB-059); `graph_model.py` (`order_of` and `topological_order` walk the loaded graph, first-ready-first; `find_cycle` goes once no production code uses it, checked with a search)
 - Must not touch: protected material; `graph_run.py` (T-03); the answers of `rule_report` and `run_check` (the oracle)
 - Depends on: T-01
@@ -76,12 +76,12 @@ Regression set: after every task the unit suite (`discover -s tests`) and every 
 - Stop and report: a criterion looks unreachable on the pinned model within the budget; results flip between repeats more than `eval-spec.md` allows; an eval case or truth label seems wrong
 
 ## Open points before the gate
-- SMOKE-RUN-001 has no script yet (`tests/smoke/smoke_run.py` is protected material); it is written and staged with A-187 before the owner ticks the gate.
+- ~~SMOKE-RUN-001 has no script yet~~: done, `tests/smoke/smoke_run.py` installed with A-187 (`a3d1d800`).
 - The risk row of the high-level spec about `lexicographical_topological_sort` is outdated (D-480); correct it with the next change of that document.
 - Amendment numbers and decisions: next free A-188, D-482 (VIEW uses D-500 and up, BUILDER D-520 to D-539).
 
 ## At the merge (Commit phase, not a task)
-- Move the requirements into the node files: REQ-GTB-053 to 060 into N-3.2, REQ-WFM-166 to 168 into N-2.3, REQ-RUN-040 to 045 into N-2.4.1; replace the texts of REQ-RUN-016 and REQ-WFM-110 to 115 with the approved changes; checks, scenarios and smoke rows into the node test specs; TR-RUN-001 to 012 into `specs/mia/test-requirements.md` through an owner-run script; regenerate the model.
+- Move the requirements into the node files: REQ-GTB-053 to 060 into N-3.2, REQ-WFM-166 to 168 into N-2.3, REQ-RUN-040 to 045 into N-2.4.1; replace the texts of REQ-RUN-016, REQ-GTB-043 (A-189) and REQ-WFM-110 to 115 with the approved changes; checks, scenarios and smoke rows into the node test specs; TR-RUN-001 to 012 into `specs/mia/test-requirements.md` through an owner-run script; regenerate the model.
 - Merge request: eval changes per suite and the model pin (MP-light, digest from `eval-spec.md`); the baselines are not recorded new (HR-007: none needed).
 - Notes for other subgoals stay as in `requirements.md`: MIGRATION stores the converted skills and switches each skill to its stored graph; SWITCH moves the nine user-interface skills and removes the old runner; CODE uses the run record's graph and version; VIEW, EDIT and CONTEXT consume IF-301 v5 (joint amendment A-187, `G-V4/goal.md`).
 

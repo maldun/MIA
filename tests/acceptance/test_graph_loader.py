@@ -5,7 +5,9 @@ Run with: python tests/acceptance/test_graph_loader.py
 """
 import copy
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -175,6 +177,36 @@ class AnswersAsBefore(unittest.TestCase):
         randoms = random_graphs()
         acyclic = sum(1 for was in recorded["random"] if was["order"] is not None)
         self.assertEqual((len(randoms), acyclic), (500, recorded["header"]["random_acyclic"]))
+
+
+class ConnectionIds(unittest.TestCase):
+    @mark.req("REQ-GTB-043", "REQ-GTB-060")
+    def test_a_connection_without_a_text_id_is_rule_three_and_the_save_refuses_it(self):
+        """TC-GTB-053 (A-189): a connection whose ID is not a non-empty text is named by rule 3, and the save refuses the graph naming it, with no exception.
+
+        Example: a connection a -> t without id gives connection_endpoints ["None"]; save_graph refuses the graph with named ["None"].
+        """
+        from graph_model import GraphModel
+        from storage import Storage
+        from storage_files import FileBackend
+        folder = tempfile.mkdtemp(prefix="gtb-053-")
+        self.addCleanup(shutil.rmtree, folder, True)
+        model = GraphModel(Storage(FileBackend(folder)), "anna")
+        cases = [  # label, the connection, the part named
+            ("no id", {"from": "a", "to": "t", "data": {}}, "None"),
+            ("the id 5", {"id": 5, "from": "a", "to": "t", "data": {}}, "5"),
+            ("the empty id", {"id": "", "from": "a", "to": "t", "data": {}}, ""),
+        ]
+        for number, (label, edge, part) in enumerate(cases):
+            with self.subTest(case=label):
+                # Given: a data step a and a transform t joined by that one connection, in a throw-away files store
+                given = graph([data("a"), transform("t")], [edge], graph_id="gtb-053-%d" % number)
+                # When: it is checked and saved
+                report = rules.rule_report(given)
+                saved = model.save_graph(given)
+                # Then: exactly rule 3 naming the ID as text, and the save refused naming it
+                self.assertEqual([(i["rule"], i["parts"]) for i in report], [("connection_endpoints", [part])])
+                self.assertEqual((saved.saved, saved.named), (False, [part]))
 
 
 if __name__ == "__main__":
