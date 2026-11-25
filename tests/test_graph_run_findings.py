@@ -17,8 +17,18 @@ sys.path.insert(0, os.path.join(HERE, "helpers"))
 from markers import mark                                              # noqa: E402
 from graph_model_fakes import Script, data_node, make_edge, make_graph, transform_node   # noqa: E402
 from graph_run import GraphRunner                                     # noqa: E402
-from graph_model import check_graph, find_cycle                       # noqa: E402
+from graph_model import check_graph                                   # noqa: E402
+from graph_rule_set import rule_report                                # noqa: E402
 
+
+
+def find_cycle(ids, edges):
+    """The cycle the rule set names for steps `ids` (all data) and `edges`, or None: graph_model.find_cycle went in G-V4.GRAPHAPI.RUN T-02,
+    the cycle now comes from the rule `cycle` on the loaded graph, so these checks ask it there (same expectations)."""
+    stored = {"nodes": [{"id": i, "data": {"type": "data"}} for i in ids],
+              "edges": [dict(e, id="c%d" % n, data={}) for n, e in enumerate(edges)]}
+    found = [item["parts"] for item in rule_report(stored) if item["rule"] == "cycle"]
+    return found[0] if found else None
 
 class GraphRunFindings(unittest.TestCase):
     def setUp(self):

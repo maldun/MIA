@@ -148,7 +148,7 @@ class RuleSetUnit(unittest.TestCase):
         cases = [  # label, the odd connection, the rule report expected
             ("from is a list", {"id": "e1", "from": ["a"], "to": "t", "data": {}}, [("connection_endpoints", ["e1"])]),
             ("to is an object", {"id": "e1", "from": "a", "to": {"x": 1}, "data": {}}, [("connection_endpoints", ["e1"])]),
-            ("id is a list", {"id": ["e1"], "from": "a", "to": "t", "data": {}}, []),
+            ("id is a list", {"id": ["e1"], "from": "a", "to": "t", "data": {}}, [("connection_endpoints", ["['e1']"])]),     # rule 3 since A-189
             ("role is a list", {"id": "e1", "from": "a", "to": "t", "data": {"role": ["x"]}}, []),
             ("as is an object", {"id": "e1", "from": "a", "to": "t", "data": {"as": {"x": 1}}}, []),
         ]

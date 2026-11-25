@@ -12,6 +12,8 @@ load(graph)                   -> networkx.MultiDiGraph of the well-formed steps 
 
 `graph` is {"kind"?, "nodes": [{"id", "data"}], "edges": [{"id", "from", "to", "data"}]} with local IDs; no `kind` means workflow (REQ-GTB-038).
 Any input gives an answer, never an exception (REQ-GTB-040, D-418 (2)). The document form keeps graph_rules.py (Q-6).
+Since IF-301 v5 (G-V4.GRAPHAPI.RUN): rules 1 to 4 read the stored form, where malformed items are seen; the others and the unsupplied inputs read
+the loaded graph of `load` (REQ-GTB-059), its connections in their stored order.
 Adapted from the prototype graph_rules_proto.py (reuse map R3).
 """
 import copy
@@ -66,34 +68,7 @@ def _graph_kind(graph):
     return kind if isinstance(kind, str) and kind in KINDS else None
 
 
-# find_cycle and the stop limit are copies of those in graph_model: importing them would tie N-3.2 to N-2.3 (plan T-01).
-def _find_cycle(ids, edges):
-    """One cycle as step IDs, first ID repeated at the end, or None. Iterative, so a long chain does not depend on the Python stack (F-12)."""
-    following = {i: [] for i in ids}
-    for edge in edges:
-        following[edge["from"]].append(edge["to"])
-    state, path = {}, []      # state: 1 = on the current path, 2 = done
-    for root in ids:
-        if root in state:
-            continue
-        state[root] = 1
-        path.append(root)
-        walk = [iter(following[root])]
-        while walk:
-            for nxt in walk[-1]:
-                if state.get(nxt) == 1:
-                    return path[path.index(nxt):] + [nxt]
-                if nxt not in state:
-                    state[nxt] = 1
-                    path.append(nxt)
-                    walk.append(iter(following[nxt]))
-                    break
-            else:
-                state[path.pop()] = 2
-                walk.pop()
-    return None
-
-
+# The stop limit is a copy of check_record's in graph_model: importing it would tie N-3.2 to N-2.3 (plan T-01 of RULES).
 def _limit(value, whole):
     """A positive limit: a whole number from 1 when `whole` (2.0 counts), else a finite number above 0; a boolean is none."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -125,22 +100,22 @@ def _steps(nodes):
 
 
 def _connections(edges, types):
-    """(parts of rule 3, the connections that are objects, the connections between existing steps)."""
-    bad, objects, valid = [], [], []
+    """(parts of rule 3, the connections that are objects): rule 3 is a connection that is not an object, whose ID is not a non-empty text
+    (A-189: `load` leaves it out, so the rules on the loaded graph would not see it) or whose ends name no existing step."""
+    bad, objects = [], []
     for edge in edges:
-        ends_known = isinstance(edge, dict) and isinstance(edge.get("from"), str) and isinstance(edge.get("to"), str) \
-            and edge["from"] in types and edge["to"] in types
-        if not ends_known:
+        well_formed = isinstance(edge, dict) and _loaded_id(edge) is not None and isinstance(edge.get("from"), str) \
+            and isinstance(edge.get("to"), str) and edge["from"] in types and edge["to"] in types
+        if not well_formed:
             bad.append(_text(edge.get("id") if isinstance(edge, dict) else edge))
         if isinstance(edge, dict):
             objects.append(edge)
-        if ends_known:
-            valid.append(edge)
-    return bad, objects, valid
+    return bad, objects
 
 
 def _view(graph):
-    """The graph read once for every rule; `nodes` or `edges` that is not a list is rule 1 or rule 3 with that part (D-418 (2))."""
+    """The stored form read once for the rules that see malformed items (1 to 4), and the loaded graph for the others (REQ-GTB-059);
+    `nodes` or `edges` that is not a list is rule 1 or rule 3 with that part (D-418 (2))."""
     nodes, edges = graph.get("nodes", []), graph.get("edges", [])
     identity, endpoints = [], []
     if not isinstance(nodes, list):
@@ -148,9 +123,8 @@ def _view(graph):
     if not isinstance(edges, list):
         endpoints, edges = ["edges"], []
     bad_steps, steps = _steps(nodes)
-    types = {s["id"]: _type(s) for s in steps}
-    bad_edges, objects, valid = _connections(edges, types)
-    return {"identity": identity + bad_steps, "endpoints": endpoints + bad_edges, "steps": steps, "types": types, "edges": objects, "valid": valid}
+    bad_edges, objects = _connections(edges, {s["id"] for s in steps})
+    return {"identity": identity + bad_steps, "endpoints": endpoints + bad_edges, "steps": steps, "edges": objects, "loaded": load(graph)}
 
 
 def _step_identity(view):
@@ -182,36 +156,46 @@ def _duplicate_connection(view):
     return doubled
 
 
+def _in_stored_order(loaded):
+    """The connections of a loaded graph as (start, end, ID, attributes) in their stored order: networkx lists them grouped by start step."""
+    return sorted(loaded.edges(keys=True, data=True), key=lambda edge: edge[3]["position"])
+
+
+def _is_data(loaded, step_id):
+    return loaded.nodes[step_id]["data"].get("type") == "data"
+
+
 def _adjacency(view):
-    types = view["types"]
-    return [_text(e.get("id")) for e in view["valid"] if (types[e["from"]] == "data") == (types[e["to"]] == "data")]
+    loaded = view["loaded"]
+    return [key for start, end, key, _ in _in_stored_order(loaded) if _is_data(loaded, start) == _is_data(loaded, end)]
 
 
 def _single_writer(view):
-    writers = {}
-    for edge in view["valid"]:
-        if view["types"][edge["to"]] == "data":
-            writers.setdefault(edge["to"], set()).add(edge["from"])
-    return [d for d, w in writers.items() if len(w) > 1]
+    """Data steps with more than one writing step, in the order of the first connection into each (as v4)."""
+    loaded = view["loaded"]
+    written = [end for _, end, _, _ in _in_stored_order(loaded) if _is_data(loaded, end)]
+    return [d for d in dict.fromkeys(written) if len(set(loaded.predecessors(d))) > 1]
 
 
 def _stop_limit(view):
     """Three passes in the order of IF-301 v4: masters without a valid stop, data steps with a session setting, steps with two settings connections."""
-    settings_in = {}
-    for edge in view["edges"]:
-        if _data(edge).get("role") == "settings":
-            settings_in.setdefault(_key(edge.get("to")), []).append(edge.get("id"))
-    steps = view["steps"]
-    return ([s["id"] for s in steps if _type(s) == "master" and not _stop_is_valid(_data(s).get("stop"))]
-            + [s["id"] for s in steps if _type(s) == "data" and ({"stop", "session"} & set(_data(s)))]
-            + [_text(t[1] if isinstance(t, tuple) else t) for t, ids in settings_in.items() if len(ids) > 1])
+    loaded = view["loaded"]
+    steps = list(loaded.nodes(data="data"))
+    settings = [end for _, end, _, attributes in _in_stored_order(loaded) if attributes["data"].get("role") == "settings"]
+    return ([i for i, data in steps if data.get("type") == "master" and not _stop_is_valid(data.get("stop"))]
+            + [i for i, data in steps if data.get("type") == "data" and ({"stop", "session"} & set(data))]
+            + [i for i in dict.fromkeys(settings) if settings.count(i) > 1])
 
 
 def _cycle(view):
-    """Only while rules 1 and 3 are kept: an order needs known, unique steps (Q-5, REQ-GTB-048)."""
+    """Only while rules 1 and 3 are kept: an order needs known, unique steps (Q-5, REQ-GTB-048). The cycle as step IDs, first repeated at the end."""
     if view["identity"] or view["endpoints"]:
         return []
-    return _find_cycle([s["id"] for s in view["steps"]], view["valid"]) or []
+    try:
+        found = networkx.find_cycle(view["loaded"])
+    except networkx.NetworkXNoCycle:
+        return []
+    return [start for start, *_ in found] + [found[0][0]]
 
 
 RULES = {"step_identity": _step_identity, "step_kind": _step_kind, "connection_endpoints": _connection_endpoints,
@@ -242,17 +226,14 @@ def rule_report(graph):
 def _unsupplied(graph, given):
     """Every input of a transform or master step (a connection from a data step, not settings or order) whose data step has no writer, no value
     other than null in the graph and is not given; in the order of the connections, repeats kept (REQ-GTB-051)."""
-    view = _view(graph)
-    steps = {s["id"]: s for s in view["steps"]}
-    written = {e["to"] for e in view["valid"]}
+    loaded = load(graph)
     found = []
-    for edge in view["valid"]:
-        source, target = edge["from"], edge["to"]
-        if _type(steps[target]) not in ("transform", "master") or _type(steps[source]) != "data":
+    for source, target, _, attributes in _in_stored_order(loaded):
+        if loaded.nodes[target]["data"].get("type") not in ("transform", "master") or not _is_data(loaded, source):
             continue
-        if _data(edge).get("role") in ("settings", "order"):
+        if attributes["data"].get("role") in ("settings", "order"):
             continue
-        if source not in written and _data(steps[source]).get("value") is None and source not in given:
+        if loaded.in_degree(source) == 0 and loaded.nodes[source]["data"].get("value") is None and source not in given:
             found.append({"kind": "input", **_item("unsupplied_input", [source]), "step": target, "input": source})
     return found
 

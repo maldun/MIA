@@ -9,7 +9,7 @@
 - topological_order(graph_id) -> the node IDs of a stored graph in an order in which every edge points forward.
 
 Node fields are the proposal of goal.md: data nodes `value`, `parameters`; transform and master `toolbox_id`; master `stop`
-({"max_repetitions": n} and/or {"max_seconds": s}, the names of IF-301 v2). find_cycle stays here for the runner (N-2.4.1).
+({"max_repetitions": n} and/or {"max_seconds": s}, the names of IF-301 v2).
 """
 
 from collections import namedtuple
@@ -42,34 +42,6 @@ def _parts(report):
     return [part for item in report for part in item["parts"]]
 
 
-def find_cycle(ids, edges):
-    """One cycle as node IDs, first ID repeated at the end, or None. Iterative, so a long chain does not depend on the Python stack (F-12)."""
-    following = {i: [] for i in ids}
-    for edge in edges:
-        following[edge["from"]].append(edge["to"])
-    state = {}      # 1 = on the current path, 2 = done
-    path = []
-    for root in ids:
-        if root in state:
-            continue
-        state[root] = 1
-        path.append(root)
-        walk = [iter(following[root])]      # one iterator of followers per node on the path
-        while walk:
-            for nxt in walk[-1]:
-                if state.get(nxt) == 1:
-                    return path[path.index(nxt):] + [nxt]
-                if nxt not in state:
-                    state[nxt] = 1
-                    path.append(nxt)
-                    walk.append(iter(following[nxt]))
-                    break
-            else:
-                state[path.pop()] = 2
-                walk.pop()
-    return None
-
-
 def check_graph(graph):
     """The parts of every broken rule of the graph's rule report, or [] when the graph keeps every rule (REQ-WFM-164). Kept for its callers: the
     rules themselves are in graph_rule_set (FR-63)."""
@@ -77,17 +49,18 @@ def check_graph(graph):
 
 
 def order_of(graph):
-    """The node IDs of a graph dict in an order in which every edge points forward (also used by the run, N-2.4.1)."""
-    waiting = {n["id"]: 0 for n in graph["nodes"]}
-    following = {i: [] for i in waiting}
-    for e in graph["edges"]:
-        waiting[e["to"]] += 1
-        following[e["from"]].append(e["to"])
-    order = [i for i, w in waiting.items() if w == 0]
-    for node in order:      # the list grows while it is walked
-        for nxt in following[node]:
-            waiting[nxt] -= 1
-            if waiting[nxt] == 0:
+    """The step IDs of a stored graph, every step after the steps it reads from (REQ-WFM-166; also used by the run, N-2.4.1).
+
+    A queue over the loaded graph (D-480): first the steps that read from no step, in their stored position, then each step as soon as the last
+    connection into it is passed, in the stored order of the connections, so ties go first-ready-first (REQ-WFM-167), as before the loaded graph.
+    """
+    loaded = graph_rule_set.load(graph)
+    open_inputs = dict(loaded.in_degree())
+    order = [step for step, count in open_inputs.items() if count == 0]
+    for step in order:      # the list grows while it is walked
+        for _, nxt, _ in sorted(loaded.out_edges(step, data="position"), key=lambda edge: edge[2]):
+            open_inputs[nxt] -= 1
+            if open_inputs[nxt] == 0:
                 order.append(nxt)
     return order
 
