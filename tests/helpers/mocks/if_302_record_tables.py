@@ -15,10 +15,13 @@ DEFINITIONS = {
     "transforms": {"versioned": True, "deletable": False},      # v11 (amendment A-112): the versioned code of a transform, one record per transform id
     "snapshots": {"versioned": True, "deletable": False},      # v14 (amendment A-161): a named snapshot of the skill set, record id = its name
     "current_versions": {"versioned": True, "deletable": False},      # v13 (amendment A-121): the current-version pointer of an item, record id <kind>/<id>
+    "arrangements": {"versioned": True, "deletable": False},      # v15 (amendment A-172): the saved arrangement of a graph, record id = the graph ID
+    "graph_changes": {"versioned": True, "deletable": False},      # v15 (amendment A-172): the record of changes of a graph version, record id <graph ID>/<version>, written once
 }
 REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version"),
-            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "snapshots": ("name", "time", "author", "items", "pins")}
+            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "snapshots": ("name", "time", "author", "items", "pins"),
+            "arrangements": ("graph", "positions"), "graph_changes": ("graph", "version", "from_version", "kind", "entries")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_FIELDS = {"kind": ("fact", "preference", "commitment"), "status": ("active", "replaced")}      # v2 (amendment A-10): optional, checked when present
 TRANSFORM_META_FIELDS = {"trust": ("untrusted", "trusted"), "lifecycle": ("draft", "tested", "retired")}      # v10 (amendment A-110): exact values, the optional fields are free
@@ -56,6 +59,22 @@ class RecordTablesMock:
                 return {"rule": "schema", "detail": "items"}
             if not isinstance(doc["pins"], dict):
                 return {"rule": "schema", "detail": "pins"}
+        if table == "arrangements":      # v15 (A-172): graph a non-empty text, positions a mapping of step ID -> {x, y} integers; other fields are kept
+            if not isinstance(doc["graph"], str) or not doc["graph"]:
+                return {"rule": "schema", "detail": "graph"}
+            places = doc["positions"]
+            if not isinstance(places, dict) or not all(isinstance(xy, dict) and all(type(xy.get(k)) is int for k in ("x", "y")) for xy in places.values()):
+                return {"rule": "schema", "detail": "positions"}
+        if table == "graph_changes":      # v15 (A-172): the record of a version; entries are kept as given (IF-104 v2 defines them)
+            if not isinstance(doc["graph"], str) or not doc["graph"]:
+                return {"rule": "schema", "detail": "graph"}
+            for field in ("version", "from_version"):
+                if type(doc[field]) is not int or doc[field] < 1:
+                    return {"rule": "schema", "detail": field}
+            if doc["kind"] not in ("editor", "derived", "restore"):
+                return {"rule": "schema", "detail": "kind"}
+            if not isinstance(doc["entries"], list):
+                return {"rule": "schema", "detail": "entries"}
         if table == "current_versions" and (type(doc["version"]) is not int or doc["version"] < 1):      # v13 (A-121): a bool or a float is no version number; other fields are kept, never refused
             return {"rule": "schema", "detail": "version"}
         if table == "workflow_meta" and doc["status"] not in ("draft", "tested", "trusted", "retired"):

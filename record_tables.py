@@ -7,8 +7,8 @@ categories and the vote value. It never changes a document (a task or memo comes
 """
 
 TABLES = {name: {"versioned": True, "deletable": name in ("history", "memory", "tasks", "memos", "skill_runs")}
-          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs", "transform_meta", "transforms", "current_versions", "snapshots")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
-REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "snapshots": ("name", "time", "author", "items", "pins"), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs", "transform_meta", "transforms", "current_versions", "snapshots", "arrangements", "graph_changes")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
+REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "snapshots": ("name", "time", "author", "items", "pins"), "arrangements": ("graph", "positions"), "graph_changes": ("graph", "version", "from_version", "kind", "entries"), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_KINDS = ("fact", "preference", "commitment")       # IF-302 v2 (REQ-CHA-011): the optional fields `kind` and `status` of a memory record; `subject` and `updated` are free
@@ -16,6 +16,15 @@ MEMORY_STATUS = ("active", "replaced")
 WORKFLOW_STATUS = ("draft", "tested", "trusted", "retired")      # IF-302 v3 (REQ-WFM-002): the lifecycle of a workflow; its specification and benchmark are free
 TRANSFORM_TRUST = ("untrusted", "trusted")      # IF-302 v10 (A-110, REQ-RTB-008): trust and lifecycle of a transform; reason, evidence, baseline_allowed, shipped, changed_by are free
 TRANSFORM_LIFECYCLE = ("draft", "tested", "retired")
+CHANGE_KINDS = ("editor", "derived", "restore")      # IF-302 v15 (A-172, REQ-RTB-011): `before_the_record` is only an answer of the changes route, never stored
+
+
+def _whole_number(value, least):
+    return type(value) is int and value >= least      # a bool or a float is no number here, as for the vote value
+
+
+def _is_place(place):
+    return isinstance(place, dict) and set(place) == {"x", "y"} and all(type(place[k]) is int for k in ("x", "y"))
 
 
 def definitions():
@@ -57,6 +66,22 @@ def validate(table, doc):
             return {"rule": "schema", "detail": "items"}
         if not isinstance(doc["pins"], dict):
             return {"rule": "schema", "detail": "pins"}
+    if table == "arrangements":      # IF-302 v15 (A-172, REQ-RTB-010): one record per graph, a new version per save; other fields are kept
+        if not isinstance(doc["graph"], str) or not doc["graph"]:
+            return {"rule": "schema", "detail": "graph"}
+        positions = doc["positions"]
+        if not isinstance(positions, dict) or not all(isinstance(step, str) and _is_place(place) for step, place in positions.items()):
+            return {"rule": "schema", "detail": "positions"}
+    if table == "graph_changes":      # IF-302 v15 (A-172, REQ-RTB-011): written once per kept graph version (checked by the graph API, D-435); entries are IF-104 v2's
+        if not isinstance(doc["graph"], str) or not doc["graph"]:
+            return {"rule": "schema", "detail": "graph"}
+        for field in ("version", "from_version"):
+            if not _whole_number(doc[field], 1):
+                return {"rule": "schema", "detail": field}
+        if doc["kind"] not in CHANGE_KINDS:
+            return {"rule": "schema", "detail": "kind"}
+        if not isinstance(doc["entries"], list):
+            return {"rule": "schema", "detail": "entries"}
     if table == "votes":
         if doc["category"] not in CATEGORIES:
             return {"rule": "category", "detail": doc["category"]}

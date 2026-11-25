@@ -132,3 +132,39 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-IF-302-01..07
 - Status: Verified
 - History: v0, amendment 5/7 (2026-10-25); 2026-10-31 A-61 (D-161): IF-302 v6; Verified by names TC-IF-302-01..07 (it said 01..03); 2026-10-31 A-67 (D-170): IF-302 v7, deletable are exactly history, memory, tasks, memos
+
+## Iteration 4 (goal G-V4.VIEW, graph viewer and the IF-104 v2 backend; moved at the merge 2026-11-25)
+Requirements of the subgoal G-V4.VIEW (goal record `specs/mia/goals/G-V4.VIEW/`: plan, test requirements TR-VIEW-001 to 021, verification report). Verified 2026-11-24 (both boxes ticked by the owner); Verify findings decided in D-501: V-1, V-2, V-4, V-5, V-8, V-9, V-10, V-13 fixed, V-15 closed by the owner's image build, V-3 handed to G-V4.GRAPHSTORE.TRANSFER, V-6, V-7, V-11, V-12, V-14 accepted; the specification points of the merge in D-502. The routes are offered through IF-104 v2 (`contracts/`, A-171, A-174), the record tables through IF-302 v15 (A-172).
+
+Terms (store setting, owner, record of changes, entry, what cannot be drawn): see the section "Terms of G-V4.VIEW" in `specs/mia/nodes/N-2-backend/nodes/N-2.1-api-and-accounts/requirements.md`.
+
+## Groups of G-V4.VIEW
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 5 | AR | Arrangement and record tables (FR-52, FR-74, FR-80, HR-003) | REQ-RTB-010, REQ-RTB-011 |
+
+### REQ-RTB-010 – Arrangements stored
+- Level: low   Subject: Persistence
+- Group: AR
+- Text: The Record tables shall define the table `arrangements` with the required fields graph and positions, as versioned records that are not deletable.
+- Rationale: refines HR-003 and FR-74; IF-302 v15 (A-172): positions maps a step ID to whole-number x and y
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: `definitions()` names `arrangements` versioned and not deletable; a place 10.5 is rule `schema` detail `positions` (exact)
+- Verified by: TC-IF-302-13
+- Status: Verified
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track A; basis: IF-104 v2 A-171, IF-302 v15 A-172, prototype round 02 R5); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").
+
+### REQ-RTB-011 – Records of changes stored
+- Level: low   Subject: Persistence
+- Group: AR
+- Text: The Record tables shall define the table `graph_changes` with the required fields graph, version, from_version, kind and entries, as versioned records that are not deletable.
+- Rationale: refines FR-80 and FR-76; IF-302 v15 (A-172): kind editor, derived or restore; written once by the graph API (D-435)
+- Parent: FR-80
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: `definitions()` names `graph_changes` versioned and not deletable; kind `before_the_record` is rule `schema` detail `kind` (exact)
+- Verified by: TC-IF-302-14
+- Status: Verified
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track A; basis: IF-104 v2 A-171, IF-302 v15 A-172, prototype round 02 R5); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").

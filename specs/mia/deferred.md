@@ -559,3 +559,78 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Decision: D-357, 2026-11-20
 - Sign-off: maldun, 2026-11-20
 - Status: open
+
+## TD-91 – Errors other than 401 and 503 show nothing on the graph page
+- Kind: defer
+- Requirement: REQ-GA-045 (Verify V-11 of G-V4.VIEW)
+- Interim criterion: a 401 shows the login note (TC-GA-019) and a 503 keeps the picture with a line that the store does not answer (TC-GA-020); any other error (a 404 between list and opening, a 500, MIA down) leaves the page as it was, with nothing said
+- Target: REQ-GA-045 as written: one line in the status band names the failure and its reason, the picture stays (node test with the JS mock answering 404, 500 and nothing)
+- Reason: the owner wants the notice (D-502 (2)); the page side of the write routes comes with G-V4.EDIT, which reworks the same error handling of `viewer.js`
+- Effort: about two hours (the band line, three mock cases)
+- Risk of the gap: the owner clicks a graph and nothing happens, with no hint why. Mitigation: read-only viewer, nothing is lost; the browser console shows the failed request
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (2), 2026-11-25
+- Sign-off: [X]
+- Status: open
+
+## TD-92 – An untrusted step's dashed border looks like a missing step
+- Kind: defer
+- Requirement: REQ-GA-027 (Verify V-14 item 1 of G-V4.VIEW)
+- Interim criterion: an untrusted step carries the one-word mark `untrusted` (TC-GA-024) and, in the code, a dashed `--danger` border (`graph_app/drawing.js`); a missing step is drawn dashed and labelled `missing step` (TC-GA-023), so the words tell them apart, the border does not
+- Target: an untrusted step and a missing step that differ at a glance without reading the words (a node check of the drawing options), as REQ-GA-027 "a mark of at most one word" asks
+- Reason: the owner sees it as a defect (D-502 (3)); the close look in Firefox in Deploy (`sample.broken`) shows how much it matters before EDIT changes the look
+- Effort: about an hour
+- Risk of the gap: the owner mistakes an untrusted step for a broken connection or the other way round. Mitigation: the word mark and the left column
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or the owner's close look in Deploy if it shows the mix-up, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [X]
+- Status: open
+
+## TD-93 – A transform step without trust hides its trust fields
+- Kind: defer
+- Requirement: REQ-GA-037 (Verify V-14 item 10 of G-V4.VIEW)
+- Interim criterion: a transform step without a toolbox entry is marked `untrusted` in the picture (TC-GA-024), and the hostile step of sample.code shows trust, lifecycle, reason, changed and code in words (TC-GA-029); for a transform step whose step data carries no trust the left column hides these fields
+- Target: every processing or loop-controlling step shows its trust, lifecycle, reason, changed and code in the left column, also when it is untrusted for lack of an entry (node check)
+- Reason: the owner sees it as a defect (D-502 (3)); EDIT shows the same column with edit controls
+- Effort: about an hour
+- Risk of the gap: the picture says untrusted and the column says nothing about why. Mitigation: the mark is shown
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [X]
+- Status: open
+
+## TD-94 – Answers that arrive out of order when two graphs are opened quickly
+- Kind: defer
+- Requirement: REQ-GA-021 (Verify V-14 item 11 of G-V4.VIEW)
+- Interim criterion: choosing a graph draws its current version (TC-GA-017); when two graphs are chosen in quick succession, the answer that arrives last is drawn, which can be the first graph chosen
+- Target: only the graph chosen last is drawn, whatever order the answers arrive in (node check with a mock that answers out of order)
+- Reason: the owner sees it as a defect (D-502 (3)); EDIT adds saves on the same path, where a stale answer would matter more
+- Effort: about two hours (a request counter or abort per opening)
+- Risk of the gap: the list shows one graph chosen and the picture another. Mitigation: the status bar names the drawn graph
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [X]
+- Status: open
+
+## TD-95 – An empty toolbox reason becomes "it is in the toolbox"
+- Kind: defer
+- Requirement: REQ-API-027 (Verify V-14 item 12 of G-V4.VIEW)
+- Interim criterion: a step with a toolbox entry is answered with that entry's trust, lifecycle and reason (TC-IF-104-19); when the entry's reason is empty, `graph_api_v2.py` answers the made-up reason "it is in the toolbox"
+- Target: the stored reason as it is (empty stays empty, or a reason the toolbox itself gives), checked in the IF-104 v2 suite
+- Reason: the owner sees it as a defect (D-502 (3)); trust per step and its reasons are the subject of G-V4.GRAPHAPI.CODE
+- Effort: under an hour, plus a contract case
+- Risk of the gap: the left column states a reason nobody gave. Mitigation: only trusted entries without a reason are affected
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.GRAPHAPI.CODE, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [X]
+- Status: open
