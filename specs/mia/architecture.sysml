@@ -667,8 +667,8 @@ package MIA_Architecture {
                    with a fixed type) in PostgreSQL through the storage layer; data classes rebuilt from a type ID, types as JSON
                    schemas, versions never deleted. Today a graph is one versioned document (graph_tables.py).
                    G-V4.GRAPHAPI.RULES: the registry of kinds, the rule report and the run check of IF-301 v4 (A-170), in graph_rule_set.py.
-                   G-V4.GRAPHAPI.RUN (planned): the loader of IF-301 v5 (A-187), the one loaded graph (a networkx MultiDiGraph, networkx==3.7)
-                   that the order, the graph rules and the run read, in graph_load.py (added to the modules when it exists); the rule set's own view and copied cycle finder go. */
+                   G-V4.GRAPHAPI.RUN: the loader of IF-301 v5 (A-187), the operation load of graph_rule_set.py (T-01): the one loaded graph
+                   (a networkx MultiDiGraph, networkx==3.7) that the order, the graph rules and the run read; (planned, T-02) the rule set's own view and copied cycle finder go. */
             @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_tables.py", "graph_rules.py", "graph_rule_set.py"); }
             @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }

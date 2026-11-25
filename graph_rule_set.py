@@ -8,6 +8,7 @@ a graph of that kind can run (FR-64).
 kinds()                       -> {kind: {"rules": [...], "runs": bool}}, a copy
 rule_report(graph)            -> [{"rule", "parts", "text"}], every broken rule in the registry's order; [] when every rule is kept
 run_check(graph, given=None)  -> {"status": "refused" | "ready", "broken": [{"kind", "rule", "parts", "text", ...}]}
+load(graph)                   -> networkx.MultiDiGraph of the well-formed steps and connections (IF-301 v5, A-187)
 
 `graph` is {"kind"?, "nodes": [{"id", "data"}], "edges": [{"id", "from", "to", "data"}]} with local IDs; no `kind` means workflow (REQ-GTB-038).
 Any input gives an answer, never an exception (REQ-GTB-040, D-418 (2)). The document form keeps graph_rules.py (Q-6).
@@ -15,6 +16,8 @@ Adapted from the prototype graph_rules_proto.py (reuse map R3).
 """
 import copy
 import math
+
+import networkx
 
 KINDS = {
     "workflow": {"rules": ["step_identity", "step_kind", "connection_endpoints", "duplicate_connection", "adjacency", "single_writer", "stop_limit", "cycle"],
@@ -278,6 +281,35 @@ def run_check(graph, given=None):
     return {"status": "refused" if broken else "ready", "broken": broken}
 
 
+def _loaded_id(item):
+    value = item.get("id") if isinstance(item, dict) else None
+    return value if isinstance(value, str) and value else None
+
+
 def load(graph):
-    """IF-301 v5: the stored form as one networkx MultiDiGraph (A-187). Not built yet: the stub of the red tests of G-V4.GRAPHAPI.RUN (REQ-GTB-053 to 058)."""
-    raise NotImplementedError("load of IF-301 v5 is built in the loader task of G-V4.GRAPHAPI.RUN")
+    """IF-301 v5 (A-187): the stored form as one networkx MultiDiGraph, built from copies (REQ-GTB-053 to 058).
+
+    A step is a node keyed by its ID, a connection an edge keyed by its ID (two connections between the same steps stay two edges); both carry `data`
+    ({} when it is no object, D-481) and `position`, their index in the stored form, which orders ties (REQ-WFM-167). Malformed items are left out and
+    nothing raises: the rule report names them from the stored form (REQ-GTB-057).
+    """
+    loaded = networkx.MultiDiGraph()
+    if not isinstance(graph, dict):
+        return loaded
+    loaded.graph.update(copy.deepcopy({k: v for k, v in graph.items() if k not in ("nodes", "edges")}))
+    loaded.graph.setdefault("kind", "workflow")
+    nodes, edges = graph.get("nodes"), graph.get("edges")
+    for position, step in enumerate(nodes if isinstance(nodes, list) else []):
+        step_id = _loaded_id(step)
+        if step_id is not None and step_id not in loaded:
+            loaded.add_node(step_id, data=copy.deepcopy(_data(step)), position=position)
+    seen = set()
+    for position, connection in enumerate(edges if isinstance(edges, list) else []):
+        edge_id = _loaded_id(connection)
+        if edge_id is None or edge_id in seen:
+            continue
+        seen.add(edge_id)
+        start, end = connection.get("from"), connection.get("to")
+        if isinstance(start, str) and isinstance(end, str) and start in loaded and end in loaded:
+            loaded.add_edge(start, end, key=edge_id, data=copy.deepcopy(_data(connection)), position=position)
+    return loaded
