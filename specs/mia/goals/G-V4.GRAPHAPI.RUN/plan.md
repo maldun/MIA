@@ -86,4 +86,4 @@ Regression set: after every task the unit suite (`discover -s tests`) and every 
 - Notes for other subgoals stay as in `requirements.md`: MIGRATION stores the converted skills and switches each skill to its stored graph; SWITCH moves the nine user-interface skills and removes the old runner; CODE uses the run record's graph and version; VIEW, EDIT and CONTEXT consume IF-301 v5 (joint amendment A-187, `G-V4/goal.md`).
 
 ## Plan gate
-- [ ] Plan package approved by maldun (owner): goal, high-level spec, requirements, checks and test code (red tests staged in `specs/mia/amendments/A-187/tests/`, A-187 staged). Date:
+- [x] Plan package approved by maldun (owner): goal, high-level spec, requirements, checks and test code (red tests staged in `specs/mia/amendments/A-187/tests/`, A-187 staged). Date: (Mal'Dun Finsterschreck, 2026-11-25)
