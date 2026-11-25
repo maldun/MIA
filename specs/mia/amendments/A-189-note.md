@@ -8,8 +8,10 @@ Status: **for the owner's decision (D-483); a joint amendment of IF-301, which i
   writer was `duplicate_connection` plus `single_writer` and would keep only `duplicate_connection`. With nothing reported, `GraphModel.save_graph`
   reaches `_scoped` and raises `KeyError: 'id'` (reproduced with the rule report switched off). REQ-GTB-060 said "for every stored form".
 - Owner's choice (questionnaire, 2026-11-25): rule 3 (`connection_endpoints`, on the stored form) also names a connection whose ID is not a non-empty
-  text; a repeated ID is named by rule 4 as before; REQ-GTB-060 holds for stored forms whose connections have unique non-empty text IDs. None of the
-  oracle's inputs (15 converted graphs, 500 random graphs, golden 24 to 31) has such a connection, so the oracle stays valid.
+  text; a repeated ID is named by rule 4 as before; REQ-GTB-060 holds for stored forms whose connections have unique non-empty text IDs (narrowed again by D-484, 2026-11-25: and lead
+  from and to existing steps; two `settings` connections into a missing step were also `stop_limit` in v4, rule 3 only now). None of the
+  oracle's inputs (15 converted graphs, 500 random graphs, golden 24 to 31) has a connection without a unique text ID, and its connections to
+  missing steps (golden 27 and 31) keep their v4 answers, so the oracle stays valid.
 - Changed: REQ-GTB-043 (changed copy in the goal's `requirements.md`, Draft), REQ-GTB-060 (text and rationale; its Status line still says Approved:
   set it to Draft and approve again, as for REQ-WFM-167), IF-301 text (rule 3, malformed input, "What changes against v4" item 4, golden 36, decision 20,
   version history), the v5 mock (`_broken` overrides rule 3), the v5 suite (TC-IF-301-39), the real-side check TC-GTB-053 in `test_graph_loader.py`,

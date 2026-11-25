@@ -137,8 +137,8 @@
 ### REQ-GTB-060 – The same rule answers as before
 - Level: low   Subject: Persistence
 - Group: RV
-- Text: The Graph tables shall give, through the loaded graph, the same `rule_report` and `run_check` answers as IF-301 v4 gave before this change, for every stored form whose connections have unique non-empty text IDs.
-- Rationale: refines HR-006 (OC-2 "every result is the same as before"); the answers of v4 are recorded as an oracle before the code changes; a stored form with another connection is refused on the stored form by rule 3 (REQ-GTB-043, changed) or rule 4, as in v4, and may name fewer further items, because `load` leaves that connection out (A-189, D-483; no input of the oracle has such a connection)
+- Text: The Graph tables shall give, through the loaded graph, the same `rule_report` and `run_check` answers as IF-301 v4 gave before this change, for every stored form whose connections have unique non-empty text IDs and lead from and to existing steps.
+- Rationale: refines HR-006 (OC-2 "every result is the same as before"); the answers of v4 are recorded as an oracle before the code changes; a stored form with another connection is refused on the stored form by rule 3 (REQ-GTB-043, changed) or rule 4, as in v4, and may name fewer further items, because `load` leaves that connection out (A-189, D-483); for example two `settings` connections into a step that does not exist were also `stop_limit` in v4 and are rule 3 only now (D-484); the oracle holds no connection without a unique text ID, and its connections to missing steps (golden 27 and 31) keep their v4 answers
 - Parent: HR-006
 - Priority: Must
 - Verification method: Test
