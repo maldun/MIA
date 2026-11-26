@@ -1,5 +1,5 @@
 """
-Browser checks of the graph viewer page (G-V4.VIEW Track B): TC-GA-033 to 039 of specs/mia/goals/G-V4.VIEW/test-spec.md, under TR-VIEW-002, 003,
+Browser checks of the graph viewer page (G-V4.VIEW Track B): TC-GA-033 to 039 of specs/mia/goals/G-V4.VIEW/test-spec.md and TC-GA-040 (A-176), under TR-VIEW-002, 003,
 008 to 013, 018, 021. Firefox of Playwright for Python (requirements-browser.txt), headless, 1280 x 800, scale 1, en-US, a new context per check;
 the page and the real provider on one origin (tests/helpers/graph_view_server.py, TR-VIEW-009); the checks read only the hooks of
 specs/mia/goals/G-V4.VIEW/page-interface-note.md and visible text. Skipped with the reason where Playwright or its Firefox is missing, never passed.
@@ -145,6 +145,50 @@ class BrowserCheck(unittest.TestCase):
             seen[scheme] = (background, label)
         # And the two schemes give different values (the check can fail)
         self.assertNotEqual(seen["light"], seen["dark"])
+
+    def colours(self, page):
+        """the page background and a step label colour as the browser shows them, and as the tokens of the shown theme resolve"""
+        shown = (page.evaluate("() => getComputedStyle(document.body).backgroundColor"),
+                 self.computed(page, "color", self.hook(page, "labelColour()")))
+        tokens = (self.computed(page, "background-color", "var(--page-bg)"), self.computed(page, "color", "var(--text)"))
+        return shown, tokens
+
+    def choose(self, page, choice):
+        """the main app's theme choice saved on this device (templates/static/chat/theme.js: key mia.theme), then the page loaded again"""
+        page.evaluate("(c) => localStorage.setItem('mia.theme', c)", choice)
+        page.reload()
+        page.wait_for_selector("[data-area=graph-list]")
+
+    @mark.req("REQ-GA-016")
+    def test_TC_GA_040_the_main_apps_theme_choice(self):
+        """TC-GA-040: the theme chosen in the main app on this device wins over the system's colour scheme; auto and an unknown value follow the system.
+        Example: system light, mia.theme = dark -> background and label colour equal those of system dark without a choice."""
+        reference = {}
+        for scheme in ("light", "dark"):
+            # Given no saved choice: the system's scheme decides (TC-GA-034)
+            page = self.page(color_scheme=scheme)
+            self.open(page, "sample.code")
+            reference[scheme] = self.colours(page)[0]
+        self.assertNotEqual(reference["light"], reference["dark"])           # the check can fail
+        for scheme, choice, expected in (("light", "dark", "dark"), ("dark", "light", "light"), ("dark", "auto", "dark"), ("light", "auto", "light"),
+                                         ("light", "purple", "light")):
+            # Given the system scheme and the main app's saved choice
+            page = self.page(color_scheme=scheme)
+            self.choose(page, choice)
+            # When sample.code is opened
+            self.open(page, "sample.code")
+            # Then the page and the picture show the chosen theme, with the token values of that theme
+            shown, tokens = self.colours(page)
+            self.assertEqual(shown, reference[expected], "%s, %s" % (scheme, choice))
+            self.assertEqual(shown, tokens, "%s, %s" % (scheme, choice))
+        # And: a choice changed in another page of the same origin (the main app in another tab) re-colours the open picture without a reload
+        page = self.page(color_scheme="light")
+        self.open(page, "sample.code")
+        other = page.context.new_page()
+        other.goto(self.server.url + "/graph/")
+        other.evaluate("() => localStorage.setItem('mia.theme', 'dark')")
+        page.wait_for_function("() => document.documentElement.dataset.theme === 'dark'", timeout=STEP)
+        self.assertEqual(self.colours(page)[0], reference["dark"])
 
     @mark.req("REQ-GA-029")
     def test_TC_GA_035_stored_text_stays_text(self):
