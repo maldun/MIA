@@ -2,6 +2,7 @@
 // (`window.graphViewTest`, TR-VIEW-010, 013). Colours and the font come from the design tokens as the browser resolves them (REQ-GA-016);
 // one fixed seed and solver settle a graph the same way on every opening (REQ-GA-031); a dropped step is held where it was dropped (REQ-GA-032).
 import { layered } from './arrangement.js';
+import { THEME_CHANGED } from './theme.js';
 
 const SMOOTH = { rounded: { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 }, straight: false };
 
@@ -114,15 +115,18 @@ export function visDrawing(container, vis, win = globalThis) {
     }
   });
   network.on('click', ({ nodes: picked, edges: links }) => select(picked[0] ? { step: picked[0] } : links[0] ? { connection: links[0] } : {}));
-  // a light/dark change re-colours what is shown in place; a new show() would settle the graph again and lose the dropped places (V-2, REQ-GA-032)
-  win.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+  // a light/dark change (the system's scheme, or the main app's choice: theme.js) re-colours what is shown in place; a new show() would
+  // settle the graph again and lose the dropped places (V-2, REQ-GA-032)
+  const recolour = () => {
     colours = tokens(doc);
     nodes.update(drawing.data.nodes.map((n) => {
       const { id, font, color, ctxRenderer } = visNode(n, colours);
       return ctxRenderer ? { id, font, color, ctxRenderer } : { id, font, color };
     }));
     network.setOptions({ edges: visOptions(options, colours).edges });
-  });
+  };
+  win.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', recolour);
+  win.addEventListener?.(THEME_CHANGED, recolour);
 
   const drawing = {
     data: { nodes: [], edges: [] },
