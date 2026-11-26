@@ -171,7 +171,7 @@ class BrowserCheck(unittest.TestCase):
             reference[scheme] = self.colours(page)[0]
         self.assertNotEqual(reference["light"], reference["dark"])           # the check can fail
         for scheme, choice, expected in (("light", "dark", "dark"), ("dark", "light", "light"), ("dark", "auto", "dark"), ("light", "auto", "light"),
-                                         ("light", "purple", "light")):
+                                         ("light", "purple", "light"), ("dark", "purple", "dark")):
             # Given the system scheme and the main app's saved choice
             page = self.page(color_scheme=scheme)
             self.choose(page, choice)
