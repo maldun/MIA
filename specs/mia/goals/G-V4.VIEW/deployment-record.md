@@ -39,7 +39,7 @@ Previous image `localhost/mia:v0.2.1` (id `439429d0b8d5`). Command: in the main 
 ## Findings
 | ID | Finding | Goes to |
 |---|---|---|
-| F-1 | `python -m MIA.migrate files-to-db --dry-run` on the live volume stops with a traceback (`AttributeError: 'str' object has no attribute 'get'` in `storage_copy._check_entries`): the file store keeps `presets` as plain documents, not version lists, and `migrate` copies every table without a choice. Its docstring promises one line and exit 1. Nothing was written | G-V4.GRAPHSTORE.TRANSFER (owner, 2026-11-26): a failing test there first, before the migration of the live store |
+| F-1 | `python -m MIA.migrate files-to-db --dry-run` on the live volume stops with a traceback (`AttributeError: 'str' object has no attribute 'get'` in `storage_copy._check_entries`): the file store keeps `presets` as plain documents, not version lists, and `migrate` copies every table without a choice. Its docstring promises one line and exit 1. Nothing was written | G-V4.GRAPHSTORE.TRANSFER (owner, 2026-11-26): a failing test there first, before the migration of the live store; note `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/note-f1-migrate-presets.md` |
 | F-2 | `deploy/preflight.sh` reads `OLLAMA_URL` from `deploy/.env` and checks it from the host; `http://host.containers.internal:11434` resolves only inside containers, so P1 fails although Ollama answers | deployment script defect: a check first, then the fix (open) |
 
 ## Known issues

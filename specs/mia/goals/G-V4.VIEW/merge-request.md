@@ -102,7 +102,7 @@ In the parent's worktree (`/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v
 - whoever merges second among VIEW, TRANSFER and BUILDER: the unit suite and every acceptance script one at a time
 
 ## Notes for other subgoals
-- **TRANSFER:** V-3 (reconnect, or open the PostgreSQL backend lazily, with a check on a real stopped container). It also carries `arrangements` and `graph_changes`, and makes the store route's live and copy fields real (REQ-API-022).
+- **TRANSFER:** V-3 (reconnect, or open the PostgreSQL backend lazily, with a check on a real stopped container). Also F-1 of VIEW's Deploy (`migrate files-to-db` stops with a traceback on the `presets` files of the live volume): `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/note-f1-migrate-presets.md`. It also carries `arrangements` and `graph_changes`, and makes the store route's live and copy fields real (REQ-API-022).
 - **EDIT:** the page side of the write routes and the arrangement save button. TD-91 (the notice for other errors), TD-92 (untrusted vs missing step), TD-93 (trust fields of a transform without trust), TD-94 (out-of-order answers). It may tighten REQ-API-048 (D-502 (1)).
 - **CODE:** `changed_since_trusted` made real (REQ-API-028); TD-95 (the made-up toolbox reason).
 - **BUILDER** (`explore/builder-workflow`): `git merge-tree` against this branch shows no conflict today. If both add rows at the end of `review-log.md`, keep both, ordered by decision number.
