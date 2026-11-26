@@ -21,7 +21,7 @@
 ## Smoke tests
 | Test | Result |
 |---|---|
-| SMOKE-VIEW-001 `smoke_view_image.py` (TR-VIEW-016) | **pending**: the owner runs it (the owner's password) against `mia-view` with `store: database`: `--user maldun --url https://localhost:8596 --image localhost/mia:g-v4-view`. Part 1 seen by the agent: `import psycopg` works in the image (3.3.9, without network) |
+| SMOKE-VIEW-001 `smoke_view_image.py` (TR-VIEW-016) | **green**, run by the owner 2026-11-26 against `mia-view` with `store: database` (`--user maldun --url https://localhost:8596 --image localhost/mia:g-v4-view`): `import psycopg` yes (3.3.9); `GET /api/v2/store` `{"store": "database", "reachable": true, "live_reachable": true, "shown": "live", "lag": {"graphs": 0, "since": null}}`; rc 0 |
 | SMOKE-VIEW-002 `smoke_view_open_time.py` (TR-VIEW-017, measured) | `chain.fifty`, Firefox 157, five openings after one warm-up: 97, 100, 92, 122, 88 ms; median **97 ms**, range 88 to 122 ms |
 | Stack | graph page 200 on 8586 and 8596; all five services up in both stacks |
 
@@ -54,4 +54,4 @@ Previous image `localhost/mia:v0.2.1` (id `439429d0b8d5`). Command: in the main 
 - Worktree files `deploy/.env`, `deploy/setup_cfg.local.json`, `deploy/setup_cfg.view-db.json`: not in git; the live stack runs from this worktree, so `.env` stays while it does.
 
 ## Validation hand-over
-Validate runs in G-V5 (parked, D-386): VAL-VIEW-01, NFR-10, light and dark readability, the 220 px layers on large graphs. Ready: yes, once SMOKE-VIEW-001 is green.
+Validate runs in G-V5 (parked, D-386): VAL-VIEW-01, NFR-10, light and dark readability, the 220 px layers on large graphs. Ready: yes.
