@@ -733,7 +733,7 @@ Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039,
 - Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
 
 ### TR-VIEW-002 – The fixture graphs
-- Applies to: TC-API-018, TC-API-020, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, SMOKE-VIEW-002
+- Applies to: TC-API-018, TC-API-020, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040, SMOKE-VIEW-002
 - Requirement: REQ-GA-019
 - Group: SD
 - Kind: setup
@@ -744,7 +744,7 @@ Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039,
 - Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
 
 ### TR-VIEW-003 – Fresh stores and accounts
-- Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039
+- Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040
 - Requirement: REQ-API-046
 - Group: SD
 - Kind: setup
@@ -799,7 +799,7 @@ Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039,
 - Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
 
 ### TR-VIEW-008 – Firefox as the reference browser
-- Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, SMOKE-VIEW-002
+- Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040, SMOKE-VIEW-002
 - Requirement: REQ-GA-012
 - Group: BR
 - Kind: setup
@@ -810,7 +810,7 @@ Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039,
 - Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
 
 ### TR-VIEW-009 – One origin with the real provider
-- Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039
+- Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040
 - Requirement: REQ-GA-042
 - Group: BR
 - Kind: setup
@@ -854,7 +854,7 @@ Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039,
 - Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
 
 ### TR-VIEW-013 – Colours compared with the browser's token values
-- Applies to: TC-GA-034
+- Applies to: TC-GA-034, TC-GA-040
 - Requirement: REQ-GA-016
 - Group: BR
 - Kind: setup
@@ -945,7 +945,7 @@ Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039,
 - Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
 
 ### TR-VIEW-021 – Each new check is shown able to fail
-- Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-OPR-011, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-031, TC-GA-032, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039
+- Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-OPR-011, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-031, TC-GA-032, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040
 - Requirement: REQ-GA-043
 - Group: CR
 - Kind: setup

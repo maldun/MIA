@@ -3,6 +3,9 @@ import { createViewer } from './viewer.js';
 import { httpApi } from './api.js';
 import { visDrawing } from './drawing.js';
 import { pageStorage } from './settings.js';
+import { followTheme } from './theme.js';
+
+followTheme(globalThis, document.documentElement);     // before the first drawing reads the tokens (A-176)
 
 createViewer({
   document,
