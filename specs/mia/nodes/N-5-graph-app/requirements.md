@@ -208,15 +208,15 @@ Terms (store setting, owner, record of changes, entry, what cannot be drawn): se
 ### REQ-GA-016 – Light and dark
 - Level: low   Subject: GraphApp
 - Group: FL
-- Text: The Graph app shall follow the system's light or dark setting through the themes of the design tokens, the picture included.
-- Rationale: NFR-14 and HR-009; the picture's colours are read from the tokens (D-431)
+- Text: The Graph app shall show the theme chosen in the main app on the same device (dark, light, or auto, which follows the system's light or dark setting; no choice or an unknown value counts as auto) through the themes of the design tokens, the picture included, also when the choice changes while the page is open.
+- Rationale: NFR-14 and HR-009; the picture's colours are read from the tokens (D-431); one theme choice for the whole app (D-503: on the owner's host the system is light, so a page that follows only the system never shows dark)
 - Parent: NFR-14
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: in Firefox with the colour scheme light and then dark, the page background and the step label colour equal the token values of that theme (exact)
-- Verified by: TC-GA-034
+- Acceptance criterion: in Firefox without a saved choice, with the colour scheme light and then dark, the page background and the step label colour equal the token values of that theme (exact); with the saved choice dark or light they equal those of the chosen theme under either colour scheme, and with auto or an unknown value those of the colour scheme (exact); a choice saved in another page of the same origin re-colours the open page without a reload
+- Verified by: TC-GA-034, TC-GA-040
 - Status: Verified
-- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").; changed by A-176 (D-503, 2026-11-26): follows the main app's theme choice `mia.theme`, auto as before (the owner's look at Deploy); TC-GA-040 added
 
 ### REQ-GA-017 – Graph status
 - Level: low   Subject: GraphApp

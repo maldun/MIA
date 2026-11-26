@@ -55,6 +55,7 @@ Unchanged from `specs/mia/goals/G-V4.VIEW/test-spec.md`; their test requirements
 | TC-GA-037 | REQ-GA-032, REQ-GA-034 | end-to-end (browser) | 2 | sample.code opened and settled; step.check dragged by 100 px; then the settings switched to straight and off | step.check stays where dropped, also after the settings change; no request other than GET | exact, whole pixels |
 | TC-GA-038 | REQ-GA-041 | end-to-end (browser) | 2 | Firefox, key presses only | the owner opens sample.code, reaches step.check, selects it (its fields appear) and opens the settings | exact |
 | TC-GA-039 | REQ-GA-042, REQ-GA-043 | end-to-end (browser) | 2 | a session: open the list, sample.code and cp2.multi, select steps, drag one, open the history and an earlier version, change the settings | no request to another origin; every request to `/api/v2` is a GET | exact |
+| TC-GA-040 | REQ-GA-016 | end-to-end (browser) | 2 | Firefox, colour scheme light or dark, the main app's choice `mia.theme` saved (dark, light, auto, an unknown value); sample.code opened; then the choice changed in another page of the origin | page background and step label colour equal those of the chosen theme (auto and unknown: of the scheme) and the token values; the change re-colours without a reload | exact |
 
 ## Edge inputs of G-V4.VIEW
 | Requirement | Edge | Test ID | Expected result |
@@ -214,6 +215,14 @@ Unchanged from `specs/mia/goals/G-V4.VIEW/test-spec.md`; their test requirements
 - Then: in each scheme the page background and the colour of a step label equal the values of the tokens of that theme
 - And: the two schemes give different values (the check can fail)
 - And: witnesses OC-8 in part (the owner's side-by-side look is VAL-VIEW-01)
+
+### TC-GA-040 – The main app's theme choice wins over the system (A-176)
+- Verifies: REQ-GA-016
+- Given: Firefox with the colour scheme light or dark; the main app's choice saved on the device (`mia.theme`: dark, light, auto or an unknown value); sample.code opened
+- When: the page background and the colour of a step label are read
+- Then: they equal those of a page under the chosen theme's colour scheme without a choice (auto and an unknown value: the scheme's), and the token values of the shown theme
+- And: a choice saved in another page of the same origin re-colours the open page without a reload
+- And: the reference colours of light and dark differ (the check can fail)
 
 ### TC-GA-035 – Stored text stays text in the browser
 - Verifies: REQ-GA-029
