@@ -7,7 +7,7 @@ import { renderPanel, renderStepList } from './panel.js';
 import { loadSettings, saveSettings, edgeSmooth } from './settings.js';
 import { applyPositions, positionsOf, arrangementNote } from './arrangement.js';
 import { historyEntries, neighbour, versionNote } from './history.js';
-import { addStep, removeStep, changeStep, addConnection, removeConnection, changeConnection } from './edit-model.js';
+import { addStep, removeStep, changeStep, addConnection, removeConnection, changeConnection, profileOf, nodeTypes } from './edit-model.js';
 import { renderStepEditor, renderConnectionEditor } from './edit-panel.js';
 import * as hist from './undo-stack.js';
 import { storeNote, canEdit, syncMessage } from './store-note.js';
@@ -33,6 +33,9 @@ let draft = null;
 let livePositions = null;
 let isOwner = false;
 let tools = [];
+let kindsAnswer = null;                               // round 05 CP21: GET /api/v2/kinds, the editor profile per kind of graph
+const kindInfo = () => profileOf(kindsAnswer, current?.graph?.kind);   // {editable, reason, profile} of the open graph
+const hasTool = (type) => (kindInfo().profile?.node_types ?? []).some((t) => t.type === type && t.fields.some((f) => f.list === 'toolbox'));
 let history = null;
 let storeStatus = null;
 let changeLog = [];
@@ -45,7 +48,7 @@ const viewGraph = () => (overlay ? overlay.graph : editing && draft ? draft : cu
 const kindOf = (id) => viewGraph().nodes.find((n) => n.id === id)?.data?.type;
 const infoOf = (id) => {
   const type = kindOf(id);
-  if (editing && (type === 'transform' || type === 'master')) {        // while editing the marks follow the tool chosen in the working copy
+  if (editing && hasTool(type)) {        // while editing the marks follow the tool chosen in the working copy (round 05: a type whose profile has a tool field)
     const tool = tools.find((t) => t.id === viewGraph().nodes.find((n) => n.id === id)?.data?.toolbox_id);
     return { kind: type, trust: tool?.trust ?? 'untrusted', lifecycle: tool?.lifecycle ?? null, code: current.steps[id]?.code ?? false };
   }
@@ -214,7 +217,8 @@ function draw() {
   if (editing && history) refreshUndo();
   $('restore').hidden = !(isOwner && !editing && !overlay && current.version !== current.current);
   $('replay-bar').hidden = !overlay;
-  $('edit-toggle').disabled = !canEdit(storeStatus) || Boolean(overlay);
+  $('edit-toggle').disabled = !canEdit(storeStatus) || Boolean(overlay) || !kindInfo().editable;
+  if (!kindInfo().editable) { $('edit-toggle').title = kindInfo().reason; $('kind-note').textContent = kindInfo().reason; } else $('kind-note').textContent = '';
 }
 
 // settings menu: opens under its button, closes with Escape, a click outside or the button again; every change applies at once and is remembered
@@ -283,8 +287,8 @@ const liveNote = (id) => (storeStatus?.behind?.[id] ? ` - the live store already
 function refreshStoreNote() {
   $('store-note').textContent = storeNote(storeStatus);
   $('sync').hidden = !(isOwner && storeStatus?.split);
-  $('edit-toggle').disabled = !canEdit(storeStatus);
-  $('edit-toggle').title = canEdit(storeStatus) ? '' : 'The live store cannot be reached.';
+  $('edit-toggle').disabled = !canEdit(storeStatus) || (current && !kindInfo().editable);
+  $('edit-toggle').title = canEdit(storeStatus) ? (current && !kindInfo().editable ? kindInfo().reason : '') : 'The live store cannot be reached.';
   $('restore').disabled = !canEdit(storeStatus);
 }
 async function loadStoreStatus() {
@@ -397,7 +401,7 @@ function change(next) {
 
 function showEditor(step, errors = {}) {
   renderStepEditor(document, $('detail'), step, {
-    errors, tools,
+    errors, tools, profile: kindInfo().profile,
     onApply: ({ data, errors: found }) => {
       if (Object.keys(found).length) { showEditor(step, found); return; }
       const r = changeStep(draft, step.id, data);
@@ -408,7 +412,8 @@ function showEditor(step, errors = {}) {
 }
 function showConnectionEditor(link) {
   renderConnectionEditor(document, $('detail'), link, {
-    onApply: (values) => { const r = changeConnection(draft, link.id, values); if (r.error) note(r.error); else change(r.graph); },
+    profile: kindInfo().profile,
+    onApply: (values) => { const r = changeConnection(draft, link.id, values, kindInfo().profile); if (r.error) note(r.error); else change(r.graph); },
     onRemove: () => { change(removeConnection(draft, link.id)); renderPanel(document, $('detail'), null); },
   });
 }
@@ -416,6 +421,8 @@ function showConnectionEditor(link) {
 function startEdit() {
   if (overlay) { $('status').textContent = 'Leave the playback or comparison first.'; return; }
   if (!current || current.version !== current.current) { $('status').textContent = 'Only the current version can be edited: open the current version first.'; return; }
+  if (!kindInfo().editable) { $('status').textContent = kindInfo().reason; return; }
+  fillEditChoices(kindInfo().profile);
   editing = true;
   draft = JSON.parse(JSON.stringify(current.graph));
   history = hist.create(draft);
@@ -431,16 +438,26 @@ function stopEdit() {
   editing = false; draft = null; history = null; editBar.hidden = true; $('edit-toggle').hidden = !isOwner; $('rules').replaceChildren(); $('session-changes').replaceChildren();
   renderPanel(document, $('detail'), null);
 }
+// round 05 CP21: the choices of the edit bar come from the profile (types of step; the choice fields of a connection)
+function fillEditChoices(profile) {
+  $('new-kind').replaceChildren(...nodeTypes(profile).map((t) => { const o = document.createElement('option'); o.value = t.type; o.textContent = t.name; return o; }));
+  const role = (profile?.connection_fields ?? []).find((f) => f.input === 'choice' && f.options);
+  $('conn-role-label').textContent = role ? role.label : '';
+  $('conn-role').hidden = !role;
+  $('conn-role').replaceChildren(...(role ? role.options : []).map((v) => { const o = document.createElement('option'); o.value = v; o.textContent = v || '(none)'; return o; }));
+  $('conn-role').dataset.field = role ? role.name : '';
+}
 $('edit-toggle').addEventListener('click', startEdit);
 $('discard').addEventListener('click', () => { stopEdit(); draw(); });
 $('add-step').addEventListener('click', () => {
-  const r = addStep(draft, $('new-name').value, $('new-kind').value);
+  const r = addStep(draft, $('new-name').value, $('new-kind').value, kindInfo().profile);
   if (r.error) { note(r.error); return; }
   $('new-name').value = '';
   change(r.graph);
 });
 $('add-conn').addEventListener('click', () => {
-  const r = addConnection(draft, $('conn-from').value, $('conn-to').value, { role: $('conn-role').value });
+  const field = $('conn-role').dataset.field;
+  const r = addConnection(draft, $('conn-from').value, $('conn-to').value, field ? { [field]: $('conn-role').value } : {}, kindInfo().profile);
   if (r.error) note(r.error); else change(r.graph);
 });
 $('keep').addEventListener('click', async () => {
@@ -458,7 +475,7 @@ async function start() {
   if (!who.user && !who.account) { show('login'); return; }
   $('who').textContent = who.user ?? who.account;
   isOwner = (await (await api('/api/v2/me')).json()).owner;
-  if (isOwner) tools = await (await api('/api/v2/toolbox')).json();
+  if (isOwner) [tools, kindsAnswer] = await Promise.all([api('/api/v2/toolbox').then((r) => r.json()), api('/api/v2/kinds').then((r) => r.json())]);
   await loadStoreStatus();
   $('edit-toggle').hidden = !isOwner || editing;
   $('run-box').hidden = !isOwner;

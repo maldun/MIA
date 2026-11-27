@@ -4,12 +4,14 @@ import assert from 'node:assert/strict';
 import { diffChanges, sessionChanges, withReasons, changeKey, describeChange, explain } from '../graph_app_v2/change-log.js';
 import * as hist from '../graph_app_v2/undo-stack.js';
 import { addStep, removeStep, changeStep, addConnection, removeConnection } from '../graph_app_v2/edit-model.js';
+import { readFileSync } from 'node:fs';
+const W = JSON.parse(readFileSync(new URL('./kinds_answer.json', import.meta.url))).kinds.workflow;   // round 05 CP21: the profile comes from the backend
 
 const base = { nodes: [{ id: 'in', data: { type: 'data', value: 'x' } }, { id: 'step', data: { type: 'transform', toolbox_id: 'check.number' } }, { id: 'out', data: { type: 'data' } }],
   edges: [{ id: 'e1', from: 'in', to: 'step', data: {} }, { id: 'e2', from: 'step', to: 'out', data: {} }] };
 
 test('FR-76: one action of the editor is one entry, with the value before and after', () => {
-  const a = addStep(base, 'n', 'data').graph;
+  const a = addStep(base, 'n', 'data', W).graph;
   assert.deepEqual(diffChanges(base, a), [{ op: 'add_step', target: 'n', before: null, after: { type: 'data' }, reason: null }]);
   const c = changeStep(a, 'step', { type: 'transform', toolbox_id: 'check.claim' }).graph;
   const [ch] = diffChanges(a, c);
@@ -26,8 +28,8 @@ test('FR-76: one action of the editor is one entry, with the value before and af
 
 test('FR-76: only the changes that would be kept are entries: undone changes are not', () => {
   let h = hist.create(base);
-  h = hist.push(h, addStep(h.present, 'a', 'data').graph);
-  h = hist.push(h, addStep(h.present, 'b', 'data').graph);
+  h = hist.push(h, addStep(h.present, 'a', 'data', W).graph);
+  h = hist.push(h, addStep(h.present, 'b', 'data', W).graph);
   h = hist.push(h, changeStep(h.present, 'step', { type: 'transform', toolbox_id: 'check.claim' }).graph);
   assert.equal(sessionChanges(h).length, 3);
   h = hist.undo(hist.undo(h));
@@ -39,8 +41,8 @@ test('FR-76: only the changes that would be kept are entries: undone changes are
 
 test('FR-77: a reason typed for a change stays with that change, and a change without one has none', () => {
   let h = hist.create(base);
-  h = hist.push(h, addStep(h.present, 'a', 'data').graph);
-  h = hist.push(h, addStep(h.present, 'b', 'data').graph);
+  h = hist.push(h, addStep(h.present, 'a', 'data', W).graph);
+  h = hist.push(h, addStep(h.present, 'b', 'data', W).graph);
   const [first, second] = sessionChanges(h);
   const reasons = new Map([[changeKey(first), '  because the test needs it  ']]);
   assert.deepEqual(withReasons([first, second], reasons).map((c) => c.reason), ['because the test needs it', null]);

@@ -1,0 +1,140 @@
+{
+ "kinds": {
+  "context": {
+   "connection_fields": [],
+   "editable": false,
+   "node_types": [],
+   "reason": "Editing context graphs comes with G-V4.CONTEXT.",
+   "rules": [
+    "step_identity",
+    "connection_endpoints",
+    "duplicate_connection"
+   ],
+   "runs": false
+  },
+  "workflow": {
+   "connection_fields": [
+    {
+     "input": "choice",
+     "label": "role",
+     "name": "role",
+     "options": [
+      "",
+      "settings",
+      "order",
+      "code"
+     ]
+    },
+    {
+     "input": "text",
+     "label": "name",
+     "name": "as"
+    }
+   ],
+   "editable": true,
+   "node_types": [
+    {
+     "fields": [
+      {
+       "input": "json",
+       "label": "value (JSON)",
+       "name": "value"
+      },
+      {
+       "input": "json",
+       "label": "parameters (JSON object)",
+       "name": "parameters",
+       "object": true
+      }
+     ],
+     "name": "data step",
+     "start": {
+      "type": "data"
+     },
+     "type": "data"
+    },
+    {
+     "fields": [
+      {
+       "filter": {
+        "controller": false
+       },
+       "input": "choice",
+       "keep_unknown": true,
+       "label": "tool (toolbox entry)",
+       "list": "toolbox",
+       "message": "A processing step needs a tool.",
+       "name": "toolbox_id",
+       "required": true
+      }
+     ],
+     "name": "processing step",
+     "start": {
+      "toolbox_id": "",
+      "type": "transform"
+     },
+     "type": "transform"
+    },
+    {
+     "fields": [
+      {
+       "filter": {
+        "controller": true
+       },
+       "input": "choice",
+       "keep_unknown": true,
+       "label": "tool (toolbox entry)",
+       "list": "toolbox",
+       "message": "A processing step needs a tool.",
+       "name": "toolbox_id",
+       "required": true
+      },
+      {
+       "above": 0,
+       "input": "number",
+       "label": "stop after repetitions",
+       "name": "stop.max_repetitions",
+       "whole": true
+      },
+      {
+       "above": 0,
+       "input": "number",
+       "label": "stop after seconds",
+       "name": "stop.max_seconds"
+      }
+     ],
+     "name": "loop-controlling step",
+     "need_one_of": [
+      {
+       "fields": [
+        "stop.max_repetitions",
+        "stop.max_seconds"
+       ],
+       "message": "A loop-controlling step needs a limit: repetitions or seconds."
+      }
+     ],
+     "start": {
+      "stop": {
+       "max_repetitions": 1
+      },
+      "toolbox_id": "",
+      "type": "master"
+     },
+     "type": "master"
+    }
+   ],
+   "rules": [
+    "step_identity",
+    "step_kind",
+    "connection_endpoints",
+    "duplicate_connection",
+    "adjacency",
+    "single_writer",
+    "stop_limit",
+    "cycle"
+   ],
+   "runs": true
+  }
+ },
+ "unknown_reason": "The program does not know this kind of graph."
+}

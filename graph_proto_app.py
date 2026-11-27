@@ -25,6 +25,7 @@ import accounts_api
 import graph_model
 import graph_changes
 import graph_rules_proto
+import graph_profiles_proto
 import graph_run
 import graph_store_move
 import graph_store_sync
@@ -301,6 +302,11 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
             return {"synced": True}
         except StorageError as error:
             return {"synced": False, "sync_problem": json.dumps(error.detail.get("graphs", error.detail)) if isinstance(error.detail, dict) else str(error.detail)}
+
+    @app.get("/api/v2/kinds")
+    def kinds():
+        """PROTOTYPE round 05 CP21: the editor profile per kind of the registry (graph_profiles_proto); the page builds its forms from it (FR-92)"""
+        return jsonify(graph_profiles_proto.kinds_answer())
 
     @app.get("/api/v2/me")
     def me():
