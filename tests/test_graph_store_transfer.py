@@ -285,8 +285,11 @@ class OneGraph(unittest.TestCase):
         """Example: with graph_changes and arrangements defined: cp2.multi/1 to /4 and arrangements cp2.multi come before the header;
         without them, members and the header only."""
         # Given: the records of cp2.multi as the module lists them, without and with VIEW's side tables
-        without = transfer._graph_records(self.live, self.copy, ts.MULTI)
-        defined = dict(transfer.table_definitions(), graph_changes={}, arrangements={})
+        # both states are patched: since VIEW's merge the tables are defined in the real registry
+        undefined = {t: d for t, d in transfer.table_definitions().items() if t not in ("graph_changes", "arrangements")}
+        with mock.patch.object(transfer, "table_definitions", lambda: undefined):
+            without = transfer._graph_records(self.live, self.copy, ts.MULTI)
+        defined = dict(undefined, graph_changes={}, arrangements={})
         with mock.patch.object(transfer, "table_definitions", lambda: defined):
             records = transfer._graph_records(self.live, self.copy, ts.MULTI)
         # Then: no side record without the tables; with them, one change record per version and the arrangement, the header still last
