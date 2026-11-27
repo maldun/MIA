@@ -51,6 +51,7 @@ from . import accounts, accounts_api
 from .chat_ops_api import create_chat_ops_blueprint
 from .items_api import create_items_blueprint
 from .graph_api import create_graph_blueprint
+from . import graph_api_v2
 from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
 from .skill_digest import LiveDigest
@@ -105,6 +106,7 @@ AUDIO_FOLDER= os.path.join(FPATH,AUDIO_DIR)
 
 from .config import load as _load_config
 cfg = _load_config(cfg_file)                    # the configuration of the file, with setup_cfg.local.json (the settings of this machine, not in git) laid over it
+_graph_store = graph_api_v2.store_setting(cfg)      # files (the data folder `accounts_dir`) or database (MIA_DATABASE_URL); anything else stops the start at once (REQ-API-019, 020)
 TIMEOUT_OPT = "timeout"
 
 from .utils import MyMarkdown, get_url, get_websocket_url, get_timestamp
@@ -656,7 +658,18 @@ def speak_answer(text, should_stop=None):
     speak_text(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT, spoken, should_stop)       # raises OSError without a sound server (REQ-CHA-033)
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
-_votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
+_db_backend = FileBackend(_db_dir)
+_votes_store = Storage(_db_backend)                  # the votes table (REQ-CHA-015); the accounts use the same folder
+
+def _graph_backend():
+    if _graph_store == "files":
+        return _db_backend
+    url = os.environ.get("MIA_DATABASE_URL")
+    if not url:
+        raise ValueError('the setting "store" is "database", but MIA_DATABASE_URL is not set')
+    from .storage_postgres import PostgresBackend          # psycopg only where the database is used (requirements-db.txt)
+    return PostgresBackend(url)
+
 _workflow_library = WorkflowLibrary(_votes_store, is_owner=accounts.owner_check(cfg, _votes_store), pins=lambda: pins_from_config(cfg))             # IF-203 on the same storage; the review workflow is its first entry (a draft); the owner of the snapshots is `owner_account`, else the first account
 
 def run_memory_skill(inputs):
@@ -707,6 +720,7 @@ app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_graph_blueprint(_workflow_library))          # IF-104 for the Graph app, under the same session
+app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_graph_backend(), _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins))      # IF-104 v2 under the same session (REQ-API-030)
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads
                                                       os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json")), socketio.emit))
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])

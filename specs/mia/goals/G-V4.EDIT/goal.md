@@ -28,6 +28,8 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 ## Explore result (2026-11-20, D-363)
 `../G-V4.VIEW/research.md`. Decision: the graph rules are checked by a backend check route that the page asks before saving (one rule set after G-V4.GRAPHAPI; the route is an amendment of IF-104 in Plan); the backend still validates on save. Open for Plan: the protected mock of the graph interface for the JavaScript tests (A-36 drafts), conflict handling (`expected_version`).
 
+**Plan points decided before Plan (2026-11-23, D-471):** Plan starts when VIEW is merged into `goal/v4`; IF-104 v3 adds `copy-step`, `kinds` and `toolbox` (joint amendment at G-V4); EDIT builds the live-store writes while MIA runs on a copy in its last task, after TRANSFER is merged; EDIT stays one goal with its tasks ordered core first. VIEW builds the backend side of FR-70 to FR-74, FR-95 and NFR-19 (D-430 (7)).
+
 ## Source
 REQ-GA-002, REQ-GA-003 (N-5 T-02, open Q-2: where the rules run in the page); the backend still validates (TB-edit).
 
@@ -60,7 +62,7 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
-| Plan | open | |
+| Plan | open | waits for VIEW's merge into `goal/v4` (D-471) |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |

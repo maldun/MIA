@@ -145,6 +145,20 @@ package MIA_Architecture {
         end sourceSide : ~EventSink;
         end sinkSide : EventSink;
     }
+    // IF-104 v2 (A-171, contracts/IF-104-graph-api.md): the graph app's requests and the backend's answers under /api/v2, one origin, one session
+    item def GraphApiRequest { attribute route : String; }   // one of the 11 routes; the page sends only GET (REQ-GA-043)
+    item def GraphApiAnswer {
+        doc /* A graph list, a graph in one version, its versions, arrangement, record of changes, rule report, store or account,
+               or a refusal with its reason. Stored names and texts are data for the page, shown as text only (FR-54). */
+    }
+    port def GraphApiPort {                       // seen from the backend
+        in item request : GraphApiRequest;
+        out item answer : GraphApiAnswer;
+    }
+    interface def GraphApiLink {
+        end serverSide : GraphApiPort;
+        end pageSide : ~GraphApiPort;
+    }
 
     // ---------------------------------------------------------------- the system
 
@@ -207,6 +221,7 @@ package MIA_Architecture {
         interface expressionLink : ExpressionLink connect webApp.expression to frontEnd.expression;
         interface eventsFromRuntime : EventLink connect taskRuntime.events to observability.sink;
         interface eventsFromResearch : EventLink connect research.events to observability.sink;
+        interface graphApiLink : GraphApiLink connect webApp.graphPort to graphApp.graphPort;   // IF-104 v2 (G-V4.VIEW)
         interface eventsFromVerification : EventLink connect verifier.events to observability.sink;
     }
 
@@ -278,6 +293,7 @@ package MIA_Architecture {
                orderly stop, the real live and copy fields of GET /api/v2/store (REQ-API-060 to 064). */
         port chat : ChatPort;
         port expression : ExpressionPort;
+        port graphPort : GraphApiPort;
 
         part chatService {
             doc /* chat_send, stop, queue of one, background exchange, deltas, rate limit. */
@@ -319,6 +335,14 @@ package MIA_Architecture {
             doc /* The workflow and graph API for the graph app (IF-104 over HTTP) on the workflow library (IF-203), behind the session guard (N-2.1 T-04). */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_api.py"); }
         }
+        part graphApiV2 {
+            doc /* Target (G-V4.VIEW, REQ-API-018 to 051): IF-104 v2 under /api/v2 beside v1, a Flask blueprint in graph_api_v2.py (all eleven routes since T-06;
+                   entry create_app(backend, accounts_store, store, allowed_origins), REQ-API-030), adapted from the prototype's graph_proto_app.py (R5)
+                   on CORE's GraphModel. Reads (list, graph, versions, arrangement, changes, store, me) for every session; check, save, restore and
+                   arrangement writes for the owner only; the store (files or PostgreSQL) named by the store setting; a refused save names the
+                   broken rule (IF-301 v4 of RULES); the record of changes derived, checked and written once. */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_api_v2.py"); }
+        }
         part variantStore {
             doc /* Target: character variants as data (shown or hidden parts, colours), stored like presets; a workflow names one, the chat has the default. */
             @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("preset_store.py", "presets_api.py"); }
@@ -327,10 +351,32 @@ package MIA_Architecture {
 
     part def GraphApp {
         doc /* Target: web page of the same stack that shows workflow graphs as nodes and edges, as the ArangoDB web interface does,
-               and edits each node and edge as a JSON dictionary on the shared database. Text data only. */
+               and edits each node and edge as a JSON dictionary on the shared database. Text data only.
+               G-V4.VIEW: the whole frame of the owner's layout (D-425) in the main app's look (D-431), read-only, through IF-104 v2 only (HR-002). */
+        port graphPort : ~GraphApiPort;
+        part pageFrame {
+            doc /* Target (G-V4.VIEW): top band, left column, picture, actions, history and replay row, graph status; the areas of EDIT, REPLAY
+                   and RUN present and empty, each with one quiet line; the main app's tokens.css copied unchanged and kept identical by a check,
+                   own styles only from its tokens; light and dark; keyboard reach; no outside request; the page sends only GET (REQ-GA-012 to 016, 022, 041 to 043). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/index.html", "graph_app/app.js", "graph_app/viewer.js", "graph_app/api.js", "graph_app/graph.css", "graph_app/tokens.css"); }
+        }
+        part graphList {
+            doc /* Target (G-V4.VIEW): the list of stored graphs with kind, the filter by name or description, the store shown read-only, opening a graph in its current version (REQ-GA-017 to 021, 023). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/viewer.js", "graph_app/list-filter.js", "graph_app/store-note.js"); }
+        }
         part graphView {
-            doc /* Node-and-edge view with a vendored graph library (plain HTML and JavaScript, no build step). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* Node-and-edge view with a vendored graph library (plain HTML and JavaScript, no build step).
+                   G-V4.VIEW: every step and connection, what cannot be drawn, kinds and attention marks, text as text, the saved arrangement or
+                   physics with a fixed seed and solver, moved steps stay, the layered reset, the settings in one place (REQ-GA-024 to 035). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/drawing.js", "graph_app/adapter.js", "graph_app/step-marks.js", "graph_app/problems.js", "graph_app/arrangement.js", "graph_app/settings.js", "graph_app/vendor"); }
+        }
+        part detailsColumn {
+            doc /* Target (G-V4.VIEW): the left column: content of the selected step or connection as read-only fields and stored text, trust and lifecycle in words, empty when nothing is selected (REQ-GA-036, 037, 044). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/viewer.js", "graph_app/panel.js"); }
+        }
+        part historyList {
+            doc /* Target (G-V4.VIEW): the versions of the open graph newest first, an earlier version shown read-only with its number and time, previous and next (REQ-GA-038 to 040). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_app/viewer.js", "graph_app/history.js"); }
         }
         part nodeEditor {
             doc /* Edits one node or edge as a JSON document; saving creates a new version. */
@@ -671,8 +717,10 @@ package MIA_Architecture {
             doc /* Target (iteration 2, FR-40, overlaps TD-21): workflow and context graphs as node and edge records (ID plus JSON
                    with a fixed type) in PostgreSQL through the storage layer; data classes rebuilt from a type ID, types as JSON
                    schemas, versions never deleted. Today a graph is one versioned document (graph_tables.py).
+                   G-V4.VIEW: the record tables `arrangements` (one per graph, no version) and `graph_changes` (written once, per kept
+                   version) of IF-302 v15 (A-172) in record_tables.py, read and written by the graph API v2 (REQ-RTB-010, 011).
                    G-V4.GRAPHAPI.RULES: the registry of kinds, the rule report and the run check of IF-301 v4 (A-170), in graph_rule_set.py. */
-            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_tables.py", "graph_rules.py", "graph_rule_set.py"); }
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_tables.py", "graph_rules.py", "graph_rule_set.py", "record_tables.py"); }
             @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
         part database {
@@ -703,10 +751,11 @@ package MIA_Architecture {
         }
         part composeStack {
             doc /* MIA, the graph app (graph), the database (db, profile db), Ollama, SearXNG and Caddy as containers, images pinned by digest; ROCm and NVIDIA
-                   overrides; up.sh (start, first account, backup and restore); the runbook (D-127, D-133, D-139, D-145). */
+                   overrides; up.sh (start, first account, backup and restore); the runbook (D-127, D-133, D-139, D-145).
+                   G-V4.VIEW: the release image installs requirements-db.txt, so the database store works in the container (REQ-OPR-011, D-430 (9)). */
             @Implementation {
                 :>> status = ImplementationStatus::built;
-                :>> modules = ("deploy/compose.yaml", "deploy/Containerfile", "deploy/up.sh", "deploy/RUNBOOK.md", "tools/backup.sh", "tools/restore.sh");
+                :>> modules = ("deploy/compose.yaml", "deploy/Containerfile", "deploy/up.sh", "deploy/RUNBOOK.md", "tools/backup.sh", "tools/restore.sh", "requirements-db.txt");
             }
         }
         part freeCheck {
@@ -1729,6 +1778,119 @@ package MIA_Requirements {
         doc /* The system shall refuse to run a graph that breaks the rules, has a step input that nobody supplies or is of a kind that cannot run, and name the broken part before any step has run. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    /* G-V4.VIEW: items of the G-V4 top-level specs that the requirements of G-V4.VIEW refine (D-439): FR-48 to FR-55 and NFR-12 to NFR-14
+       from specs/mia/goals/G-V4.VIEW/top-level-spec.md; FR-70 to FR-74, FR-95 and NFR-19 from ../G-V4.EDIT, FR-76, FR-77, FR-80 and FR-81 from
+       ../G-V4.REPLAY, whose backend side VIEW builds (D-430 (7)). VIEW's HR-001 to HR-009 appear as their parents (tools/gen_node_requirements_model.py). */
+    requirement def <'FR-48'> OpenAnyStoredGraphByName {
+        subject mia : MiaSystem;
+        doc /* The system shall let the owner open any stored workflow graph or context graph and find it by name. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-49'> DrawEveryStepAndConnection {
+        subject mia : MiaSystem;
+        doc /* The system shall draw every step and connection of a stored graph, and say what it cannot draw. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-50'> KindTrustAndLifecycleAtAGlance {
+        subject mia : MiaSystem;
+        doc /* The system shall show the type of each node, and the trust and lifecycle state of each node that uses a tool, at a glance. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-51'> FullContentOfTheSelection {
+        subject mia : MiaSystem;
+        doc /* The system shall show the full content of a selected step or connection. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-52'> NaturalAndKeptArrangement {
+        subject mia : MiaSystem;
+        doc /* The system shall arrange the graph so that it reads naturally and keeps what the owner arranged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-53'> LookChosenInOnePlace {
+        subject mia : MiaSystem;
+        doc /* The system shall let the owner choose how connections and the arrangement look, in one place. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-54'> ShownAsStoredNeverRun {
+        subject mia : MiaSystem;
+        doc /* The system shall always show the graph as it is stored and never run or follow what it contains. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-55'> HistoryAndEarlierVersions {
+        subject mia : MiaSystem;
+        doc /* The system shall show the history of a graph as a list the owner can scroll through and let the owner look at any earlier stored version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-70'> KeepAChangeOnlyWithinTheRules {
+        subject mia : MiaSystem;
+        doc /* The system shall keep a change only when the graph rules hold, and refuse it otherwise with the rule named. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-71'> EveryKeptChangeANewVersion {
+        subject mia : MiaSystem;
+        doc /* The system shall keep every kept change as a new version and leave earlier versions reachable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-72'> NoOverwriteOfAChangedGraph {
+        subject mia : MiaSystem;
+        doc /* The system shall not overwrite a graph that changed while the owner was editing it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-73'> MakeAnEarlierVersionCurrent {
+        subject mia : MiaSystem;
+        doc /* The system shall let the owner make an earlier version the current one again. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-74'> KeepWhereStepsArePlaced {
+        subject mia : MiaSystem;
+        doc /* The system shall keep where the owner placed the steps of a graph between visits, the same for everyone who opens it, without making a new version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-76'> RecordEveryEditorChange {
+        subject mia : MiaSystem;
+        doc /* The system shall record every change made in the editor as a separate entry with who made it, when, what it did and what version it started from. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-77'> ReasonForAChange {
+        subject mia : MiaSystem;
+        doc /* The system shall let the owner give a reason for a change and show it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-80'> RecordedChangesNeverAltered {
+        subject mia : MiaSystem;
+        doc /* The system shall not allow recorded changes to be altered or deleted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-81'> RecordedChangesMoveWithTheGraph {
+        subject mia : MiaSystem;
+        doc /* The system shall keep the recorded changes with the graph when graphs move between places. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'FR-95'> KeptChangesToTheLiveStore {
+        subject mia : MiaSystem;
+        doc /* The system shall write every kept change to the live store, and make the editor read-only when the live store cannot be reached. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'NFR-12'> OnlyLoggedInUsersSeeGraphs {
+        subject mia : MiaSystem;
+        doc /* Only logged-in users see stored graphs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'NFR-13'> ViewerInsideTheHomeNetwork {
+        subject mia : MiaSystem;
+        doc /* The viewer works inside the home network only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'NFR-14'> LightDarkAndKeyboard {
+        subject mia : MiaSystem;
+        doc /* The viewer follows the system's light or dark setting and works by keyboard. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'NFR-19'> OnlyTheOwnerChangesGraphs {
+        subject mia : MiaSystem;
+        doc /* Only the owner changes graphs, and a step changed since it was trusted is marked. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
 
     // ================================================================ the requirement tree
 
@@ -1799,6 +1961,28 @@ package MIA_Requirements {
     requirement nfr16 : NoHalfStoredGraph;
     requirement fr63 : OneRuleSetPerKind;
     requirement fr64 : RefuseARunThatCannotWork;
+    requirement fr48 : OpenAnyStoredGraphByName;
+    requirement fr49 : DrawEveryStepAndConnection;
+    requirement fr50 : KindTrustAndLifecycleAtAGlance;
+    requirement fr51 : FullContentOfTheSelection;
+    requirement fr52 : NaturalAndKeptArrangement;
+    requirement fr53 : LookChosenInOnePlace;
+    requirement fr54 : ShownAsStoredNeverRun;
+    requirement fr55 : HistoryAndEarlierVersions;
+    requirement fr70 : KeepAChangeOnlyWithinTheRules;
+    requirement fr71 : EveryKeptChangeANewVersion;
+    requirement fr72 : NoOverwriteOfAChangedGraph;
+    requirement fr73 : MakeAnEarlierVersionCurrent;
+    requirement fr74 : KeepWhereStepsArePlaced;
+    requirement fr76 : RecordEveryEditorChange;
+    requirement fr77 : ReasonForAChange;
+    requirement fr80 : RecordedChangesNeverAltered;
+    requirement fr81 : RecordedChangesMoveWithTheGraph;
+    requirement fr95 : KeptChangesToTheLiveStore;
+    requirement nfr12 : OnlyLoggedInUsersSeeGraphs;
+    requirement nfr13 : ViewerInsideTheHomeNetwork;
+    requirement nfr14 : LightDarkAndKeyboard;
+    requirement nfr19 : OnlyTheOwnerChangesGraphs;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
@@ -1893,6 +2077,28 @@ package MIA_Allocation {
     satisfy nfr16 by mia;
     satisfy fr63 by mia;
     satisfy fr64 by mia;
+    satisfy fr48 by mia;
+    satisfy fr49 by mia;
+    satisfy fr50 by mia;
+    satisfy fr51 by mia;
+    satisfy fr52 by mia;
+    satisfy fr53 by mia;
+    satisfy fr54 by mia;
+    satisfy fr55 by mia;
+    satisfy fr70 by mia;
+    satisfy fr71 by mia;
+    satisfy fr72 by mia;
+    satisfy fr73 by mia;
+    satisfy fr74 by mia;
+    satisfy fr76 by mia;
+    satisfy fr77 by mia;
+    satisfy fr80 by mia;
+    satisfy fr81 by mia;
+    satisfy fr95 by mia;
+    satisfy nfr12 by mia;
+    satisfy nfr13 by mia;
+    satisfy nfr14 by mia;
+    satisfy nfr19 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
@@ -2103,6 +2309,41 @@ package MIA_Allocation {
     allocate fr63 to mia.taskRuntime.workflowGraph;
     allocate fr64 to mia.persistence.graphRecords;
     allocate fr64 to mia.taskRuntime.pipelineRunner;
+    allocate fr48 to mia.webApp.graphApiV2;
+    allocate fr48 to mia.graphApp.graphList;
+    allocate fr49 to mia.webApp.graphApiV2;
+    allocate fr49 to mia.graphApp.graphView;
+    allocate fr50 to mia.webApp.graphApiV2;
+    allocate fr50 to mia.graphApp.graphView;
+    allocate fr50 to mia.graphApp.detailsColumn;
+    allocate fr51 to mia.graphApp.detailsColumn;
+    allocate fr52 to mia.graphApp.graphView;
+    allocate fr52 to mia.persistence.graphRecords;
+    allocate fr53 to mia.graphApp.graphView;
+    allocate fr54 to mia.webApp.graphApiV2;
+    allocate fr54 to mia.graphApp.graphView;
+    allocate fr54 to mia.graphApp.detailsColumn;
+    allocate fr55 to mia.webApp.graphApiV2;
+    allocate fr55 to mia.graphApp.historyList;
+    allocate fr70 to mia.webApp.graphApiV2;
+    allocate fr70 to mia.persistence.graphRecords;
+    allocate fr71 to mia.webApp.graphApiV2;
+    allocate fr72 to mia.webApp.graphApiV2;
+    allocate fr73 to mia.webApp.graphApiV2;
+    allocate fr74 to mia.webApp.graphApiV2;
+    allocate fr74 to mia.persistence.graphRecords;
+    allocate fr76 to mia.webApp.graphApiV2;
+    allocate fr77 to mia.webApp.graphApiV2;
+    allocate fr80 to mia.webApp.graphApiV2;
+    allocate fr80 to mia.persistence.graphRecords;
+    allocate fr81 to mia.persistence.graphRecords;
+    allocate fr95 to mia.webApp.graphApiV2;
+    allocate nfr12 to mia.webApp.accessControl;
+    allocate nfr12 to mia.graphApp.pageFrame;
+    allocate nfr13 to mia.graphApp.pageFrame;
+    allocate nfr14 to mia.graphApp.pageFrame;
+    allocate nfr19 to mia.webApp.accessControl;
+    allocate nfr19 to mia.webApp.graphApiV2;
     allocate fr40 to mia.persistence.typeRegistry;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
@@ -2798,6 +3039,176 @@ package MIA_NodeRequirements {
     requirement def <'REQ-API-017'> Logout_Api017 {
         subject s : WebApplication;
         doc /* The API and accounts shall end a session on request, drop its connected sockets and refuse it afterwards. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-018'> StoreNamedByTheConfiguration_Api018 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall read and write the graphs of IF-104 v2 in the file store or in the PostgreSQL store that its store setting names. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-019'> WithoutAStoreSetting_Api019 {
+        subject s : WebApplication;
+        doc /* Where the configuration names no store, the API and accounts shall use the file store in the data folder it uses today. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-020'> UnknownStoreSetting_Api020 {
+        subject s : WebApplication;
+        doc /* If the store setting names neither the file store nor a PostgreSQL address, then the API and accounts shall refuse to start and name the setting and its value. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-021'> WhichStoreIsRead_Api021 {
+        subject s : WebApplication;
+        doc /* When a logged-in account asks for the store, the API and accounts shall answer the kind of store it reads and whether that store answers now. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-022'> LiveAndCopyFieldsFixedUntilTRANSFER_Api022 {
+        subject s : WebApplication;
+        doc /* While no copy of the live store exists (until G-V4.GRAPHSTORE.TRANSFER), the API and accounts shall answer the store with `shown` live, `live_reachable` equal to `reachable` and a lag of no graphs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-023'> ListOfGraphs_Api023 {
+        subject s : WebApplication;
+        doc /* When a logged-in account asks for the graphs, the API and accounts shall answer every stored graph sorted by ID, with its kind, current version, author, time, description and counts of steps and connections. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-024'> OneGraphInOneVersion_Api024 {
+        subject s : WebApplication;
+        doc /* When a logged-in account asks for a graph, the API and accounts shall answer the asked version, by default the current one, with its number, author and time and the current version's number. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-025'> VersionsOfAGraph_Api025 {
+        subject s : WebApplication;
+        doc /* When a logged-in account asks for the versions of a graph, the API and accounts shall answer every stored version oldest first with its number, author and time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-026'> WhatCannotBeDrawn_Api026 {
+        subject s : WebApplication;
+        doc /* When the API and accounts answers a graph, it shall name every connection to a missing step and every step ID used twice, keeping all steps and connections in the answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-027'> KindAndMarksOfEachStep_Api027 {
+        subject s : WebApplication;
+        doc /* When the API and accounts answers a workflow graph, it shall give each step's kind and, for a processing or loop-controlling step, its toolbox trust, lifecycle, reason and whether it holds code. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-028'> ChangedSinceTrustedUntilCODE_Api028 {
+        subject s : WebApplication;
+        doc /* While no trusted content of steps is recorded (until G-V4.GRAPHAPI.CODE), the API and accounts shall answer `changed_since_trusted` false for every processing and loop-controlling step. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-029'> TextExactlyAsStored_Api029 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall answer the IDs, names and values of a graph exactly as stored, without escaping, shortening or interpreting them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-030'> TheProviderOfIF104V2_Api030 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall offer the routes of IF-104 v2 under `/api/v2` beside the unchanged IF-104 v1 routes, in the web application and through `graph_api_v2.create_app(backend, accounts_store, store, allowed_origins)`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-031'> RuleReportOfAWorkingCopy_Api031 {
+        subject s : WebApplication;
+        doc /* When the owner sends a graph to the check route, the API and accounts shall answer the IF-301 v4 rule report of the sent steps and connections under the stored graph's kind. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-032'> AChangeIsANewVersion_Api032 {
+        subject s : WebApplication;
+        doc /* When the owner saves a graph that differs from its current version and keeps every rule, the API and accounts shall store it as a new version authored by the owner's account. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-033'> AnUnchangedSaveWritesNothing_Api033 {
+        subject s : WebApplication;
+        doc /* When the owner saves a graph equal in content to its current version, the API and accounts shall write no version and no record of changes and answer the current version as unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-034'> AStaleVersionIsRefused_Api034 {
+        subject s : WebApplication;
+        doc /* If the owner saves with an expected version that is not the current one, then the API and accounts shall refuse with `conflict` naming the current version and write nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-035'> ABrokenRuleIsRefused_Api035 {
+        subject s : WebApplication;
+        doc /* If a saved or restored graph breaks a rule of its kind, then the API and accounts shall refuse with `rules_broken` and the full rule report of IF-301 v4, and write nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-036'> ARefusedRecordCheck_Api036 {
+        subject s : WebApplication;
+        doc /* If the store's record check refuses a saved or restored graph, then the API and accounts shall refuse with `refused` naming the rule and its detail, and write nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-037'> RecordOfChangesDerived_Api037 {
+        subject s : WebApplication;
+        doc /* When the owner saves a changed graph without entries, the API and accounts shall record with the new version the entries that lead from the current version to it, as kind `derived`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-038'> EditorEntriesChecked_Api038 {
+        subject s : WebApplication;
+        doc /* When the owner saves a graph with entries, the API and accounts shall record them as kind `editor` only if playing them back on the current version gives the saved graph. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-051'> EntriesThatDoNotGiveTheGraph_Api051 {
+        subject s : WebApplication;
+        doc /* If the entries sent with a save do not give the saved graph when played back on the current version, then the API and accounts shall refuse the save with `changes_do_not_match`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-039'> RecordWrittenOnce_Api039 {
+        subject s : WebApplication;
+        doc /* When the API and accounts writes a record of changes, it shall write it only for a new graph version and only after checking that no record with its ID exists. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-040'> AVersionWithoutItsRecord_Api040 {
+        subject s : WebApplication;
+        doc /* If the record of changes cannot be written after a new version is stored, then the API and accounts shall keep the version, answer `logged` false, and list that version as made before the record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-041'> RestoreAsANewVersion_Api041 {
+        subject s : WebApplication;
+        doc /* When the owner restores an earlier version, the API and accounts shall store its content as a new version with a record of kind `restore` holding one entry, and keep every earlier version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-042'> ChangesOfEveryVersion_Api042 {
+        subject s : WebApplication;
+        doc /* When a logged-in account asks for the changes of a graph, the API and accounts shall answer one item per version, oldest first, with its record or marked as made before the record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-043'> ReadTheArrangement_Api043 {
+        subject s : WebApplication;
+        doc /* When a logged-in account asks for the arrangement of a graph, the API and accounts shall answer the saved places with their version, author and time, or no places when none is saved. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-044'> SaveTheArrangement_Api044 {
+        subject s : WebApplication;
+        doc /* When the owner saves an arrangement, the API and accounts shall store the places of the graph's steps, rounded to whole numbers, as the one arrangement record of that graph. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-045'> ASessionForEveryV2Route_Api045 {
+        subject s : WebApplication;
+        doc /* If a request to a route of IF-104 v2 has no valid session, then the API and accounts shall refuse it with `unauthenticated` and change nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-046'> ChangesByTheOwnerOnly_Api046 {
+        subject s : WebApplication;
+        doc /* If an account other than the owner calls an IF-104 v2 route that checks or changes a graph or an arrangement, then the API and accounts shall refuse it with `not_owner`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-047'> AForeignOriginIsRefused_Api047 {
+        subject s : WebApplication;
+        doc /* If a request that changes something through IF-104 v2 comes from an origin that is not allowed, then the API and accounts shall refuse it with `bad_origin` and change nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-048'> AMalformedRequest_Api048 {
+        subject s : WebApplication;
+        doc /* If a check, save or arrangement request lacks a field of IF-104 v2, has `nodes` or `edges` that are not lists, has a connection without a text `id`, or has a place that is not a pair of numbers, then the API and accounts shall refuse it with `invalid` naming the field; a value of another wrong type shall be refused by the check that meets it (`conflict`, `changes_do_not_match`, `refused` or `rules_broken`), and no malformed request shall write anything or end in a server error. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-049'> AnUnknownGraphOrVersion_Api049 {
+        subject s : WebApplication;
+        doc /* If a request names a graph or a version that is not stored, then the API and accounts shall refuse it with `not_found`, naming `version` for a version, and change nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-050'> TheStoreDoesNotAnswer_Api050 {
+        subject s : WebApplication;
+        doc /* If the store cannot be reached, then the API and accounts shall answer every graph route of IF-104 v2 with `store_unreachable` and change nothing. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-001'> ChatEventsAndStreaming_Cha001 {
@@ -4820,6 +5231,16 @@ package MIA_NodeRequirements {
         doc /* The Record tables shall define the table transforms with the required fields id and version, as versioned records that are not deletable. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-RTB-010'> ArrangementsStored_Rtb010 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table `arrangements` with the required fields graph and positions, as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-011'> RecordsOfChangesStored_Rtb011 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table `graph_changes` with the required fields graph, version, from_version, kind and entries, as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-DB-001'> PostgreSQLInAContainer_Db001 {
         subject s : Persistence;
         doc /* The Database shall be one PostgreSQL database in a container behind the storage interface IF-102. */
@@ -5035,6 +5456,11 @@ package MIA_NodeRequirements {
         doc /* The Operation shall configure the model server to load one model at a time. */
         @Trace { :>> verifiedBy = (HowVerified::inspection); }
     }
+    requirement def <'REQ-OPR-011'> DatabaseDriverInTheReleaseImage_Opr011 {
+        subject s : OperationLayer;
+        doc /* The Operation shall build the release image with the packages of `requirements-db.txt`, so that the PostgreSQL store opens from the image. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-OPS-001'> HarnessWithRepeats_Ops001 {
         subject s : Evaluation;
         doc /* The Evaluation and operation node shall run pipeline variants on fixed suites with repeats, intervals and cost counting. */
@@ -5188,6 +5614,176 @@ package MIA_NodeRequirements {
     requirement def <'REQ-GA-011'> OwnContainer_Ga011 {
         subject s : GraphApp;
         doc /* The Graph app shall start as its own container alone and by the compose stack. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-012'> TheWholeFrame_Ga012 {
+        subject s : GraphApp;
+        doc /* The Graph app shall show the seven areas of the owner's layout: graph list, search band, other things, left column, picture, actions row, history and replay row, status bar. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-013'> AreasOfLaterSubgoals_Ga013 {
+        subject s : GraphApp;
+        doc /* The Graph app shall show each area that a later subgoal fills as an empty area with one line naming that subgoal and with no control in it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-014'> TheMainAppSDesignTokens_Ga014 {
+        subject s : GraphApp;
+        doc /* The Graph app shall load a copy of the main app's design tokens file that is identical byte for byte to `templates/static/chat/tokens.css`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-015'> StylesOnlyFromTheTokens_Ga015 {
+        subject s : GraphApp;
+        doc /* The Graph app's own styles shall take every colour, font, spacing, radius and shadow from the variables of the design tokens. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-016'> LightAndDark_Ga016 {
+        subject s : GraphApp;
+        doc /* The Graph app shall show the theme chosen in the main app on the same device (dark, light, or auto, which follows the system's light or dark setting; no choice or an unknown value counts as auto) through the themes of the design tokens, the picture included, also when the choice changes while the page is open. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-017'> GraphStatus_Ga017 {
+        subject s : GraphApp;
+        doc /* The Graph app shall show in the status bar the shown graph's ID, the shown version, who stored it and when, and that it is read-only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-018'> WhichStoreIsShown_Ga018 {
+        subject s : GraphApp;
+        doc /* The Graph app shall show under other things which store it reads and whether that store answers, read-only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-019'> TheListOfGraphs_Ga019 {
+        subject s : GraphApp;
+        doc /* The Graph app shall list every graph that IF-104 v2 names, each with its ID, kind, version and numbers of steps and connections. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-020'> FilterByNameOrDescription_Ga020 {
+        subject s : GraphApp;
+        doc /* When the owner types into the list filter, the Graph app shall show only the graphs whose ID or description contains every typed word, ignoring case. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-021'> OpeningAGraph_Ga021 {
+        subject s : GraphApp;
+        doc /* When the owner chooses a graph in the list, the Graph app shall draw its current version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-022'> NotLoggedIn_Ga022 {
+        subject s : GraphApp;
+        doc /* If IF-104 v2 answers that no one is logged in, then the Graph app shall show no graph and ask the person to log in through the main app. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-023'> TheStoreDoesNotAnswer_Ga023 {
+        subject s : GraphApp;
+        doc /* If IF-104 v2 answers that the store cannot be reached, then the Graph app shall say so and keep what it already shows. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-045'> AnotherFailureIsSaid_Ga045 {
+        subject s : GraphApp;
+        doc /* If IF-104 v2 answers with an error other than "not logged in" or "store does not answer", or does not answer at all, then the Graph app shall say in one line of the status band that the graph could not be loaded, with the reason, and keep what it already shows. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-024'> EveryStepAndConnection_Ga024 {
+        subject s : GraphApp;
+        doc /* When a graph is opened, the Graph app shall draw every step and every connection of it, each connection with its direction. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-025'> WhatCannotBeDrawn_Ga025 {
+        subject s : GraphApp;
+        doc /* When IF-104 v2 names a connection to a missing step, the Graph app shall draw that connection dashed to a marked missing step and name the problem beside the picture. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-026'> KindsOfStepAtAGlance_Ga026 {
+        subject s : GraphApp;
+        doc /* The Graph app shall draw data steps as ellipses, processing steps as boxes and loop-controlling steps as hexagons, each with its kind in words. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-027'> AMarkOnlyWhereAttentionIsNeeded_Ga027 {
+        subject s : GraphApp;
+        doc /* The Graph app shall put a mark of at most one word on a processing or loop-controlling step that is untrusted, changed since trusted or holds code, and no mark on any other step. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-028'> AGraphOfAnotherKind_Ga028 {
+        subject s : GraphApp;
+        doc /* When a graph is not a workflow graph, the Graph app shall draw its steps in one neutral shape with their type in words, without trust marks, read-only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-029'> StoredTextStaysText_Ga029 {
+        subject s : GraphApp;
+        doc /* The Graph app shall show every ID, name and value of a graph as plain text and never as markup, a link or code it runs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-030'> TheSavedArrangement_Ga030 {
+        subject s : GraphApp;
+        doc /* When a graph with a saved arrangement is opened, the Graph app shall place its steps where the arrangement puts them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-031'> TheSamePictureEveryTime_Ga031 {
+        subject s : GraphApp;
+        doc /* When a graph without a saved arrangement is opened, the Graph app shall arrange it with one fixed solver and one fixed seed. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-032'> AMovedStepStays_Ga032 {
+        subject s : GraphApp;
+        doc /* When the owner drags a step, the Graph app shall keep it where it was dropped while the graph is open. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-033'> TheLayeredReset_Ga033 {
+        subject s : GraphApp;
+        doc /* When the owner asks for the layered arrangement, the Graph app shall place the steps in layers so that every connection points forward. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-034'> SettingsInOnePlace_Ga034 {
+        subject s : GraphApp;
+        doc /* When the owner changes the connection style (rounded or straight) or the automatic arrangement (on or off) in the one settings place, the Graph app shall redraw the picture at once. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-035'> SettingsRemembered_Ga035 {
+        subject s : GraphApp;
+        doc /* The Graph app shall remember the settings on the device for the next visit and work with its defaults when they cannot be kept. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-036'> ContentOfTheSelection_Ga036 {
+        subject s : GraphApp;
+        doc /* When the owner selects a step or a connection, the Graph app shall show in the left column its known values as labelled read-only fields and its full stored text. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-044'> NothingSelected_Ga044 {
+        subject s : GraphApp;
+        doc /* When the owner selects nothing, the Graph app shall leave the left column empty. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-037'> TrustAndLifecycleInWords_Ga037 {
+        subject s : GraphApp;
+        doc /* When the owner selects a processing or loop-controlling step, the Graph app shall show its trust, lifecycle, reason and whether it changed since trusted or holds code in the left column. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-038'> TheHistoryList_Ga038 {
+        subject s : GraphApp;
+        doc /* When the owner opens the history of a graph, the Graph app shall list its versions newest first with who stored each and when, the current one marked. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-039'> AnEarlierVersion_Ga039 {
+        subject s : GraphApp;
+        doc /* When the owner chooses an entry of the history, the Graph app shall draw that version read-only and name it with its time in the status bar. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-040'> PreviousAndNext_Ga040 {
+        subject s : GraphApp;
+        doc /* The Graph app shall let the owner step from the shown version to the next older and the next newer one, and offer no step beyond the oldest or the newest. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-041'> ByKeyboard_Ga041 {
+        subject s : GraphApp;
+        doc /* The Graph app shall let the owner pick a graph, move from step to step, select a step and open the settings with the keyboard alone. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-042'> NothingFromOutside_Ga042 {
+        subject s : GraphApp;
+        doc /* The Graph app shall request nothing from an address other than its own origin. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-043'> ThePageWritesNothing_Ga043 {
+        subject s : GraphApp;
+        doc /* The Graph app shall send no request that changes a graph, an arrangement or a version. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-SLY-016'> WholeStoreMovedUnchanged_Sly016 {
@@ -5455,6 +6051,40 @@ package MIA_NodeRequirements {
     requirement r_req_api_015 : RealiseIF101_Api015;
     requirement r_req_api_016 : RealiseTheRoutesOfIF104_Api016;
     requirement r_req_api_017 : Logout_Api017;
+    requirement r_req_api_018 : StoreNamedByTheConfiguration_Api018;
+    requirement r_req_api_019 : WithoutAStoreSetting_Api019;
+    requirement r_req_api_020 : UnknownStoreSetting_Api020;
+    requirement r_req_api_021 : WhichStoreIsRead_Api021;
+    requirement r_req_api_022 : LiveAndCopyFieldsFixedUntilTRANSFER_Api022;
+    requirement r_req_api_023 : ListOfGraphs_Api023;
+    requirement r_req_api_024 : OneGraphInOneVersion_Api024;
+    requirement r_req_api_025 : VersionsOfAGraph_Api025;
+    requirement r_req_api_026 : WhatCannotBeDrawn_Api026;
+    requirement r_req_api_027 : KindAndMarksOfEachStep_Api027;
+    requirement r_req_api_028 : ChangedSinceTrustedUntilCODE_Api028;
+    requirement r_req_api_029 : TextExactlyAsStored_Api029;
+    requirement r_req_api_030 : TheProviderOfIF104V2_Api030;
+    requirement r_req_api_031 : RuleReportOfAWorkingCopy_Api031;
+    requirement r_req_api_032 : AChangeIsANewVersion_Api032;
+    requirement r_req_api_033 : AnUnchangedSaveWritesNothing_Api033;
+    requirement r_req_api_034 : AStaleVersionIsRefused_Api034;
+    requirement r_req_api_035 : ABrokenRuleIsRefused_Api035;
+    requirement r_req_api_036 : ARefusedRecordCheck_Api036;
+    requirement r_req_api_037 : RecordOfChangesDerived_Api037;
+    requirement r_req_api_038 : EditorEntriesChecked_Api038;
+    requirement r_req_api_051 : EntriesThatDoNotGiveTheGraph_Api051;
+    requirement r_req_api_039 : RecordWrittenOnce_Api039;
+    requirement r_req_api_040 : AVersionWithoutItsRecord_Api040;
+    requirement r_req_api_041 : RestoreAsANewVersion_Api041;
+    requirement r_req_api_042 : ChangesOfEveryVersion_Api042;
+    requirement r_req_api_043 : ReadTheArrangement_Api043;
+    requirement r_req_api_044 : SaveTheArrangement_Api044;
+    requirement r_req_api_045 : ASessionForEveryV2Route_Api045;
+    requirement r_req_api_046 : ChangesByTheOwnerOnly_Api046;
+    requirement r_req_api_047 : AForeignOriginIsRefused_Api047;
+    requirement r_req_api_048 : AMalformedRequest_Api048;
+    requirement r_req_api_049 : AnUnknownGraphOrVersion_Api049;
+    requirement r_req_api_050 : TheStoreDoesNotAnswer_Api050;
     requirement r_req_cha_001 : ChatEventsAndStreaming_Cha001;
     requirement r_req_cha_002 : OneSharedMIA_Cha002;
     requirement r_req_cha_003 : QueueWithPositions_Cha003;
@@ -5859,6 +6489,8 @@ package MIA_NodeRequirements {
     requirement r_req_rtb_007 : SkillRunsStored_Rtb007;
     requirement r_req_rtb_008 : TransformMetaStored_Rtb008;
     requirement r_req_rtb_009 : TransformsStored_Rtb009;
+    requirement r_req_rtb_010 : ArrangementsStored_Rtb010;
+    requirement r_req_rtb_011 : RecordsOfChangesStored_Rtb011;
     requirement r_req_db_001 : PostgreSQLInAContainer_Db001;
     requirement r_req_db_002 : SharedStateHeld_Db002;
     requirement r_req_db_003 : ImmutableVersions_Db003;
@@ -5902,6 +6534,7 @@ package MIA_NodeRequirements {
     requirement r_req_opr_008 : PrivateAccessOnly_Opr008;
     requirement r_req_opr_009 : FreeAndOpen_Opr009;
     requirement r_req_opr_010 : HardwareConfiguration_Opr010;
+    requirement r_req_opr_011 : DatabaseDriverInTheReleaseImage_Opr011;
     requirement r_req_ops_001 : HarnessWithRepeats_Ops001;
     requirement r_req_ops_002 : DecisionsOnHeldOutCases_Ops002;
     requirement r_req_ops_003 : JudgeCalibration_Ops003;
@@ -5933,6 +6566,40 @@ package MIA_NodeRequirements {
     requirement r_req_ga_009 : PlainStackWithAVendoredLibrary_Ga009;
     requirement r_req_ga_010 : NoOutsideRequest_Ga010;
     requirement r_req_ga_011 : OwnContainer_Ga011;
+    requirement r_req_ga_012 : TheWholeFrame_Ga012;
+    requirement r_req_ga_013 : AreasOfLaterSubgoals_Ga013;
+    requirement r_req_ga_014 : TheMainAppSDesignTokens_Ga014;
+    requirement r_req_ga_015 : StylesOnlyFromTheTokens_Ga015;
+    requirement r_req_ga_016 : LightAndDark_Ga016;
+    requirement r_req_ga_017 : GraphStatus_Ga017;
+    requirement r_req_ga_018 : WhichStoreIsShown_Ga018;
+    requirement r_req_ga_019 : TheListOfGraphs_Ga019;
+    requirement r_req_ga_020 : FilterByNameOrDescription_Ga020;
+    requirement r_req_ga_021 : OpeningAGraph_Ga021;
+    requirement r_req_ga_022 : NotLoggedIn_Ga022;
+    requirement r_req_ga_023 : TheStoreDoesNotAnswer_Ga023;
+    requirement r_req_ga_045 : AnotherFailureIsSaid_Ga045;
+    requirement r_req_ga_024 : EveryStepAndConnection_Ga024;
+    requirement r_req_ga_025 : WhatCannotBeDrawn_Ga025;
+    requirement r_req_ga_026 : KindsOfStepAtAGlance_Ga026;
+    requirement r_req_ga_027 : AMarkOnlyWhereAttentionIsNeeded_Ga027;
+    requirement r_req_ga_028 : AGraphOfAnotherKind_Ga028;
+    requirement r_req_ga_029 : StoredTextStaysText_Ga029;
+    requirement r_req_ga_030 : TheSavedArrangement_Ga030;
+    requirement r_req_ga_031 : TheSamePictureEveryTime_Ga031;
+    requirement r_req_ga_032 : AMovedStepStays_Ga032;
+    requirement r_req_ga_033 : TheLayeredReset_Ga033;
+    requirement r_req_ga_034 : SettingsInOnePlace_Ga034;
+    requirement r_req_ga_035 : SettingsRemembered_Ga035;
+    requirement r_req_ga_036 : ContentOfTheSelection_Ga036;
+    requirement r_req_ga_044 : NothingSelected_Ga044;
+    requirement r_req_ga_037 : TrustAndLifecycleInWords_Ga037;
+    requirement r_req_ga_038 : TheHistoryList_Ga038;
+    requirement r_req_ga_039 : AnEarlierVersion_Ga039;
+    requirement r_req_ga_040 : PreviousAndNext_Ga040;
+    requirement r_req_ga_041 : ByKeyboard_Ga041;
+    requirement r_req_ga_042 : NothingFromOutside_Ga042;
+    requirement r_req_ga_043 : ThePageWritesNothing_Ga043;
     requirement r_req_sly_016 : WholeStoreMovedUnchanged_Sly016;
     requirement r_req_sly_017 : EveryGraphCheckedWithWhatTheMoveBrings_Sly017;
     requirement r_req_sly_018 : ADamagedGraphStopsTheWholeMove_Sly018;
@@ -6082,6 +6749,40 @@ package MIA_NodeRequirements {
     satisfy r_req_api_015 by mia.webApp;
     satisfy r_req_api_016 by mia.webApp;
     satisfy r_req_api_017 by mia.webApp;
+    satisfy r_req_api_018 by mia.webApp;
+    satisfy r_req_api_019 by mia.webApp;
+    satisfy r_req_api_020 by mia.webApp;
+    satisfy r_req_api_021 by mia.webApp;
+    satisfy r_req_api_022 by mia.webApp;
+    satisfy r_req_api_023 by mia.webApp;
+    satisfy r_req_api_024 by mia.webApp;
+    satisfy r_req_api_025 by mia.webApp;
+    satisfy r_req_api_026 by mia.webApp;
+    satisfy r_req_api_027 by mia.webApp;
+    satisfy r_req_api_028 by mia.webApp;
+    satisfy r_req_api_029 by mia.webApp;
+    satisfy r_req_api_030 by mia.webApp;
+    satisfy r_req_api_031 by mia.webApp;
+    satisfy r_req_api_032 by mia.webApp;
+    satisfy r_req_api_033 by mia.webApp;
+    satisfy r_req_api_034 by mia.webApp;
+    satisfy r_req_api_035 by mia.webApp;
+    satisfy r_req_api_036 by mia.webApp;
+    satisfy r_req_api_037 by mia.webApp;
+    satisfy r_req_api_038 by mia.webApp;
+    satisfy r_req_api_051 by mia.webApp;
+    satisfy r_req_api_039 by mia.webApp;
+    satisfy r_req_api_040 by mia.webApp;
+    satisfy r_req_api_041 by mia.webApp;
+    satisfy r_req_api_042 by mia.webApp;
+    satisfy r_req_api_043 by mia.webApp;
+    satisfy r_req_api_044 by mia.webApp;
+    satisfy r_req_api_045 by mia.webApp;
+    satisfy r_req_api_046 by mia.webApp;
+    satisfy r_req_api_047 by mia.webApp;
+    satisfy r_req_api_048 by mia.webApp;
+    satisfy r_req_api_049 by mia.webApp;
+    satisfy r_req_api_050 by mia.webApp;
     satisfy r_req_cha_001 by mia.conversation;
     satisfy r_req_cha_002 by mia.conversation;
     satisfy r_req_cha_003 by mia.conversation;
@@ -6486,6 +7187,8 @@ package MIA_NodeRequirements {
     satisfy r_req_rtb_007 by mia.persistence;
     satisfy r_req_rtb_008 by mia.persistence;
     satisfy r_req_rtb_009 by mia.persistence;
+    satisfy r_req_rtb_010 by mia.persistence;
+    satisfy r_req_rtb_011 by mia.persistence;
     satisfy r_req_db_001 by mia.persistence;
     satisfy r_req_db_002 by mia.persistence;
     satisfy r_req_db_003 by mia.persistence;
@@ -6529,6 +7232,7 @@ package MIA_NodeRequirements {
     satisfy r_req_opr_008 by mia.operation;
     satisfy r_req_opr_009 by mia.operation;
     satisfy r_req_opr_010 by mia.operation;
+    satisfy r_req_opr_011 by mia.operation;
     satisfy r_req_ops_001 by mia.evaluation;
     satisfy r_req_ops_002 by mia.evaluation;
     satisfy r_req_ops_003 by mia.evaluation;
@@ -6560,6 +7264,40 @@ package MIA_NodeRequirements {
     satisfy r_req_ga_009 by mia.graphApp;
     satisfy r_req_ga_010 by mia.graphApp;
     satisfy r_req_ga_011 by mia.graphApp;
+    satisfy r_req_ga_012 by mia.graphApp;
+    satisfy r_req_ga_013 by mia.graphApp;
+    satisfy r_req_ga_014 by mia.graphApp;
+    satisfy r_req_ga_015 by mia.graphApp;
+    satisfy r_req_ga_016 by mia.graphApp;
+    satisfy r_req_ga_017 by mia.graphApp;
+    satisfy r_req_ga_018 by mia.graphApp;
+    satisfy r_req_ga_019 by mia.graphApp;
+    satisfy r_req_ga_020 by mia.graphApp;
+    satisfy r_req_ga_021 by mia.graphApp;
+    satisfy r_req_ga_022 by mia.graphApp;
+    satisfy r_req_ga_023 by mia.graphApp;
+    satisfy r_req_ga_045 by mia.graphApp;
+    satisfy r_req_ga_024 by mia.graphApp;
+    satisfy r_req_ga_025 by mia.graphApp;
+    satisfy r_req_ga_026 by mia.graphApp;
+    satisfy r_req_ga_027 by mia.graphApp;
+    satisfy r_req_ga_028 by mia.graphApp;
+    satisfy r_req_ga_029 by mia.graphApp;
+    satisfy r_req_ga_030 by mia.graphApp;
+    satisfy r_req_ga_031 by mia.graphApp;
+    satisfy r_req_ga_032 by mia.graphApp;
+    satisfy r_req_ga_033 by mia.graphApp;
+    satisfy r_req_ga_034 by mia.graphApp;
+    satisfy r_req_ga_035 by mia.graphApp;
+    satisfy r_req_ga_036 by mia.graphApp;
+    satisfy r_req_ga_044 by mia.graphApp;
+    satisfy r_req_ga_037 by mia.graphApp;
+    satisfy r_req_ga_038 by mia.graphApp;
+    satisfy r_req_ga_039 by mia.graphApp;
+    satisfy r_req_ga_040 by mia.graphApp;
+    satisfy r_req_ga_041 by mia.graphApp;
+    satisfy r_req_ga_042 by mia.graphApp;
+    satisfy r_req_ga_043 by mia.graphApp;
     satisfy r_req_sly_016 by mia.persistence;
     satisfy r_req_sly_017 by mia.persistence;
     satisfy r_req_sly_018 by mia.persistence;
@@ -6708,6 +7446,40 @@ package MIA_NodeRequirements {
     allocate r_req_api_015 to mia.webApp;
     allocate r_req_api_016 to mia.webApp;
     allocate r_req_api_017 to mia.webApp;
+    allocate r_req_api_018 to mia.webApp;
+    allocate r_req_api_019 to mia.webApp;
+    allocate r_req_api_020 to mia.webApp;
+    allocate r_req_api_021 to mia.webApp;
+    allocate r_req_api_022 to mia.webApp;
+    allocate r_req_api_023 to mia.webApp;
+    allocate r_req_api_024 to mia.webApp;
+    allocate r_req_api_025 to mia.webApp;
+    allocate r_req_api_026 to mia.webApp;
+    allocate r_req_api_027 to mia.webApp;
+    allocate r_req_api_028 to mia.webApp;
+    allocate r_req_api_029 to mia.webApp;
+    allocate r_req_api_030 to mia.webApp;
+    allocate r_req_api_031 to mia.webApp;
+    allocate r_req_api_032 to mia.webApp;
+    allocate r_req_api_033 to mia.webApp;
+    allocate r_req_api_034 to mia.webApp;
+    allocate r_req_api_035 to mia.webApp;
+    allocate r_req_api_036 to mia.webApp;
+    allocate r_req_api_037 to mia.webApp;
+    allocate r_req_api_038 to mia.webApp;
+    allocate r_req_api_051 to mia.webApp;
+    allocate r_req_api_039 to mia.webApp;
+    allocate r_req_api_040 to mia.webApp;
+    allocate r_req_api_041 to mia.webApp;
+    allocate r_req_api_042 to mia.webApp;
+    allocate r_req_api_043 to mia.webApp;
+    allocate r_req_api_044 to mia.webApp;
+    allocate r_req_api_045 to mia.webApp;
+    allocate r_req_api_046 to mia.webApp;
+    allocate r_req_api_047 to mia.webApp;
+    allocate r_req_api_048 to mia.webApp;
+    allocate r_req_api_049 to mia.webApp;
+    allocate r_req_api_050 to mia.webApp;
     allocate r_req_cha_001 to mia.conversation;
     allocate r_req_cha_002 to mia.conversation;
     allocate r_req_cha_003 to mia.conversation;
@@ -7112,6 +7884,8 @@ package MIA_NodeRequirements {
     allocate r_req_rtb_007 to mia.persistence;
     allocate r_req_rtb_008 to mia.persistence;
     allocate r_req_rtb_009 to mia.persistence;
+    allocate r_req_rtb_010 to mia.persistence;
+    allocate r_req_rtb_011 to mia.persistence;
     allocate r_req_db_001 to mia.persistence;
     allocate r_req_db_002 to mia.persistence;
     allocate r_req_db_003 to mia.persistence;
@@ -7155,6 +7929,7 @@ package MIA_NodeRequirements {
     allocate r_req_opr_008 to mia.operation;
     allocate r_req_opr_009 to mia.operation;
     allocate r_req_opr_010 to mia.operation;
+    allocate r_req_opr_011 to mia.operation;
     allocate r_req_ops_001 to mia.evaluation;
     allocate r_req_ops_002 to mia.evaluation;
     allocate r_req_ops_003 to mia.evaluation;
@@ -7186,6 +7961,40 @@ package MIA_NodeRequirements {
     allocate r_req_ga_009 to mia.graphApp;
     allocate r_req_ga_010 to mia.graphApp;
     allocate r_req_ga_011 to mia.graphApp;
+    allocate r_req_ga_012 to mia.graphApp;
+    allocate r_req_ga_013 to mia.graphApp;
+    allocate r_req_ga_014 to mia.graphApp;
+    allocate r_req_ga_015 to mia.graphApp;
+    allocate r_req_ga_016 to mia.graphApp;
+    allocate r_req_ga_017 to mia.graphApp;
+    allocate r_req_ga_018 to mia.graphApp;
+    allocate r_req_ga_019 to mia.graphApp;
+    allocate r_req_ga_020 to mia.graphApp;
+    allocate r_req_ga_021 to mia.graphApp;
+    allocate r_req_ga_022 to mia.graphApp;
+    allocate r_req_ga_023 to mia.graphApp;
+    allocate r_req_ga_045 to mia.graphApp;
+    allocate r_req_ga_024 to mia.graphApp;
+    allocate r_req_ga_025 to mia.graphApp;
+    allocate r_req_ga_026 to mia.graphApp;
+    allocate r_req_ga_027 to mia.graphApp;
+    allocate r_req_ga_028 to mia.graphApp;
+    allocate r_req_ga_029 to mia.graphApp;
+    allocate r_req_ga_030 to mia.graphApp;
+    allocate r_req_ga_031 to mia.graphApp;
+    allocate r_req_ga_032 to mia.graphApp;
+    allocate r_req_ga_033 to mia.graphApp;
+    allocate r_req_ga_034 to mia.graphApp;
+    allocate r_req_ga_035 to mia.graphApp;
+    allocate r_req_ga_036 to mia.graphApp;
+    allocate r_req_ga_044 to mia.graphApp;
+    allocate r_req_ga_037 to mia.graphApp;
+    allocate r_req_ga_038 to mia.graphApp;
+    allocate r_req_ga_039 to mia.graphApp;
+    allocate r_req_ga_040 to mia.graphApp;
+    allocate r_req_ga_041 to mia.graphApp;
+    allocate r_req_ga_042 to mia.graphApp;
+    allocate r_req_ga_043 to mia.graphApp;
     allocate r_req_sly_016 to mia.persistence;
     allocate r_req_sly_017 to mia.persistence;
     allocate r_req_sly_018 to mia.persistence;
@@ -7345,6 +8154,40 @@ package MIA_NodeRequirements {
     dependency from r_req_api_015 to if101;
     dependency from r_req_api_016 to if104;
     dependency from r_req_api_017 to r_req_be_077;
+    dependency from r_req_api_018 to fr48;
+    dependency from r_req_api_019 to fr48;
+    dependency from r_req_api_020 to fr48;
+    dependency from r_req_api_021 to fr48;
+    dependency from r_req_api_022 to fr48;
+    dependency from r_req_api_023 to fr48;
+    dependency from r_req_api_024 to fr55;
+    dependency from r_req_api_025 to fr55;
+    dependency from r_req_api_026 to fr49;
+    dependency from r_req_api_027 to fr50;
+    dependency from r_req_api_028 to fr50;
+    dependency from r_req_api_029 to fr54;
+    dependency from r_req_api_030 to fr48;
+    dependency from r_req_api_031 to fr70;
+    dependency from r_req_api_032 to fr70;
+    dependency from r_req_api_033 to fr71;
+    dependency from r_req_api_034 to fr72;
+    dependency from r_req_api_035 to fr70;
+    dependency from r_req_api_036 to fr70;
+    dependency from r_req_api_037 to fr76;
+    dependency from r_req_api_038 to fr76;
+    dependency from r_req_api_051 to fr76;
+    dependency from r_req_api_039 to fr80;
+    dependency from r_req_api_040 to fr81;
+    dependency from r_req_api_041 to fr73;
+    dependency from r_req_api_042 to fr77;
+    dependency from r_req_api_043 to fr52;
+    dependency from r_req_api_044 to fr74;
+    dependency from r_req_api_045 to nfr12;
+    dependency from r_req_api_046 to nfr19;
+    dependency from r_req_api_047 to nfr12;
+    dependency from r_req_api_048 to fr70;
+    dependency from r_req_api_049 to fr48;
+    dependency from r_req_api_050 to fr95;
     dependency from r_req_cha_001 to r_req_be_001;
     dependency from r_req_cha_002 to r_req_be_002;
     dependency from r_req_cha_003 to r_req_be_003;
@@ -7770,6 +8613,8 @@ package MIA_NodeRequirements {
     dependency from r_req_rtb_007 to r_req_db_002;
     dependency from r_req_rtb_008 to r_req_db_002;
     dependency from r_req_rtb_009 to r_req_db_002;
+    dependency from r_req_rtb_010 to fr52;
+    dependency from r_req_rtb_011 to fr80;
     dependency from r_req_db_001 to nfr8;
     dependency from r_req_db_001 to con7;
     dependency from r_req_db_001 to nfr9;
@@ -7824,6 +8669,7 @@ package MIA_NodeRequirements {
     dependency from r_req_opr_008 to r_req_ops_014;
     dependency from r_req_opr_009 to r_req_ops_015;
     dependency from r_req_opr_010 to r_req_ops_016;
+    dependency from r_req_opr_011 to fr48;
     dependency from r_req_ops_001 to fr17;
     dependency from r_req_ops_002 to fr17;
     dependency from r_req_ops_003 to fr17;
@@ -7870,6 +8716,40 @@ package MIA_NodeRequirements {
     dependency from r_req_ga_009 to fr22;
     dependency from r_req_ga_010 to nfr5;
     dependency from r_req_ga_011 to nfr9;
+    dependency from r_req_ga_012 to fr51;
+    dependency from r_req_ga_013 to fr51;
+    dependency from r_req_ga_014 to nfr14;
+    dependency from r_req_ga_015 to nfr14;
+    dependency from r_req_ga_016 to nfr14;
+    dependency from r_req_ga_017 to fr55;
+    dependency from r_req_ga_018 to fr48;
+    dependency from r_req_ga_019 to fr48;
+    dependency from r_req_ga_020 to fr48;
+    dependency from r_req_ga_021 to fr48;
+    dependency from r_req_ga_022 to nfr12;
+    dependency from r_req_ga_023 to fr48;
+    dependency from r_req_ga_045 to fr48;
+    dependency from r_req_ga_024 to fr49;
+    dependency from r_req_ga_025 to fr49;
+    dependency from r_req_ga_026 to fr50;
+    dependency from r_req_ga_027 to fr50;
+    dependency from r_req_ga_028 to fr50;
+    dependency from r_req_ga_029 to fr54;
+    dependency from r_req_ga_030 to fr52;
+    dependency from r_req_ga_031 to fr52;
+    dependency from r_req_ga_032 to fr52;
+    dependency from r_req_ga_033 to fr52;
+    dependency from r_req_ga_034 to fr53;
+    dependency from r_req_ga_035 to fr53;
+    dependency from r_req_ga_036 to fr51;
+    dependency from r_req_ga_044 to fr51;
+    dependency from r_req_ga_037 to fr50;
+    dependency from r_req_ga_038 to fr55;
+    dependency from r_req_ga_039 to fr55;
+    dependency from r_req_ga_040 to fr55;
+    dependency from r_req_ga_041 to nfr14;
+    dependency from r_req_ga_042 to nfr13;
+    dependency from r_req_ga_043 to nfr12;
     dependency from r_req_sly_023 to nfr16;
     dependency from r_req_sly_029 to nfr16;
     dependency from r_req_sly_036 to nfr16;
