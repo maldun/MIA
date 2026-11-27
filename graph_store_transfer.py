@@ -19,7 +19,7 @@ FileBackend, its root holds the aside folder, the lock and the format marker.
 - lag_summary(live, copy) -> {"graphs": n, "since": time or None}: the lag in IF-104 v2 terms (REQ-API-064, D-540).
 - AutoSync(open_live, copy, name, log).run("start" | "stop") -> report: the sync as MIA runs it at start and orderly stop (REQ-API-062, 063);
   a live store that does not answer and a refused sync are one log line each, never an exception.
-- An older set (no marker) with an unscoped record: StorageError("invalid", rule="older_format", detail={"table", "id", "conversion": CONVERSION_STEP})
+- An older set (no marker) with an unscoped record, as source or target: StorageError("invalid", rule="older_format", detail={"table", "id", "conversion": CONVERSION_STEP})
   (REQ-SLY-034). A newer set: the FileBackend refuses to open it, StorageError("format", detail={"found": n, "known": FORMAT}) (REQ-SLY-035).
 """
 import contextlib
@@ -96,6 +96,13 @@ def check_format(source):
                 raise StorageError("invalid", rule="older_format", detail={"table": table, "id": record_id, "conversion": CONVERSION_STEP})
 
 
+def check_formats(source, target):
+    """check_format on both ends before the first write: a move or sync into an older set would mark it format 1 and hide its old IDs from the
+    conversion (REQ-SLY-034, V-3 of Verify)."""
+    check_format(source)
+    check_format(target)
+
+
 def check_graphs(source, graph_ids):
     """Raises StorageError("invalid", rule="move_refused") naming every graph that cannot be moved, with its problems (REQ-SLY-018, 021)."""
     node_ids = {table: set(source.ids(table)) for table in ("graph_nodes", "context_nodes")}
@@ -139,7 +146,7 @@ def move_store(source, target):
     its own checks: a record with another history in the target is a conflict, a record put would refuse is invalid, both before any write.
     A files target that is a copy (it holds sync.lock) is moved into under its lock (REQ-SLY-028, V-1 of Verify, D-549)."""
     with _lock_of_copy(target):
-        check_format(source)
+        check_formats(source, target)
         check_graphs(source, source.ids(HEADERS))
         return copy_records(source, target, ordered_tables(table_definitions()))
 
@@ -164,7 +171,7 @@ def move_graph(source, target, graph_id):
     StorageError("conflict", detail={"graph": graph_id}); both before any write. A stop at any write leaves the target's graph at its last
     complete version, and a rerun appends the rest (REQ-SLY-029, 036)."""
     with _lock_of(target):
-        check_format(source)
+        check_formats(source, target)
         check_graphs(source, [graph_id])
         plan = []
         for table, record_id in _graph_records(source, target, graph_id):
@@ -297,7 +304,7 @@ def sync_store(live, copy):
     (REQ-SLY-026, 027), then cut back (REQ-SLY-038); then the live versions the copy lacks follow, members before headers (REQ-SLY-019).
     "graphs" counts the graphs that were not current, "records" the versions appended."""
     with copy_lock(copy.root):
-        check_format(live)
+        check_formats(live, copy)
         check_graphs(live, live.ids(HEADERS))
         states = {graph_id: _state(live, copy, graph_id) for graph_id in _graphs(live, copy)}
         states = {graph_id: found for graph_id, found in states.items() if found[0] != "current"}

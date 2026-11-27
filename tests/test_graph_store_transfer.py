@@ -359,6 +359,30 @@ class OlderSets(unittest.TestCase):
         self.assertEqual((refused.exception.rule, refused.exception.detail["id"]), ("unscoped_id", "e9"))
         self.assertEqual(ts.entries(target), {})
 
+    @mark.req("REQ-SLY-034")
+    def test_a_move_or_sync_into_an_older_set_is_refused_and_writes_no_marker(self):
+        """V-3 (Verify): the older set is refused as the target too, before the first write, so it stays recognisable as older.
+        Example: the set without its marker (unscoped e9) as target of move_store, move_graph and sync_store: older_format naming e9 each
+        time; no marker written, the set unchanged."""
+        # Given: the older set without its marker, and a current live store
+        os.remove(os.path.join(self.old.root, transfer.MARKER))
+        live = ts.small_store(FileBackend(os.path.join(self.base, "live")))
+        ts.new_multi_version(live, "newer")
+        before = ts.entries(self.old)
+        moves = {"move_store": lambda: transfer.move_store(live, self.old),
+                 "move_graph": lambda: transfer.move_graph(live, self.old, ts.MULTI),
+                 "sync_store": lambda: transfer.sync_store(live, self.old)}
+        for name, move in moves.items():
+            with self.subTest(name):
+                # When / Then: refused naming the record and the conversion step
+                with self.assertRaises(StorageError) as refused:
+                    move()
+                self.assertEqual((refused.exception.rule, refused.exception.detail),
+                                 ("older_format", {"table": "graph_edges", "id": "e9", "conversion": transfer.CONVERSION_STEP}))
+                # And: the set is still older and unchanged
+                self.assertIsNone(self.old.format())
+                self.assertEqual(ts.entries(self.old), before)
+
     @mark.req("REQ-SLY-035")
     def test_the_commands_name_a_newer_set_in_one_line(self):
         """Example: `lag --data <set of format 2> --copy DIR`: "refused: ... format 2 ... knows format 1 ...", exit 1."""

@@ -154,6 +154,10 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **V-1 (REQ-SLY-028):** `move_store` takes the copy's lock for a files target that is a copy. Red first: `Move.test_a_whole_store_move_into_a_locked_copy_is_refused` (StorageError not raised). Always locking broke four unit checks of `tests/test_migrate.py`: a db-to-files round trip got a `sync.lock` (REQ-SLY-007, identical files), and a refused move created the target folder (F-1 checks). That was a stop condition, so I asked the owner. D-549 (owner): lock only a target that already holds `sync.lock` (`_lock_of_copy`). Pinned by `Move.test_a_move_into_a_folder_that_is_no_copy_leaves_no_lock_file`. Known limit: a folder no sync has ever run on, while its first sync and a move start at the same moment.
 
+**V-3 (REQ-SLY-034):** `move_store`, `move_graph` and `sync_store` check the format of the target too, before the first write (`check_formats`). Red first: `OlderSets.test_a_move_or_sync_into_an_older_set_is_refused_and_writes_no_marker`, three subtests (StorageError not raised). Now refused `older_format`, no marker written, the set unchanged.
+
+**Tests green (my runs, feedback only):** `tests/test_graph_store_transfer.py`, `test_migrate.py`, `test_storage_copy.py`, `tests/acceptance/test_transfer_*.py` OK. `verify-repro/repro_sync_edges.py`: V-1 refused `locked`; V-3 refused `older_format` both times; V-2a/b unchanged (A-196).
+
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
