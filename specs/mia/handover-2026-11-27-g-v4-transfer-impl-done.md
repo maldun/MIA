@@ -12,13 +12,13 @@ Supersedes `handover-2026-11-27-g-v4-view-deploy-done.md` for the session that p
 Lesson behind the tools: a deliberate defect restored with the same size within the same second left stale bytecode, so later checks ran the defect (TRANSFER T-06 finding). Use `tools/plant_defects.py` instead of hand-made sed and copy scripts.
 
 ## Waiting for the owner
-- [ ] REQ-GA-016 (state at the end of this session): the node file `specs/mia/nodes/N-5-graph-app/requirements.md` says `Approved` in the working tree but is **not committed**; the goal copy `specs/mia/goals/G-V4.VIEW/requirements.md` still says `Draft` (`4e989647`). Approve the goal copy, save, commit both (`git add` of the two paths in the `goal-v4` worktree). Then the next session runs `python3 -I tools/gen_node_requirements_model.py .`, `python3 -I tools/check_sysml_model.py .` and `bash tools/check_sysml.sh specs/mia/architecture.sysml`, and commits `specs/mia/architecture.sysml` ("docs: model block regenerated, REQ-GA-016 approved").
+- [x] REQ-GA-016: approved by the owner (`4f85c406`); model block regenerated and checked (`456d34ce`). The goal copy in `goals/G-V4.VIEW/requirements.md` holds only the group table row, no status.
 - [ ] RUN: REQ-GTB-060 (text changed twice, still Approved) and REQ-GTB-043 (Draft) in `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-run/specs/mia/goals/G-V4.GRAPHAPI.RUN/requirements.md`; A-189 as a joint amendment of IF-301.
 
 ## Next (pick one per session)
 - **TRANSFER Verify**, in a fresh session: start prompt at the end of `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer/specs/mia/handover-2026-11-27-g-v4-transfer-verify-next.md`.
 - **RUN T-03** (`goal/v4.graphapi.run`, worktree `goal-v4-run`): `handover-2026-11-25-g-v4-run-t03-next.md` there; raise the packaging of `graph_run.py` at its next planning point. RUN should merge `goal/v4` to get the shared tools.
-- **F-2** of VIEW's Deploy, no line yet: `deploy/preflight.sh` checks the container-side `OLLAMA_URL` (`host.containers.internal`) from the host, so P1 fails though Ollama answers; a failing check first, then the script fix. The same pattern hit the smoke: `deploy/.env`'s `MIA_DATABASE_URL` names `db`, which only the stack network resolves.
+- ~~F-2 of VIEW's Deploy~~: fixed on `goal/v4` (`f384b4cd`), recorded in `goals/G-V4.VIEW/deployment-record.md`. Still open, same pattern: the protected smoke reads `deploy/.env`'s `MIA_DATABASE_URL` (`db`), which only the stack network resolves; that needs an owner-approved change of the protected check.
 - `explore/builder-workflow` (BUILDER, waits for RUN and CONTEXT, D-521); EDIT and CODE: notes in `goals/G-V4.VIEW/merge-request.md`, TD-91 to TD-95 (deadline 2026-12-31).
 - `deploy/REQUIREMENTS_DB.md` item 7 names an `up.sh migrate` that does not exist (stale; whoever owns the deploy docs).
 
