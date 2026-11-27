@@ -1,6 +1,6 @@
 """
 Acceptance tests of portable sets of files and of the lag and sync commands (groups PT and AS of G-V4.GRAPHSTORE.TRANSFER): TC-SLY-032 to
-TC-SLY-035, TC-SLY-037, TC-SLY-039 (REQ-SLY-032 to 035, 037, 039; HR-006, HR-008).
+TC-SLY-035, TC-SLY-037 (A-197), TC-SLY-039 (REQ-SLY-032 to 035, 037, 039; HR-006, HR-008).
 
 Every set is a fresh folder (TR-TRANSFER-007). A set "without a marker" is made as a set from before this version: by today's save path with its
 marker deleted afterwards (TC-SLY-033), or with an old-style record file written straight into the folder (TC-SLY-034), since every write now adds
@@ -145,27 +145,35 @@ class Sets(unittest.TestCase):
     @mark.req("REQ-SLY-037")
     def test_a_set_holds_no_path_of_the_machine(self):
         """TC-SLY-037: after a move, a sync with an aside file and a copy of the folder elsewhere, no file holds the source folder's path
-        (a random token in its name) or the home folder, and the copied folder lists the same graphs and versions as the folder it was copied from.
+        (a random token in its name), the absolute path of any folder the check made, or the home folder, and the copied folder lists the same
+        graphs and versions as the folder it was copied from (A-197: the copy's own path under /tmp was not searched, V-4 of Verify).
 
-        Example: token "3f9c0b5e7a1d2c4b" appears in no file of the three folders; graph_group(third) == graph_group(copy).
+        Example: token "3f9c0b5e7a1d2c4b", "/tmp/transfer-set-ab12cd" (the copy) and the home folder appear in no file of the three folders;
+        graph_group(third) == graph_group(copy).
         """
+        made = []
+
+        def folder():
+            made.append(self.folder())
+            return made[-1]
         # Given: the sample store under a folder with a random token in its name
         token = secrets.token_hex(8)
-        source = FileBackend(os.path.join(self.folder(), token, "store"))
+        source = FileBackend(os.path.join(folder(), token, "store"))
         ts.sample_store(source)
         # When: it is moved to a second folder, which is synced as a copy with one aside file, and copied to a third place
-        copy = FileBackend(self.folder())
+        copy = FileBackend(folder())
         transfer.move_store(source, copy)
         self.assertEqual(ts.entries(copy), ts.entries(source))
-        live = FileBackend(self.folder())
+        live = FileBackend(folder())
         ts.equalize(copy, live)
         ts.ac007(live, copy, with_store=False)
         answer = transfer.sync_store(live, copy)
         self.assertEqual(sorted(answer["set_aside"]), [ts.CODE])
-        third = os.path.join(self.folder(), "third")
+        third = os.path.join(folder(), "third")
         shutil.copytree(copy.root, third)
-        # Then: no file of the three folders holds the token or the home folder
-        needles = (token.encode(), os.path.expanduser("~").encode())
+        # Then: no file of the three folders holds the token, the absolute path of a folder the check made, or the home folder
+        needles = [token.encode(), os.path.expanduser("~").encode()] + [os.path.realpath(root).encode() for root in made]
+        needles += [root.encode() for root in made if root != os.path.realpath(root)]
         for root in (source.root, copy.root, third):
             for path, data in folder_bytes(root).items():
                 for needle in needles:

@@ -16,7 +16,7 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 | 5 | CR | Ability to fail | TR-TRANSFER-008 |
 
 ### TR-TRANSFER-001 – Exact values
-- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-022, TC-SLY-023, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-027, TC-SLY-030, TC-SLY-031, TC-SLY-032, TC-SLY-033, TC-SLY-034, TC-SLY-035, TC-SLY-039, TC-SLY-009, TC-API-060, TC-API-061, TC-API-062, TC-API-064, TC-API-065, TC-API-066, TC-API-067
+- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-022, TC-SLY-023, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-027, TC-SLY-040, TC-SLY-030, TC-SLY-031, TC-SLY-032, TC-SLY-033, TC-SLY-034, TC-SLY-035, TC-SLY-039, TC-SLY-009, TC-API-060, TC-API-061, TC-API-062, TC-API-064, TC-API-065, TC-API-066, TC-API-067
 - Requirement: REQ-SLY-016
 - Group: EX
 - Kind: unit
@@ -28,7 +28,7 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 - Status: Approved
 
 ### TR-TRANSFER-002 – Both backends, skips visible
-- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-029, TC-SLY-036, TC-SLY-038
+- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-040, TC-SLY-029, TC-SLY-036, TC-SLY-038
 - Requirement: REQ-SLY-022
 - Group: BK
 - Kind: setup
@@ -61,7 +61,7 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 - Status: Approved
 
 ### TR-TRANSFER-005 – Times copied are compared exactly, times made are not
-- Applies to: TC-SLY-016, TC-SLY-020, TC-SLY-022, TC-SLY-025, TC-SLY-026, TC-API-064
+- Applies to: TC-SLY-016, TC-SLY-020, TC-SLY-022, TC-SLY-025, TC-SLY-040, TC-SLY-026, TC-API-064
 - Requirement: REQ-SLY-016
 - Group: EX
 - Kind: unit
@@ -84,7 +84,7 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 - Status: Approved
 
 ### TR-TRANSFER-007 – Only throw-away databases and folders
-- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-029, TC-SLY-036, TC-SLY-038, TC-API-063, TC-API-065, TC-API-066, TC-API-067, SMOKE-TRANSFER-001
+- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-040, TC-SLY-029, TC-SLY-036, TC-SLY-038, TC-API-063, TC-API-065, TC-API-066, TC-API-067, SMOKE-TRANSFER-001
 - Requirement: REQ-SLY-016
 - Group: BK
 - Kind: setup
@@ -132,8 +132,9 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 - Requirement: REQ-SLY-037
 - Group: EP
 - Kind: setup
-- Text: The check shall place the source under a folder whose name holds a random 16-character token and shall search every file of the resulting folders, as bytes, for that token and for the home folder's path.
-- Rationale: AC-008 "no file holds a path of where it was made"; a random token cannot appear by chance, and a byte search also finds a path inside JSON strings.
+- Text: The check shall place the source under a folder whose name holds a random 16-character token and shall search every file of the resulting folders, as bytes, for that token, for the absolute path of every folder the check made, and for the home folder's path.
+- Rationale: AC-008 "no file holds a path of where it was made"; a random token cannot appear by chance, and a byte search also finds a path inside JSON strings. The folders the check made lie under the system's temporary folder, outside home and without the token: a file that held the copy's own path was missed (V-4 of Verify, A-197).
 - Credibility aspect: power and false-alarm rate
-- Verified by: mutation (an aside answer with an absolute path must fail the check)
+- Verified by: mutation (an aside file that holds the copy's absolute folder must fail the check: defect D1 of `verify-repro/defects.json`)
 - Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan, 2026-11-22, new; Verify, 2026-11-27, changed by A-197 (D-548: every folder the check made)

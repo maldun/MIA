@@ -1,6 +1,6 @@
 """
 Acceptance tests of the same behaviour, the lag, the sync and the side records (groups SB, SY, SR of G-V4.GRAPHSTORE.TRANSFER): TC-SLY-022 to
-TC-SLY-028, TC-SLY-030, TC-SLY-031 (REQ-SLY-022 to 028, 030, 031; HR-003, HR-005, HR-006).
+TC-SLY-028, TC-SLY-030, TC-SLY-031, TC-SLY-040 (A-196) (REQ-SLY-022 to 028, 030, 031; HR-003, HR-005, HR-006).
 
 Live and copy are fresh stores (core_stores, TR-TRANSFER-002, -007); the copy is always a files folder, the live store is files and, where the
 scenario says so, a throw-away PostgreSQL database (skipped visibly where it cannot run). The cases AC-006 and AC-007 come from the helper
@@ -12,6 +12,7 @@ Run with: python tests/acceptance/test_transfer_sync.py
 
 import itertools
 import os
+import re
 import stat
 import sys
 import unittest
@@ -202,6 +203,56 @@ class LagAndSync(unittest.TestCase):
         self.assertFalse(os.path.isabs(named["file"]))
         self.assertTrue(named["file"].startswith(transfer.ASIDE + "/" + ts.CODE + "__"))
         self.assertTrue(os.path.isfile(os.path.join(copy.root, named["file"])))
+
+    @mark.req("REQ-SLY-024", "REQ-SLY-025", "REQ-SLY-026", "REQ-SLY-027")
+    def test_records_no_graph_names_are_listed_set_aside_and_synced_like_a_graph(self):
+        """TC-SLY-040 (A-196, V-2 of Verify): three steps that no header names: lonely.g/z differs, orphan.g/x is only on the copy, fresh.g/y only
+        in the live store. The lag lists the three; the sync sets the copy's two aside, names them, and leaves the graph group equal.
+
+        Example: lag {"graph_nodes|lonely.g/z": {"live": 1, "copy": 1, "state": "differs", "reason": None}, "graph_nodes|orphan.g/x": {"live": 0,
+        "copy": 1, "state": "copy_only", ...}, "graph_nodes|fresh.g/y": {"live": 1, "copy": 0, "state": "behind", ...}}; set_aside of
+        "graph_nodes|lonely.g/z": {"versions": [1], "file": "aside/graph_nodes_lonely.g_z__20261127T120000Z.json", "reason": "the live store won"}.
+        """
+        lonely, orphan, fresh = "graph_nodes|lonely.g/z", "graph_nodes|orphan.g/x", "graph_nodes|fresh.g/y"
+
+        def step(record_id, author):
+            return {"id": record_id, "version": 1, "author": author, "time": ts.STAMP, "doc": {"id": record_id, "data": {"type": "data"}}}
+        for kind in LIVE_KINDS:
+            with self.subTest(live=kind):
+                # Given: the sample store, equal on both sides, plus three steps that no header names
+                live, copy = live_and_copy(self, kind)
+                ts.sample_store(live)
+                ts.equalize(live, copy)
+                live.append("graph_nodes", "lonely.g/z", step("lonely.g/z", "live-writer"))
+                copy.append("graph_nodes", "lonely.g/z", step("lonely.g/z", "copy-writer"))
+                copy.append("graph_nodes", "orphan.g/x", step("orphan.g/x", "copy-writer"))
+                live.append("graph_nodes", "fresh.g/y", step("fresh.g/y", "live-writer"))
+                own = {lonely: copy.versions("graph_nodes", "lonely.g/z"), orphan: copy.versions("graph_nodes", "orphan.g/x")}
+                # When: the owner asks for the lag
+                answer = transfer.lag(live, copy)
+                # Then: exactly the three records, each under <table>|<record ID>, with its versions and state
+                self.assertEqual(answer, {lonely: {"live": 1, "copy": 1, "state": "differs", "reason": None},
+                                          orphan: {"live": 0, "copy": 1, "state": "copy_only", "reason": None},
+                                          fresh: {"live": 1, "copy": 0, "state": "behind", "reason": None}})
+                # When: the sync runs
+                synced = transfer.sync_store(live, copy)
+                # Then: it names the two records of the copy's own, with their versions, reasons and relative aside files that exist
+                self.assertEqual(sorted(synced["set_aside"]), [lonely, orphan])
+                for key, reason, name in ((lonely, "the live store won", "graph_nodes_lonely.g_z"),
+                                          (orphan, "the record exists only on the copy", "graph_nodes_orphan.g_x")):
+                    named = synced["set_aside"][key]
+                    self.assertEqual((named["versions"], named["reason"]), ([1], reason))
+                    self.assertRegex(named["file"], r"^%s/%s__\d{8}T\d{6}Z(_\d+)?\.json$" % (transfer.ASIDE, re.escape(name)))
+                    # And: the aside file holds the copy's own version with author and time
+                    aside = ts.read_json(os.path.join(copy.root, named["file"]))
+                    self.assertEqual((aside["record"], aside["reason"], aside["versions"]), (key, reason, own[key]))
+                # And: the graph group is equal on both sides, the copy-only record is gone
+                self.assertEqual(ts.graph_group(copy), ts.graph_group(live))
+                self.assertEqual(copy.versions("graph_nodes", "orphan.g/x"), [])
+                # And: a second sync adds 0 records and sets nothing aside, and the lag is empty
+                again = transfer.sync_store(live, copy)
+                self.assertEqual((again["records"], again["set_aside"]), (0, {}))
+                self.assertEqual(transfer.lag(live, copy), {})
 
     @mark.req("REQ-SLY-028")
     def test_only_one_sync_at_a_time_and_a_crashed_one_does_not_block(self):
