@@ -5926,9 +5926,19 @@ package MIA_NodeRequirements {
         doc /* If the live store does not answer when AutoSync runs, then the API and accounts shall go on with the copy and report that the sync did not run, naming the live store. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-API-065'> ACopyMIACannotRead_Api065 {
+        subject s : WebApplication;
+        doc /* If the copy folder holds a set of a newer format than MIA knows, then the API and accounts shall read the graphs from the live store, answer the store with `shown` live, and log one line naming the copy and its format. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-066'> WritesGoToTheLiveStore_Api066 {
+        subject s : WebApplication;
+        doc /* While a copy is set, the API and accounts shall write the changes of IF-104 v2 to the live store and leave the copy unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-API-064'> TheStoreAnswerWhileACopyIsSet_Api064 {
         subject s : WebApplication;
-        doc /* While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy. */
+        doc /* While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy, which is no graphs since null while the live store does not answer. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
 
@@ -6628,6 +6638,8 @@ package MIA_NodeRequirements {
     requirement r_req_api_061 : AutoSyncOffUnlessAsked_Api061;
     requirement r_req_api_062 : AutoSyncAtStartAndAtAnOrderlyStop_Api062;
     requirement r_req_api_063 : AnUnreachableLiveStoreDoesNotStopTheStart_Api063;
+    requirement r_req_api_065 : ACopyMIACannotRead_Api065;
+    requirement r_req_api_066 : WritesGoToTheLiveStore_Api066;
     requirement r_req_api_064 : TheStoreAnswerWhileACopyIsSet_Api064;
 
     satisfy r_req_clv_001 by mia.frontEnd;
@@ -7326,6 +7338,8 @@ package MIA_NodeRequirements {
     satisfy r_req_api_061 by mia.webApp;
     satisfy r_req_api_062 by mia.webApp;
     satisfy r_req_api_063 by mia.webApp;
+    satisfy r_req_api_065 by mia.webApp;
+    satisfy r_req_api_066 by mia.webApp;
     satisfy r_req_api_064 by mia.webApp;
     allocate r_req_clv_001 to mia.frontEnd;
     allocate r_req_clv_002 to mia.frontEnd;
@@ -8023,6 +8037,8 @@ package MIA_NodeRequirements {
     allocate r_req_api_061 to mia.webApp;
     allocate r_req_api_062 to mia.webApp;
     allocate r_req_api_063 to mia.webApp;
+    allocate r_req_api_065 to mia.webApp;
+    allocate r_req_api_066 to mia.webApp;
     allocate r_req_api_064 to mia.webApp;
 
     dependency from r_req_clv_001 to r_req_fe_001;
