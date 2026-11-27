@@ -1,6 +1,6 @@
 # Handover: G-V4.EDIT paused after prototype round 05; G-V4.CONTEXT Plan next (2026-11-28)
 
-For the session that starts the Plan of G-V4.CONTEXT. Read `CLAUDE.md`, this file and the line handover `handover-2026-11-27-g-v4-line-transfer-deployed.md` (still valid for everything not named here). Ways of working: decisions as a questionnaire, recommended option first; full absolute paths for files; the owner signs and ticks, the agent never sets Approved; only the owner pushes (`git push -4`); the owner's delegation for G-V4 asks again at CONTEXT (D-423), so CONTEXT's decisions are asked, not taken.
+For the session that starts the Plan of G-V4.CONTEXT. Read `CLAUDE.md`, this file (in `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4/specs/mia/` since the merge) and the line handover `handover-2026-11-27-g-v4-line-transfer-deployed.md` (still valid for everything not named here). Ways of working: decisions as a questionnaire, recommended option first; full absolute paths for files; the owner signs and ticks, the agent never sets Approved; only the owner pushes (`git push -4`); the owner's delegation for G-V4 asks again at CONTEXT (D-423), so CONTEXT's decisions are asked, not taken.
 
 ## Why CONTEXT comes first now (D-606)
 The owner asked during EDIT's prototype round 05 whether EDIT makes more sense after CONTEXT, since the context graph's stored form is defined. The code shows the mismatch:
@@ -37,14 +37,14 @@ Report: `/home/maldun/prog/Python/MIA/.claude/worktrees/prototype-g-v4/specs/mia
 
 ## Waiting for the owner
 - [ ] Push `goal/v4.edit` (`git push -4 -u origin goal/v4.edit` in its worktree) and `prototype/g-v4` (`git push -4` in its worktree).
-- [ ] Whether `goal/v4.edit` (records only: D-600 to D-606, goal records, THR-009) is merged into `goal/v4` now, or CONTEXT branches from it (the start prompt assumes the latter).
+- [x] `goal/v4.edit` (records only) merged into `goal/v4` at `ff4b3b70` on the owner's request (2026-11-28); push `goal/v4` with `git push -4`.
 - [ ] The two fingerprint boxes of round 05's `run.md` (optional, the round is closed).
 
 ## Next free numbers
 EDIT D-607, A-210 (A-210 is reserved for IF-104 v3); round 05's prototype IDs: CP26, ASM-13. Line and other subgoals as in the line handover.
 
 ## Start prompt for CONTEXT Plan
-> Start Plan of G-V4.CONTEXT. Create the worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-context` on a new branch `goal/v4.context` from `goal/v4.edit` (it holds D-606, the reason CONTEXT now goes before EDIT). Read `CLAUDE.md`, `specs/mia/goals/G-V4.CONTEXT/goal.md` and `top-level-spec.md`, `specs/mia/goals/G-V4.EDIT/generality-review.md`, the decisions D-403 to D-405, D-602 and D-606 in `specs/mia/review-log.md`, and `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-edit/specs/mia/handover-2026-11-28-g-v4-edit-paused-context-next.md`. Read the round 05 report `/home/maldun/prog/Python/MIA/.claude/worktrees/prototype-g-v4/specs/mia/goals/G-V4/prototype/rounds/05/prototype-report.md` (findings 4, 6, 7, 10, 11, 13) and the context parts of `graph_tables.py` (`_context_node_refusal`, `_node_schema`) and `graph_rule_set.py` (`KINDS`). Load dev-workflow, plan-phase, agent-app, agent-app-plan.
+> Start Plan of G-V4.CONTEXT. Create the worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-context` on a new branch `goal/v4.context` from `goal/v4` (it holds the EDIT records up to D-606, the reason CONTEXT now goes before EDIT; merged at `ff4b3b70`). Read `CLAUDE.md`, `specs/mia/goals/G-V4.CONTEXT/goal.md` and `top-level-spec.md`, `specs/mia/goals/G-V4.EDIT/generality-review.md`, the decisions D-403 to D-405, D-602 and D-606 in `specs/mia/review-log.md`, and `specs/mia/handover-2026-11-28-g-v4-edit-paused-context-next.md`. Read the round 05 report `/home/maldun/prog/Python/MIA/.claude/worktrees/prototype-g-v4/specs/mia/goals/G-V4/prototype/rounds/05/prototype-report.md` (findings 4, 6, 7, 10, 11, 13) and the context parts of `graph_tables.py` (`_context_node_refusal`, `_node_schema`) and `graph_rule_set.py` (`KINDS`). Load dev-workflow, plan-phase, agent-app, agent-app-plan.
 >
 > Begin with step 0: ask the owner the open points of the handover's section "Open for CONTEXT's Plan step 0" as one questionnaire, recommended option first, then apply each answer (decision rows, goal record). Don't write requirements before the editor-core and profile-language questions are decided.
 >
