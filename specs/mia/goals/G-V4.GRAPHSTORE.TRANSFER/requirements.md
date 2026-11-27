@@ -38,7 +38,7 @@
 | 3 | SY | Lag and one-way sync: live wins, the copy's own versions set aside, one sync at a time, rerun after an interruption (FR-93, HR-003, HR-006, HR-007) | REQ-SLY-024, REQ-SLY-025, REQ-SLY-026, REQ-SLY-027, REQ-SLY-028, REQ-SLY-029, REQ-SLY-036, REQ-SLY-038 |
 | 4 | SR | Side records and the one-graph move (AC-033, FR-95 and FR-81 mechanisms) | REQ-SLY-030, REQ-SLY-031 |
 | 5 | PT | Portable sets: the format marker, older and newer sets, no paths (NFR-15, HR-008) | REQ-SLY-032, REQ-SLY-033, REQ-SLY-034, REQ-SLY-035, REQ-SLY-037 |
-| 6 | AS | The copy setting in the backend: reading the copy, AutoSync at start and stop, the real store answer (FR-58, FR-93, D-460) | REQ-SLY-039, REQ-API-060, REQ-API-061, REQ-API-062, REQ-API-063, REQ-API-064 |
+| 6 | AS | The copy setting in the backend: reading the copy, AutoSync at start and stop, the real store answer (FR-58, FR-93, D-460) | REQ-SLY-039, REQ-API-060, REQ-API-061, REQ-API-062, REQ-API-063, REQ-API-064 (changed, A-195), REQ-API-065, REQ-API-066 |
 
 ## Requirements
 
@@ -406,20 +406,46 @@
 - Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
 
+### REQ-API-065 – A copy MIA cannot read
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: If the copy folder holds a set of a newer format than MIA knows, then the API and accounts shall read the graphs from the live store, answer the store with `shown` live, and log one line naming the copy and its format.
+- Rationale: refines HR-002 ("MIA can run daily on the copy") for a copy an older MIA cannot read (REQ-SLY-035: such a set is not opened); the owner chose the fallback over a stopped start (D-543); the line tells the owner why the live store is shown
+- Parent: HR-002
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: a copy whose marker names format 2 and a live store with cp2.multi at version 4: the backend starts, `GET` of cp2.multi answers version 4, the store answer has `shown: "live"`, and `mia.log` holds one line naming the copy folder and "format 2" (exact)
+- Verified by: TC-API-065
+- Status: Draft
+- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-543)
+
+### REQ-API-066 – Writes go to the live store
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: While a copy is set, the API and accounts shall write the changes of IF-104 v2 to the live store and leave the copy unchanged.
+- Rationale: refines HR-002; the live store is the master (Terms; FR-95 of EDIT), so a save on the copy would be set aside by the next sync; the rationale of REQ-API-060 said it, no requirement text did (D-544). A save is seen on the copy after the next sync; what the editor shows meanwhile is EDIT's (FR-95)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-006 with `copy` set and no AutoSync: a save of cp2.multi on version 6 answers version 7, the live store holds 7 versions, and the copy's graph group is unchanged entry by entry (exact)
+- Verified by: TC-API-066
+- Status: Draft
+- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-544)
+## Changed requirements (proposed; the approved text in `In force:` stays in force until the owner approves the change, M8)
+
 ### REQ-API-064 – The store answer while a copy is set
 - Level: low   Subject: WebApplication
 - Group: AS
-- Text: While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy.
-- Rationale: refines HR-006 and FR-93 "MIA shows how far the copy lags"; the lag in IF-104 v2 terms: `graphs` = the number of graphs not current, `since` = the time of the oldest live version the copy lacks, null when none; makes VIEW's fixed fields of IF-104 v2 real without a new version (D-460 (2), REQ-API-022)
+- In force (Approved, G-V4.GRAPHSTORE.TRANSFER Plan): "While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy."
+- Text: While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy, which is no graphs since null while the live store does not answer.
+- Rationale: refines HR-006 and FR-93 "MIA shows how far the copy lags"; the lag in IF-104 v2 terms: `graphs` = the number of graphs not current, `since` = the time of the oldest live version the copy lacks, null when none; `since` is counted from the header versions, as the lag counts graphs (D-540); while the live store does not answer the lag cannot be known and is given as no graphs, `live_reachable` false says why (D-545); makes VIEW's fixed fields of IF-104 v2 real without a new version (D-460 (2), REQ-API-022)
 - Parent: HR-006
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-006 before the sync: `GET /api/v2/store` gives `shown: "copy"`, `live_reachable: true`, `lag: {"graphs": 1, "since": <time of live version 5 of cp2.multi>}`; after the sync `lag: {"graphs": 0, "since": null}` (exact)
-- Verified by: TC-API-064
+- Acceptance criterion: AC-006 before the sync: `GET /api/v2/store` gives `shown: "copy"`, `live_reachable: true`, `lag: {"graphs": 1, "since": <time of live version 5 of cp2.multi>}`; after the sync `lag: {"graphs": 0, "since": null}`; with the live store's address unreachable: `shown: "copy"`, `reachable: true`, `live_reachable: false`, `lag: {"graphs": 0, "since": null}` (exact)
+- Verified by: TC-API-064, TC-API-067
 - Status: Approved
-- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460 (2))
-
-## Changed requirements (proposed; the approved text in `In force:` stays in force until the owner approves the change, M8)
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460 (2)); Implement, 2026-11-27, change proposed by A-195 (D-540, D-545)
 
 ### REQ-SLY-009 – Library export and seed
 - Level: low   Subject: Persistence

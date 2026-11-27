@@ -159,7 +159,9 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | V-3 of G-V4.VIEW's verification (handed to TRANSFER, D-501 (2)): a PostgreSQL store never reconnected, and MIA did not start while the database was down (against REQ-API-021, 050). Fixed: `PostgresBackend._connection()` opens a dropped connection again on the next call (the failed call is not repeated, so no write is sent twice); `web_app` gives the graph routes the lazily opened `_LiveStore` also without a copy (it passes every call on; a store that cannot be opened fails each call, the routes answer 503 `store_unreachable`, `/store` says `reachable: false`, and the first call after the database answers opens it). The drop is made by `pg_terminate_backend` on the throw-away server, a real server-side drop (a stopped `--rm` container with tmpfs data could not be started again with its data); the stop of a real container was seen in SMOKE-TRANSFER-001's setting only. No requirement changed | after T-06 | `tests/test_storage_postgres.py` `test_a_dropped_connection_is_opened_again_on_the_next_call` (seen red: "the connection is closed"); `tests/test_web_app_live_store.py` (new, seen red: the import stopped with `OperationalError`); IF-102 contract suite on postgres:16 green (`tools/contract_postgres.sh`) |
 
 ## Plan amendments
-None.
+| Amendment | Why | State |
+|---|---|---|
+| A-195 | D-543 to D-545: the copy setting's behaviour that no requirement text stated (REQ-API-064 changed, REQ-API-065, 066 new; TC-API-065 to 067) | drafts committed 2026-11-27; waits for the owner's install and approval (D-546) |
 
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |
@@ -190,5 +192,5 @@ None.
 ## Open questions for Phase 4
 - T-03: should the sync also overwrite (with an aside file) a differing graph-group record that no graph names, instead of refusing it? See Unspecified behavior.
 - T-01: should `library-seed` also refuse a folder whose headers name missing members (the check of REQ-SLY-017)? Not asked by REQ-SLY-009; noted above.
-- T-06: D-543, D-544, D-545 are behaviour no requirement text states yet (amendment batch proposed after V-3).
+- T-06: D-543, D-544, D-545 go into requirement texts by A-195 (REQ-API-064, 065, 066).
 - T-06: `setup_cfg.example.json` names `copy` and `autosync` (needed by `test_config`); a machine's own file without them gets the usual "missing options" warning (REQ-OPR-003).

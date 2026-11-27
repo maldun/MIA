@@ -43,6 +43,9 @@ Protected tests in force: TC-SLY-007 and TC-SLY-009 (`tests/test_migrate.py`, `t
 | TC-API-062 | REQ-API-062 | component | `copy` set, `autosync` true; the live store has a newer version; a version written to the live store while running; orderly stop | the newer version is on the copy before the first answer; the version written while running is on the copy after the stop | exact |
 | TC-API-063 | REQ-API-063 | component | `copy` set, `autosync` true, `store` database with an address on a closed port | the backend starts and answers graphs from the copy; the log holds one line naming the live store and `sync not run` | exact |
 | TC-API-064 | REQ-API-064 | component | AC-006 with `copy` set; `GET /api/v2/store` before and after a sync | before: `shown` `copy`, `live_reachable` true, `lag` `{"graphs": 1, "since": <time of live version 5 of cp2.multi>}`; after: `lag` `{"graphs": 0, "since": null}` | exact |
+| TC-API-065 | REQ-API-065 | component | the live store with cp2.multi at 4; `copy` set to a folder whose marker names format 2 | the read answers version 4; `shown` live, lag no graphs; one log line naming the copy and `format 2` | exact |
+| TC-API-066 | REQ-API-066 | component | AC-006 with `copy` set, no `autosync`; the owner saves cp2.multi on version 6 | version 7 in the live store (7 versions); the copy's graph group unchanged | exact |
+| TC-API-067 | REQ-API-064 | component | `copy` set, no `autosync`, `store` database with an address on a closed port; `GET /api/v2/store` | `shown` copy, `reachable` true, `live_reachable` false, `lag` `{"graphs": 0, "since": null}` | exact |
 
 ## Edge inputs (per operation: empty, missing, at and past the limit)
 | Operation | Edge | Check |
@@ -275,6 +278,26 @@ None: no hard bound and no time budget (high-level spec section 3).
 - When: `GET /api/v2/store` is asked before and after a sync
 - Then: before: `shown` is `copy`, `live_reachable` true, `lag` `{"graphs": 1, "since": <time of live version 5 of cp2.multi>}`
 - And: after: `lag` is `{"graphs": 0, "since": null}`
+
+### TC-API-065 – A copy of a newer format is not read
+- Verifies: REQ-API-065
+- Given: the live store on files with the sample store (cp2.multi at version 4); `copy` set to a folder whose marker names format 2
+- When: the backend starts, and cp2.multi and the store are read through the graph interface
+- Then: the read answers version 4 (the live store's), the store answer has `shown` live and a lag of no graphs
+- And: `mia.log` holds one line naming the copy folder and "format 2"
+
+### TC-API-066 – While a copy is set, a save goes to the live store
+- Verifies: REQ-API-066
+- Given: AC-006 with `copy` set, no `autosync`
+- When: the owner saves cp2.multi on version 6 with one value changed
+- Then: the answer is version 7 and the live store holds 7 versions
+- And: the copy's graph group is unchanged, entry by entry
+
+### TC-API-067 – The store answer while the live store does not answer
+- Verifies: REQ-API-064
+- Given: `copy` set (the sample store), no `autosync`, `store` database with an address on a port where nothing listens
+- When: `GET /api/v2/store` is asked
+- Then: `shown` copy, `reachable` true, `live_reachable` false, `lag` `{"graphs": 0, "since": null}`
 
 ### SMOKE-TRANSFER-001 – Move and sync on the owner's server, throw-away only
 - Verifies: REQ-SLY-016, REQ-SLY-025, REQ-SLY-026, HR-004, HR-006
