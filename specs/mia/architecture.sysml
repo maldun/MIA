@@ -5826,26 +5826,6 @@ package MIA_NodeRequirements {
         doc /* When its files backend replaces a record file, the Storage layer shall flush the new file to disk before the replacement and flush the folder after it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-SLY-024'> TheLagOfEveryGraph_Sly024 {
-        subject s : Persistence;
-        doc /* When the owner asks for the lag, the Storage layer shall list every graph that is not current, with its versions in the live store and the copy, its state and its reason. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-SLY-025'> TheSyncBringsTheCopyToTheLiveStore_Sly025 {
-        subject s : Persistence;
-        doc /* When the owner runs the sync, the Storage layer shall make the history of every record of the graph group in the copy equal to its history in the live store. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-SLY-026'> TheCopySOwnVersionsSetAsideBeforeTheyGo_Sly026 {
-        subject s : Persistence;
-        doc /* If a graph differs or exists only on the copy, then the Storage layer shall write the copy's differing versions of the graph and its members durably to an aside file before removing them. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-SLY-027'> TheSyncNamesWhatItSetAside_Sly027 {
-        subject s : Persistence;
-        doc /* When a sync has set versions aside, the Storage layer shall name in its answer each such graph with its versions and the path of its aside file relative to the copy. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
     requirement def <'REQ-SLY-028'> OneSyncAtATime_Sly028 {
         subject s : Persistence;
         doc /* If a sync or a move into the copy is running, then the Storage layer shall refuse a second one on the same copy and name the copy's lock. */
@@ -5896,11 +5876,6 @@ package MIA_NodeRequirements {
         doc /* If the format marker of a set of files names a format greater than the one the Storage layer knows, then the Storage layer shall refuse to open the set and name both formats. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-SLY-037'> NoPathOfTheMachineInASet_Sly037 {
-        subject s : Persistence;
-        doc /* The Storage layer shall write no absolute file path of the machine into a set of files. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
     requirement def <'REQ-SLY-039'> LagAndSyncOnCommand_Sly039 {
         subject s : Persistence;
         doc /* The Storage layer shall offer the lag and the sync of a copy as commands of its storage tool, next to the move commands. */
@@ -5939,6 +5914,31 @@ package MIA_NodeRequirements {
     requirement def <'REQ-API-064'> TheStoreAnswerWhileACopyIsSet_Api064 {
         subject s : WebApplication;
         doc /* While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy, which is no graphs since null while the live store does not answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-024'> TheLagOfEveryGraph_Sly024 {
+        subject s : Persistence;
+        doc /* When the owner asks for the lag, the Storage layer shall list every graph, and every record no graph names, that is not current, with its versions in both stores, its state and its reason. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-025'> TheSyncBringsTheCopyToTheLiveStore_Sly025 {
+        subject s : Persistence;
+        doc /* When the owner runs the sync, the Storage layer shall make the history of every record of the graph group in the copy equal to its history in the live store. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-026'> TheCopySOwnVersionsSetAsideBeforeTheyGo_Sly026 {
+        subject s : Persistence;
+        doc /* If a graph or a record no graph names differs or exists only on the copy, then the Storage layer shall write the copy's differing versions of it, and of a graph's members, durably to an aside file before removing them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-027'> TheSyncNamesWhatItSetAside_Sly027 {
+        subject s : Persistence;
+        doc /* When a sync has set versions aside, the Storage layer shall name in its answer each such graph or record with its versions and the path of its aside file relative to the copy. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-037'> NoPathOfTheMachineInASet_Sly037 {
+        subject s : Persistence;
+        doc /* The Storage layer shall write no absolute file path of the machine into a set of files. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
 
@@ -6618,10 +6618,6 @@ package MIA_NodeRequirements {
     requirement r_req_sly_021 : AGraphOfAnUnknownKindStopsAMoveOrSync_Sly021;
     requirement r_req_sly_022 : TheSameAnswersOnFilesAndTheDatabase_Sly022;
     requirement r_req_sly_023 : ARecordFileIsOnDiskBeforeItCounts_Sly023;
-    requirement r_req_sly_024 : TheLagOfEveryGraph_Sly024;
-    requirement r_req_sly_025 : TheSyncBringsTheCopyToTheLiveStore_Sly025;
-    requirement r_req_sly_026 : TheCopySOwnVersionsSetAsideBeforeTheyGo_Sly026;
-    requirement r_req_sly_027 : TheSyncNamesWhatItSetAside_Sly027;
     requirement r_req_sly_028 : OneSyncAtATime_Sly028;
     requirement r_req_sly_029 : AnInterruptedMoveOrSyncLeavesCompleteGraphs_Sly029;
     requirement r_req_sly_036 : ARerunFinishesAnInterruptedMoveOrSync_Sly036;
@@ -6632,7 +6628,6 @@ package MIA_NodeRequirements {
     requirement r_req_sly_033 : AnOlderSetWithoutUnscopedRecordsIsRead_Sly033;
     requirement r_req_sly_034 : AnOlderSetWithUnscopedRecordsIsRefused_Sly034;
     requirement r_req_sly_035 : ANewerSetIsRefused_Sly035;
-    requirement r_req_sly_037 : NoPathOfTheMachineInASet_Sly037;
     requirement r_req_sly_039 : LagAndSyncOnCommand_Sly039;
     requirement r_req_api_060 : GraphsReadFromTheCopy_Api060;
     requirement r_req_api_061 : AutoSyncOffUnlessAsked_Api061;
@@ -6641,6 +6636,11 @@ package MIA_NodeRequirements {
     requirement r_req_api_065 : ACopyMIACannotRead_Api065;
     requirement r_req_api_066 : WritesGoToTheLiveStore_Api066;
     requirement r_req_api_064 : TheStoreAnswerWhileACopyIsSet_Api064;
+    requirement r_req_sly_024 : TheLagOfEveryGraph_Sly024;
+    requirement r_req_sly_025 : TheSyncBringsTheCopyToTheLiveStore_Sly025;
+    requirement r_req_sly_026 : TheCopySOwnVersionsSetAsideBeforeTheyGo_Sly026;
+    requirement r_req_sly_027 : TheSyncNamesWhatItSetAside_Sly027;
+    requirement r_req_sly_037 : NoPathOfTheMachineInASet_Sly037;
 
     satisfy r_req_clv_001 by mia.frontEnd;
     satisfy r_req_clv_002 by mia.frontEnd;
@@ -7318,10 +7318,6 @@ package MIA_NodeRequirements {
     satisfy r_req_sly_021 by mia.persistence;
     satisfy r_req_sly_022 by mia.persistence;
     satisfy r_req_sly_023 by mia.persistence;
-    satisfy r_req_sly_024 by mia.persistence;
-    satisfy r_req_sly_025 by mia.persistence;
-    satisfy r_req_sly_026 by mia.persistence;
-    satisfy r_req_sly_027 by mia.persistence;
     satisfy r_req_sly_028 by mia.persistence;
     satisfy r_req_sly_029 by mia.persistence;
     satisfy r_req_sly_036 by mia.persistence;
@@ -7332,7 +7328,6 @@ package MIA_NodeRequirements {
     satisfy r_req_sly_033 by mia.persistence;
     satisfy r_req_sly_034 by mia.persistence;
     satisfy r_req_sly_035 by mia.persistence;
-    satisfy r_req_sly_037 by mia.persistence;
     satisfy r_req_sly_039 by mia.persistence;
     satisfy r_req_api_060 by mia.webApp;
     satisfy r_req_api_061 by mia.webApp;
@@ -7341,6 +7336,11 @@ package MIA_NodeRequirements {
     satisfy r_req_api_065 by mia.webApp;
     satisfy r_req_api_066 by mia.webApp;
     satisfy r_req_api_064 by mia.webApp;
+    satisfy r_req_sly_024 by mia.persistence;
+    satisfy r_req_sly_025 by mia.persistence;
+    satisfy r_req_sly_026 by mia.persistence;
+    satisfy r_req_sly_027 by mia.persistence;
+    satisfy r_req_sly_037 by mia.persistence;
     allocate r_req_clv_001 to mia.frontEnd;
     allocate r_req_clv_002 to mia.frontEnd;
     allocate r_req_clv_003 to mia.frontEnd;
@@ -8017,10 +8017,6 @@ package MIA_NodeRequirements {
     allocate r_req_sly_021 to mia.persistence;
     allocate r_req_sly_022 to mia.persistence;
     allocate r_req_sly_023 to mia.persistence;
-    allocate r_req_sly_024 to mia.persistence;
-    allocate r_req_sly_025 to mia.persistence;
-    allocate r_req_sly_026 to mia.persistence;
-    allocate r_req_sly_027 to mia.persistence;
     allocate r_req_sly_028 to mia.persistence;
     allocate r_req_sly_029 to mia.persistence;
     allocate r_req_sly_036 to mia.persistence;
@@ -8031,7 +8027,6 @@ package MIA_NodeRequirements {
     allocate r_req_sly_033 to mia.persistence;
     allocate r_req_sly_034 to mia.persistence;
     allocate r_req_sly_035 to mia.persistence;
-    allocate r_req_sly_037 to mia.persistence;
     allocate r_req_sly_039 to mia.persistence;
     allocate r_req_api_060 to mia.webApp;
     allocate r_req_api_061 to mia.webApp;
@@ -8040,6 +8035,11 @@ package MIA_NodeRequirements {
     allocate r_req_api_065 to mia.webApp;
     allocate r_req_api_066 to mia.webApp;
     allocate r_req_api_064 to mia.webApp;
+    allocate r_req_sly_024 to mia.persistence;
+    allocate r_req_sly_025 to mia.persistence;
+    allocate r_req_sly_026 to mia.persistence;
+    allocate r_req_sly_027 to mia.persistence;
+    allocate r_req_sly_037 to mia.persistence;
 
     dependency from r_req_clv_001 to r_req_fe_001;
     dependency from r_req_clv_002 to r_req_fe_002;
