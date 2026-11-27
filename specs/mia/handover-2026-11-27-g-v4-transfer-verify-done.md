@@ -16,10 +16,13 @@ Replaces `handover-2026-11-27-g-v4-transfer-verify-next.md`. Worktree `/home/mal
 - V-6 low: `architecture.sysml` text still says T-06 planned (fix at Commit).
 
 ## Next
-1. The owner answers the six questions in the report's "Owner's decisions" (questionnaire, recommended first) → D-548 and up.
+1. Done 2026-11-27 (D-548, `871e19f5`): V-1 Phase 3 fix; V-2 amendment A-196 (records no graph names synced like a graph, `lag` lists them); V-3 Phase 3 fix (`check_format` on the target too); V-4 amendment A-197 (TC-SLY-037 searches every folder root the check made); V-5 fixed on `goal/v4` (`b259b533`). Verdict and V-6 after the fixes.
 2. With 2(a)/3(a): a fresh Implement session on this branch fixes V-1 (and V-3), each with a failing unit test first; with 1(a)/4(a) the amendments come first (A-196 and up, owner scripts).
 3. Re-verify of the fix commits only (a fresh session), then the owner ticks the sign-off; then Commit into `goal/v4`.
 4. V-5 is a docs commit on `goal/v4` (another session's line).
+
+## Start prompt for the fix session
+> Continue G-V4.GRAPHSTORE.TRANSFER after Verify: fix V-1 and V-3 and stage amendments A-196 (V-2) and A-197 (V-4) as decided in D-548. Work in `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer` (branch `goal/v4.graphstore.transfer`). Read `CLAUDE.md`, `specs/mia/handover-2026-11-27-g-v4-transfer-verify-done.md` and the findings in `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/verification-report.md` (repro in `verify-repro/`); load `dev-workflow`, `implement-phase` and `plan-phase` (amendments: drafts staged by a script outside the repo, the owner installs). Merge `goal/v4` first (V-5 fix). Each fix with a failing unit test first; then hand over to a fresh re-verify of the fix commits only.
 
 ## Host state
 `mia_db_1` stopped again (started only for the smoke with `podman start`; `deploy/up.sh` was not run, it would write a `deploy/.env` into the worktree). No image built; `localhost/mia:latest` untouched (the smoke used `localhost/mia:g-v4-transfer` as runtime).
