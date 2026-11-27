@@ -157,8 +157,8 @@
 - Verification method: Test
 - Acceptance criterion: a connection `e2` from `a` to the missing step `z` gives `connection_endpoints` naming `e2` (exact, in force); a connection from the data step `a` to the transform `t` without `id` gives `connection_endpoints` naming `None`, with `id` 5 naming `5`, with the empty `id` naming the empty text, and saving each graph is refused naming that part, with no exception (exact)
 - Verified by: TC-GTB-042, TC-GTB-053, TC-IF-301-39
-- Status: Draft
-- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); G-V4.GRAPHAPI.RUN Implement T-02, 2026-11-25, changed (A-189, D-483)
+- Status: Approved
+- History: G-V4.GRAPHAPI.RULES Plan step 1b, 2026-11-22, new (basis: prototype round 04, CP17); G-V4.GRAPHAPI.RUN Implement T-02, 2026-11-25, changed (A-189, D-483); Approved confirmed in Emacs on 2026-11-27
 
 ## Group OR – the order
 
@@ -239,8 +239,8 @@
 - Verification method: Inspection
 - Acceptance criterion: the import statements of `graph_run.py` and `graph_rule_set.py`, read with Python's `ast`, name only modules of `sys.stdlib_module_names`, `networkx`, `graph_rule_set` and `graph_run` (exact)
 - Verified by: TC-RUN-049
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN T-03, 2026-11-27, new by amendment A-190 (D-485, owner's word in the questionnaire)
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN T-03, 2026-11-27, new by amendment A-190 (D-485, owner's word in the questionnaire); Approved confirmed in Emacs on 2026-11-27
 
 REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output writes; plain callables unchanged; broken wiring refused before any node ran; start values; order edge) are taken in **unchanged** from G-V2 (Draft there, built and checked by TC-RUN-030 to 035) for approval with this group: they state what the run does with the loaded graph's roles and names (HR-003, OC-3). Their texts stay in `specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`; only their status changes, at the merge, to Approved.
 
@@ -308,8 +308,8 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - Verification method: Test
 - Acceptance criterion: for each of the six skills saved into a throw-away store, the answer of the run from the stored graph on the scripted replies equals the answer recorded for the old runner by the oracle of TR-RUN-002 (0 differences)
 - Verified by: TC-RUN-048
-- Status: Draft
-- History: G-V4.GRAPHAPI.RUN T-03, 2026-11-27, new by amendment A-190 (D-485, owner's word in the questionnaire)
+- Status: Approved
+- History: G-V4.GRAPHAPI.RUN T-03, 2026-11-27, new by amendment A-190 (D-485, owner's word in the questionnaire); Approved confirmed in Emacs on 2026-11-27
 
 ## Group EQ – the six skills from their stored graph
 
