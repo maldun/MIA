@@ -34,6 +34,7 @@ Regression set: after every task the unit suite (`discover -s tests`) and every 
 | T-02 The order and the rule set on the loaded graph | REQ-GTB-059, 060; REQ-WFM-166, 167 | TC-GTB-051, 052; TC-WFM-185, 186 | T-01 |
 | T-03 The runner and the stored-graph path | REQ-RUN-016, 040 to 045; REQ-WFM-168; REQ-WFM-115 (the check) | TC-RUN-041 to 047; TC-WFM-187; TC-WFM-115 | T-02 |
 | T-04 The equivalence runs on the stored-graph path | REQ-WFM-110 to 114 | `eval_decide.py` PASS for TC-WFM-110 to 114; SMOKE-RUN-001 on the branch | T-03 |
+| T-05 One common module for the thin code (F-7, D-486) | none (finding F-7) | the new F-7 test green inside the full unit suite; the pin in `tests/test_core_stored_graph.py` removed | T-03 |
 
 ### T-01: The loader and IF-301 v5
 - Implements: REQ-GTB-053 to REQ-GTB-058
@@ -74,6 +75,15 @@ Regression set: after every task the unit suite (`discover -s tests`) and every 
 - Demonstrator after this task: the five `eval_decide.py` verdicts side by side with the old-runner baselines of commit `1fb0c35`
 - Done when: all five criteria PASS (a FAIL re-run once, only the re-run counts); the runs are logged with versions and the model pin; the dev runs are feedback, the decision for the record is Verify's
 - Stop and report: a criterion looks unreachable on the pinned model within the budget; results flip between repeats more than `eval-spec.md` allows; an eval case or truth label seems wrong
+
+### T-05: One common module for the thin code (F-7, D-486)
+- Implements: no requirement; fixes finding F-7 of T-03 (owner's decision D-486: its own task in RUN's line)
+- Test to turn green first: a new unit test that reproduces F-7 (once the package `MIA` is importable beside the plain modules, a tool step of a converted skill run fails with `ToolMissing`); it is red before the fix
+- Touches: `toolbox.py` (the thin code reaches the same `common_operations` module the run registers its model and tools in, instead of importing whichever of `MIA.common_operations` and `common_operations` comes first); the new unit test; `tests/test_core_stored_graph.py` (the pin of one module that worked around F-7 goes)
+- Must not touch: protected material; `graph_run.py`, `core.py`, `skill_converter.py` beyond what the fix needs; suites, baselines
+- Depends on: T-03. Runs in this worktree before or after T-04, never during its model runs or its regression set
+- Done when: the new test green, the full unit suite green without the pin, the regression set holds; taking the fix out makes the new test fail (logged)
+- Stop and report: the fix changes the stored thin code text of shipped entries in a way that gives them new versions or touches their trust (`seed_shipped`, `changed_since_trusted`); that needs a decision first
 
 ## Open points before the gate
 - ~~SMOKE-RUN-001 has no script yet~~: done, `tests/smoke/smoke_run.py` installed with A-187 (`a3d1d800`).
