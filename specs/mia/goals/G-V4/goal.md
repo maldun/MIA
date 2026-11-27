@@ -9,7 +9,7 @@ Opened 2026-11-20 on the owner's request ("G-V4 starts a bigger rework"). Scope 
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4
-- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, G-V4.CONTEXT (after EDIT), G-V4.BUILDER (after CONTEXT)
+- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, G-V4.CONTEXT (planned before EDIT, D-606), G-V4.BUILDER (after CONTEXT)
 - Status: Proposed
 
 ## Owner's scope of 2026-11-20 (D-360)
