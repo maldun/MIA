@@ -23,9 +23,10 @@
 | members (of a graph) | the step and connection records its header names, at the versions it names; with them go its record of changes (`graph_changes`) and its arrangement (`arrangements`) |
 | move (of the whole store) | copying every record of every table from a source store to a target store with versions, authors and times unchanged |
 | one-graph move | copying the missing versions of one graph with its members from one store to another (called after a keep, FR-95, FR-81) |
-| lag | per graph of the graph group: the number of versions of its header in the live store and in the copy, and its state `current`, `behind`, `differs`, `copy_only` or `refused` with a reason |
+| lag | per graph of the graph group: the number of versions of its header in the live store and in the copy, and its state `current`, `behind`, `differs`, `copy_only` or `refused` with a reason; per record no graph names, under `<table>|<record ID>`: the number of its versions in each store and its state (A-196, proposed) |
+| record no graph names | a record of the graph group that no header version of any graph names in either store and that is no side record of a graph: every skill, and a step or connection left by a hand edit or a foreign copy (A-196, proposed) |
 | differs | the copy holds a version of the graph, or of one of its members, that is not the same entry as the live store's version of that number, or a version beyond the live store's newest |
-| aside folder | `<copy root>/aside/`; an aside file `<graph id, / as _>__<UTC stamp>[_n].json` holds the copy's differing versions of one graph and its members with their authors and times, and the reason |
+| aside folder | `<copy root>/aside/`; an aside file `<graph id, / as _>__<UTC stamp>[_n].json` holds the copy's differing versions of one graph and its members with their authors and times, and the reason; for a record no graph names `<table>_<record ID, / as _>__<UTC stamp>[_n].json` holds `record`, `set_aside_at`, `reason` and its `versions` (A-196, proposed) |
 | format marker | the file `mia-store.json` in the root of a set of files, `{"format": n}`; a set without it is format 0 |
 | AutoSync | the sync run by the backend at its start and at its orderly stop, while the copy setting asks for it |
 | scoped record | a record of `graph_nodes`, `graph_edges`, `context_nodes` or `context_edges` whose ID is `<graph id>/<local id>` (IF-301 v3, A-167) |
@@ -35,9 +36,9 @@
 |---|---|---|---|
 | 1 | MV | Moving the whole store: everything arrives, damaged graphs refused, members before headers, a repeat changes nothing (FR-59, HR-001, HR-004) | REQ-SLY-016, REQ-SLY-017, REQ-SLY-018, REQ-SLY-019, REQ-SLY-020, REQ-SLY-021, REQ-SLY-009 (changed), REQ-GA-008 (changed) |
 | 2 | SB | The same behaviour on files and the database, durable file writes (FR-58, HR-002, HR-005, NFR-16) | REQ-SLY-022, REQ-SLY-023 |
-| 3 | SY | Lag and one-way sync: live wins, the copy's own versions set aside, one sync at a time, rerun after an interruption (FR-93, HR-003, HR-006, HR-007) | REQ-SLY-024, REQ-SLY-025, REQ-SLY-026, REQ-SLY-027, REQ-SLY-028, REQ-SLY-029, REQ-SLY-036, REQ-SLY-038 |
+| 3 | SY | Lag and one-way sync: live wins, the copy's own versions set aside, one sync at a time, rerun after an interruption (FR-93, HR-003, HR-006, HR-007) | REQ-SLY-024 (changed, A-196), REQ-SLY-025 (changed, A-196), REQ-SLY-026 (changed, A-196), REQ-SLY-027 (changed, A-196), REQ-SLY-028, REQ-SLY-029, REQ-SLY-036, REQ-SLY-038 |
 | 4 | SR | Side records and the one-graph move (AC-033, FR-95 and FR-81 mechanisms) | REQ-SLY-030, REQ-SLY-031 |
-| 5 | PT | Portable sets: the format marker, older and newer sets, no paths (NFR-15, HR-008) | REQ-SLY-032, REQ-SLY-033, REQ-SLY-034, REQ-SLY-035, REQ-SLY-037 |
+| 5 | PT | Portable sets: the format marker, older and newer sets, no paths (NFR-15, HR-008) | REQ-SLY-032, REQ-SLY-033, REQ-SLY-034, REQ-SLY-035, REQ-SLY-037 (changed, A-197) |
 | 6 | AS | The copy setting in the backend: reading the copy, AutoSync at start and stop, the real store answer (FR-58, FR-93, D-460) | REQ-SLY-039, REQ-API-060, REQ-API-061, REQ-API-062, REQ-API-063, REQ-API-064 (changed, A-195), REQ-API-065, REQ-API-066 |
 
 ## Requirements
@@ -145,58 +146,6 @@
 - Verified by: TC-SLY-023
 - Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (survey)
-
-### REQ-SLY-024 – The lag of every graph
-- Level: low   Subject: Persistence
-- Group: SY
-- Text: When the owner asks for the lag, the Storage layer shall list every graph that is not current, with its versions in the live store and the copy, its state and its reason.
-- Rationale: refines HR-006 and FR-93 "MIA shows how far the copy lags before a sync"; the states and the line format follow the prototype (`graph_store_sync.lag`)
-- Parent: HR-006
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-006: `cp2.multi` is listed as live 6, copy 4, `behind`; AC-007: `sample.code` is listed as `differs`; a graph of kind `swarm` is listed as `refused` with reason `unknown_kind`; no other graph is listed (exact)
-- Verified by: TC-SLY-024
-- Status: Approved
-- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3)
-
-### REQ-SLY-025 – The sync brings the copy to the live store
-- Level: low   Subject: Persistence
-- Group: SY
-- Text: When the owner runs the sync, the Storage layer shall make the history of every record of the graph group in the copy equal to its history in the live store.
-- Rationale: refines HR-003, HR-006 and FR-93 "the copy receives the missing versions and equals the live store"; the sync covers the graph group only (D-460; reading of FR-58 shown in the plan review)
-- Parent: HR-003
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-006 and AC-007 with the live store on files and on the database: after the sync every record of the graph group has the same history in both stores; a second sync adds 0 records (exact)
-- Verified by: TC-SLY-025
-- Status: Approved
-- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3)
-
-### REQ-SLY-026 – The copy's own versions set aside before they go
-- Level: low   Subject: Persistence
-- Group: SY
-- Text: If a graph differs or exists only on the copy, then the Storage layer shall write the copy's differing versions of the graph and its members durably to an aside file before removing them.
-- Rationale: refines HR-003 and FR-93 "the copy's differing versions are saved aside and named to the owner, not discarded"; removing on the copy is a backend operation of N-3.1, not of IF-102 (D-460)
-- Parent: HR-003
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-007: the aside file holds the copy's version 2 of `sample.code` with its author and time; with a fault injected between the aside write and the first removal, the copy still holds version 2 and the aside file is complete (exact)
-- Verified by: TC-SLY-026
-- Status: Approved
-- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3, CP15)
-
-### REQ-SLY-027 – The sync names what it set aside
-- Level: low   Subject: Persistence
-- Group: SY
-- Text: When a sync has set versions aside, the Storage layer shall name in its answer each such graph with its versions and the path of its aside file relative to the copy.
-- Rationale: refines HR-003, FR-93 "named to the owner"; AC-007 "the sync names version 2 and the aside file"
-- Parent: HR-003
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-007: the answer's `set_aside` holds `sample.code` with versions `[2]` and a file `aside/sample.code__<stamp>.json` that exists (exact)
-- Verified by: TC-SLY-027
-- Status: Approved
-- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
 
 ### REQ-SLY-028 – One sync at a time
 - Level: low   Subject: Persistence
@@ -325,19 +274,6 @@
 - Verification method: Test
 - Acceptance criterion: a set with `{"format": 2}` is refused naming 2 and 1, and no file in it changes (exact)
 - Verified by: TC-SLY-035
-- Status: Approved
-- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
-
-### REQ-SLY-037 – No path of the machine in a set
-- Level: low   Subject: Persistence
-- Group: PT
-- Text: The Storage layer shall write no absolute file path of the machine into a set of files.
-- Rationale: refines HR-008 and NFR-15 "a set made on one machine works on another"; AC-008 "no file holds a path of where it was made"; aside paths in answers are relative to the copy (REQ-SLY-027)
-- Parent: HR-008
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-008: after a move, a sync with an aside file and a copy of the folder to another place, no file of either folder contains the source folder's absolute path or the home folder (exact)
-- Verified by: TC-SLY-037
 - Status: Approved
 - History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new
 
@@ -474,6 +410,76 @@
 - Verified by: TC-SLY-009
 - Status: Approved
 - History: G-V1, approved, out (D-177); G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, superseded by REQ-SLY-009 (proposed)
+
+### REQ-SLY-024 – The lag of every graph
+- Level: low   Subject: Persistence
+- Group: SY
+- In force (Approved, G-V4.GRAPHSTORE.TRANSFER Plan): "When the owner asks for the lag, the Storage layer shall list every graph that is not current, with its versions in the live store and the copy, its state and its reason."
+- Text: When the owner asks for the lag, the Storage layer shall list every graph, and every record no graph names, that is not current, with its versions in both stores, its state and its reason.
+- Rationale: refines HR-006 and FR-93 "MIA shows how far the copy lags before a sync"; the states and the line format follow the prototype (`graph_store_sync.lag`); records no graph names (Terms) are synced like a graph, so the copy equals the live store for every record of the graph group and the lag says so (V-2 of Verify, D-548)
+- Parent: HR-006
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-006: `cp2.multi` is listed as live 6, copy 4, `behind`; AC-007: `sample.code` is listed as `differs`; a graph of kind `swarm` is listed as `refused` with reason `unknown_kind`; no other graph is listed; TC-SLY-040: a step `lonely.g/z` no header names, different in the two stores, is listed as `graph_nodes|lonely.g/z` live 1, copy 1, `differs`; `orphan.g/x` only on the copy as live 0, copy 1, `copy_only`; `fresh.g/y` only in the live store as live 1, copy 0, `behind`; each with reason null (exact)
+- Verified by: TC-SLY-024, TC-SLY-040
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3); Verify, 2026-11-27, change proposed by A-196 (D-548)
+
+### REQ-SLY-025 – The sync brings the copy to the live store
+- Level: low   Subject: Persistence
+- Group: SY
+- In force (Approved, G-V4.GRAPHSTORE.TRANSFER Plan): the text below; acceptance criterion "AC-006 and AC-007 with the live store on files and on the database: after the sync every record of the graph group has the same history in both stores; a second sync adds 0 records (exact)"
+- Text: When the owner runs the sync, the Storage layer shall make the history of every record of the graph group in the copy equal to its history in the live store.
+- Rationale: refines HR-003, HR-006 and FR-93 "the copy receives the missing versions and equals the live store"; the sync covers the graph group only (D-460; reading of FR-58 shown in the plan review); records no graph names (Terms) are synced like a graph, so the copy equals the live store for every record of the graph group and the lag says so (V-2 of Verify, D-548)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-006 and AC-007 with the live store on files and on the database: after the sync every record of the graph group has the same history in both stores; a second sync adds 0 records; TC-SLY-040 on both backends: after the sync the copy's graph group equals the live store's, `orphan.g/x` is gone from the copy, and a second sync adds 0 records and sets nothing aside (exact)
+- Verified by: TC-SLY-025, TC-SLY-040
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3); Verify, 2026-11-27, change proposed by A-196 (D-548)
+
+### REQ-SLY-026 – The copy's own versions set aside before they go
+- Level: low   Subject: Persistence
+- Group: SY
+- In force (Approved, G-V4.GRAPHSTORE.TRANSFER Plan): "If a graph differs or exists only on the copy, then the Storage layer shall write the copy's differing versions of the graph and its members durably to an aside file before removing them."
+- Text: If a graph or a record no graph names differs or exists only on the copy, then the Storage layer shall write the copy's differing versions of it, and of a graph's members, durably to an aside file before removing them.
+- Rationale: refines HR-003 and FR-93 "the copy's differing versions are saved aside and named to the owner, not discarded"; removing on the copy is a backend operation of N-3.1, not of IF-102 (D-460); records no graph names (Terms) are synced like a graph, so the copy equals the live store for every record of the graph group and the lag says so (V-2 of Verify, D-548)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-007: the aside file holds the copy's version 2 of `sample.code` with its author and time; with a fault injected between the aside write and the first removal, the copy still holds version 2 and the aside file is complete; TC-SLY-040: the aside file of `graph_nodes|lonely.g/z` and that of `graph_nodes|orphan.g/x` each hold the copy's version 1 with its author and time (exact)
+- Verified by: TC-SLY-026, TC-SLY-040
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype CP3, CP15); Verify, 2026-11-27, change proposed by A-196 (D-548)
+
+### REQ-SLY-027 – The sync names what it set aside
+- Level: low   Subject: Persistence
+- Group: SY
+- In force (Approved, G-V4.GRAPHSTORE.TRANSFER Plan): "When a sync has set versions aside, the Storage layer shall name in its answer each such graph with its versions and the path of its aside file relative to the copy."
+- Text: When a sync has set versions aside, the Storage layer shall name in its answer each such graph or record with its versions and the path of its aside file relative to the copy.
+- Rationale: refines HR-003, FR-93 "named to the owner"; AC-007 "the sync names version 2 and the aside file"; records no graph names (Terms) are synced like a graph, so the copy equals the live store for every record of the graph group and the lag says so (V-2 of Verify, D-548)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-007: the answer's `set_aside` holds `sample.code` with versions `[2]` and a file `aside/sample.code__<stamp>.json` that exists; TC-SLY-040: `set_aside` holds `graph_nodes|lonely.g/z` with versions `[1]`, reason "the live store won" and a file `aside/graph_nodes_lonely.g_z__<stamp>.json`, and `graph_nodes|orphan.g/x` with versions `[1]` and reason "the record exists only on the copy"; both files exist (exact)
+- Verified by: TC-SLY-027, TC-SLY-040
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new; Verify, 2026-11-27, change proposed by A-196 (D-548)
+
+### REQ-SLY-037 – No path of the machine in a set
+- Level: low   Subject: Persistence
+- Group: PT
+- In force (Approved, G-V4.GRAPHSTORE.TRANSFER Plan): the text below; acceptance criterion "AC-008: after a move, a sync with an aside file and a copy of the folder to another place, no file of either folder contains the source folder's absolute path or the home folder (exact)"
+- Text: The Storage layer shall write no absolute file path of the machine into a set of files.
+- Rationale: refines HR-008 and NFR-15 "a set made on one machine works on another"; AC-008 "no file holds a path of where it was made"; aside paths in answers are relative to the copy (REQ-SLY-027); the folders a check makes lie under the system's temporary folder, outside home and without the source's token, so each is searched too (V-4 of Verify, D-548)
+- Parent: HR-008
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-008: after a move, a sync with an aside file and a copy of the folder to another place, no file of either folder contains the source folder's absolute path, the absolute path of any folder the check made, or the home folder (exact)
+- Verified by: TC-SLY-037
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new; Verify, 2026-11-27, change proposed by A-197 (D-548)
 
 ## Notes for other subgoals (not requirements of TRANSFER)
 - VIEW: REQ-API-022 (fixed fields) holds while no copy is set; REQ-API-064 gives the real values. VIEW builds the backend choice (config `store` = `files` | `database`, address from `MIA_DATABASE_URL`; VIEW D-440 (4), commit `3f0bc69a` on `goal/v4.view`); the copy setting of REQ-API-060 lies on top of it. VIEW agreed to `move_graph(source, target, graph_id) -> {"graphs": 1, "records": n}` with the order members, `graph_changes`, `arrangements`, header; no VIEW requirement calls it (VIEW's save route writes the live store only), so the call site belongs to EDIT.

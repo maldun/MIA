@@ -25,6 +25,7 @@ Protected tests in force: TC-SLY-007 and TC-SLY-009 (`tests/test_migrate.py`, `t
 | TC-SLY-025 | REQ-SLY-025, HR-006 | component | AC-006 and AC-007 (without `alien`); sync, then sync again; live on files and on the database | after the first sync every graph-group record has the same history on both sides; the second sync adds 0 records | exact |
 | TC-SLY-026 | REQ-SLY-026, HR-003 | component | AC-007; once plain, once with a fault after the aside file is written and before the first removal or cut | the aside file holds the copy's version 2 of `sample.code` and its members with author and time; after the fault the copy still holds version 2 and the aside file is complete JSON | exact |
 | TC-SLY-027 | REQ-SLY-027 | component | AC-007, sync | the answer's `set_aside` is exactly `{"sample.code": {"versions": [2], "file": "aside/sample.code__<stamp>.json", ...}}`; the path is relative and the file exists | exact |
+| TC-SLY-040 | REQ-SLY-024, REQ-SLY-025, REQ-SLY-026, REQ-SLY-027 (A-196) | component | the sample store equal on both sides plus three steps no header names: `lonely.g/z` different in the two stores, `orphan.g/x` only on the copy, `fresh.g/y` only in the live store; lag, sync, sync again; live on files and on the database | the lag lists exactly `graph_nodes|lonely.g/z` (1, 1, `differs`), `graph_nodes|orphan.g/x` (0, 1, `copy_only`), `graph_nodes|fresh.g/y` (1, 0, `behind`); the sync names the first two in `set_aside` with versions `[1]`, their reasons and relative aside files holding the copy's version 1; afterwards the graph group is equal, `orphan.g/x` is gone, the second sync adds 0 and the lag is empty | exact |
 | TC-SLY-028 | REQ-SLY-028 | component | a copy; process A holds its lock (a helper process that takes the lock and waits); process B runs a sync; then A is killed and B runs again | B's first sync is refused naming `sync.lock` and the copy is unchanged; after A is killed B's sync runs | exact |
 | TC-SLY-029 | REQ-SLY-029, HR-007 | component | a move of the small store (`cp2.multi`, `sample.code`, `context.cp13`), a one-graph move of `cp2.multi` and the sync of AC-006 plus AC-007, each interrupted at every write position; both backends | after every stop no header in the target names a missing member | 0 positions failing |
 | TC-SLY-036 | REQ-SLY-036, HR-007 | component | every stopped run of TC-SLY-029, run again | the target equals, record by record, the target of an uninterrupted run (aside files may be two) | 0 differences |
@@ -35,7 +36,7 @@ Protected tests in force: TC-SLY-007 and TC-SLY-009 (`tests/test_migrate.py`, `t
 | TC-SLY-033 | REQ-SLY-033 | component | a set written by today's code without a marker (scoped graphs and `workflows` documents) | moved and synced like a format-1 set; the move result equals that of TC-SLY-016 for those records | exact |
 | TC-SLY-034 | REQ-SLY-034 | component | a set without a marker holding `graph_nodes/n1` (no slash) | move and sync refused naming `graph_nodes`, `n1` and MIGRATION's conversion step; nothing written | exact |
 | TC-SLY-035 | REQ-SLY-035 | component | a set with `mia-store.json` = `{"format": 2}` | opening it is refused naming 2 and 1; no file in it changes (byte compare) | exact |
-| TC-SLY-037 | REQ-SLY-037, HR-008 | component | the sample store in a folder with a unique name under a temporary folder; moved to another folder, synced with an aside file, the copy folder copied elsewhere | no file of the target, the copy or the copied folder contains the source folder's absolute path or the home folder; the copied folder lists the same graphs and versions as the folder it was copied from | exact |
+| TC-SLY-037 | REQ-SLY-037, HR-008 | component | the sample store in a folder with a unique name under a temporary folder; moved to another folder, synced with an aside file, the copy folder copied elsewhere | no file of the target, the copy or the copied folder contains the source folder's absolute path, the absolute path of any folder the check made (A-197) or the home folder; the copied folder lists the same graphs and versions as the folder it was copied from | exact |
 | TC-SLY-039 | REQ-SLY-039 | component | AC-006 on files; `python -m MIA.migrate lag --copy DIR`, then `sync --copy DIR`, then `sync` while a helper holds the lock | `lag` prints the line of `cp2.multi` (live 6, copy 4, behind), exit 0; `sync` reports the records added, exit 0; the locked sync is one line, exit 1 | exact |
 | TC-SLY-009 | REQ-SLY-009, REQ-GA-008 | component | the sample store; `library-export` to a new folder, `library-seed` into an empty store | every library entry and every graph-group record arrives identical; in the seed's write log members come before headers | exact |
 | TC-API-060 | REQ-API-060 | component | the backend app with `store` files (live) and `copy` set to a folder holding a different version of `cp2.multi` | `GET` of `cp2.multi` through IF-104 v2 answers the copy's version | exact |
@@ -51,8 +52,8 @@ Protected tests in force: TC-SLY-007 and TC-SLY-009 (`tests/test_migrate.py`, `t
 | Operation | Edge | Check |
 |---|---|---|
 | move | empty source; empty target; target with the same histories; target with a different history of one record | TC-SLY-016, TC-SLY-020, and the existing `conflict` of TC-SLY-007 (unit) |
-| lag | copy equal to live (no line); graph only on the copy (`copy_only`); unknown kind (`refused`) | TC-SLY-024, TC-SLY-025 (second lag empty) |
-| sync | nothing to do; versions only behind; differing; only on the copy; interrupted; locked | TC-SLY-025, 026, 029, 036, 038, 028 |
+| lag | copy equal to live (no line); graph only on the copy (`copy_only`); unknown kind (`refused`); a record no graph names, differing, only on the copy, only live (A-196) | TC-SLY-024, TC-SLY-025 (second lag empty), TC-SLY-040 |
+| sync | nothing to do; versions only behind; differing; only on the copy; interrupted; locked; a record no graph names (A-196) | TC-SLY-025, 026, 029, 036, 038, 028, 040 |
 | one-graph move | target lacks the graph; target behind; target with its own version | TC-SLY-031 |
 | format marker | none with scoped records; none with an unscoped record; format 1; format 2 | TC-SLY-032 to 035 |
 | AutoSync | off; on with live reachable; on with live unreachable | TC-API-061 to 063 |
@@ -157,6 +158,15 @@ None: no hard bound and no time budget (high-level spec section 3).
 - Then: its answer names `sample.code` with versions `[2]` and the file `aside/sample.code__<stamp>.json`, relative to the copy
 - And: that file exists in the copy
 
+### TC-SLY-040 – Records no graph names are listed, set aside and synced like a graph (A-196)
+- Verifies: REQ-SLY-024, REQ-SLY-025, REQ-SLY-026, REQ-SLY-027
+- Given: the sample store, equal in the live store and the copy; then three steps that no header names, each version 1: `lonely.g/z` written by `live-writer` in the live store and by `copy-writer` on the copy, `orphan.g/x` only on the copy, `fresh.g/y` only in the live store; the live store once on files, once on the database
+- When: the owner asks for the lag, runs the sync, and runs it again
+- Then: the lag lists exactly `graph_nodes|lonely.g/z` (live 1, copy 1, `differs`), `graph_nodes|orphan.g/x` (live 0, copy 1, `copy_only`) and `graph_nodes|fresh.g/y` (live 1, copy 0, `behind`), each with reason null
+- And: the sync's `set_aside` names exactly `graph_nodes|lonely.g/z` (versions `[1]`, "the live store won") and `graph_nodes|orphan.g/x` (versions `[1]`, "the record exists only on the copy"), each with a file `aside/<table>_<record ID, / as _>__<stamp>.json` relative to the copy that holds `record`, `reason` and the copy's version 1 with author and time
+- And: afterwards the graph group is equal in both stores and `orphan.g/x` is gone from the copy
+- And: the second sync adds 0 records and sets nothing aside, and the lag lists nothing
+
 ### TC-SLY-028 – Only one sync at a time, and a crashed one does not block
 - Verifies: REQ-SLY-028
 - Given: a copy; a helper process that takes the copy's lock and waits
@@ -229,7 +239,7 @@ None: no hard bound and no time budget (high-level spec section 3).
 - Verifies: REQ-SLY-037, HR-008
 - Given: the sample store in a folder with a unique name under a temporary folder
 - When: it is moved to a second folder, that folder is used as a copy and synced with one aside file, and the copy is copied to a third place
-- Then: no file of the three folders contains the first folder's absolute path or the home folder
+- Then: no file of the three folders contains the first folder's absolute path, the absolute path of any folder the check made, or the home folder (A-197)
 - And: the third folder lists the same graphs and versions as the folder it was copied from
 
 ### TC-SLY-039 – Lag and sync are commands

@@ -156,6 +156,8 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **V-3 (REQ-SLY-034):** `move_store`, `move_graph` and `sync_store` check the format of the target too, before the first write (`check_formats`). Red first: `OlderSets.test_a_move_or_sync_into_an_older_set_is_refused_and_writes_no_marker`, three subtests (StorageError not raised). Now refused `older_format`, no marker written, the set unchanged.
 
+**Amendments (D-550):** A-196 (V-2) and A-197 (V-4) drafted in `specs/mia/amendments/A-196-197/`, note `A-196-197-note.md`, install script `tools/apply_amendment_a196_a197.sh`. TC-SLY-040 is red on the branch by assertion (lag `{}`), files and database. The A-197 draft of TC-SLY-037 is green and fails on D1. The installed check passes D1.
+
 **Tests green (my runs, feedback only):** `tests/test_graph_store_transfer.py`, `test_migrate.py`, `test_storage_copy.py`, `tests/acceptance/test_transfer_*.py` OK. `verify-repro/repro_sync_edges.py`: V-1 refused `locked`; V-3 refused `older_format` both times; V-2a/b unchanged (A-196).
 
 ## Findings
@@ -173,6 +175,8 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | Amendment | Why | State |
 |---|---|---|
 | A-195 | D-543 to D-545: the copy setting's behaviour that no requirement text stated (REQ-API-064 changed, REQ-API-065, 066 new; TC-API-065 to 067) | drafts committed 2026-11-27; waits for the owner's install and approval (D-546) |
+| A-196 | V-2 of Verify, D-548: records no graph names synced like a graph (aside, cut back, removed when only on the copy), listed by the lag; REQ-SLY-024 to 027 changed, TC-SLY-040 new | drafts committed 2026-11-27 (D-550); waits for the owner's install and approval; trial implementation on `wip/transfer-a196-trial` |
+| A-197 | V-4 of Verify, D-548: TC-SLY-037 searches every folder the check made; REQ-SLY-037 acceptance criterion and TR-TRANSFER-011 changed | drafts committed 2026-11-27 (D-550); waits for the owner's install and approval |
 
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |
@@ -189,7 +193,7 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | The sync answer's `graphs` counts the graphs that were not current before the sync | `sync_store` | none: the plan fixes the field, not its meaning; Verify may ask for it in REQ-SLY-025's answer |
 | `sync` prints one more line per set-aside graph (`  <graph>: versions [..] set aside in <copy>/<file> (<reason>)`); `lag` prints nothing when the copy is current | `migrate._copy_command` | proposed for REQ-SLY-039's command texts at the next amendment: the plan names only the summary line; the extra line names the aside file to the owner as FR-93 asks |
 | `--data` is required per command, not by argparse, so `lag`/`sync` can take the live store from `--database-url` alone | `migrate.main` | none: follows the plan's `--data DIR` or `--database-url URL` |
-| A differing record of the graph group that no graph names is refused (`conflict`) by the sync, not overwritten | `_refuse_other_conflicts` | open for Phase 4: REQ-SLY-025 says the copy equals the live store for every record of the group; since T-04 the side records belong to their graph, so this concerns only steps or connections no header names and `skills` records |
+| A differing record of the graph group that no graph names is refused (`conflict`) by the sync, not overwritten | `_refuse_other_conflicts` | A-196 (D-548): synced like a graph instead; drafts staged (D-550) |
 | `move_graph` takes the copy's lock only when the target is a files folder | `_lock_of` | none: REQ-SLY-028 locks the copy, which is always a files folder; a database has no lock file |
 | With a copy set, the writes of IF-104 v2 go to the live store (503 `store_unreachable` while it does not answer); the reads come from the copy, so a save is seen on the copy only after the next sync | `graph_api_v2.create_graph_v2_blueprint` | D-544: proposed for REQ-API-060 at TRANSFER's amendment batch (the rationale says "writes go to the live store", no requirement text does) |
 | While the live store does not answer, `GET /store` gives `live_reachable: false` and the lag `{"graphs": 0, "since": null}` | `graph_api_v2._store_answer` | D-545: proposed for REQ-API-064 (the lag cannot be known then) |
@@ -203,7 +207,7 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 - T-02: the format marker (`mia-store.json`, `{"format": 1}`) is **not** written in T-02 but in T-05. The plan names REQ-SLY-032 under T-05 and REQ-SLY-023 asks only for the flush; TC-SLY-023 allows either. If the marker were written now, it would have no reading side: an older set or a newer one (REQ-SLY-034, 035) would not be told apart, and every files store and library export would change its tree one task early. T-05 adds both sides together, through `put_file`.
 
 ## Open questions for Phase 4
-- T-03: should the sync also overwrite (with an aside file) a differing graph-group record that no graph names, instead of refusing it? See Unspecified behavior.
+- T-03: should the sync also overwrite (with an aside file) a differing graph-group record that no graph names, instead of refusing it? Answered by D-548: yes, A-196.
 - T-01: should `library-seed` also refuse a folder whose headers name missing members (the check of REQ-SLY-017)? Not asked by REQ-SLY-009; noted above.
 - T-06: D-543, D-544, D-545 go into requirement texts by A-195 (REQ-API-064, 065, 066).
 - T-06: `setup_cfg.example.json` names `copy` and `autosync` (needed by `test_config`); a machine's own file without them gets the usual "missing options" warning (REQ-OPR-003).
