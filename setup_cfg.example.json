@@ -92,6 +92,8 @@
   "memory_budget_tokens": 400,
   "accounts_dir": "data/db",
   "store": "files",
+  "copy": "",
+  "autosync": false,
   "changes_log": "data/changes.jsonl",
   "moods_file": "moods.json",
   "mood_hold_minutes": 10,

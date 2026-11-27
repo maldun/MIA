@@ -1,4 +1,4 @@
-"""The provider of IF-104 v2 (G-V4.VIEW T-02, T-03): store setting, session, origin, owner, an unreachable store and the read routes. Run with: python tests/test_graph_api_v2.py"""
+"""The provider of IF-104 v2 (G-V4.VIEW T-02, T-03): store setting, session, origin, owner, an unreachable store and the read routes; the copy setting (G-V4.GRAPHSTORE.TRANSFER T-06). Run with: python tests/test_graph_api_v2.py"""
 import os
 import shutil
 import sys
@@ -508,6 +508,62 @@ class RecordOfChanges(Stored):
         self.assertEqual([(i["author"], i["time"]) for i in items], [("anna", t) for t in times])
         self.assertNotIn("from_version", items[0])
         self.assertEqual(self.web.get("/api/v2/graphs/g.none/changes").status_code, 404)
+
+
+class CopySet(unittest.TestCase):
+    """create_app(copy, ..., live=open_live): reads from the copy, writes to the live store, the real store answer (T-06, D-470)"""
+
+    def setUp(self):
+        root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, root, True)
+        self.accounts_store = Storage(FileBackend(os.path.join(root, "accounts")))
+        accounts.create(self.accounts_store, "anna", "pw-anna-x", "test")
+        self.live = FileBackend(os.path.join(root, "live"))
+        self.copy = FileBackend(os.path.join(root, "copy"))
+        graph_model.GraphModel(Storage(self.live), author="anna").save_graph(small("g.one"))
+        graph_model.GraphModel(Storage(self.copy), author="anna").save_graph(small("g.one"))
+        changed = small("g.one")
+        changed["nodes"][1]["data"]["toolbox_id"] = "tool.b"
+        self.live_v2 = graph_model.GraphModel(Storage(self.live), author="anna").save_graph(changed)
+        self.open_live = lambda: self.live
+
+    def web(self):
+        app = graph_api_v2.create_app(self.copy, self.accounts_store, "files", (ORIGIN,), live=lambda: self.open_live())
+        web = app.test_client()
+        web.post("/api/login", json={"user": "anna", "password": "pw-anna-x"}, headers={"Origin": ORIGIN})
+        return web
+
+    def down(self):
+        raise OSError("down")
+
+    @mark.req("REQ-API-060", "REQ-API-064")
+    def test_reads_come_from_the_copy_and_the_store_answer_shows_the_lag(self):
+        """Example: live g.one at 2, copy at 1 -> the read answers 1; store: shown copy, live reachable, lag 1 graph since live version 2."""
+        web = self.web()
+        self.assertEqual(web.get("/api/v2/graphs/g.one").get_json()["version"], 1)
+        since = self.live.versions("graphs", "g.one")[1]["time"]
+        self.assertEqual(web.get("/api/v2/store").get_json(),
+                         {"store": "files", "reachable": True, "shown": "copy", "live_reachable": True, "lag": {"graphs": 1, "since": since}})
+
+    @mark.req("REQ-API-060")
+    def test_a_save_goes_to_the_live_store(self):
+        """Example: a save on live version 2 -> live version 3, the copy stays at 1 (writes go to the live store, D-544)."""
+        graph = small("g.one")
+        graph["nodes"][1]["data"]["toolbox_id"] = "tool.c"
+        answer = self.web().put("/api/v2/graphs/g.one", json={"graph": sent(graph), "expected_version": 2}, headers={"Origin": ORIGIN})
+        self.assertEqual(answer.status_code, 200, answer.get_json())
+        self.assertEqual((len(self.live.versions("graphs", "g.one")), len(self.copy.versions("graphs", "g.one"))), (3, 1))
+
+    @mark.req("REQ-API-063", "REQ-API-064")
+    def test_a_live_store_that_does_not_answer(self):
+        """Example: opening the live store fails -> reads still answer from the copy; store: live_reachable false, lag 0; a save 503."""
+        self.open_live = self.down
+        web = self.web()
+        self.assertEqual(web.get("/api/v2/graphs/g.one").status_code, 200)
+        self.assertEqual(web.get("/api/v2/store").get_json(),
+                         {"store": "files", "reachable": True, "shown": "copy", "live_reachable": False, "lag": {"graphs": 0, "since": None}})
+        answer = web.put("/api/v2/graphs/g.one", json={"graph": sent(small("g.one")), "expected_version": 2}, headers={"Origin": ORIGIN})
+        self.assertEqual((answer.status_code, answer.get_json()["error"]), (503, "store_unreachable"))
 
 
 if __name__ == "__main__":

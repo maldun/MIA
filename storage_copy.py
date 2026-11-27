@@ -6,7 +6,8 @@ renumbered, so a copy is identical to its source. What put would refuse is refus
 definitions (REQ-SLY-004), and the versions of a record must be its own and run 1..n without a gap (REQ-SLY-003), because get reads a version by
 its position. The operation is idempotent: a record that is already there with the same versions is skipped; a target that has only the first
 versions of the source gets the missing ones. A target with a different history is a conflict and a refused record is `invalid`; either way the
-whole copy is refused before the first write (two passes), so a half copy cannot happen.
+whole copy is refused before the first write (two passes), so a half copy cannot happen. The writes follow the order of the tables given; the
+graph group goes members first and headers last (REQ-SLY-019), so a graph is never in the target before the steps and connections it names.
 """
 try:
     from .storage import StorageError, check_names, table_definitions, validate
@@ -16,6 +17,20 @@ except ImportError:  # used as plain script / in tests
     from storage_files import FileBackend
 
 LIBRARY_TABLES = ("workflows", "context_graphs")
+# The graph group in write order (REQ-SLY-019, 025, 030): members first, headers last; VIEW's side tables where they are defined.
+GRAPH_GROUP = ("graph_nodes", "graph_edges", "context_nodes", "context_edges", "skills", "graph_changes", "arrangements", "graphs")
+
+
+def ordered_tables(names):
+    """The tables in write order: those of the graph group first, in GRAPH_GROUP order, then the others in the order given."""
+    names = list(names)
+    return [t for t in GRAPH_GROUP if t in names] + [t for t in names if t not in GRAPH_GROUP]
+
+
+def library_tables():
+    """What export and seed carry (REQ-SLY-009): the graph group, as far as its tables are defined, and the library entries."""
+    defined = table_definitions()
+    return ordered_tables([t for t in GRAPH_GROUP if t in defined] + list(LIBRARY_TABLES))
 
 
 def copy_records(source, target, tables):
@@ -49,6 +64,10 @@ def _check_entries(table, record_id, entries):
     """Raises StorageError("invalid") with the table and id of the record when its versions could not have come from put."""
     def refuse(rule, detail):
         raise StorageError("invalid", rule=rule, detail={"table": table, "id": record_id, "detail": detail})
+    # a file that is no list of versions was not written by the store: the usual cause is a folder above the store's own (F-1 of G-V4.VIEW's
+    # Deploy: MIA's data folder, whose presets/ holds the preset store's plain files, instead of `accounts_dir`)
+    if not isinstance(entries, list) or not all(isinstance(entry, dict) for entry in entries):
+        refuse("not_a_history", "the file holds no list of versions; is this the store's folder (accounts_dir, default data/db)?")
     for number, entry in enumerate(entries, 1):
         if entry.get("id") != record_id:
             refuse("id", entry.get("id"))
@@ -62,10 +81,10 @@ def _check_entries(table, record_id, entries):
 
 
 def export_library(store, folder):
-    """The workflows and context graphs of the store as files in a folder (the file backend format)."""
-    return copy_records(store.backend, FileBackend(folder), LIBRARY_TABLES)
+    """The library of the store (the graph group, workflows and context graphs) as files in a folder (the file backend format)."""
+    return copy_records(store.backend, FileBackend(folder), library_tables())
 
 
 def seed_library(store, folder):
     """The library of a folder into the store; an existing library with other versions is a conflict."""
-    return copy_records(FileBackend(folder), store.backend, LIBRARY_TABLES)
+    return copy_records(FileBackend(folder), store.backend, library_tables())

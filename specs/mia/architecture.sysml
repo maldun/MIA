@@ -288,7 +288,12 @@ package MIA_Architecture {
     // ---------------------------------------------------------------- host-side
 
     part def WebApplication {
-        doc /* Flask and Socket.IO server: page, chat events, REST for history, presets and gestures. */
+        doc /* Flask and Socket.IO server: page, chat events, REST for history, presets and gestures.
+               G-V4.GRAPHSTORE.TRANSFER, built (T-06, A-195; REQ-API-060 to 066): the copy setting (`copy`, `autosync`) on top of the store
+               setting; graphs read from the copy and written to the live store; a copy of a newer format read from the live store instead;
+               AutoSync (graph_store_transfer.AutoSync) at start and at an orderly stop, a live store that does not answer logged, not fatal;
+               the real live and copy fields of GET /api/v2/store with the lag from lag_summary; the live store opened lazily and kept
+               (web_app._LiveStore, V-3 of VIEW). */
         port chat : ChatPort;
         port expression : ExpressionPort;
         port graphPort : GraphApiPort;
@@ -695,9 +700,20 @@ package MIA_Architecture {
         part storageLayer {
             doc /* The one door to the shared state (IF-102, N-3.1): versions, validation by the table definitions, notices, a file backend and a
                    PostgreSQL backend, accounts, the copy between backends (library export and seed, migration). Partly: the old file stores are
-                   not behind it yet (N-2 tasks, D-67, D-105). */
+                   not behind it yet (N-2 tasks, D-67, D-105).
+                   G-V4.GRAPHSTORE.TRANSFER, in graph_store_transfer.py (REQ-SLY-016 to 039): built (T-01) the whole-store move checked per
+                   graph with members before headers; built (T-02) durable file writes and, in both backends, the cut back of a record to a
+                   version and, in the file backend, put_file for a plain file below the root (backend operations beside IF-102, for the
+                   sync only); built (T-03) the lag and the one-way sync under the copy's lock, the aside file before the cut back, and
+                   the lag and sync commands of migrate; built (T-04) the one-graph move and the side records with their graph; built (T-05)
+                   the format marker of a set of files and the refusal of a newer or an older set, on the source and the target (check_formats);
+                   built (T-06) lag_summary (the lag as the store answer counts it, `since` from the headers) and AutoSync, the sync at the
+                   backend's start and orderly stop; a whole-store move into a copy under the copy's lock (D-549); records no graph names
+                   listed, set aside and synced like a graph (A-196); PostgresBackend opens a dropped connection again on the next call
+                   (V-3 of VIEW, REQ-API-021, 050). */
             @Implementation { :>> status = ImplementationStatus::partly;
-                              :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py"); }
+                              :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py",
+                                             "graph_store_transfer.py"); }
         }
         part typeRegistry {
             doc /* Target (iteration 2, FR-40, G-V2): the registry of data classes by type ID with the JSON schema of each type; rebuilds a node's class from the stored type ID, refuses an unknown type ID, no pickle. */
@@ -3202,6 +3218,41 @@ package MIA_NodeRequirements {
         doc /* If the store cannot be reached, then the API and accounts shall answer every graph route of IF-104 v2 with `store_unreachable` and change nothing. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-API-060'> GraphsReadFromTheCopy_Api060 {
+        subject s : WebApplication;
+        doc /* Where the configuration names a copy folder, the API and accounts shall read the graphs of IF-104 v2 from the copy. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-061'> AutoSyncOffUnlessAsked_Api061 {
+        subject s : WebApplication;
+        doc /* Where the configuration does not switch AutoSync on, the API and accounts shall run no sync at start or stop. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-062'> AutoSyncAtStartAndAtAnOrderlyStop_Api062 {
+        subject s : WebApplication;
+        doc /* While AutoSync is switched on, the API and accounts shall run the sync before it answers the first request and after it has answered the last one at an orderly stop. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-063'> AnUnreachableLiveStoreDoesNotStopTheStart_Api063 {
+        subject s : WebApplication;
+        doc /* If the live store does not answer when AutoSync runs, then the API and accounts shall go on with the copy and report that the sync did not run, naming the live store. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-064'> TheStoreAnswerWhileACopyIsSet_Api064 {
+        subject s : WebApplication;
+        doc /* While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy, which is no graphs since null while the live store does not answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-065'> ACopyMIACannotRead_Api065 {
+        subject s : WebApplication;
+        doc /* If the copy folder holds a set of a newer format than MIA knows, then the API and accounts shall read the graphs from the live store, answer the store with `shown` live, and log one line naming the copy and its format. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-066'> WritesGoToTheLiveStore_Api066 {
+        subject s : WebApplication;
+        doc /* While a copy is set, the API and accounts shall write the changes of IF-104 v2 to the live store and leave the copy unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-CHA-001'> ChatEventsAndStreaming_Cha001 {
         subject s : ConversationCore;
         doc /* When the Chat agent receives a message through IF-201, it shall answer it as a stream of sentences with expression events. */
@@ -4884,7 +4935,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-SLY-009'> LibraryExportAndSeed_Sly009 {
         subject s : Persistence;
-        doc /* The Storage layer shall export library entries to files and seed them from files with identical entries. */
+        doc /* The Storage layer shall export the library entries and the graph group to a set of files and seed them from one with identical entries, as commands of the storage tool. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-SLY-010'> ReachableOnlyInsideTheHostNetwork_Sly010 {
@@ -4915,6 +4966,126 @@ package MIA_NodeRequirements {
     requirement def <'REQ-SLY-015'> SizeOfADocument_Sly015 {
         subject s : Persistence;
         doc /* If a document that is put has more than 100,000 values, counting a value once for every path that reaches it, then the Storage layer shall refuse it as invalid. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-016'> WholeStoreMovedUnchanged_Sly016 {
+        subject s : Persistence;
+        doc /* When the owner moves the whole store between a set of files and the database, the Storage layer shall copy every record of every table with its versions, authors and times unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-017'> EveryGraphCheckedWithWhatTheMoveBrings_Sly017 {
+        subject s : Persistence;
+        doc /* When a move starts, the Storage layer shall check every graph header of the source against the member versions and connection ends found in the source before it writes any record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-018'> ADamagedGraphStopsTheWholeMove_Sly018 {
+        subject s : Persistence;
+        doc /* If the check before a move finds a header naming a missing member version or connection end, then the Storage layer shall write nothing and name every such graph with its missing parts. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-019'> MembersBeforeTheHeader_Sly019 {
+        subject s : Persistence;
+        doc /* When the Storage layer moves or syncs a graph, it shall write each member version before the header version that names it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-020'> MovingAgainChangesNothing_Sly020 {
+        subject s : Persistence;
+        doc /* When a move is run onto a target that already holds the same histories, the Storage layer shall add no record and report the number of records it skipped. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-021'> AGraphOfAnUnknownKindStopsAMoveOrSync_Sly021 {
+        subject s : Persistence;
+        doc /* If a graph of the source names a kind that the registry of kinds does not list, then the Storage layer shall refuse the whole move or sync and name the graph with `unknown_kind`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-022'> TheSameAnswersOnFilesAndTheDatabase_Sly022 {
+        subject s : Persistence;
+        doc /* The Storage layer shall give the same answer to every operation on the graph group, including versions, authors, order of IDs and refusals, on the files backend and on the PostgreSQL backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-023'> ARecordFileIsOnDiskBeforeItCounts_Sly023 {
+        subject s : Persistence;
+        doc /* When its files backend replaces a record file, the Storage layer shall flush the new file to disk before the replacement and flush the folder after it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-024'> TheLagOfEveryGraph_Sly024 {
+        subject s : Persistence;
+        doc /* When the owner asks for the lag, the Storage layer shall list every graph, and every record no graph names, that is not current, with its versions in both stores, its state and its reason. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-025'> TheSyncBringsTheCopyToTheLiveStore_Sly025 {
+        subject s : Persistence;
+        doc /* When the owner runs the sync, the Storage layer shall make the history of every record of the graph group in the copy equal to its history in the live store. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-026'> TheCopySOwnVersionsSetAsideBeforeTheyGo_Sly026 {
+        subject s : Persistence;
+        doc /* If a graph or a record no graph names differs or exists only on the copy, then the Storage layer shall write the copy's differing versions of it, and of a graph's members, durably to an aside file before removing them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-027'> TheSyncNamesWhatItSetAside_Sly027 {
+        subject s : Persistence;
+        doc /* When a sync has set versions aside, the Storage layer shall name in its answer each such graph or record with its versions and the path of its aside file relative to the copy. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-028'> OneSyncAtATime_Sly028 {
+        subject s : Persistence;
+        doc /* If a sync or a move into the copy is running, then the Storage layer shall refuse a second one on the same copy and name the copy's lock. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-029'> AnInterruptedMoveOrSyncLeavesCompleteGraphs_Sly029 {
+        subject s : Persistence;
+        doc /* If a move or a sync stops at any write, then the Storage layer shall leave every graph of the target at a complete version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-030'> SideRecordsTravelWithTheirGraph_Sly030 {
+        subject s : Persistence;
+        doc /* Where the tables `arrangements` and `graph_changes` exist, the Storage layer shall carry each graph's records of them in every move, one-graph move and sync. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-031'> TheOneGraphMove_Sly031 {
+        subject s : Persistence;
+        doc /* When the backend asks to move one graph, the Storage layer shall copy the versions of the graph and its members that the target lacks, header last, leaving other graphs unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-032'> TheFormatMarker_Sly032 {
+        subject s : Persistence;
+        doc /* When the Storage layer writes into a set of files that has no format marker, it shall first write the marker with the format it knows. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-033'> AnOlderSetWithoutUnscopedRecordsIsRead_Sly033 {
+        subject s : Persistence;
+        doc /* Where a set of files has no format marker and every graph-group record in it is scoped, the Storage layer shall read it as the format it knows. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-034'> AnOlderSetWithUnscopedRecordsIsRefused_Sly034 {
+        subject s : Persistence;
+        doc /* If a set of files without a format marker holds an unscoped graph-group record, then the Storage layer shall refuse to move or sync the set, naming the record and MIGRATION's conversion step. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-035'> ANewerSetIsRefused_Sly035 {
+        subject s : Persistence;
+        doc /* If the format marker of a set of files names a format greater than the one the Storage layer knows, then the Storage layer shall refuse to open the set and name both formats. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-036'> ARerunFinishesAnInterruptedMoveOrSync_Sly036 {
+        subject s : Persistence;
+        doc /* When a move or a sync that stopped at a write is run again, the Storage layer shall finish it so that the target holds the same records as after an uninterrupted run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-037'> NoPathOfTheMachineInASet_Sly037 {
+        subject s : Persistence;
+        doc /* The Storage layer shall write no absolute file path of the machine into a set of files. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-038'> ADifferingGraphIsCutBackNeverRemovedFirst_Sly038 {
+        subject s : Persistence;
+        doc /* When the sync replaces a differing graph on the copy, the Storage layer shall cut its header back to the last version both stores share before cutting back its members. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-039'> LagAndSyncOnCommand_Sly039 {
+        subject s : Persistence;
+        doc /* The Storage layer shall offer the lag and the sync of a copy as commands of its storage tool, next to the move commands. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-GTB-001'> SharedStateHeld_Gtb001 {
@@ -5589,8 +5760,8 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-GA-008'> LibraryExportAndSeed_Ga008 {
         subject s : GraphApp;
-        doc /* The Graph app shall offer the export of the library to files and the seed from files. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
+        doc /* The Graph app shall leave the export and the seed of the library to the commands of the Storage layer (superseded by REQ-SLY-009). */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
     }
     requirement def <'REQ-GA-009'> PlainStackWithAVendoredLibrary_Ga009 {
         subject s : GraphApp;
@@ -5931,6 +6102,13 @@ package MIA_NodeRequirements {
     requirement r_req_api_048 : AMalformedRequest_Api048;
     requirement r_req_api_049 : AnUnknownGraphOrVersion_Api049;
     requirement r_req_api_050 : TheStoreDoesNotAnswer_Api050;
+    requirement r_req_api_060 : GraphsReadFromTheCopy_Api060;
+    requirement r_req_api_061 : AutoSyncOffUnlessAsked_Api061;
+    requirement r_req_api_062 : AutoSyncAtStartAndAtAnOrderlyStop_Api062;
+    requirement r_req_api_063 : AnUnreachableLiveStoreDoesNotStopTheStart_Api063;
+    requirement r_req_api_064 : TheStoreAnswerWhileACopyIsSet_Api064;
+    requirement r_req_api_065 : ACopyMIACannotRead_Api065;
+    requirement r_req_api_066 : WritesGoToTheLiveStore_Api066;
     requirement r_req_cha_001 : ChatEventsAndStreaming_Cha001;
     requirement r_req_cha_002 : OneSharedMIA_Cha002;
     requirement r_req_cha_003 : QueueWithPositions_Cha003;
@@ -6274,6 +6452,30 @@ package MIA_NodeRequirements {
     requirement r_req_sly_013 : DepthOfADocument_Sly013;
     requirement r_req_sly_014 : ADocumentThatContainsItself_Sly014;
     requirement r_req_sly_015 : SizeOfADocument_Sly015;
+    requirement r_req_sly_016 : WholeStoreMovedUnchanged_Sly016;
+    requirement r_req_sly_017 : EveryGraphCheckedWithWhatTheMoveBrings_Sly017;
+    requirement r_req_sly_018 : ADamagedGraphStopsTheWholeMove_Sly018;
+    requirement r_req_sly_019 : MembersBeforeTheHeader_Sly019;
+    requirement r_req_sly_020 : MovingAgainChangesNothing_Sly020;
+    requirement r_req_sly_021 : AGraphOfAnUnknownKindStopsAMoveOrSync_Sly021;
+    requirement r_req_sly_022 : TheSameAnswersOnFilesAndTheDatabase_Sly022;
+    requirement r_req_sly_023 : ARecordFileIsOnDiskBeforeItCounts_Sly023;
+    requirement r_req_sly_024 : TheLagOfEveryGraph_Sly024;
+    requirement r_req_sly_025 : TheSyncBringsTheCopyToTheLiveStore_Sly025;
+    requirement r_req_sly_026 : TheCopySOwnVersionsSetAsideBeforeTheyGo_Sly026;
+    requirement r_req_sly_027 : TheSyncNamesWhatItSetAside_Sly027;
+    requirement r_req_sly_028 : OneSyncAtATime_Sly028;
+    requirement r_req_sly_029 : AnInterruptedMoveOrSyncLeavesCompleteGraphs_Sly029;
+    requirement r_req_sly_030 : SideRecordsTravelWithTheirGraph_Sly030;
+    requirement r_req_sly_031 : TheOneGraphMove_Sly031;
+    requirement r_req_sly_032 : TheFormatMarker_Sly032;
+    requirement r_req_sly_033 : AnOlderSetWithoutUnscopedRecordsIsRead_Sly033;
+    requirement r_req_sly_034 : AnOlderSetWithUnscopedRecordsIsRefused_Sly034;
+    requirement r_req_sly_035 : ANewerSetIsRefused_Sly035;
+    requirement r_req_sly_036 : ARerunFinishesAnInterruptedMoveOrSync_Sly036;
+    requirement r_req_sly_037 : NoPathOfTheMachineInASet_Sly037;
+    requirement r_req_sly_038 : ADifferingGraphIsCutBackNeverRemovedFirst_Sly038;
+    requirement r_req_sly_039 : LagAndSyncOnCommand_Sly039;
     requirement r_req_gtb_001 : SharedStateHeld_Gtb001;
     requirement r_req_gtb_002 : SchemaValidationOnWrite_Gtb002;
     requirement r_req_gtb_003 : ContextGraphsStored_Gtb003;
@@ -6600,6 +6802,13 @@ package MIA_NodeRequirements {
     satisfy r_req_api_048 by mia.webApp;
     satisfy r_req_api_049 by mia.webApp;
     satisfy r_req_api_050 by mia.webApp;
+    satisfy r_req_api_060 by mia.webApp;
+    satisfy r_req_api_061 by mia.webApp;
+    satisfy r_req_api_062 by mia.webApp;
+    satisfy r_req_api_063 by mia.webApp;
+    satisfy r_req_api_064 by mia.webApp;
+    satisfy r_req_api_065 by mia.webApp;
+    satisfy r_req_api_066 by mia.webApp;
     satisfy r_req_cha_001 by mia.conversation;
     satisfy r_req_cha_002 by mia.conversation;
     satisfy r_req_cha_003 by mia.conversation;
@@ -6943,6 +7152,30 @@ package MIA_NodeRequirements {
     satisfy r_req_sly_013 by mia.persistence;
     satisfy r_req_sly_014 by mia.persistence;
     satisfy r_req_sly_015 by mia.persistence;
+    satisfy r_req_sly_016 by mia.persistence;
+    satisfy r_req_sly_017 by mia.persistence;
+    satisfy r_req_sly_018 by mia.persistence;
+    satisfy r_req_sly_019 by mia.persistence;
+    satisfy r_req_sly_020 by mia.persistence;
+    satisfy r_req_sly_021 by mia.persistence;
+    satisfy r_req_sly_022 by mia.persistence;
+    satisfy r_req_sly_023 by mia.persistence;
+    satisfy r_req_sly_024 by mia.persistence;
+    satisfy r_req_sly_025 by mia.persistence;
+    satisfy r_req_sly_026 by mia.persistence;
+    satisfy r_req_sly_027 by mia.persistence;
+    satisfy r_req_sly_028 by mia.persistence;
+    satisfy r_req_sly_029 by mia.persistence;
+    satisfy r_req_sly_030 by mia.persistence;
+    satisfy r_req_sly_031 by mia.persistence;
+    satisfy r_req_sly_032 by mia.persistence;
+    satisfy r_req_sly_033 by mia.persistence;
+    satisfy r_req_sly_034 by mia.persistence;
+    satisfy r_req_sly_035 by mia.persistence;
+    satisfy r_req_sly_036 by mia.persistence;
+    satisfy r_req_sly_037 by mia.persistence;
+    satisfy r_req_sly_038 by mia.persistence;
+    satisfy r_req_sly_039 by mia.persistence;
     satisfy r_req_gtb_001 by mia.persistence;
     satisfy r_req_gtb_002 by mia.persistence;
     satisfy r_req_gtb_003 by mia.persistence;
@@ -7268,6 +7501,13 @@ package MIA_NodeRequirements {
     allocate r_req_api_048 to mia.webApp;
     allocate r_req_api_049 to mia.webApp;
     allocate r_req_api_050 to mia.webApp;
+    allocate r_req_api_060 to mia.webApp;
+    allocate r_req_api_061 to mia.webApp;
+    allocate r_req_api_062 to mia.webApp;
+    allocate r_req_api_063 to mia.webApp;
+    allocate r_req_api_064 to mia.webApp;
+    allocate r_req_api_065 to mia.webApp;
+    allocate r_req_api_066 to mia.webApp;
     allocate r_req_cha_001 to mia.conversation;
     allocate r_req_cha_002 to mia.conversation;
     allocate r_req_cha_003 to mia.conversation;
@@ -7611,6 +7851,30 @@ package MIA_NodeRequirements {
     allocate r_req_sly_013 to mia.persistence;
     allocate r_req_sly_014 to mia.persistence;
     allocate r_req_sly_015 to mia.persistence;
+    allocate r_req_sly_016 to mia.persistence;
+    allocate r_req_sly_017 to mia.persistence;
+    allocate r_req_sly_018 to mia.persistence;
+    allocate r_req_sly_019 to mia.persistence;
+    allocate r_req_sly_020 to mia.persistence;
+    allocate r_req_sly_021 to mia.persistence;
+    allocate r_req_sly_022 to mia.persistence;
+    allocate r_req_sly_023 to mia.persistence;
+    allocate r_req_sly_024 to mia.persistence;
+    allocate r_req_sly_025 to mia.persistence;
+    allocate r_req_sly_026 to mia.persistence;
+    allocate r_req_sly_027 to mia.persistence;
+    allocate r_req_sly_028 to mia.persistence;
+    allocate r_req_sly_029 to mia.persistence;
+    allocate r_req_sly_030 to mia.persistence;
+    allocate r_req_sly_031 to mia.persistence;
+    allocate r_req_sly_032 to mia.persistence;
+    allocate r_req_sly_033 to mia.persistence;
+    allocate r_req_sly_034 to mia.persistence;
+    allocate r_req_sly_035 to mia.persistence;
+    allocate r_req_sly_036 to mia.persistence;
+    allocate r_req_sly_037 to mia.persistence;
+    allocate r_req_sly_038 to mia.persistence;
+    allocate r_req_sly_039 to mia.persistence;
     allocate r_req_gtb_001 to mia.persistence;
     allocate r_req_gtb_002 to mia.persistence;
     allocate r_req_gtb_003 to mia.persistence;
@@ -8311,6 +8575,10 @@ package MIA_NodeRequirements {
     dependency from r_req_sly_013 to r_req_sly_004;
     dependency from r_req_sly_014 to r_req_sly_004;
     dependency from r_req_sly_015 to r_req_sly_004;
+    dependency from r_req_sly_023 to nfr16;
+    dependency from r_req_sly_029 to nfr16;
+    dependency from r_req_sly_036 to nfr16;
+    dependency from r_req_sly_038 to nfr16;
     dependency from r_req_gtb_001 to r_req_db_002;
     dependency from r_req_gtb_002 to r_req_db_004;
     dependency from r_req_gtb_003 to r_req_db_011;

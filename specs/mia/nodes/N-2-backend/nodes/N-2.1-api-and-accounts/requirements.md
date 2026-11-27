@@ -682,3 +682,97 @@ Requirements of the subgoal G-V4.VIEW (goal record `specs/mia/goals/G-V4.VIEW/`:
 - Verified by: TC-IF-104-26
 - Status: Verified
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track A; basis: IF-104 v2 A-171, IF-302 v15 A-172, prototype round 02 R5); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").
+
+## Iteration 4 (goal G-V4.GRAPHSTORE.TRANSFER, the copy setting in the backend; moved at the merge 2026-11-27)
+Requirements of the subgoal G-V4.GRAPHSTORE.TRANSFER (goal record `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/`: plan, test requirements TR-TRANSFER-001 to 011, verification report). Verified 2026-11-27 (both boxes ticked by the owner); Verify findings decided in D-548 and D-549: V-1 and V-3 fixed, V-2 and V-4 by the amendments A-196 and A-197, V-5 fixed on `goal/v4`, V-6 at the merge; R-1, R-2 and D-549's lock limit accepted. The specification points of the merge in D-551. The texts are those of the goal file with the approved changes in force (A-195, A-196, A-197, the plan gate); the Status lines stay Approved until the owner sets Verified. Group AS; the terms (live store, copy, lag, AutoSync, ...) and the groups are in `specs/mia/nodes/N-3-database/nodes/N-3.1-storage-layer/requirements.md`, section "Iteration 4 (goal G-V4.GRAPHSTORE.TRANSFER ...)".
+
+### REQ-API-060 – Graphs read from the copy
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: Where the configuration names a copy folder, the API and accounts shall read the graphs of IF-104 v2 from the copy.
+- Rationale: refines HR-002 and FR-58 "so that MIA can run daily on the copy"; on top of VIEW's store setting (REQ-API-018); the configuration key is `copy` (a folder; absent means no copy, D-467); writes go to the live store (FR-95 of EDIT, not here)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: with a live store and a copy holding a different version of one graph, `GET` of that graph through IF-104 v2 answers the copy's version (exact)
+- Verified by: TC-API-060
+- Status: Verified
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460); verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Verified confirmed in Emacs on 2026-11-27
+
+### REQ-API-061 – AutoSync off unless asked
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: Where the configuration does not switch AutoSync on, the API and accounts shall run no sync at start or stop.
+- Rationale: refines HR-003; D-460: AutoSync is off by default, until the owner's later gate MIA runs on files (D-460 (1)); the configuration key is `autosync` (true or false, default false, D-467)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: start and orderly stop with a copy set and no AutoSync setting leave the copy unchanged while the live store has a newer version (exact)
+- Verified by: TC-API-061
+- Status: Verified
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460); verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Verified confirmed in Emacs on 2026-11-27
+
+### REQ-API-062 – AutoSync at start and at an orderly stop
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: While AutoSync is switched on, the API and accounts shall run the sync before it answers the first request and after it has answered the last one at an orderly stop.
+- Rationale: refines HR-003 and FR-93 "when MIA starts or stops in an orderly way"; the stop hook is the `graceful_shutdown` list (survey: `__main__.py:104`), before the database is closed
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: with AutoSync on, a newer live version is in the copy before the first answer, and a version written to the live store while running is in the copy after the orderly stop (exact)
+- Verified by: TC-API-062
+- Status: Verified
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (basis: prototype `AutoSync`); verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Verified confirmed in Emacs on 2026-11-27
+
+### REQ-API-063 – An unreachable live store does not stop the start
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: If the live store does not answer when AutoSync runs, then the API and accounts shall go on with the copy and report that the sync did not run, naming the live store.
+- Rationale: refines HR-003; D-460 "an unreachable live store is a report, not a failure"; the editor is then read-only (FR-95, EDIT)
+- Parent: HR-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: with AutoSync on and the live store's address unreachable, the backend starts, answers graphs from the copy, and its log holds one line naming the live store and "sync not run" (exact)
+- Verified by: TC-API-063
+- Status: Verified
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460); Approved confirmed in Emacs on 2026-11-27; verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Verified confirmed in Emacs on 2026-11-27
+
+### REQ-API-064 – The store answer while a copy is set
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: While a copy is set, the API and accounts shall answer the store with `shown` copy, `live_reachable` as the live store answers now, and the lag of the copy, which is no graphs since null while the live store does not answer.
+- Rationale: refines HR-006 and FR-93 "MIA shows how far the copy lags"; the lag in IF-104 v2 terms: `graphs` = the number of graphs not current, `since` = the time of the oldest live version the copy lacks, null when none; `since` is counted from the header versions, as the lag counts graphs (D-540); while the live store does not answer the lag cannot be known and is given as no graphs, `live_reachable` false says why (D-545); makes VIEW's fixed fields of IF-104 v2 real without a new version (D-460 (2), REQ-API-022)
+- Parent: HR-006
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-006 before the sync: `GET /api/v2/store` gives `shown: "copy"`, `live_reachable: true`, `lag: {"graphs": 1, "since": <time of live version 5 of cp2.multi>}`; after the sync `lag: {"graphs": 0, "since": null}`; with the live store's address unreachable: `shown: "copy"`, `reachable: true`, `live_reachable: false`, `lag: {"graphs": 0, "since": null}` (exact)
+- Verified by: TC-API-064, TC-API-067
+- Status: Verified
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460 (2)); Implement, 2026-11-27, changed by A-195 (D-540, D-545); verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Verified confirmed in Emacs on 2026-11-27
+
+### REQ-API-065 – A copy MIA cannot read
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: If the copy folder holds a set of a newer format than MIA knows, then the API and accounts shall read the graphs from the live store, answer the store with `shown` live, and log one line naming the copy and its format.
+- Rationale: refines HR-002 ("MIA can run daily on the copy") for a copy an older MIA cannot read (REQ-SLY-035: such a set is not opened); the owner chose the fallback over a stopped start (D-543); the line tells the owner why the live store is shown
+- Parent: HR-002
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: a copy whose marker names format 2 and a live store with cp2.multi at version 4: the backend starts, `GET` of cp2.multi answers version 4, the store answer has `shown: "live"`, and `mia.log` holds one line naming the copy folder and "format 2" (exact)
+- Verified by: TC-API-065
+- Status: Verified
+- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-543); Approved confirmed in Emacs on 2026-11-27; verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Verified confirmed in Emacs on 2026-11-27
+
+### REQ-API-066 – Writes go to the live store
+- Level: low   Subject: WebApplication
+- Group: AS
+- Text: While a copy is set, the API and accounts shall write the changes of IF-104 v2 to the live store and leave the copy unchanged.
+- Rationale: refines HR-002; the live store is the master (Terms; FR-95 of EDIT), so a save on the copy would be set aside by the next sync; the rationale of REQ-API-060 said it, no requirement text did (D-544). A save is seen on the copy after the next sync; what the editor shows meanwhile is EDIT's (FR-95)
+- Parent: HR-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-006 with `copy` set and no AutoSync: a save of cp2.multi on version 6 answers version 7, the live store holds 7 versions, and the copy's graph group is unchanged entry by entry (exact)
+- Verified by: TC-API-066
+- Status: Verified
+- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-544); Approved confirmed in Emacs on 2026-11-27; verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Verified confirmed in Emacs on 2026-11-27
