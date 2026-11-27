@@ -106,7 +106,7 @@ As a consumer of IF-301, EDIT agrees to RUN's joint amendment A-189 (D-604, 2026
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
-| Plan | paused | started 2026-11-27 on `goal/v4.edit` (D-600); step 0 drafted; prototype round 05 ran CP21 to CP23 (`prototype/g-v4`, report `rounds/05/prototype-report.md`); paused 2026-11-28 until G-V4.CONTEXT is planned (D-606) |
+| Plan | open | paused (D-606); started 2026-11-27 on `goal/v4.edit` (D-600); step 0 drafted; prototype round 05 ran CP21 to CP23 (`prototype/g-v4`, report `rounds/05/prototype-report.md`); paused 2026-11-28 until G-V4.CONTEXT is planned (D-606) |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
