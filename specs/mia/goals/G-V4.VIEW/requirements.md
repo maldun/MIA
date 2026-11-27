@@ -579,7 +579,7 @@
 - Verification method: Test
 - Acceptance criterion: in Firefox with the colour scheme light and then dark, the page background and the step label colour equal the token values of that theme (exact)
 - Verified by: TC-GA-034
-- Status: Approved
+- Status: Draft
 - History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436)
 
 ### REQ-GA-017 – Graph status
