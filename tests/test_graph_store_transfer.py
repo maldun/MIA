@@ -101,6 +101,31 @@ class Move(unittest.TestCase):
         # Then: everything is skipped
         self.assertEqual(second, {"copied": 0, "skipped": first["copied"], "added_versions": 0})
 
+    @mark.req("REQ-SLY-028")
+    def test_a_whole_store_move_into_a_locked_copy_is_refused(self):
+        """V-1 (Verify): a move into the copy takes the copy's lock like the sync.
+        Example: move_store while this process holds the target's lock: StorageError locked naming sync.lock, nothing written."""
+        # Given: the target folder's lock is held
+        target = self.folder("target")
+        with transfer.copy_lock(target.root):
+            # When / Then: the move is refused naming the lock
+            with self.assertRaises(StorageError) as refused:
+                transfer.move_store(self.source, target)
+        self.assertEqual((refused.exception.code, refused.exception.detail), ("locked", {"lock": transfer.LOCK}))
+        # And: nothing was written
+        self.assertEqual(ts.entries(target), {})
+
+    @mark.req("REQ-SLY-028", "REQ-SLY-007")
+    def test_a_move_into_a_folder_that_is_no_copy_leaves_no_lock_file(self):
+        """D-549: only a copy (a folder holding sync.lock) is locked; any other target gets no new file, so a round trip stays identical.
+        Example: move_store into a new folder: no sync.lock in it afterwards."""
+        # Given: a folder no sync has run on
+        target = self.folder("target")
+        # When: the store is moved into it
+        transfer.move_store(self.source, target)
+        # Then: no lock file was left there
+        self.assertFalse(os.path.exists(os.path.join(target.root, transfer.LOCK)))
+
 
 class Commands(unittest.TestCase):
     def setUp(self):

@@ -136,16 +136,26 @@ class copy_lock:
 def move_store(source, target):
     """Every record of every table from the source to the target, unchanged (REQ-SLY-016); every graph checked first, nothing written when one is
     damaged (REQ-SLY-017, 018, 021); members before headers (REQ-SLY-019); records already there are skipped (REQ-SLY-020). copy_records keeps
-    its own checks: a record with another history in the target is a conflict, a record put would refuse is invalid, both before any write."""
-    check_format(source)
-    check_graphs(source, source.ids(HEADERS))
-    return copy_records(source, target, ordered_tables(table_definitions()))
+    its own checks: a record with another history in the target is a conflict, a record put would refuse is invalid, both before any write.
+    A files target that is a copy (it holds sync.lock) is moved into under its lock (REQ-SLY-028, V-1 of Verify, D-549)."""
+    with _lock_of_copy(target):
+        check_format(source)
+        check_graphs(source, source.ids(HEADERS))
+        return copy_records(source, target, ordered_tables(table_definitions()))
 
 
 def _lock_of(target):
     """the copy's lock for a files target (REQ-SLY-028); a database target has no copy lock"""
     root = getattr(target, "root", None)
     return copy_lock(root) if root else contextlib.nullcontext()
+
+
+def _lock_of_copy(target):
+    """the copy's lock when the files target is a copy, known by its sync.lock; any other target gets no new file, so a move there and back
+    stays identical file by file and a refused move leaves no folder (REQ-SLY-007). Not covered (D-549): a folder never synced, while its
+    first sync and a move start at the same moment."""
+    root = getattr(target, "root", None)
+    return copy_lock(root) if root and os.path.exists(os.path.join(root, LOCK)) else contextlib.nullcontext()
 
 
 def move_graph(source, target, graph_id):

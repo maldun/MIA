@@ -148,6 +148,12 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **Traceability:** 585 ERROR lines, the same as `943b8dac` (compared line by line); none new. (549 before the VIEW merge.)
 
+## Fixes after Verify (D-548, 2026-11-27)
+
+**Before:** `goal/v4` merged in (V-5 fix `b259b533`).
+
+**V-1 (REQ-SLY-028):** `move_store` takes the copy's lock for a files target that is a copy. Red first: `Move.test_a_whole_store_move_into_a_locked_copy_is_refused` (StorageError not raised). Always locking broke four unit checks of `tests/test_migrate.py`: a db-to-files round trip got a `sync.lock` (REQ-SLY-007, identical files), and a refused move created the target folder (F-1 checks). That was a stop condition, so I asked the owner. D-549 (owner): lock only a target that already holds `sync.lock` (`_lock_of_copy`). Pinned by `Move.test_a_move_into_a_folder_that_is_no_copy_leaves_no_lock_file`. Known limit: a folder no sync has ever run on, while its first sync and a move start at the same moment.
+
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
@@ -167,6 +173,7 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |
 |---|---|---|---|---|
+| 2026-11-27 | V-1 fix | REQ-SLY-028 (lock a move into the copy) against REQ-SLY-007 (identical files) and the F-1 checks (nothing written) | owner | D-549: lock only a folder that holds `sync.lock` |
 
 ## Unspecified behavior (decisions no requirement covers)
 | Decision | Where in code | Proposed requirement or amendment |
@@ -184,6 +191,7 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | While the live store does not answer, `GET /store` gives `live_reachable: false` and the lag `{"graphs": 0, "since": null}` | `graph_api_v2._store_answer` | D-545: proposed for REQ-API-064 (the lag cannot be known then) |
 | A copy of a newer format: MIA reads the live store and logs one line | `web_app._open_copy` | D-543 (owner): proposed for REQ-API-060 |
 | The live store, once opened, is kept; a dropped database connection is opened again on the next call | `web_app._LiveStore`, `PostgresBackend._connection` | none: V-3 fixed against REQ-API-021, 050 (Findings) |
+| `move_store` locks a files target only when it already holds `sync.lock` (a copy); otherwise no lock and no new file | `_lock_of_copy` | D-549 (owner): REQ-SLY-028 "the copy" = a folder a sync or one-graph move has run on; text amendment optional at Commit |
 
 ## Decisions
 - T-01: `library-seed` does not run the per-graph check of the move; it keeps `copy_records`' checks and the write order (members first). REQ-SLY-009 asks for identical entries and the order, not for the graph check; a damaged library folder is refused by `copy_records` only where a record breaks put's rules.
