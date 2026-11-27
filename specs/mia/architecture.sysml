@@ -5629,7 +5629,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-GA-016'> LightAndDark_Ga016 {
         subject s : GraphApp;
-        doc /* The Graph app shall follow the system's light or dark setting through the themes of the design tokens, the picture included. */
+        doc /* The Graph app shall show the theme chosen in the main app on the same device (dark, light, or auto, which follows the system's light or dark setting; no choice or an unknown value counts as auto) through the themes of the design tokens, the picture included, also when the choice changes while the page is open. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-GA-017'> GraphStatus_Ga017 {
