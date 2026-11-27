@@ -18,7 +18,7 @@ Lesson behind the tools: a deliberate defect restored with the same size within 
 ## Next (pick one per session)
 - **TRANSFER Verify**, in a fresh session: start prompt at the end of `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-transfer/specs/mia/handover-2026-11-27-g-v4-transfer-verify-next.md`.
 - **RUN T-03** (`goal/v4.graphapi.run`, worktree `goal-v4-run`): `handover-2026-11-25-g-v4-run-t03-next.md` there; raise the packaging of `graph_run.py` at its next planning point. RUN should merge `goal/v4` to get the shared tools.
-- ~~F-2 of VIEW's Deploy~~: fixed on `goal/v4` (`f384b4cd`), recorded in `goals/G-V4.VIEW/deployment-record.md`. Still open, same pattern: the protected smoke reads `deploy/.env`'s `MIA_DATABASE_URL` (`db`), which only the stack network resolves; that needs an owner-approved change of the protected check.
+- ~~F-2 of VIEW's Deploy~~: fixed on `goal/v4` (`f384b4cd`), recorded in `goals/G-V4.VIEW/deployment-record.md`. The smoke half (`db` of `MIA_DATABASE_URL` resolves only on the stack network): `bash tools/smoke_in_stack.sh --image localhost/mia:g-v4-view tests/smoke/smoke_core_graphs.py` (the stack's `db` must run); no protected check changed.
 - `explore/builder-workflow` (BUILDER, waits for RUN and CONTEXT, D-521); EDIT and CODE: notes in `goals/G-V4.VIEW/merge-request.md`, TD-91 to TD-95 (deadline 2026-12-31).
 - `deploy/REQUIREMENTS_DB.md` item 7 names an `up.sh migrate` that does not exist (stale; whoever owns the deploy docs).
 
