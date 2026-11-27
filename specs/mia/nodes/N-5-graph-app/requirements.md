@@ -99,8 +99,8 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Inspection
 - Acceptance criterion: the Graph app's page has no export or seed control, and REQ-SLY-009's check covers export and seed (exact)
 - Verified by: TC-SLY-009
-- Status: Approved
-- History: G-V1, approved, out (D-177); G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, superseded by REQ-SLY-009 (plan gate 2026-11-23); verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.
+- Status: Verified
+- History: G-V1, approved, out (D-177); G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, superseded by REQ-SLY-009 (plan gate 2026-11-23); verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.; Approved confirmed in Emacs on 2026-11-27; Verified confirmed in Emacs on 2026-11-27
 
 ### REQ-GA-009 – Plain stack with a vendored library
 - Level: high   Subject: GraphApp
