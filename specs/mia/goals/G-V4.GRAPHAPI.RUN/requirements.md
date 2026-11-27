@@ -145,7 +145,7 @@
 - Acceptance criterion: on the 15 converted skill graphs, the 500 random graphs of the spike (seed 7, with self loops) and the golden examples 24 to 31 of IF-301, every `rule_report` and `run_check` answer equals the answer recorded from IF-301 v4 at `goal/v4` (0 differences, exact)
 - Verified by: TC-GTB-052, TC-GTB-053
 - Status: Approved
-- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24; Implement T-02, 2026-11-25, changed: unique text connection IDs (A-189, D-483)
+- History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24; Implement T-02, 2026-11-25, changed: unique text connection IDs (A-189, D-483); Approved confirmed in Emacs on 2026-11-27
 
 ### REQ-GTB-043 – Rule 3, connection ends (changed)
 - Level: low   Subject: Persistence
