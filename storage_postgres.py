@@ -46,9 +46,16 @@ class PostgresBackend:
                     with open(os.path.join(schema_dir, name), encoding="utf-8") as handle:
                         self._conn.execute(handle.read())
 
+    def _connection(self):
+        """the open connection; one the server dropped (a restart of the database) is opened again here, so the call after the failed one
+        answers (V-3, REQ-API-050). The failed call itself is not repeated: a write is never sent twice. Called under self._lock."""
+        if self._conn.closed:
+            self._conn = psycopg.connect(self.url, autocommit=True)
+        return self._conn
+
     def _query(self, sql, params=()):
         with self._lock:
-            cursor = self._conn.execute(sql, params)
+            cursor = self._connection().execute(sql, params)
             return cursor.fetchall() if cursor.description else []
 
     def versions(self, table, record_id):
@@ -58,7 +65,7 @@ class PostgresBackend:
     def append(self, table, record_id, entry):
         try:
             with self._lock:
-                self._conn.execute("INSERT INTO records (tbl, id, version, author, time, doc) VALUES (%s, %s, %s, %s, %s, %s::jsonb)",
+                self._connection().execute("INSERT INTO records (tbl, id, version, author, time, doc) VALUES (%s, %s, %s, %s, %s, %s::jsonb)",
                                    (table, record_id, entry["version"], entry["author"], entry["time"], json.dumps(entry["doc"], ensure_ascii=False)))
         except psycopg.errors.UniqueViolation:
             raise StorageError("conflict", detail={"current": len(self.versions(table, record_id))}) from None
@@ -68,6 +75,10 @@ class PostgresBackend:
 
     def remove(self, table, record_id):
         self._query("DELETE FROM records WHERE tbl = %s AND id = %s RETURNING 1", (table, record_id))
+
+    def cut(self, table, record_id, version):
+        """Keeps the versions 1 to `version` in one statement (REQ-SLY-038; only the sync of a copy uses it, never through IF-102)."""
+        self._query("DELETE FROM records WHERE tbl = %s AND id = %s AND version > %s RETURNING 1", (table, record_id, version))
 
     def publish(self, event):
         self._query("SELECT pg_notify(%s, %s)", (CHANNEL, json.dumps(event)))

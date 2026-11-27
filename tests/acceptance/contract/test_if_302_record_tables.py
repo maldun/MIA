@@ -180,6 +180,48 @@ class RecordTablesContract(unittest.TestCase):
             self.assertEqual(tables.validate("snapshots", dict(doc, **{field: bad})), {"rule": "schema", "detail": field}, (field, bad))
         self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
 
+    @mark.req("IF-302")
+    @each_provider(IF)
+    def test_an_arrangement_is_a_versioned_record_of_whole_places(self, tables):
+        """TC-IF-302-13 (v15, A-172): `arrangements` is versioned and not deletable; a record needs graph (a text that is not empty) and positions (a mapping of step ID to two integers x and y), else rule schema with that field as detail; other fields are kept; the deletable set stays as in v8.
+        Example: {"graph": "cp2.multi", "positions": {"var.in": {"x": 10, "y": -3}}} -> None; a place {"x": 10.5, "y": 0} -> {"rule": "schema", "detail": "positions"}."""
+        # Given a valid arrangement record
+        doc = {"graph": "cp2.multi", "positions": {"var.in": {"x": 10, "y": -3}, "step.write": {"x": 0, "y": 0}}}
+        # When it is defined and validated, also with an empty mapping and an extra field
+        # Then it is versioned, not deletable, and valid
+        self.assertEqual(tables.definitions()["arrangements"], {"versioned": True, "deletable": False})
+        self.assertIsNone(tables.validate("arrangements", doc))
+        self.assertIsNone(tables.validate("arrangements", dict(doc, positions={}, note="kept")))
+        # And a missing field or a bad value is rule schema naming the field
+        for field in doc:
+            self.assertEqual(tables.validate("arrangements", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field}, field)
+        for field, bad in (("graph", ""), ("graph", 5), ("positions", []), ("positions", {"a": {"x": 10.5, "y": 0}}), ("positions", {"a": {"x": True, "y": 0}}),
+                           ("positions", {"a": {"x": 1}}), ("positions", {"a": [1, 2]})):
+            self.assertEqual(tables.validate("arrangements", dict(doc, **{field: bad})), {"rule": "schema", "detail": field}, (field, bad))
+        self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
+
+    @mark.req("IF-302")
+    @each_provider(IF)
+    def test_a_record_of_changes_names_its_version_and_kind(self, tables):
+        """TC-IF-302-14 (v15, A-172): `graph_changes` is versioned and not deletable; a record needs graph (text, not empty), version and from_version (integers of at least 1), kind (editor, derived or restore) and entries (a list), else rule schema with that field as detail; entries and other fields are kept as given.
+        Example: {"graph": "cp2.multi", "version": 5, "from_version": 4, "kind": "derived", "entries": []} -> None; kind "before_the_record" -> {"rule": "schema", "detail": "kind"}."""
+        # Given a valid record of changes
+        doc = {"graph": "cp2.multi", "version": 5, "from_version": 4, "kind": "derived",
+               "entries": [{"n": 1, "op": "change_step", "target": "step.write", "before": {"toolbox_id": "t4"}, "after": {"toolbox_id": "t9"}, "reason": None}]}
+        # When it is defined and validated, for each kind and with an extra field
+        # Then it is versioned, not deletable, and valid
+        self.assertEqual(tables.definitions()["graph_changes"], {"versioned": True, "deletable": False})
+        for kind in ("editor", "derived", "restore"):
+            self.assertIsNone(tables.validate("graph_changes", dict(doc, kind=kind)), kind)
+        self.assertIsNone(tables.validate("graph_changes", dict(doc, entries=[], note="kept")))
+        # And a missing field or a bad value is rule schema naming the field
+        for field in doc:
+            self.assertEqual(tables.validate("graph_changes", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field}, field)
+        for field, bad in (("graph", ""), ("graph", None), ("version", 0), ("version", 5.0), ("version", True), ("version", "5"), ("from_version", 0),
+                           ("from_version", None), ("kind", "before_the_record"), ("kind", "Editor"), ("entries", {}), ("entries", None)):
+            self.assertEqual(tables.validate("graph_changes", dict(doc, **{field: bad})), {"rule": "schema", "detail": field}, (field, bad))
+        self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
+
 
 if __name__ == "__main__":
     unittest.main()

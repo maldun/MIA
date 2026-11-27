@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Preflight of the target before MIA is installed or updated (Phase 6; deploy/RUNBOOK.md). Fails loudly, changes nothing.
 #   bash deploy/preflight.sh            checks the host, then the model server against the pins of specs/mia/eval-spec.md
-# Reads OLLAMA_URL from the environment or deploy/.env (default http://127.0.0.1:11434). MIA_PREFLIGHT_MIN_GB (default 30) is the free space needed.
+# Reads OLLAMA_URL from the environment or deploy/.env (default http://127.0.0.1:11434; host.containers.internal and host.docker.internal become 127.0.0.1). MIA_PREFLIGHT_MIN_GB (default 30) is the free space needed.
 # A digest that differs from the pin is a model change (an amendment), not an install detail: the script stops there.
 set -u
 cd "$(dirname "$0")/.."
@@ -51,6 +51,14 @@ backend=$(python3 -c "import json;print(json.load(open('deploy/setup_cfg.compose
 url="${OLLAMA_URL:-}"
 if [ -z "$url" ] && [ -f deploy/.env ]; then url=$(grep -E '^OLLAMA_URL=' deploy/.env | tail -1 | cut -d= -f2-); fi
 url="${url:-http://127.0.0.1:11434}"
+# .env names Ollama as the containers see it; only containers resolve these names, and they mean this host
+for name in host.containers.internal host.docker.internal; do
+    case "$url" in
+        *"://$name:"*|*"://$name/"*|*"://$name")
+            echo "note: OLLAMA_URL names $name (container side); checking this host's 127.0.0.1 instead"
+            url="${url/:\/\/$name/://127.0.0.1}" ;;
+    esac
+done
 echo "-- model server $url against the pins of specs/mia/eval-spec.md"
 python3 deploy/preflight_agent.py --pins specs/mia/eval-spec.md --ollama "$url" || failed=1
 

@@ -14,6 +14,9 @@ Host: Fedora, Ryzen 9 5900X, RX 7800 XT with 16 GB, 62 GB RAM, podman. Models th
 - Model consistency: `python3 -I tools/check_sysml_model.py .`
 - SysML syntax and semantics with the pilot parser of the kernel (about 15 s, run after every change of a `.sysml` file): `bash tools/check_sysml.sh` (all models) or `bash tools/check_sysml.sh FILE...`
 - Run log tools: `python tools/run_explain.py list | show | explain | problems | diff | reproduce`
+- Regression set of a task: `bash tools/regress.sh --out <scratch dir> [--base <commit>]` (unit suite, then each acceptance script; one run per worktree)
+- Deliberate defects: `python tools/plant_defects.py <defects.json>` (plants, runs the checks, restores; NOT CAUGHT = exit 1)
+- Smoke checks that need the stack network (`db` of `deploy/.env`): `bash tools/smoke_in_stack.sh --image <MIA image> tests/smoke/<check>.py [args]` (throw-away container on `mia_default`, export without `.env`; the stack's `db` must run)
 - No lint, formatter or type checker is configured yet.
 
 ## Always

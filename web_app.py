@@ -51,13 +51,15 @@ from . import accounts, accounts_api
 from .chat_ops_api import create_chat_ops_blueprint
 from .items_api import create_items_blueprint
 from .graph_api import create_graph_blueprint
+from . import graph_api_v2
 from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
 from .skill_digest import LiveDigest
 from .internal_auth import ensure_token, internal_headers
-from .storage import Storage
+from .storage import Storage, StorageError
 from .skill_record import SkillCatalog, SkillRecords
 from .storage_files import FileBackend
+from .graph_store_transfer import AutoSync
 from .moods import MoodTracker
 from .memory_records import MemoryRecords, memory_hooks
 from .speech_text import speech_text
@@ -105,6 +107,7 @@ AUDIO_FOLDER= os.path.join(FPATH,AUDIO_DIR)
 
 from .config import load as _load_config
 cfg = _load_config(cfg_file)                    # the configuration of the file, with setup_cfg.local.json (the settings of this machine, not in git) laid over it
+_graph_store = graph_api_v2.store_setting(cfg)      # files (the data folder `accounts_dir`) or database (MIA_DATABASE_URL); anything else stops the start at once (REQ-API-019, 020)
 TIMEOUT_OPT = "timeout"
 
 from .utils import MyMarkdown, get_url, get_websocket_url, get_timestamp
@@ -656,7 +659,71 @@ def speak_answer(text, should_stop=None):
     speak_text(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT, spoken, should_stop)       # raises OSError without a sound server (REQ-CHA-033)
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
-_votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
+_db_backend = FileBackend(_db_dir)
+_votes_store = Storage(_db_backend)                  # the votes table (REQ-CHA-015); the accounts use the same folder
+
+def _graph_backend():
+    if _graph_store == "files":
+        return _db_backend
+    url = os.environ.get("MIA_DATABASE_URL")
+    if not url:
+        raise ValueError('the setting "store" is "database", but MIA_DATABASE_URL is not set')
+    from .storage_postgres import PostgresBackend          # psycopg only where the database is used (requirements-db.txt)
+    return PostgresBackend(url)
+
+
+class _LiveStore:
+    """the live store, opened on first use and kept: MIA starts while the database does not answer, and the first call after it answers
+    opens it (REQ-API-050, 063; V-3). Called, it gives the backend; used as a backend, it passes every call on, so a store that cannot be
+    opened fails each call as a lost connection does, and the routes answer `store_unreachable`."""
+
+    def __init__(self, opener):
+        self._opener, self._opened, self._lock = opener, None, threading.Lock()
+
+    def __call__(self):
+        with self._lock:
+            if self._opened is None:
+                self._opened = self._opener()
+            return self._opened
+
+    def __getattr__(self, name):
+        return getattr(self(), name)
+
+
+def _live_name():
+    """the live store as the log names it: the folder, or the database's host:port/name without the password (REQ-API-063)"""
+    if _graph_store == "files":
+        return "files " + _db_dir
+    from urllib.parse import urlsplit
+    url = urlsplit(os.environ.get("MIA_DATABASE_URL", ""))
+    return "database %s:%s%s" % (url.hostname, url.port or 5432, url.path)
+
+
+def _open_copy():
+    """the copy MIA reads the graphs from (`copy`, a folder, relative to MIA's folder; absent = no copy, REQ-API-060, D-467); a copy of a newer
+    format than this MIA knows is not opened: MIA reads the live store and says so in the log (D-543)"""
+    if not cfg.get("copy"):
+        return None
+    folder = _own_path("copy", "")
+    try:
+        return FileBackend(folder)
+    except StorageError as err:
+        if err.code != "format":
+            raise
+        logger.warning("The copy %s has format %s, this MIA knows %s: the graphs are read from the live store" % (folder, err.detail["found"], err.detail["known"]))
+        return None
+
+
+_live_store = _LiveStore(_graph_backend)
+_graph_copy = _open_copy()
+_autosync = AutoSync(_live_store, _graph_copy, _live_name(), logger.info) if _graph_copy is not None and cfg.get("autosync", False) is True else None
+
+
+def sync_copy(when):
+    """AutoSync at the start and at an orderly stop, only while `autosync` is on (REQ-API-061, 062); __main__ calls it"""
+    if _autosync is not None:
+        _autosync.run(when)
+
 _workflow_library = WorkflowLibrary(_votes_store, is_owner=accounts.owner_check(cfg, _votes_store), pins=lambda: pins_from_config(cfg))             # IF-203 on the same storage; the review workflow is its first entry (a draft); the owner of the snapshots is `owner_account`, else the first account
 
 def run_memory_skill(inputs):
@@ -707,6 +774,10 @@ app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_graph_blueprint(_workflow_library))          # IF-104 for the Graph app, under the same session
+if _graph_copy is None:
+    app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_live_store, _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins))      # IF-104 v2 under the same session (REQ-API-030)
+else:          # the graphs are read from the copy, the writes go to the live store (REQ-API-060, D-544)
+    app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_graph_copy, _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins, live=_live_store))
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads
                                                       os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json")), socketio.emit))
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])

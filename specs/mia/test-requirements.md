@@ -16,10 +16,17 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 | 2 | Conversion stand-ins | the fake model server of the same-calls check | TR-CONVERT-006 |
 | 3 | Conversion exact values | hand-checked expected values of the deterministic conversion and snapshot tests | TR-CONVERT-007 |
 | 4 | Conversion component checks | The unit and component checks of the converter, the toolbox entries and the descriptors | TR-CONVERT-008 |
-| 5 | FI | Fault injection: what makes the interruption checks credible | TR-CORE-001, TR-CORE-002 |
-| 6 | BK | Backends and data: the stores and the graphs the checks run on | TR-CORE-003, TR-CORE-004, TR-CORE-009 |
-| 7 | EX | Exact values: expected names, IDs and counts, signed off as a group | TR-CORE-005, TR-CORE-007, TR-CORE-008 |
-| 8 | CR | Ability to fail: the checks are shown able to fail | TR-CORE-006 |
+| 5 | FI | Fault injection: what makes the interruption checks credible | TR-CORE-001, TR-CORE-002, TR-TRANSFER-004, TR-TRANSFER-006 |
+| 6 | BK | Backends and data: the stores and the graphs the checks run on | TR-CORE-003, TR-CORE-004, TR-CORE-009, TR-TRANSFER-002, TR-TRANSFER-003, TR-TRANSFER-007 |
+| 7 | EX | Exact values: expected names, IDs and counts, signed off as a group | TR-CORE-005, TR-CORE-007, TR-CORE-008, TR-RULES-001, TR-VIEW-018, TR-VIEW-019, TR-VIEW-020, TR-TRANSFER-001, TR-TRANSFER-005 |
+| 8 | CR | Ability to fail: the checks are shown able to fail; the older suites stay untouched (RULES) | TR-CORE-006, TR-RULES-008, TR-RULES-009, TR-VIEW-021, TR-TRANSFER-008 |
+| 9 | DA | Data (RULES): the graphs, the corpus and the skills the checks run on | TR-RULES-002, TR-RULES-003, TR-RULES-004 |
+| 10 | EP | Entry points and stand-ins (RULES): how the run, the save and the check route are driven, and what the mock proves | TR-RULES-005, TR-RULES-006, TR-RULES-007, TR-TRANSFER-009, TR-TRANSFER-010, TR-TRANSFER-011 |
+| 11 | SD | Stores and data: the stores, the fixture graphs, the accounts the checks run on (VIEW) | TR-VIEW-001, TR-VIEW-002, TR-VIEW-003 |
+| 12 | SI | Stand-ins: what the mocks, the fake DOM and the fault wrappers prove (VIEW) | TR-VIEW-004, TR-VIEW-005, TR-VIEW-006, TR-VIEW-007 |
+| 13 | BR | Browser: Firefox, the test server, "settled", the request record, keyboard, colours (VIEW) | TR-VIEW-008, TR-VIEW-009, TR-VIEW-010, TR-VIEW-011, TR-VIEW-012, TR-VIEW-013 |
+| 14 | DP | Dependencies on other goals and on installed material (VIEW) | TR-VIEW-014, TR-VIEW-015 |
+| 15 | SM | Smoke checks on the owner's host (VIEW) | TR-VIEW-016, TR-VIEW-017 |
 
 ### TR-CONVERT-001 – Equivalence runs use the pinned model
 - Applies to: EV-research, EV-plans, EV-verdicts, EV-computable, EV-extraction, TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114
@@ -605,3 +612,484 @@ Test requirements of the checks TC-GTB-033 to 036, TC-WFM-162 to 178 and SMOKE-C
 - Credibility aspect: measurement conditions
 - Verified by: inspection
 - Status: Approved; moved here at the merge 2026-11-22 (D-408)
+
+## G-V4.GRAPHAPI.RULES (Plan step 3, 2026-11-22, D-422; prefix TR-RULES-; moved at the merge 2026-11-22)
+
+Test requirements of the checks TC-GTB-037 to 047, TC-IF-301-27 to 34, TC-WFM-179 to 184, TC-RUN-036 to 040 and SMOKE-RULES-001, unchanged from `specs/mia/goals/G-V4.GRAPHAPI.RULES/test-requirements.md`. Their groups are rows of the table `## Groups` at the top: EX and CR are shared with CORE (same meaning), DA and EP are new.
+
+### TR-RULES-001 – Exact values
+- Applies to: TC-GTB-037, TC-GTB-038, TC-GTB-039, TC-GTB-040, TC-GTB-041, TC-GTB-042, TC-GTB-043, TC-GTB-044, TC-WFM-179, TC-WFM-180, TC-WFM-181, TC-WFM-182, TC-WFM-183, TC-WFM-184, TC-RUN-037, TC-RUN-038, TC-RUN-039, TC-IF-301-27, TC-IF-301-28, TC-IF-301-29, TC-IF-301-30, TC-IF-301-31, TC-IF-301-32, TC-IF-301-33, TC-IF-301-34
+- Requirement: REQ-GTB-037
+- Group: EX
+- Kind: unit
+- Text: The expected values of these checks shall be written as exact values: rule names, parts in their order, sentences, statuses and counts, with no tolerance and no check by "contains".
+- Rationale: every outcome is a name, an ID, an order or an equality (test spec, limit column); OC-1 is about the same order, so a check that ignores the order or allows extra items would hide the defect it is for.
+- Credibility aspect: reference accuracy
+- Verified by: known answer
+- Sign-off: skimmed as a group
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-002 – Small graphs written out in the check
+- Applies to: TC-GTB-038, TC-GTB-039, TC-GTB-040, TC-GTB-041, TC-GTB-042, TC-GTB-043, TC-GTB-046, TC-WFM-179, TC-WFM-180, TC-WFM-181, TC-WFM-183, TC-WFM-184, TC-RUN-036, TC-RUN-037, TC-RUN-038, TC-RUN-039
+- Requirement: REQ-GTB-041
+- Group: DA
+- Kind: setup
+- Text: Each graph of these checks shall be written out in the check itself with at most eight steps, and each broken graph shall have a sound twin that differs in one place and gives no item.
+- Rationale: a reader sees at a glance which rule a graph breaks; the twin shows that the item comes from the one difference and not from something else in the graph (the prototype's rule 1 once refused a slash for no reason, finding 5).
+- Credibility aspect: validity domain
+- Verified by: inspection
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-003 – The corpus of the old refusals
+- Applies to: TC-GTB-047
+- Requirement: HR-005
+- Group: DA
+- Kind: setup
+- Text: The check shall use every case of TC-GTB-002 and the generator of TC-GTB-003 with the seeds 1 to 1000 as they are at `goal/v4`, turn each document into the stored form with the mapping of the prototype (a session processing step becomes a loop-controlling step, `max_cycles` becomes `max_repetitions`), and fail on the first graph refused by the five older rules and accepted by the eight.
+- Rationale: HR-005 fixes this corpus; `from_document` is not used because it keeps a session as a transform, so rule 7 would never see it and old refusals would look lost (D-424); the seed range is fixed in Plan and never changed to make the check pass; the one known exception (`max_seconds: 1.0`, valid under REQ-WFM-048) is named in the check, not filtered by a broad rule; the counts of newly refused graphs are printed for the record (prototype: 57, 42 and 15), not asserted, so a better rule does not fail the check.
+- Credibility aspect: validity domain
+- Verified by: known answer (the prototype's counts of `cp17_check.py`)
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-004 – The converted skills
+- Applies to: TC-RUN-040, TC-GTB-043, TC-GTB-044, TC-RUN-037, TC-IF-301-28, TC-IF-301-33, SMOKE-RULES-001
+- Requirement: HR-006
+- Group: DA
+- Kind: setup
+- Text: The converted skill graphs shall be built at test time from `skills/*.md` and `library/` with `pipeline_graph.convert` and `bind_skill`, as the prototype's `converted()` does, and the check shall fail when fewer than 15 graphs are built.
+- Rationale: DEP-2; built, not copied, so a change of a skill shows up in the check; the count guards against a silent loss of skills (a check over zero graphs passes); `chat` is the converted `chat` skill named in AC-018.
+- Credibility aspect: reference accuracy
+- Verified by: known answer (15 skills on 2026-11-22)
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-005 – No step ran, shown by markers that can fire
+- Applies to: TC-RUN-036, TC-RUN-039, SMOKE-RULES-001
+- Requirement: REQ-RUN-036
+- Group: EP
+- Kind: setup
+- Text: "No step ran" shall be shown by a marker function per step that counts its calls, and in the same check a sound twin shall call each of its markers once.
+- Rationale: a count of zero proves nothing if the markers cannot be called; the twin shows they can (as TC-RUN-017 shows the marker side effect).
+- Credibility aspect: power and false-alarm rate
+- Verified by: mutation (a runner that runs the first step before asking the run check must fail TC-RUN-036)
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-006 – Every entry point, five times
+- Applies to: TC-GTB-046
+- Requirement: HR-004
+- Group: EP
+- Kind: setup
+- Text: The check shall send each graph through the rule report, the save on a fresh files store, the check route and the run, five times each in one process, and compare the items with the rule report item by item: rule, parts in order and sentence.
+- Rationale: HR-004 fixes four entry points and five repeats; "kept" in HR-004 is the save of a working copy, the same call as the save (the page is a stand-in, D-416 (2)); a fresh store per save, so an earlier refusal cannot change a later one.
+- Credibility aspect: validity domain
+- Verified by: inspection
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-007 – What the stand-ins prove
+- Applies to: TC-GTB-046, TC-IF-301-27, TC-IF-301-28, TC-IF-301-29, TC-IF-301-30, TC-IF-301-31, TC-IF-301-32, TC-IF-301-33, TC-IF-301-34
+- Requirement: REQ-GTB-033
+- Group: EP
+- Kind: setup
+- Text: The IF-301 v4 mock shall pass the same contract cases as the real module, and the check-route half of TC-GTB-046 shall count only as a wiring check until IF-104 v2 is real.
+- Rationale: the consumers (save, runner, later EDIT and CONTEXT) test against the mock, so it must agree with the real side on every golden example; the IF-104 v2 mock answers with the rule report, so TC-GTB-046 shows the route passes the kind and the report through, not that a real route does (D-416 (2)); the real route is checked when IF-104 v2 is written or in EDIT.
+- Credibility aspect: stand-in fidelity
+- Verified by: contract suite on both sides
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-008 – Each check is shown able to fail
+- Applies to: TC-GTB-037, TC-GTB-039, TC-GTB-042, TC-GTB-043, TC-GTB-046, TC-WFM-179, TC-WFM-180, TC-RUN-036, TC-RUN-037, TC-RUN-038, TC-RUN-039
+- Requirement: REQ-GTB-034
+- Group: CR
+- Kind: setup
+- Text: Each of these checks shall be shown able to fail by running it once against a deliberate defect of the unit it checks, before the check is trusted.
+- Rationale: the code is adapted from the validated prototype, so a test written against it tends to confirm it; the defects: two rules swapped in the registry, the first broken rule only, the cycle asked while rule 3 is broken, the save path on `check_graph`, repeats removed from a refused run (seen on the scratch run of 2026-11-22), trust checked before the run check, prepare inputs not counted as given.
+- Credibility aspect: reviewer independence
+- Verified by: mutation
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+### TR-RULES-009 – The older suites stay untouched
+- Applies to: TC-GTB-045
+- Requirement: REQ-GTB-052
+- Group: CR
+- Kind: setup
+- Text: The check shall run the contract suites of IF-301 v1 to v3, IF-102, IF-104 v1 and IF-203 from files that `git diff goal/v4` shows unchanged, and shall fail if any of those files differs.
+- Rationale: Q-6 keeps the document form as it is; a suite that was edited to pass would hide a change of it; the protected suites change only through an amendment, and none is planned in RULES.
+- Credibility aspect: reference accuracy
+- Verified by: inspection (git diff)
+- Status: Approved; moved here at the merge 2026-11-22 (G-V4.GRAPHAPI.RULES, plan.md "At the merge")
+
+## G-V4.VIEW (Plan step 3, 2026-11-22, D-442; prefix TR-VIEW-; moved at the merge 2026-11-25)
+
+Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039, TC-IF-104-17 to 27, TC-IF-302-13, 14 and SMOKE-VIEW-001, 002, unchanged from `specs/mia/goals/G-V4.VIEW/test-requirements.md`. Their groups are rows of the table `## Groups` at the top: EX and CR are shared with CORE and RULES (same meaning), SD, SI, BR, DP and SM are new.
+
+### TR-VIEW-001 – Both stores, skips visible
+- Applies to: TC-IF-104-17, TC-IF-104-18, TC-IF-104-19, TC-IF-104-20, TC-IF-104-21, TC-IF-104-22, TC-IF-104-23, TC-IF-104-24, TC-IF-104-25, TC-IF-104-26, TC-IF-104-27, TC-API-021
+- Requirement: REQ-API-018
+- Group: SD
+- Kind: setup
+- Text: The check shall run on a new file store in a temporary folder and on a throw-away PostgreSQL 16 database started by the test (`core_stores`, image `postgres:16` local, never pulled), and shall report a variant that cannot run as skipped with its reason, never as passed.
+- Rationale: REQ-API-018 asks for the same answers on both stores; the PostgreSQL variant needs podman, the image and psycopg 3, which the venv `mia312` has and the system Python has not (CLAUDE.md); a hidden skip would read as success (as TR-CORE-003).
+- Credibility aspect: measurement conditions
+- Verified by: inspection of the test report (each case listed three times: mock, files, postgres)
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-002 – The fixture graphs
+- Applies to: TC-API-018, TC-API-020, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040, SMOKE-VIEW-002
+- Requirement: REQ-GA-019
+- Group: SD
+- Kind: setup
+- Text: The checks shall take their graphs from `tests/fixtures/graph_view/`, made by the prototype's `make_sample_store.py` (R11, `prototype/g-v4`) and kept unchanged: cp2.multi (versions 1 to 4 by anna, ben, anna, ben, version n naming the tool tn, 3 steps, 2 connections), sample.code (7 steps, 6 connections, the hostile step), sample.broken (e2 to the missing var.gone), plus four added graphs: a context graph `ctx.small` (steps of types `concept`, `source` and `data`, the last a workflow type, A-175), a graph `swarm.one` of kind `swarm` with one untrusted step, a graph `chat` whose description is "Chat with the owner", and a chain `chain.fifty` of 50 steps and 49 connections; the JS checks read the same graphs as JSON.
+- Rationale: the scenarios name these graphs and their counts; one source for the Python, the JS and the browser checks keeps their answers comparable, and the counts are the expected values of TC-GA-017 and TC-GA-022; the four added graphs are the cases R11 lacks (REQ-GA-020, 028, SMOKE-VIEW-002).
+- Credibility aspect: reference accuracy
+- Verified by: inspection of the fixture list against this text (IDs, versions, authors, counts)
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-003 – Fresh stores and accounts
+- Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040
+- Requirement: REQ-API-046
+- Group: SD
+- Kind: setup
+- Text: Each check shall start on a store and an accounts store that no other check has written to, with `anna` made first (the owner) and `ben` made second, each with its own password; the Firefox checks log in as anna through `/api/login` once per check.
+- Rationale: the owner is the first account (`accounts.owner_check`), so the order of making decides who may write; a store shared between checks would let an earlier save change a later count; one login per check is the case of NFR-12 ("one login is enough").
+- Credibility aspect: measurement conditions
+- Verified by: review of the test setup
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-004 – What the JS mock proves
+- Applies to: TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030
+- Requirement: REQ-GA-019
+- Group: SI
+- Kind: setup
+- Text: The node checks shall use the protected JS mock of IF-104 v2 only through its routes (no reach into its fields except `seed` and `unreachable`), shall count only while the JS contract suite passes on that mock, and shall use no value the mock and the real provider are known to treat differently (a place with a half, a rule other than `step_identity`, `connection_endpoints`, `cycle`, an exact time).
+- Rationale: the node checks prove the page's logic over the answers the contract fixes; the mock's fidelity limits (its header: three rules, no record checks, a fixed toolbox, half-up rounding, a counter for time) must not decide a verdict; that the page works with the real provider is shown by the Firefox checks (D-440 (2)).
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection of the node checks against the mock's fidelity list; the JS contract suite in the same run
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-005 – What the fake DOM proves
+- Applies to: TC-GA-017, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030
+- Requirement: REQ-GA-024
+- Group: SI
+- Kind: setup
+- Text: The node checks shall assert on text, attributes and elements of the fake DOM (`tests/js/fake-dom.mjs`) and on the nodes, connections and options the page hands to the drawing library, never on places in pixels, sizes or colours; claims about pixels, colours, focus and requests are made only by the Firefox checks.
+- Rationale: the fake DOM has no layout, no styles and no drawing; a node check that read a place would test the fake, not the page; vis-network draws what it is handed, so the handed data is the page's part of REQ-GA-024 to 027.
+- Credibility aspect: stand-in fidelity
+- Verified by: review of the node checks
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-006 – Fault wrappers are shown to fire
+- Applies to: TC-IF-104-26, TC-API-021, TC-API-023, TC-GA-020
+- Requirement: REQ-API-040
+- Group: SI
+- Kind: setup
+- Text: Each fault stand-in shall be shown to fire in the same check before its verdict counts: the unreachable store (every backend call raises `ConnectionError`), the failing record table (only writes to `graph_changes` raise; a write to `graphs` succeeds in the same save), the record the store refuses (step.write with the extra field `colour`, refused by IF-301 `check_record` with `schema_break`, D-444), the unreachable JS mock.
+- Rationale: a wrapper that never fires makes a refusal check pass for the wrong reason; TC-API-023 needs the version write to succeed and only the record write to fail, else it shows a refused save, not a version without its record.
+- Credibility aspect: stand-in fidelity
+- Verified by: an assertion in each check that the fault was raised at least once (a call counter of the wrapper)
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-007 – The store setting is read as in production
+- Applies to: TC-API-018, TC-API-019, SMOKE-VIEW-001
+- Requirement: REQ-API-019
+- Group: SI
+- Kind: setup
+- Text: The checks shall give the store setting the way the product reads it (D-440 (4)): the configuration key `store` (`files`, `database`, absent, or the wrong values `postgress`, `""`, `5`) and the address from `MIA_DATABASE_URL`, set in a copy of the configuration and an environment of the test; they shall not call the store choice with prepared objects.
+- Rationale: REQ-API-019 and 020 are about the configuration as the owner writes it; a check that hands in a backend object would skip the part that can go wrong (the key, the default folder, the message).
+- Credibility aspect: validity domain
+- Verified by: review of the test setup
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-008 – Firefox as the reference browser
+- Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040, SMOKE-VIEW-002
+- Requirement: REQ-GA-012
+- Group: BR
+- Kind: setup
+- Text: The checks shall drive the Firefox build installed by Playwright for Python at the version pinned in `requirements-browser.txt` (a release at least two weeks old at install, DEP-5, DEP-6), headless, viewport 1280 × 800 at device scale factor 1, locale `en-US`, colour scheme `light` unless the check sets `dark`, a new browser context per check, and a step timeout of 10 s; where Playwright or its Firefox is missing the checks skip with that reason, never pass.
+- Rationale: the owner's choice of browser and size (D-430, REQ-GA-012 "1280 × 800"); one pinned build keeps pixel places and colours comparable between runs (REQ-GA-031); a new context per check has no storage, cookies or cache of an earlier check.
+- Credibility aspect: measurement conditions
+- Verified by: inspection of the test report (browser name and version printed once per run)
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-009 – One origin with the real provider
+- Applies to: TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040
+- Requirement: REQ-GA-042
+- Group: BR
+- Kind: setup
+- Text: The Firefox checks shall run against one local test server on `127.0.0.1` at a free port that serves `graph_app/` at `/graph/` and the real provider `graph_api_v2.create_app` with the account routes at `/api/`, on a throw-away file store seeded per TR-VIEW-002, with that origin as the only allowed origin.
+- Rationale: D-440 (2); in production Caddy gives page and API one origin (DEP-9), and the session cookie and the "nothing from outside" check depend on it; the real provider removes the mock's fidelity limits from the browser verdicts.
+- Credibility aspect: validity domain
+- Verified by: inspection of the server helper
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-010 – When the picture counts as settled
+- Applies to: TC-GA-036, TC-GA-037, SMOKE-VIEW-002
+- Requirement: REQ-GA-031
+- Group: BR
+- Kind: setup
+- Text: A picture shall count as settled when the drawing library has reported that it stabilised (or physics is off), and the places shall then be read through the read-only test hook the page offers (named in `plan.md`) and rounded to whole pixels; a picture not settled within 10 s fails the check.
+- Rationale: places read during the movement differ from run to run and would make REQ-GA-031 flaky or meaningless; rounding to whole pixels is the tolerance of the scenario; a bound on the wait keeps a never-settling picture from hanging the run.
+- Credibility aspect: numerical settings
+- Verified by: review; the check prints the time to settle
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-011 – Every request is recorded
+- Applies to: TC-GA-037, TC-GA-039
+- Requirement: REQ-GA-043
+- Group: BR
+- Kind: setup
+- Text: The checks shall record every request the page makes from the first navigation to the end of the check, through the browser's own request events (documents, scripts, styles, fonts, images, fetches and web sockets), with method and full address, and shall fail on any request to another origin or any request to `/api/v2` other than GET.
+- Rationale: a record taken only from the page's own fetch calls would miss a font or script from outside (NFR-13) and a write sent by the drawing library; the browser's events see everything that leaves the page.
+- Credibility aspect: measurement conditions
+- Verified by: a planted request to `https://example.invalid/x.css` in a copy of the page fails TC-GA-039 (see TR-VIEW-021)
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-012 – Keyboard only
+- Applies to: TC-GA-038
+- Requirement: REQ-GA-041
+- Group: BR
+- Kind: setup
+- Text: The check shall use key presses only (Tab, Shift+Tab, arrow keys, Enter, Space, Escape) and no mouse or touch call, and shall assert after each step which element has the focus.
+- Rationale: one mouse click hidden in the setup would let a page that cannot be reached by keyboard pass; asserting the focus shows each step was reached, not only the end state.
+- Credibility aspect: validity domain
+- Verified by: review of the check
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-013 – Colours compared with the browser's token values
+- Applies to: TC-GA-034, TC-GA-040
+- Requirement: REQ-GA-016
+- Group: BR
+- Kind: setup
+- Text: The check shall take the expected colours from the browser itself, as the computed value of a probe element styled with the token variable in the same page and theme, and compare them with the computed colour of the page background and a step label, as RGB values equal to the last digit.
+- Rationale: hard-coded hex values in the test would copy the tokens and break with any change of `tokens.css`; the browser's own resolution of the variable is the reference the requirement means ("equal the token values of that theme").
+- Credibility aspect: reference accuracy
+- Verified by: the two themes give different values in the same run (the check can fail)
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-014 – Checks that wait for RULES
+- Applies to: TC-API-025, TC-IF-104-22, TC-IF-104-23
+- Requirement: REQ-API-035
+- Group: DP
+- Kind: setup
+- Text: TC-API-025 shall count only on code that holds IF-301 v4 (`graph_rule_set`, G-V4.GRAPHAPI.RULES merged into `goal/v4` and from there into this branch); until then it fails naming RULES; the real side of TC-IF-104-22 and 23 counts for the rule names only as far as CORE's rules name them.
+- Rationale: REQ-API-031 and 035 ask for the IF-301 v4 rule report, which only RULES provides (handover, section 4); a pass on CORE's rules would not show HR-008.
+- Credibility aspect: validity domain
+- Verified by: inspection of the branch state in the verification report
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-015 – Installed contract suites unchanged
+- Applies to: TC-IF-104-17, TC-IF-104-18, TC-IF-104-19, TC-IF-104-20, TC-IF-104-21, TC-IF-104-22, TC-IF-104-23, TC-IF-104-24, TC-IF-104-25, TC-IF-104-26, TC-IF-104-27, TC-IF-302-13, TC-IF-302-14, TC-API-020
+- Requirement: REQ-API-030
+- Group: DP
+- Kind: setup
+- Text: The contract cases shall count only when run from suite files byte-identical to those installed by A-171, A-172 and A-174, and the IF-104 v1 suites (Python and JS) byte-identical to `goal/v4`, with the mock and the real variants all passing.
+- Rationale: the suites are the frozen interface shared with EDIT, REPLAY and CONTEXT (D-368, D-425 A); REQ-API-030 keeps v1 unchanged beside v2.
+- Credibility aspect: reviewer independence
+- Verified by: `git diff --stat` of the suite files against the installing commits in the verification report
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-016 – The image smoke check writes nothing
+- Applies to: SMOKE-VIEW-001
+- Requirement: REQ-OPR-011
+- Group: SM
+- Kind: setup
+- Text: The smoke check shall build the release image from `deploy/` on the owner's host, start it with `store: database` and the owner's `MIA_DATABASE_URL` from `deploy/.env`, run only `import psycopg` in the container and `GET /api/v2/store` as the owner, and send no request that writes.
+- Rationale: the check proves the image can open the owner's database (REQ-OPR-011); the live graphs are not test data (as TR-CORE-009).
+- Credibility aspect: measurement conditions
+- Verified by: inspection of the smoke script
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-017 – The opening time is measured, not judged
+- Applies to: SMOKE-VIEW-002
+- Requirement: REQ-GA-031
+- Group: SM
+- Kind: setup
+- Text: The measurement shall run on the owner's host with the installed release's graph app and API against a throw-away file store holding `chain.fifty` (TR-VIEW-002), in Firefox per TR-VIEW-008, five openings with a reload between them after one warm-up opening not counted, each timed from the choice in the list to "settled" (TR-VIEW-010), and report the median and the smallest and largest time in milliseconds without a pass or fail.
+- Rationale: NFR-11 has no hard bound (D-425 E-H); the number is for the owner to read with VAL-VIEW-01; a warm-up keeps the first load of the vendored library out of the figure; the live store is not written.
+- Credibility aspect: repetitions and seeds
+- Verified by: the deployment record holds the five times, the median and the range
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-018 – Exact values
+- Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-OPR-011, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-031, TC-GA-033, TC-GA-035, TC-GA-038, TC-GA-039, TC-IF-104-17, TC-IF-104-18, TC-IF-104-19, TC-IF-104-20, TC-IF-104-21, TC-IF-104-22, TC-IF-104-23, TC-IF-104-24, TC-IF-104-25, TC-IF-104-26, TC-IF-104-27, TC-IF-302-13, TC-IF-302-14
+- Requirement: REQ-API-023
+- Group: EX
+- Kind: unit
+- Text: The expected values of these checks shall be written as exact values: statuses, codes, IDs, versions, authors, counts, orders, words of the page and hashes, with no tolerance; places in pixels are compared rounded to whole pixels (TC-GA-036, TC-GA-037 only).
+- Rationale: every outcome of the test spec is exact (its limit column); a tolerance would hide a defect.
+- Credibility aspect: reference accuracy
+- Verified by: known answer
+- Sign-off: skimmed as a group
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-019 – Times are not compared exactly
+- Applies to: TC-GA-021, TC-GA-030, TC-IF-104-17, TC-IF-104-25
+- Requirement: REQ-GA-017
+- Group: EX
+- Kind: unit
+- Text: The checks shall compare a time only as the text the IF-104 v2 answer holds for that version (the page shows what it was given), and in the backend checks only for being present and not decreasing, never against a fixed clock value.
+- Rationale: the time is the store's clock (the mock's is a counter); fixed values would make the checks flaky and say nothing about the requirement (as TR-CORE-008).
+- Credibility aspect: measurement conditions
+- Verified by: review
+- Sign-off: skimmed as a group
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-020 – What the file checks read
+- Applies to: TC-GA-031, TC-GA-032, TC-OPR-011
+- Requirement: REQ-GA-015
+- Group: EX
+- Kind: unit
+- Text: TC-GA-031 shall hash the files as committed (bytes, no line-ending change); TC-GA-032 shall scan every `.css` of `graph_app/` except `tokens.css` and `vendor/`, plus `style` attributes and `<style>` blocks of its HTML, for `#` colours, `rgb(`, `rgba(`, `hsl(`, `hsla(`, the CSS named colours, `font-family` values and `px` values of `border-radius` and `box-shadow`, allowing them only inside a `var(--…)` use; TC-OPR-011 shall read the stage of `deploy/Containerfile` that the release image is built from.
+- Rationale: these are the forms in which a style can bypass the tokens (REQ-GA-015) and a file can drift (REQ-GA-014); the list fixes what "outside the tokens" means so the scan is reproducible.
+- Credibility aspect: validity domain
+- Verified by: known answer (TR-VIEW-021's planted literal)
+- Sign-off: skimmed as a group
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+### TR-VIEW-021 – Each new check is shown able to fail
+- Applies to: TC-API-018, TC-API-019, TC-API-020, TC-API-021, TC-API-022, TC-API-023, TC-API-024, TC-API-025, TC-OPR-011, TC-GA-017, TC-GA-018, TC-GA-019, TC-GA-020, TC-GA-021, TC-GA-022, TC-GA-023, TC-GA-024, TC-GA-025, TC-GA-026, TC-GA-027, TC-GA-028, TC-GA-029, TC-GA-030, TC-GA-031, TC-GA-032, TC-GA-033, TC-GA-034, TC-GA-035, TC-GA-036, TC-GA-037, TC-GA-038, TC-GA-039, TC-GA-040
+- Requirement: REQ-GA-043
+- Group: CR
+- Kind: setup
+- Text: Each of these checks shall be shown able to fail once, by running it against a deliberate defect of the unit it checks, before its pass is trusted; the defects are listed per check in `plan.md` (for example: the store default changed to PostgreSQL, the record written twice, the origin check removed, a filter that ignores the description, a mark on every step, a link around the stored name, a random seed, a page that saves the arrangement on drop, a planted `color: #fff`, a planted request to `https://example.invalid/x.css`).
+- Rationale: the page logic comes from the prototype (R6 keep+tests), and a check written against existing code tends to confirm it; the red state before the code is not enough where a stub could pass by accident (as TR-CORE-006).
+- Credibility aspect: reviewer independence
+- Verified by: mutation (each listed defect makes its check fail; recorded in the implementation log)
+- Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+## G-V4.GRAPHSTORE.TRANSFER (Plan step 3, 2026-11-22; A-196, A-197 2026-11-27; prefix TR-TRANSFER-; moved at the merge 2026-11-27)
+
+Test requirements of the checks TC-SLY-009, TC-SLY-016 to 040, TC-API-060 to 067 and SMOKE-TRANSFER-001, unchanged from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/test-requirements.md` (with the A-196 and A-197 changes installed on the line of work); only a History line records the move. Their groups are rows of the table `## Groups` at the top: FI, BK, EX, CR and EP are shared with CORE, RULES and VIEW (same meaning).
+
+### TR-TRANSFER-001 – Exact values
+- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-022, TC-SLY-023, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-027, TC-SLY-040, TC-SLY-030, TC-SLY-031, TC-SLY-032, TC-SLY-033, TC-SLY-034, TC-SLY-035, TC-SLY-039, TC-SLY-009, TC-API-060, TC-API-061, TC-API-062, TC-API-064, TC-API-065, TC-API-066, TC-API-067
+- Requirement: REQ-SLY-016
+- Group: EX
+- Kind: unit
+- Text: The expected values of these checks shall be written as exact values: record histories entry by entry, IDs, states, counts, call orders and refusals with rule and detail, with no tolerance and no check by "contains".
+- Rationale: every outcome is a history, a name, a count or an equality (test spec, limit column); a move "without loss" is checked entry by entry, so a check by "contains" would hide a lost or changed version.
+- Credibility aspect: reference accuracy
+- Verified by: known answer
+- Sign-off: skimmed as a group
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-002 – Both backends, skips visible
+- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-040, TC-SLY-029, TC-SLY-036, TC-SLY-038
+- Requirement: REQ-SLY-022
+- Group: BK
+- Kind: setup
+- Text: The check shall run on the files backend and on PostgreSQL 16 started as a throw-away container named by the test, with CORE's `tests/helpers/core_stores.py`, and shall report a half that cannot run as skipped, never as passed.
+- Rationale: the same behaviour on both is FR-58 and HR-005; the copy is always files, the live side is both (TR-CORE-003, adopted unchanged in substance); a missing podman must not read as success.
+- Credibility aspect: measurement conditions
+- Verified by: inspection of the test report
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-003 – The sample store from the fixtures
+- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-029, TC-SLY-033, TC-SLY-037, TC-SLY-009, SMOKE-TRANSFER-001
+- Requirement: REQ-SLY-016
+- Group: BK
+- Kind: setup
+- Text: The checks shall build the sample store from the 15 converted skill graphs, the graph `sample.code` and the context graph `context.cp13` under `tests/fixtures/graphs/`, unchanged, plus `cp2.multi` with four versions saved by four authors through the graph model.
+- Rationale: the golden examples of CORE (TR-CORE-004) cover every kind of step including a loop-controlling one (D-374) and a context graph; `cp2.multi` gives the several versions and authors of AC-005 and AC-006.
+- Credibility aspect: reference accuracy
+- Verified by: inspection of the fixture list
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-004 – Every write position is tried, and the injector fires
+- Applies to: TC-SLY-026, TC-SLY-029, TC-SLY-036, TC-SLY-038
+- Requirement: REQ-SLY-029
+- Group: FI
+- Kind: setup
+- Text: The check shall interrupt the run after every single write of that run — each append, cut back and removal on the target, and the writing of the aside file — one run per write position, through CORE's `FailingBackend` on the target side, and shall show that it fired by comparing the counted writes with the writes of the same run without a stop.
+- Rationale: HR-007 "at any one write": no sampling (TR-CORE-001, 002); an injector that never fires would let every position pass; the uninterrupted run gives the known number of writes. CORE's injector counts only appends; a sync also cuts back and removes on the copy and writes the aside file, and the positions between those writes are where the header-first defect sits (D-466), so `FailingBackend` is extended to count them (protected helper, installed with the red tests; CORE's counts stay, a save only appends; owner, review of group FI).
+- Credibility aspect: power and false-alarm rate
+- Verified by: mutation (header written first, or removed first in the sync, must fail the check)
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-005 – Times copied are compared exactly, times made are not
+- Applies to: TC-SLY-016, TC-SLY-020, TC-SLY-022, TC-SLY-025, TC-SLY-040, TC-SLY-026, TC-API-064
+- Requirement: REQ-SLY-016
+- Group: EX
+- Kind: unit
+- Text: A check shall compare the time of a version exactly where the time was copied by a move or sync, and shall set a fixed clock where it compares times made by two saves.
+- Rationale: FR-59 "times unchanged" is an exact claim about copied values; a time made by a save is the clock of the store (TR-CORE-008), so TC-SLY-022 fixes the clock instead of loosening the comparison.
+- Credibility aspect: measurement conditions
+- Verified by: review
+- Sign-off: skimmed as a group
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-006 – The lock is tried across real processes
+- Applies to: TC-SLY-028, TC-SLY-039
+- Requirement: REQ-SLY-028
+- Group: FI
+- Kind: setup
+- Text: The check shall hold the copy's lock in a separate operating-system process and kill that process with SIGKILL before the second attempt, never with threads in one process.
+- Rationale: the lock is an operating-system lock released when its process ends; a lock tried by threads of one process may pass for the wrong reason, and only a killed process shows that a crashed sync leaves no stale lock.
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-007 – Only throw-away databases and folders
+- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-040, TC-SLY-029, TC-SLY-036, TC-SLY-038, TC-API-063, TC-API-065, TC-API-066, TC-API-067, SMOKE-TRANSFER-001
+- Requirement: REQ-SLY-016
+- Group: BK
+- Kind: setup
+- Text: The checks shall write only to folders under a new temporary folder and to databases they create; the smoke check shall write only to a new database `mia_smoke` and new folders, refuse any other database name, and drop them by name afterwards.
+- Rationale: TR-CORE-009 and CORE's Deploy lessons: the owner's data (volume `mia-data`, his database) is never a fixture; the live store switch is a later owner gate (D-460 (1)).
+- Credibility aspect: measurement conditions
+- Verified by: inspection
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-008 – Each check is shown able to fail
+- Applies to: TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-023, TC-SLY-026, TC-SLY-029, TC-SLY-038, TC-SLY-031
+- Requirement: REQ-SLY-019
+- Group: CR
+- Kind: setup
+- Text: Each of these checks shall be shown able to fail by running it once against a deliberate defect before it is trusted: the per-record check of today, the headers written first, no flush, the removal before the aside file, the header removed first in the sync, a one-graph move that overwrites.
+- Rationale: the two defects of today (survey) and the prototype's header-first removal (D-466) are the faults these checks exist for; a check that cannot catch them proves nothing.
+- Credibility aspect: reviewer independence
+- Verified by: mutation
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-009 – The backend is started and stopped for real
+- Applies to: TC-API-060, TC-API-061, TC-API-062, TC-API-063, TC-API-064, TC-API-065, TC-API-066, TC-API-067
+- Requirement: REQ-API-062
+- Group: EP
+- Kind: setup
+- Text: The checks shall start the backend through the same start function and stop it through the same orderly-stop list as `python -m MIA` does, with a configuration naming `store`, `copy` and `autosync`, and an unreachable live store shall be a database address on a port where nothing listens.
+- Rationale: AutoSync hangs on the start and the stop hook (survey: `__main__.py`); a check that calls the sync directly would not show that the hook runs, nor that the stop sync runs before the database is closed. Today `__main__.py` does the start steps and `socketio.run` in one function: Implement splits the start steps and the stop list into two functions that `__main__` calls and the checks call with Flask's test client (a structural change inside N-2.1, no new part or interface; owner, review of group EP).
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-010 – VIEW's parts, skipped until they exist
+- Applies to: TC-SLY-030, TC-API-060, TC-API-061, TC-API-062, TC-API-063, TC-API-064
+- Requirement: REQ-SLY-030
+- Group: EP
+- Kind: setup
+- Text: TC-SLY-030 shall write the side records through the table definitions of IF-302 v15 (VIEW, A-172), and TC-API-060 to 064 shall configure the backend through VIEW's `store` setting and ask VIEW's `GET /api/v2/store`; each shall be skipped, with the reason, while that part of VIEW is missing, and shall be green before TRANSFER's Verify.
+- Rationale: D-460: the side tables are carried by an explicit list, tested once VIEW is merged into `goal/v4`; the copy setting lies on top of VIEW's store setting (D-465); a skip keeps the gap visible, a stand-in table or route would test TRANSFER against itself. Extended to the API checks by the agent on the owner's delegation (2026-11-22, D-468).
+- Credibility aspect: validity domain
+- Verified by: inspection of the test report
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-011 – The path search
+- Applies to: TC-SLY-037
+- Requirement: REQ-SLY-037
+- Group: EP
+- Kind: setup
+- Text: The check shall place the source under a folder whose name holds a random 16-character token and shall search every file of the resulting folders, as bytes, for that token, for the absolute path of every folder the check made, and for the home folder's path.
+- Rationale: AC-008 "no file holds a path of where it was made"; a random token cannot appear by chance, and a byte search also finds a path inside JSON strings. The folders the check made lie under the system's temporary folder, outside home and without the token: a file that held the copy's own path was missed (V-4 of Verify, A-197).
+- Credibility aspect: power and false-alarm rate
+- Verified by: mutation (an aside file that holds the copy's absolute folder must fail the check: defect D1 of `verify-repro/defects.json`)
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan, 2026-11-22, new; Verify, 2026-11-27, changed by A-197 (D-548: every folder the check made)
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")

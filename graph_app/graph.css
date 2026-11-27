@@ -1,13 +1,60 @@
-/* The Graph app follows the light and dark scheme of the system; no outside fonts (REQ-GA-010). vis-network draws on a canvas:
-   app.js hands it the node colors below. */
-:root { color-scheme: light dark; --fg: #1d1d1f; --bg: #fafafa; --panel: #f0f0f2; --data: #dbeafe; --process: #fde68a; --line: #6b7280; }
-@media (prefers-color-scheme: dark) { :root { --fg: #e5e7eb; --bg: #18181b; --panel: #232327; --data: #1e3a8a; --process: #78350f; --line: #9ca3af; } }
-body { margin: 0; font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg); }
-header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 8px 16px; }
-h1 { font-size: 1.125rem; margin: 0; }
-h2 { font-size: 1rem; margin: 0 0 8px; }
-#status { padding: 0 16px; min-height: 1.4em; }
-.work { display: flex; flex-wrap: wrap; gap: 16px; padding: 0 16px 16px; }
-#view { flex: 1 1 480px; height: calc(100vh - 140px); min-height: 320px; border: 1px solid var(--line); border-radius: 6px; }
-aside { flex: 0 1 320px; min-width: 0; background: var(--panel); border-radius: 6px; padding: 12px; }
-#detail { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8125rem; }
+/* The graph viewer's own styles (REQ-GA-015): every colour, font, spacing, radius and shadow is a variable of tokens.css, the main app's
+   design tokens, so light and dark follow the system through data-theme="auto" (REQ-GA-016). The picture's colours are handed to the
+   drawing library from the same variables (drawing.js). Layout: the owner's sketch (D-425) as the owner narrowed it (D-459): the graph list
+   above the left column and as wide as it, a slim band of search and store above the picture, actions under the picture, the history and
+   replay row, the status bar. */
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--leading); color: var(--text); background: var(--page-bg); }
+#app { display: grid; grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr); grid-template-rows: auto 11rem minmax(0, 1fr) auto auto auto;
+  grid-template-areas: "list band" "list picture" "left picture" "left actions" "history history" "status status";
+  gap: var(--space-3); height: 100vh; padding: var(--space-3); box-sizing: border-box; }
+.graph-list { grid-area: list; display: flex; flex-direction: column; min-height: 0; contain: size; }      /* its entries scroll; it does not stretch the band's row */
+.band { grid-area: band; display: flex; gap: var(--space-3); min-width: 0; }
+.left-column { grid-area: left; }
+.picture { grid-area: picture; }
+.actions-row { grid-area: actions; }
+.history-row { grid-area: history; }
+.status-bar { grid-area: status; }
+.band .area, .actions-row { padding: var(--space-2) var(--space-3); }
+.search-band { flex: 1 1 auto; }
+.other-things { flex: 0 1 auto; }
+.band .search-band h2, .area.actions-row h2 { display: inline; margin: 0 var(--space-2) 0 0; }
+.search-band .later, .actions-row .later { display: inline; }
+.area { background: var(--glass-solid); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); min-width: 0; }
+.area h2 { margin: 0 0 var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--text-muted); }
+.graph-entries { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-height: 0; overflow: auto; font-size: var(--text-sm); }
+.graph-entry { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+.picture { display: flex; flex-direction: column; min-height: 0; }
+.drawing { flex: 1 1 auto; min-height: 0; border-radius: var(--radius-sm); background: var(--field); }
+.later, .hint, .store { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
+.later-parts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
+.status-bar { padding: var(--space-2) var(--space-3); }
+.status-bar h2 { display: inline; margin: 0 var(--space-2) 0 0; }
+.status-line { display: inline; margin: 0; font-size: var(--text-sm); overflow-wrap: anywhere; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.problems { margin: 0 0 var(--space-2); padding-left: var(--space-4); font-size: var(--text-sm); color: var(--danger); }
+.problems:empty { display: none; }
+.picture-tools button, .settings select, #graph-filter { font: inherit; font-size: var(--text-sm); color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); }
+#graph-filter { box-sizing: border-box; width: 100%; margin-bottom: var(--space-2); }
+.picture { position: relative; }
+.picture-tools { position: absolute; top: var(--space-2); right: var(--space-3); }
+.settings { position: absolute; z-index: 10; top: 100%; right: 0; min-width: 16rem; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3);
+  background: var(--glass-solid); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow); }
+.settings[hidden] { display: none; }
+.setting { display: flex; justify-content: space-between; gap: var(--space-2); align-items: center; font-size: var(--text-sm); }
+.left-column h3, .selection h3 { margin: var(--space-3) 0 var(--space-1); font-size: var(--text-sm); font-weight: 600; color: var(--text-muted); }
+.field { margin: 0; font-size: var(--text-sm); overflow-wrap: anywhere; }
+.stored-text { margin: var(--space-2) 0 0; padding: var(--space-2); max-height: 14rem; overflow: auto; font-family: var(--font-mono); font-size: var(--text-sm); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--field); border-radius: var(--radius-sm); }
+.step-list, .history-list { list-style: none; margin: 0; padding: 0; font-size: var(--text-sm); }
+
+.step-entry, .history-entry { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); overflow-wrap: anywhere; cursor: pointer; }
+.step-entry:hover, .history-entry:hover, .graph-entry:hover, .graph-entry[aria-current="true"], .history-entry[aria-selected="true"] { background: var(--hover); }
+.history { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); align-items: flex-start; margin-bottom: var(--space-2); }
+.history-buttons { display: flex; gap: var(--space-2); }
+.history-list { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); max-height: 4.5rem; overflow: auto; }
+.history-row button { font: inherit; font-size: var(--text-sm); color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); }
+.history-row button[disabled] { color: var(--text-muted); }
+.left-column { display: flex; flex-direction: column; overflow: hidden; }
+.selection { flex: 1 1 0; min-height: 4rem; overflow: auto; }
+.left-column > h3 { flex: none; }
+.step-list { flex: 0 1 auto; min-height: 3rem; max-height: 10rem; overflow: auto; }

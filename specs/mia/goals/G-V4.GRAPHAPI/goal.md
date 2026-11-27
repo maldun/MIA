@@ -9,7 +9,7 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 - Supervision: supervised
 - Accepted by: pending (the owner records the agreement in the table below)
 - Line of work: goal/v4.graphapi
-- Subgoals: G-V4.GRAPHAPI.RULES, G-V4.GRAPHAPI.RUN, G-V4.GRAPHAPI.CODE
+- Subgoals: G-V4.GRAPHAPI.RULES, G-V4.GRAPHAPI.RUN, G-V4.GRAPHAPI.SWITCH (after RUN, D-474), G-V4.GRAPHAPI.CODE
 - Depends on: G-V4.GRAPHSTORE (the loader reads the one stored form)
 - Status: Agreed
 
@@ -54,6 +54,8 @@ Code may be stored in a graph: a code snippet is a data node attached to a trans
 ## Split into parts (owner, 2026-11-20, D-392)
 Three parts: **RULES** (eight rules in one order, refusal before running; independent of storage), **RUN** (the stored graph as one graph for the order and the run, equivalence with the old runner; needs GRAPHSTORE.CORE and RULES) and **CODE** (code steps through trusted tools, trust kept with a mark, THR-013; needs RUN). The requirements of the group's top-level spec are allocated: RULES FR-63, FR-64; RUN FR-65, NFR-17; CODE FR-66, FR-67.
 
+**Fourth part (owner, 2026-11-23, D-473, D-474):** RUN now also moves every skill to the graph path and removes the old runner (D-473); this is cut: **RUN** keeps the loader, one networkx graph for order, rules and run, the six skills with equivalence suites on the stored-graph path and NFR-17 decided on their suites; **SWITCH** (after RUN) moves the nine skills the owner kept on the old runner as part of the user interface (2026-11-07), checked by scripted replies and the owner's look in the app, then removes the old runner with the owner's agreement.
+
 ## Scope
 Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
 
@@ -91,6 +93,7 @@ None yet; the shared interfaces are marked in the next step of Plan step 0.
 |---|---|---|
 | G-V4.GRAPHAPI.RULES | [x] Stefan Reiterer (owner) | 2026-11-20 |
 | G-V4.GRAPHAPI.RUN | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHAPI.SWITCH | [ ] Stefan Reiterer (owner) | |
 | G-V4.GRAPHAPI.CODE | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases

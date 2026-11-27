@@ -17,10 +17,12 @@ A graph of a kind not in KINDS gives one item, `unknown_kind`, naming the kind (
 check(graph) -> [{"rule", "parts", "text"}] for each broken rule, in order (an empty list: the graph keeps all rules); `rule_report` is the older name.
 `graph` is {"kind"?, "nodes": [{"id", "data"}], "edges": [{"id", "from", "to", "data"}]} with local IDs; no `kind` is `workflow` (REQ-WFM-153).
 """
-try:
-    from .graph_model import find_cycle, stop_is_valid
+try:   # PROTOTYPE round 05: after goal/v4 (RULES) is merged, the rules are the product's graph_rule_set; this module keeps the run guard only
+    from . import graph_rule_set
+    from .graph_rule_set import _find_cycle as find_cycle, _stop_is_valid as stop_is_valid
 except ImportError:
-    from graph_model import find_cycle, stop_is_valid
+    import graph_rule_set
+    from graph_rule_set import _find_cycle as find_cycle, _stop_is_valid as stop_is_valid
 
 STEP_KINDS = ("data", "transform", "master")
 KINDS = {
@@ -127,6 +129,10 @@ RULES = {"step_identity": _step_identity, "step_kind": _step_kind, "connection_e
 
 
 def check(graph):
+    return graph_rule_set.rule_report(graph)     # PROTOTYPE round 05: the product's one rule set (REQ-GTB-037 to 048)
+
+
+def _check_round04(graph):
     kind = graph_kind(graph)
     if kind is None:
         return [{"rule": "unknown_kind", "parts": [str(graph.get("kind"))], "text": TEXTS["unknown_kind"]}]

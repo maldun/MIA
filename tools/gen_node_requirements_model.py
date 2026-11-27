@@ -27,6 +27,20 @@ def camel(title, rid):
     return re.sub(r"^(\d)", r"R\1", name) + "_" + rid.split("-")[1].title() + rid.split("-")[-1]
 
 
+def high_level_parents(goal_dir):
+    """{HR id: [its parents]} from the goal's high-level-spec.md; empty when the goal has none."""
+    path = goal_dir / "high-level-spec.md"
+    if not path.exists():
+        return {}
+    found = {}
+    for block in re.split(r"\n(?=### )", path.read_text(encoding="utf-8"))[1:]:
+        m = re.match(r"### (HR-\d+)", block)
+        parent = re.search(r"^- Parent: (.*)$", block, re.M)
+        if m and parent:
+            found[m.group(1)] = [p.strip() for p in parent.group(1).split(",") if p.strip()]
+    return found
+
+
 def read(root):
     out = []
     nodes = sorted((root / "specs/mia/nodes").rglob("requirements.md"))
@@ -44,7 +58,17 @@ def read(root):
             field = lambda k: (re.search(r"- %s: (.*)" % k, block) or [0, ""])[1].strip()
             methods = [HOW[m.strip().lower()] for m in field("Verification method").split(",") if m.strip().lower() in HOW] or ["test"]
             subject = re.search(r"Subject: (\w+)", block)
-            out.append(dict(id=head[4:].split(" ")[0], title=head.split(" – ", 1)[1], text=field("Text"), parent=[p.strip() for p in field("Parent").split(",") if p.strip()],
+            parents = [p.strip() for p in field("Parent").split(",") if p.strip()]
+            # HR ids repeat from goal to goal, so an HR parent stands here for its own parents in that goal's high-level spec (D-420);
+            # after the merge moved an item into a node file, its goal is the first one its History names
+            goal_dir = path.parent if path in goals else None
+            named = re.search(r"^- History: (G-[A-Z0-9.]+)\b", block, re.M)
+            if goal_dir is None and named and any(p.startswith("HR-") for p in parents):
+                goal_dir = root / "specs/mia/goals" / named.group(1)
+            if goal_dir is not None:
+                hr = high_level_parents(goal_dir)
+                parents = list(dict.fromkeys(q for p in parents for q in hr.get(p, [p])))
+            out.append(dict(id=head[4:].split(" ")[0], title=head.split(" – ", 1)[1], text=field("Text"), parent=parents,
                             methods=methods, subject=subject.group(1) if subject else "MiaSystem"))
     return out
 
@@ -93,4 +117,5 @@ def main(root):
     print(len(reqs), "node requirements written")
 
 
-main(sys.argv[1])
+if __name__ == "__main__":
+    main(sys.argv[1])

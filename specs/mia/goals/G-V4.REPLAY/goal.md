@@ -22,6 +22,8 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 ## Explore result (2026-11-20, D-363)
 `../G-V4.VIEW/research.md`. Decisions: one edit-log entry per operation (add, remove or change a node or edge, change a field; moves are not among them, D-371) with account, time, start version, old and new value and an optional reason; undone changes are not logged; a save closes a group that makes one graph version; replay applies the entries to the start version. Node positions are a side record, not part of the graph version and (D-371) not in the edit log either. Retention: everything is kept (D-371). Open for Plan: where the log is stored (a table of the storage layer) and how the existing history and diff relate to it.
 
+**Since then (2026-11-23, D-472):** the store of the record of changes and its route are VIEW's (backend side of FR-76, FR-77, FR-80, FR-81, D-430 (7)), and it moves with the graph through TRANSFER (REQ-SLY-030). REPLAY keeps the page side: each change shown with who, when, what and why, playback (FR-78), comparison (FR-79), NFR-20. Its Plan starts after EDIT's plan is approved.
+
 ## Source
 Owner 2026-11-20: an edit log of operations, replayable on a graph (not only version stepping). Links to REQ-GA-004 (versions, history, diff).
 
@@ -51,7 +53,7 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
-| Plan | open | |
+| Plan | open | starts when EDIT's plan is approved; EDIT's Plan waits for VIEW's merge (D-471, D-472) |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
