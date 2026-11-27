@@ -48,21 +48,8 @@ def check_graph(graph):
     return _parts(graph_rule_set.rule_report(graph))
 
 
-def order_of(graph):
-    """The step IDs of a stored graph, every step after the steps it reads from (REQ-WFM-166; also used by the run, N-2.4.1).
-
-    A queue over the loaded graph (D-480): first the steps that read from no step, in their stored position, then each step as soon as the last
-    connection into it is passed, in the stored order of the connections, so ties go first-ready-first (REQ-WFM-167), as before the loaded graph.
-    """
-    loaded = graph_rule_set.load(graph)
-    open_inputs = dict(loaded.in_degree())
-    order = [step for step, count in open_inputs.items() if count == 0]
-    for step in order:      # the list grows while it is walked
-        for _, nxt, _ in sorted(loaded.out_edges(step, data="position"), key=lambda edge: edge[2]):
-            open_inputs[nxt] -= 1
-            if open_inputs[nxt] == 0:
-                order.append(nxt)
-    return order
+# REQ-RUN-047 (A-190): the order lives in the rule set, so the graph run imports nothing of MIA but it; the same function for the callers here
+order_of = graph_rule_set.order_of
 
 
 class GraphModel:

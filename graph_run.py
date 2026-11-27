@@ -19,10 +19,10 @@ from collections import namedtuple
 
 try:
     from . import graph_rule_set
-    from .graph_model import order_of
+    from .graph_rule_set import order_of
 except ImportError:
     import graph_rule_set
-    from graph_model import order_of
+    from graph_rule_set import order_of
 
 RunResult = namedtuple("RunResult", "status named named_status values")
 
@@ -40,90 +40,91 @@ class GraphRunner:
         self.trust = trust
 
     def run(self, graph, nodes, inputs):
+        # REQ-RUN-041: types, roles and names come from the loaded graph (IF-301 v5), the one the order and the rules read
+        loaded = graph_rule_set.load(graph)
+        kinds = {i: data["data"].get("type") for i, data in loaded.nodes(data=True)}
         # REQ-RUN-036, 037: the run check comes first, so a graph that breaks a rule or lacks an input is refused whatever its trust (REQ-RUN-038)
-        kinds = _kinds(graph)
-        check = graph_rule_set.run_check(graph, _given(graph, nodes, inputs))
+        check = graph_rule_set.run_check(graph, _given(loaded, nodes, inputs))
         if check["status"] == "refused":
             named = [part for item in check["broken"] for part in item["parts"]]
             return RunResult("refused", named, None, _data_values(kinds, dict(inputs)))
-        reads = {i: [] for i in kinds}
-        for edge in graph["edges"]:
-            if not _is_order(edge):     # an order edge only orders (REQ-RUN-035): it is no input of a plain callable either
-                reads[edge["to"]].append(edge["from"])
+        order = order_of(graph)
         # REQ-RUN-017: check every transform and master node before the first one runs. Any status except "trusted"
         # counts as untrusted, so an unknown status never lets a node run.
         refused = {i: self.trust(i) for i, k in kinds.items() if k != "data"}
         refused = {i: s for i, s in refused.items() if s != "trusted"}
         if refused:
-            named = [i for i in order_of(graph) if i in refused]
+            named = [i for i in order if i in refused]
             return RunResult("refused", named, refused[named[0]], _data_values(kinds, dict(inputs)))
-        bad = [i for i in order_of(graph) if isinstance(nodes.get(i), Stage) and _bad_wiring(graph["edges"], i)]
+        bad = [i for i in order if isinstance(nodes.get(i), Stage) and _bad_wiring(loaded, i)]
         if bad:
             return RunResult("refused", bad, None, _data_values(kinds, dict(inputs)))
-        defaults = {n["id"]: n["data"].get("value") for n in graph["nodes"] if kinds[n["id"]] == "data"}
+        defaults = {i: data["data"].get("value") for i, data in loaded.nodes(data=True) if kinds[i] == "data"}
         values = dict(inputs)
-        for node_id in order_of(graph):
+        # REQ-RUN-040: one step after the other; the next starts only when the one before has returned
+        for node_id in order:
             if kinds[node_id] == "data":
                 continue
             # A master node runs once, like a transform; its stop criterion is stored and unused until debates (FR-39).
             try:
                 if isinstance(nodes[node_id], Stage):
-                    written = _run_stage(nodes[node_id], graph["edges"], node_id, values, defaults)
+                    written = _run_stage(nodes[node_id], loaded, node_id, values, defaults)
                 else:
-                    result = nodes[node_id]({d: values[d] for d in reads[node_id] if d in values})
-                    written = {e["to"]: result for e in graph["edges"] if e["from"] == node_id}
+                    # an order edge only orders (REQ-RUN-035): it is no input of a plain callable either
+                    reads = [start for start, _, data in _into(loaded, node_id) if not _is_order(data)]
+                    result = nodes[node_id]({d: values[d] for d in reads if d in values})
+                    written = {end: result for _, end, _ in _out_of(loaded, node_id)}
             except Exception:
                 return RunResult("failed", [node_id], None, _data_values(kinds, values))
             values.update(written)
         return RunResult("done", [], None, _data_values(kinds, values))
 
 
-def _given(graph, nodes, inputs):
+def _into(loaded, node_id):
+    """(from, to, data) of the connections into a step, in their stored order"""
+    return [(a, b, d["data"]) for a, b, d in sorted(loaded.in_edges(node_id, data=True), key=lambda e: e[2]["position"])]
+
+
+def _out_of(loaded, node_id):
+    return [(a, b, d["data"]) for a, b, d in sorted(loaded.out_edges(node_id, data=True), key=lambda e: e[2]["position"])]
+
+
+def _given(loaded, nodes, inputs):
     """The data steps the run check counts as given: the run's inputs, and every data step read by a Stage with a prepare function, which may give
-    that input a default the graph does not show (REQ-RUN-039, D-418 (1))."""
-    preparing = {i for i, f in nodes.items() if isinstance(f, Stage) and f.prepare}
-    edges = graph.get("edges") if isinstance(graph, dict) else None
-    # a malformed end (a list, an object) cannot name a step; skipping it keeps the run check the one that refuses it (REQ-GTB-040, Verify V-1)
-    read = [e.get("from") for e in edges if isinstance(e, dict) and isinstance(e.get("to"), str) and e["to"] in preparing] if isinstance(edges, list) else []
-    return set(inputs) | {d for d in read if isinstance(d, str)}
-
-
-def _kinds(graph):
-    """The type of every step with an ID, read leniently: the graph is read before the run check, which refuses a malformed graph without raising."""
-    steps = graph.get("nodes") if isinstance(graph, dict) else None
-    steps = steps if isinstance(steps, list) else []
-    return {n["id"]: (n.get("data") if isinstance(n.get("data"), dict) else {}).get("type")
-            for n in steps if isinstance(n, dict) and isinstance(n.get("id"), str)}
+    that input a default the graph does not show (REQ-RUN-039, D-418 (1)). A malformed connection is not in the loaded graph; the run check refuses it."""
+    preparing = [i for i, f in nodes.items() if isinstance(f, Stage) and f.prepare and i in loaded]
+    return set(inputs) | {start for i in preparing for start, _, _ in _into(loaded, i)}
 
 
 def _data_values(kinds, values):
     return {i: v for i, v in values.items() if kinds.get(i) == "data"}
 
 
-def _is_settings(edge):
-    return edge.get("data", {}).get("role") == "settings"
+def _is_settings(data):
+    return data.get("role") == "settings"
 
 
-def _is_order(edge):
-    return edge.get("data", {}).get("role") == "order"
+def _is_order(data):
+    return data.get("role") == "order"
 
 
-def _bad_wiring(edges, node_id):
+def _bad_wiring(loaded, node_id):
     """REQ-RUN-033: more than one settings edge into the transform, or two output edges with the same name."""
-    settings = [e for e in edges if e["to"] == node_id and _is_settings(e)]
-    names = [_name(e, e["to"]) for e in edges if e["from"] == node_id]
+    settings = [d for _, _, d in _into(loaded, node_id) if _is_settings(d)]
+    names = [_name(d, end) for _, end, d in _out_of(loaded, node_id)]
     return len(settings) > 1 or len(names) != len(set(names))
 
 
-def _name(edge, data_id):
-    return edge.get("data", {}).get("as", data_id)
+def _name(data, data_id):
+    return data.get("as", data_id)
 
 
-def _run_stage(stage, edges, node_id, values, defaults):
+def _run_stage(stage, loaded, node_id, values, defaults):
     """Build inputs, outputs and settings, call prepare once, call the function; returns {output data node id: value} to write."""
-    reads = [(_name(e, e["from"]), e["from"]) for e in edges if e["to"] == node_id and not _is_settings(e) and not _is_order(e)]
-    writes = [(_name(e, e["to"]), e["to"]) for e in edges if e["from"] == node_id]
-    settings = next((e["from"] for e in edges if e["to"] == node_id and _is_settings(e)), None)
+    into = _into(loaded, node_id)
+    reads = [(_name(d, start), start) for start, _, d in into if not _is_settings(d) and not _is_order(d)]
+    writes = [(_name(d, end), end) for _, end, d in _out_of(loaded, node_id)]
+    settings = next((start for start, _, d in into if _is_settings(d)), None)
 
     def start(data_id):     # the run beats prepare beats the graph (REQ-RUN-034); key presence counts, so a given None stays None
         return values[data_id] if data_id in values else defaults.get(data_id)

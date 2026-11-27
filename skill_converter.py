@@ -88,9 +88,10 @@ def _latest_nodes(nodes_dir):
     return latest
 
 
-def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None, tool_calls=None, door_tools=None, should_stop=None, run_id=None):
+def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None, tool_calls=None, door_tools=None, should_stop=None, run_id=None, graph=None):
     """REQ-WFM-058, REQ-WFM-115 (A-125, D-253): runs skill `name` as a graph on the toolbox with the given model and tools. The pipeline is converted in memory at every call,
-    bound to the skill and run by the GraphRunner; `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
+    bound to the skill and run by the GraphRunner; `graph` (REQ-RUN-042) is the stored graph of the skill, which then runs instead of the converted one (the conversion
+    only names the data step that holds the answer, which the stored form does not say); `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
     this path writes no run record yet. `run_id` (F-06) is the id the IF-402 door sees: the app gives the id of the run log record, so the door's events tie to it. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
     skill = load_skill(os.path.join(skills_dir, name + ".md"))
     pipeline = Library(library_dir).resolve(skill["pipeline"], "pipeline")
@@ -98,8 +99,13 @@ def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library
     found = pipeline_graph.convert({k: v for k, v in pipeline.items() if not k.startswith("_")}, nodes, (skill.get("budget") or {}).get("seconds", 300))
     if found["graph"] is None:
         raise ConversionError("%s cannot be converted: %s" % (name, found["refused"]))
-    graph = pipeline_graph.bind_skill(found["graph"], nodes, skill, skill_changes)
+    if graph is None:
+        graph = pipeline_graph.bind_skill(found["graph"], nodes, skill, skill_changes)
     setting = {**(skill.get("model") or {}), **((skill_changes or {}).get("model") or {})}
+    # F-6: the steps inside a map or loop take the model setting of the graph that runs, as its top-level steps do over descriptor.model
+    descriptor = next((n["data"].get("value") for n in graph["nodes"] if n.get("id") == "descriptor.model"), None)
+    if isinstance(descriptor, dict):
+        setting = {"profile": descriptor.get("model"), "options": descriptor.get("options") or {}}
     # the registries are process-wide: a run starts from what this call hands over
     common_operations.reset()
     if model is not None:

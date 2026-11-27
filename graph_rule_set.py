@@ -9,6 +9,7 @@ kinds()                       -> {kind: {"rules": [...], "runs": bool}}, a copy
 rule_report(graph)            -> [{"rule", "parts", "text"}], every broken rule in the registry's order; [] when every rule is kept
 run_check(graph, given=None)  -> {"status": "refused" | "ready", "broken": [{"kind", "rule", "parts", "text", ...}]}
 load(graph)                   -> networkx.MultiDiGraph of the well-formed steps and connections (IF-301 v5, A-187)
+order_of(graph)               -> the step IDs, every step after the steps it reads from (REQ-WFM-166, 167; moved here by A-190)
 
 `graph` is {"kind"?, "nodes": [{"id", "data"}], "edges": [{"id", "from", "to", "data"}]} with local IDs; no `kind` means workflow (REQ-GTB-038).
 Any input gives an answer, never an exception (REQ-GTB-040, D-418 (2)). The document form keeps graph_rules.py (Q-6).
@@ -261,6 +262,22 @@ def run_check(graph, given=None):
         broken += _unsupplied(graph, _given_ids(given))
     return {"status": "refused" if broken else "ready", "broken": broken}
 
+
+def order_of(graph):
+    """The step IDs of a stored graph, every step after the steps it reads from (REQ-WFM-166; also used by the run, N-2.4.1; here since A-190, REQ-RUN-047).
+
+    A queue over the loaded graph (D-480): first the steps that read from no step, in their stored position, then each step as soon as the last
+    connection into it is passed, in the stored order of the connections, so ties go first-ready-first (REQ-WFM-167), as before the loaded graph.
+    """
+    loaded = load(graph)
+    open_inputs = dict(loaded.in_degree())
+    order = [step for step, count in open_inputs.items() if count == 0]
+    for step in order:      # the list grows while it is walked
+        for _, nxt, _ in sorted(loaded.out_edges(step, data="position"), key=lambda edge: edge[2]):
+            open_inputs[nxt] -= 1
+            if open_inputs[nxt] == 0:
+                order.append(nxt)
+    return order
 
 def _loaded_id(item):
     value = item.get("id") if isinstance(item, dict) else None

@@ -5,7 +5,8 @@ Goal: G-V4.GRAPHAPI.RUN   Line of work: goal/v4.graphapi.run   Supervision: supe
 | Task | Status | Commit | Tests green (reported) | Notes |
 |---|---|---|---|---|
 | T-01 The loader and IF-301 v5 | done | `2379dc0a` | TC-GTB-048, 049, 050 (`tests/acceptance/test_graph_loader.py`; its TC-GTB-051 stays red for T-02); regression set: unit suite 2535 tests, 59 of 71 acceptance scripts OK, reds only the known two (decide_guard, judge_calibration), the RUN checks of T-02 and T-03 and the image tests of F-2; TC-IF-301-35 to 38 mock and real side (`tests/acceptance/contract/test_if_301_v5_load.py`); `tests/test_graph_loader.py` (5 unit tests) | `networkx==3.7` added to `requirements.txt` and installed into mia312 (approved in the plan); `load` in `graph_rule_set.py`; `graphRecords` doc in `architecture.sysml` names graph_rule_set.py instead of the planned graph_load.py (as the plan's Touches says) |
-| T-02 The order and the rule set on the loaded graph | done | (this commit) | TC-GTB-051, 052 (0 differences against the oracle), 053 (`tests/acceptance/test_graph_loader.py`); TC-IF-301-39 both sides (`contract/test_if_301_v5_load.py`); kept green: TC-WFM-185, 186 (`test_run_graph_order.py`; its "the run reads the loaded graph" stays red for T-03), the IF-301 v1 to v4 suites; unit tests: 5 new in `tests/test_graph_loader.py`, `tests/test_graph_run_findings.py` (the find_cycle checks now ask the cycle rule), `tests/test_graph_rule_set.py` (a list as connection `id` is rule 3, A-189); regression set (2026-11-25): unit suite 2563 tests OK; 67 of 71 acceptance scripts OK, red only the known two (decide_guard, judge_calibration) and T-03's checks ("the run reads the loaded graph", `test_stored_graph_run.py` 15) | rules 1 to 4 on the stored form, rule 3 also for a connection without a non-empty text ID (A-189); adjacency, one writer, `stop_limit`, cycle (`networkx.find_cycle`) and unsupplied inputs on `load(graph)`, connections in their stored order; `order_of` a queue over the loaded graph (D-480); `graph_model.find_cycle` and the rule set's copied cycle finder removed |
+| T-02 The order and the rule set on the loaded graph | done | `4f8a9c56` | TC-GTB-051, 052 (0 differences against the oracle), 053 (`tests/acceptance/test_graph_loader.py`); TC-IF-301-39 both sides (`contract/test_if_301_v5_load.py`); kept green: TC-WFM-185, 186 (`test_run_graph_order.py`; its "the run reads the loaded graph" stays red for T-03), the IF-301 v1 to v4 suites; unit tests: 5 new in `tests/test_graph_loader.py`, `tests/test_graph_run_findings.py` (the find_cycle checks now ask the cycle rule), `tests/test_graph_rule_set.py` (a list as connection `id` is rule 3, A-189); regression set (2026-11-25): unit suite 2563 tests OK; 67 of 71 acceptance scripts OK, red only the known two (decide_guard, judge_calibration) and T-03's checks ("the run reads the loaded graph", `test_stored_graph_run.py` 15) | rules 1 to 4 on the stored form, rule 3 also for a connection without a non-empty text ID (A-189); adjacency, one writer, `stop_limit`, cycle (`networkx.find_cycle`) and unsupplied inputs on `load(graph)`, connections in their stored order; `order_of` a queue over the loaded graph (D-480); `graph_model.find_cycle` and the rule set's copied cycle finder removed |
+| T-03 The runner and the stored-graph path | done | (this commit) | TC-RUN-043, 049 (`test_run_graph_order.py`), TC-RUN-044 to 048, TC-WFM-187, TC-WFM-115 (`test_stored_graph_run.py`); kept green: TC-RUN-041, 042, 045, TC-WFM-185, 186, `test_graph_run.py`, `test_graph_run_stages.py`, `test_graph_order.py`, `test_graph_loader.py`, the IF-301 v4 and v5 suites; unit tests: `tests/test_core_stored_graph.py` (5 new: F-6, a storage error other than not_found, `run_explain show`, the refusal text); regression set (2026-11-27): unit suite 2610 tests, red only F-6's unit test in the suite (F-7, fixed in the test), then OK on re-run (2610 tests, skipped 5, expected failures 2); 73 of 75 acceptance scripts OK, red only the known two (decide_guard, judge_calibration); against 39dd1e1f newly green: test_graph_loader, test_rules_rule_set, test_run_graph_order, test_stored_graph_run, and the VIEW scripts of the merge | `graph_run.py` reads types, roles and names from `graph_rule_set.load` (`_kinds`, the `reads` map, the edge scans gone; `_given` over the loaded graph); `order_of` moved into `graph_rule_set.py`, `graph_model.order_of` the same function (A-190, REQ-RUN-047); `Core(graph_store=)`: `<pipeline>@<version>` looked up with `graph_versions` (not_found = no stored graph), the newest read once, run check before any step (`refused`, naming rule, parts, graph and version), `graph` and `graph_version` in the record; `run_converted(graph=)` runs the stored graph, the conversion names only the answer step (REQ-RUN-046); `run_explain show` names graph and version (owner, 2026-11-27); demonstrator: `show` printed `graph verify.single@1, version 2` |
 
 ## TR-RUN-007 for T-01 (each check shown able to fail)
 | Defect (planted in `graph_rule_set.load`, then removed) | Caught by |
@@ -21,6 +22,17 @@ Goal: G-V4.GRAPHAPI.RUN   Line of work: goal/v4.graphapi.run   Supervision: supe
 | one changed branch: adjacency counts only connections between two data steps | TC-GTB-052 (the oracle) |
 | ties by ID instead of first-ready: the first ready steps sorted | TC-WFM-186 |
 
+## TR-RUN-007 for T-03 (`python tools/plant_defects.py`, 2026-11-27, after A-190)
+| Defect (planted, then removed) | Caught by |
+|---|---|
+| two steps run in a thread pool (a plain step submitted to a pool, not awaited) | TC-RUN-042 |
+| the stored graph ignored (the in-memory converted graph runs) | TC-WFM-187 (planted option), `test_core_stored_graph` F-6 |
+| version 1 run instead of the newest | TC-RUN-044, TC-RUN-047 |
+| the run record without `graph_version` | TC-RUN-046, `test_core_stored_graph` (`show`) |
+| one prompt changed in the stored graph (the first `literal.` step) | TC-WFM-187 |
+| the answer taken from the last data step of the stored form (A-190) | TC-RUN-048 |
+| `graph_run.py` imports `graph_model` (A-190) | TC-RUN-049 |
+
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
@@ -29,8 +41,16 @@ Goal: G-V4.GRAPHAPI.RUN   Line of work: goal/v4.graphapi.run   Supervision: supe
 | F-3: moving the rules onto the loaded graph loses connections that `load` leaves out: a connection without a non-empty text ID was no longer reported (v4: e.g. `adjacency ["None"]`), and `GraphModel.save_graph` then raised `KeyError: 'id'` in `_scoped`; REQ-GTB-060 asked for the v4 answers "for every stored form" | T-02 | TC-GTB-053 and TC-IF-301-39 (A-189, D-483) |
 | F-4: the third pass of `stop_limit` counted settings connections into steps that do not exist; on the loaded graph two `settings` connections into a missing `z` are rule 3 only (v4 also `stop_limit ["z"]`), inside REQ-GTB-060 as narrowed by A-189. Shown to the owner in the graph viewer of G-V4.VIEW (two throw-away servers, v4 and RUN rule set) | T-02 | `tests/test_graph_loader.py::test_settings_connections_into_a_missing_step_are_rule_three_only`; REQ-GTB-060 narrowed again (D-484) |
 | F-5: networkx lists the edges of a loaded graph grouped by their start step, not in stored order; parts of adjacency, single_writer, stop_limit, unsupplied inputs and the readiness in `order_of` depend on the stored order | T-02 | three unit tests in `tests/test_graph_loader.py` (adjacency order, single_writer order, readiness by the last connection); the code sorts by `position` |
+| F-6: from a stored graph, model calls inside a map or loop step took the model options of the skill file, not of the stored `descriptor.model` (research: the stored option in 1 of 5 calls, verify_computable 1 of 3); TC-WFM-187 sees only call 1 | T-03 | `tests/test_core_stored_graph.py::test_every_model_call_takes_the_options_of_the_stored_graph` (red, then fixed in `run_converted`) |
+| F-7 (pre-existing, tests only): after a test that makes the package `MIA` importable (`checkout_copy.use()`, e.g. `test_api_events`), the thin code of the toolbox (`IMPORT_OPS`: `from MIA import common_operations` first) loads `MIA.common_operations`, a second module beside the plain `common_operations` in which `run_converted` registers model and tools; every tool step then fails with `ToolMissing`. Seen as F-6's test red only inside the unit suite. Not in production (`python -m MIA` has one module). The cause is in `toolbox.py` (outside T-03): the thin code could take the toolbox's own module instead of importing one | T-03 | `tests/test_core_stored_graph.py` pins one module while it runs (bisected to `test_api_events`); a fix of `IMPORT_OPS` is proposed as its own small task |
 
 ## Plan amendments
+### A-190: the answer step of a stored graph, and the graph run on its own (REQ-RUN-046, 047 new; TC-RUN-048, 049)
+- Found in: T-03 (the stored form names no answer step; the owner's re-use of the runner, memory of 2026-11-27)
+- Decision: the answer is the value of the data step the pipeline names as its result; `graph_run.py` and `graph_rule_set.py` import only the standard library, networkx and each other (re-use = module boundary only)
+- Kind: amendment inside RUN's line (no frozen requirement, no interface)
+- Status: installed by the owner (`e12d5d94`); REQ-RUN-046, 047 Draft, to approve
+- Approved by: maldun, 2026-11-27 (D-485, questionnaire)
 ### A-189: rule 3 names a connection without a non-empty text ID (REQ-GTB-043 changed, REQ-GTB-060 narrowed; IF-301; TC-GTB-053, TC-IF-301-39)
 - Found in: T-02 (F-3, F-4)
 - Problem: see F-3 and F-4
@@ -53,15 +73,22 @@ Goal: G-V4.GRAPHAPI.RUN   Line of work: goal/v4.graphapi.run   Supervision: supe
 | 2026-11-25 | T-01 | a finding needs a changed protected test (F-1) | owner | A-188 approved and installed (D-482) |
 | 2026-11-25 | T-02 | REQ-GTB-057 and 059 contradict REQ-GTB-060 (F-3) | owner | A-189 approved and installed (D-483), joint amendment of IF-301 |
 | 2026-11-25 | T-02 | REQ-GTB-060 as narrowed still contradicted by `stop_limit` (F-4) | owner | REQ-GTB-060 narrowed again, A-189 drafts corrected and installed again (D-484) |
+| 2026-11-27 | T-03 | the demonstrator needs `run_explain.py`, outside the Touches | owner | one line in T-03 (questionnaire) |
+| 2026-11-27 | T-03 | unspecified behaviour: which step holds the answer of a stored graph | owner | A-190, REQ-RUN-046 (D-485) |
 
 ## Unspecified behavior (decisions no requirement covers)
 | Decision | Where in code | Proposed requirement or amendment |
 |---|---|---|
+| A variant run (`Core.run(..., pipeline=...)`) stays on the old runner even when the variant's graph is stored (as on the converted path) | `core.py` `run` | none yet; REQ-RUN-042 speaks of "a skill"; ask in Verify |
+| A stored graph with an `ask_user` step while `ask` is given, or whose pipeline cannot be converted, falls back to the old runner without saying so (as on the converted path) | `core.py` `_run_converted` | open; the stored graph is then ignored silently |
+| A stored graph without the result step runs to `done` with no answer | `skill_converter.run_converted` | open point of A-190 (an error naming the step, if wanted) |
 
 ## Decisions
 - `networkx` is imported at the top of `graph_rule_set.py` (it is a dependency now); the mock imports it inside `load` only so the protected suite could import before T-01.
 
 ## Open questions for Phase 4
+- T-03: REQ-RUN-046 and 047 (A-190) to approve; the three rows under "Unspecified behavior".
+- T-03: the refusal of REQ-RUN-045 runs `run_check` in `Core` with the run's inputs as given (the converted stages have no `prepare`), so it answers as GraphRunner's own check; GraphRunner keeps its check for every other caller.
 - A-189: the re-approval of REQ-GTB-060 and REQ-GTB-043 (changed) and the agreement of IF-301's consumers.
 - The sentence of rule 3 ("a connection leads to or from a step that does not exist") also covers a connection without an ID now; a better sentence would change the oracle's answers for golden 27 and 31.
 - F-2: `localhost/mia:latest` is now a branch build (9206eeb93719); the deployed stack should start with `MIA_IMAGE=localhost/mia:v0.2.1` until v0.3 is deployed.

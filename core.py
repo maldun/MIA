@@ -7,12 +7,14 @@ import time
 
 try:
     from . import behaviour, checks, extraction, number_gate, research, verification
-    from . import skill_converter
+    from . import graph_rule_set, skill_converter
     from .library import LibraryError
     from .pipeline import PipelineError, RunResult, Runner, Tool, reaches_internet, validate_pipeline
     from .run_log import RunLog
     from .skill_store import SkillStore
+    from .storage import StorageError
 except ImportError:  # used as plain script / in tests
+    import graph_rule_set
     import skill_converter
     import checks
     import extraction
@@ -24,6 +26,7 @@ except ImportError:  # used as plain script / in tests
     from pipeline import PipelineError, RunResult, Runner, Tool, reaches_internet, validate_pipeline
     from run_log import RunLog
     from skill_store import SkillStore
+    from storage import StorageError
 
 
 class Core:
@@ -33,7 +36,7 @@ class Core:
         sandbox: a sandbox.SandboxRouter (None = no scripts can run); broker_factory: makes a web broker per script (broker.WebBroker), None = scripts have no web"""
         self.skills = SkillStore(skills_dir)
         self.conversion_dir = conversion_dir
-        self.graph_store = graph_store      # a GraphModel: a skill whose graph is stored runs from it (REQ-RUN-042, D-480); not built yet, the red tests of G-V4.GRAPHAPI.RUN
+        self.graph_store = graph_store      # a GraphModel: a skill whose graph is stored runs from it (REQ-RUN-042, D-480)
         self.library = library
         self.run_log = RunLog(runs_dir)
         tools = dict(tools or {})
@@ -97,6 +100,12 @@ class Core:
         if pipeline:
             skill = dict(skill, pipeline=pipeline)
         graph = self.graph(skill)[0]
+        # REQ-RUN-042, 043: a skill whose graph is in the store runs from its newest version; a variant (`pipeline=`) is not the skill's graph, so it stays on the old runner
+        stored = self._stored_graph(skill) if self.graph_store is not None and not pipeline else None
+        if stored is not None:
+            converted = self._run_converted(task, skill, graph, inputs, stored=stored, **kwargs)
+            if converted is not None:
+                return converted
         # a skill with an acceptance record that still fits the skill file, the pipeline and the run file runs as a graph (D-257, F-02); a variant (`pipeline=`) is not the accepted skill, so it stays on the old runner
         if not pipeline and self.conversion_dir and task in skill_converter.bound_checks(self.conversion_dir, self.skills.folder, self.library.shipped_dir):
             converted = self._run_converted(task, skill, graph, inputs, **kwargs)
@@ -104,10 +113,24 @@ class Core:
                 return converted
         return self.runner.run(skill, graph, inputs, task=task, **kwargs)
 
-    def _run_converted(self, task, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, started_by="message", user="mia", **unused):
+    def _stored_graph(self, skill):
+        """(graph ID, newest version, stored form) of the skill's graph `<pipeline>@<version>` in the store, None when the store has none (REQ-RUN-042, 043)"""
+        graph_id = skill_converter.pipeline_ref(self.library.resolve(skill["pipeline"], "pipeline"))
+        try:
+            versions = self.graph_store.graph_versions(graph_id)
+        except StorageError as error:
+            if error.code != "not_found":
+                raise
+            return None
+        if not versions:
+            return None
+        return graph_id, versions[-1]["version"], self.graph_store.read_graph(graph_id)
+
+    def _run_converted(self, task, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, started_by="message", user="mia", stored=None, **unused):
         """the run of an accepted skill on the graph path with the guards and the record of the old runner: the trust rule of REQ-RUN-001, the validation of the pipeline, a run log record, a
         result of the old shape. What it lacks so far: the events of single nodes (only run_start, run_end and the tool events), a stop in the middle of a top-level step, the
-        cost of tokens and steps. A pipeline that cannot be converted gives None: the old runner runs the skill."""
+        cost of tokens and steps. A pipeline that cannot be converted gives None: the old runner runs the skill. `stored` = (graph ID, version, stored form) runs that graph
+        instead of the converted one and names it in the record (REQ-RUN-042, 044)."""
         if started_by == "message" and reaches_internet(skill):
             raise PipelineError("'%s' reaches the internet and starts only by a command, not by a chat message" % skill.get("name"))
         all_tools = {**self.runner.tools, **{k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}}
@@ -118,13 +141,20 @@ class Core:
             return None
         started = time.monotonic()
         record = self.run_log.start(task, skill["name"], skill["version"], skill["pipeline"], None, (skill["model"] or {}).get("name") or (skill["model"] or {}).get("profile"), inputs)
+        graph_id, version, stored_graph = stored or (None, None, None)
+        if stored:
+            record.record.update(graph=graph_id, graph_version=version)
+            refused = _refusal(graph_id, version, stored_graph, inputs)
+            if refused:
+                record.finish("refused", {"answer": None}, time.monotonic() - started, refused)
+                return RunResult(record.id, "refused", None, {"input": inputs}, 0.0, refused, [], [], {"seconds": 0.0, "converted": True})
         if should_stop is not None and should_stop():
             ended = None
         else:
             try:
                 ended = skill_converter.run_converted(task, inputs, model=self.runner.model, tools=all_tools, skills_dir=self.skills.folder, library_dir=self.library.shipped_dir,
                                                       sandbox=self.sandbox, broker_factory=self.runner.broker_factory, tool_calls=self.runner.tool_calls,
-                                                      door_tools=self.runner.door_tools, should_stop=should_stop, run_id=record.id)
+                                                      door_tools=self.runner.door_tools, should_stop=should_stop, run_id=record.id, graph=stored_graph)
             except skill_converter.ConversionError:
                 return None
         seconds = time.monotonic() - started
@@ -146,3 +176,12 @@ class Core:
                 on_event(dict(event, run=record.id))
         record.finish(status, {"answer": answer}, seconds, error)
         return RunResult(record.id, status, answer, {"input": inputs}, seconds, error, events, missing, {"seconds": round(seconds, 3), "converted": True})
+
+
+def _refusal(graph_id, version, stored_graph, inputs):
+    """REQ-RUN-045: the error of a stored graph the run check refuses, naming each broken rule with its parts, the graph ID and the version; None when it can run"""
+    check = graph_rule_set.run_check(stored_graph, {"input." + field for field in inputs or {}})
+    if check["status"] != "refused":
+        return None
+    broken = "; ".join("%s (%s)" % (item["rule"], ", ".join(str(p) for p in item["parts"])) for item in check["broken"])
+    return "the stored graph %s version %s cannot run: %s" % (graph_id, version, broken)

@@ -68,6 +68,8 @@ def cmd_show(record, out, budget=600, focus=None, **_):
     graph = CG.replay_run(record)
     summary = graph.summary()
     out("run %s: %s, %s, %.1fs" % (record["id"], record.get("task"), record.get("status"), record.get("seconds") or 0.0))
+    if record.get("graph"):     # a run from a stored graph (REQ-RUN-044)
+        out("graph %s, version %s" % (record["graph"], record.get("graph_version")))
     out("graph: %d nodes, %d edges, claims %s, %d open slot(s), %d problem(s)" % (summary["nodes"], summary["edges"], {k: v for k, v in summary["claims"].items() if v}, summary["open_slots"], summary["problems"]))
     if graph.meta["stop"]:
         out("ended: %(reason)s %(detail)s" % {"reason": graph.meta["stop"]["reason"], "detail": graph.meta["stop"].get("detail") or ""})
