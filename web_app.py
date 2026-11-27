@@ -673,7 +673,9 @@ def _graph_backend():
 
 
 class _LiveStore:
-    """the live store, opened on first use and kept: with a copy set MIA starts even while the live database does not answer (REQ-API-063)"""
+    """the live store, opened on first use and kept: MIA starts while the database does not answer, and the first call after it answers
+    opens it (REQ-API-050, 063; V-3). Called, it gives the backend; used as a backend, it passes every call on, so a store that cannot be
+    opened fails each call as a lost connection does, and the routes answer `store_unreachable`."""
 
     def __init__(self, opener):
         self._opener, self._opened, self._lock = opener, None, threading.Lock()
@@ -683,6 +685,9 @@ class _LiveStore:
             if self._opened is None:
                 self._opened = self._opener()
             return self._opened
+
+    def __getattr__(self, name):
+        return getattr(self(), name)
 
 
 def _live_name():
@@ -770,7 +775,7 @@ app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_graph_blueprint(_workflow_library))          # IF-104 for the Graph app, under the same session
 if _graph_copy is None:
-    app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_live_store(), _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins))      # IF-104 v2 under the same session (REQ-API-030)
+    app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_live_store, _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins))      # IF-104 v2 under the same session (REQ-API-030)
 else:          # the graphs are read from the copy, the writes go to the live store (REQ-API-060, D-544)
     app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_graph_copy, _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins, live=_live_store))
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads

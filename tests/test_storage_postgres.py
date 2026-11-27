@@ -222,6 +222,22 @@ class SharedDatabase(unittest.TestCase):
         # Then: the second instance hears again
         self.assertTrue(heard)
 
+    @mark.req("REQ-API-050", "REQ-API-021")
+    def test_a_dropped_connection_is_opened_again_on_the_next_call(self):
+        """V-3 of G-V4.VIEW's verification: a restart of the database left every call failing until MIA restarted.
+        Example: the server ends the second instance's connection; one call may fail, the next one reads the record the first wrote."""
+        # Given: a record, and the server ends the second instance's own connection (as a database restart does)
+        self.a.put("tasks", "t", {"text": "x"}, "anna")
+        pid = self.second._query("SELECT pg_backend_pid()")[0][0]
+        self.first._query("SELECT pg_terminate_backend(%s)", (pid,))
+        # When: the second instance is asked twice
+        try:
+            self.second.ids("tasks")
+        except psycopg.OperationalError:
+            pass                                   # the call that meets the dropped connection may fail; it is not repeated
+        # Then: the next call answers again
+        self.assertEqual(self.second.ids("tasks"), ["t"])
+
     @mark.req("REQ-SLY-006")
     def test_a_delete_on_one_instance_is_heard_on_the_other(self):
         """Finding F7, D-158: the delete notice goes through the channel like a write.
