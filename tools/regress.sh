@@ -24,9 +24,11 @@ mkdir -p "$OUT"
 exec 9>"$(git rev-parse --git-dir)/regress.lock"
 flock -n 9 || { echo "another regression run holds this worktree" >&2; exit 2; }
 
-acceptance() {   # $1 = folder of a checkout, $2 = result file
+acceptance() {   # $1 = folder of a checkout, $2 = result file; per script its unittest result line (OK, FAILED), else its last line
   (cd "$1" && for f in $(find tests/acceptance -name 'test_*.py' | sort); do
-     printf '%s %s\n' "$f" "$(timeout 1200 "$PY" "$f" 2>&1 | tail -1)"
+     out=$(timeout 1200 "$PY" "$f" 2>&1)
+     line=$(printf '%s\n' "$out" | grep -E '^(OK|FAILED)' | tail -1)     # some scripts print a note after the result
+     printf '%s %s\n' "$f" "${line:-$(printf '%s\n' "$out" | tail -1)}"
    done) > "$2"
 }
 
