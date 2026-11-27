@@ -215,8 +215,8 @@ Terms (store setting, owner, record of changes, entry, what cannot be drawn): se
 - Verification method: Test
 - Acceptance criterion: in Firefox without a saved choice, with the colour scheme light and then dark, the page background and the step label colour equal the token values of that theme (exact); with the saved choice dark or light they equal those of the chosen theme under either colour scheme, and with auto or an unknown value those of the colour scheme (exact); a choice saved in another page of the same origin re-colours the open page without a reload
 - Verified by: TC-GA-034, TC-GA-040
-- Status: Verified
-- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").; changed by A-176 (D-503, 2026-11-26): follows the main app's theme choice `mia.theme`, auto as before (the owner's look at Deploy); TC-GA-040 added
+- Status: Approved
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track B; basis: prototype round 02 R6, R7, the owner's layout D-425, D-426, D-430, D-431, D-436); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").; changed by A-176 (D-503, 2026-11-26): follows the main app's theme choice `mia.theme`, auto as before (the owner's look at Deploy); TC-GA-040 added; Approved confirmed in Emacs on 2026-11-27
 
 ### REQ-GA-017 – Graph status
 - Level: low   Subject: GraphApp
