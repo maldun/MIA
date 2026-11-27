@@ -35,7 +35,7 @@ Decided 2026-10-21: a database container is wanted because **several MIA instanc
 5. **Schema** by numbered SQL files in `deploy/db/` applied at start (table `schema_version`), no ORM.
 6. **Compose**: `db` (postgres:16, profile `db`, volume `pgdata`, `POSTGRES_PASSWORD` in `.env` made by `up.sh`), MIA waits for it like for Ollama (`database_wait`). `up.sh backup|restore` use `pg_dump` and `psql` in the container.
 7. **Migration**: `python -m MIA.migrate files-to-db` (and `db-to-files`) reads the file stores through the same interfaces, so both directions are the same code (`migrate.py`). There is no `up.sh migrate`; with the database running (`deploy/up.sh db`), it runs in the container through the compose pass-through of `up.sh`:
-   `deploy/up.sh exec mia sh -c 'python -m MIA.migrate files-to-db --data MIA/data --database-url "$MIA_DATABASE_URL" --dry-run'`
+   `deploy/up.sh exec mia sh -c 'python -m MIA.migrate files-to-db --data MIA/data/db --database-url "$MIA_DATABASE_URL" --dry-run'`
    (drop `--dry-run` to write). Idempotent (a second run copies nothing; a conflict writes nothing).
 
 ## Stages (each one is useful and tested on its own)
