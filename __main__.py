@@ -21,7 +21,7 @@ import signal
 import subprocess
 import sys
 import threading
-from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger, _votes_store
+from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger, _votes_store, sync_copy
 from .utils import get_own_ip
 from .tls_proxy import start_https_proxy
 from . import tailscale_serve
@@ -48,6 +48,22 @@ static_folder = os.path.join(fpath,STATIC_DIR)
 
 with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
+
+
+def start_backend():
+    """the backend's start steps before the first answer: AutoSync of the copy while it is on (REQ-API-062); the checks call it too (TR-TRANSFER-009)"""
+    sync_copy("start")
+
+
+def stop_list(https_proc=None, speak_proc=None, tailscale_started=False):
+    """the orderly stop, one step after the other: the copy is synced after the last answer and before the database is closed (REQ-API-062)"""
+    return [("save history", comm.dump_history),
+            ("sync the copy", lambda: sync_copy("stop")),
+            ("close the database", lambda: close_database(_votes_store)),
+            ("stop tailscale serve", lambda: tailscale_serve.stop_serve(WEB_PORT) if tailscale_started else None),
+            ("stop https proxy", lambda: stop_process(https_proc,"https proxy",group=True)),
+            ("stop speech process", lambda: stop_process(speak_proc,"speech process",group=True))]
+
 
 if __name__ == "__main__":
     https_proc = None
@@ -95,6 +111,7 @@ if __name__ == "__main__":
                 served = tailscale_serve.start_serve(WEB_PORT)
                 tailscale_started = served["ok"]
                 print(f"MIA (Tailscale, only your tailnet): {served['url']}" if served["ok"] else f"Tailscale: {served['message']}")
+            start_backend()
             # allow_unsafe_werkzeug: without a terminal (service, container) Flask-SocketIO refuses the Werkzeug server; MIA is a personal app behind its own port
             socketio.run(app, host=host,debug=False,port=WEB_PORT,allow_unsafe_werkzeug=True)
             
@@ -102,10 +119,5 @@ if __name__ == "__main__":
         print("MIA is shutting down ...")
     finally:
         # one step after the other with a short pause, instead of everything at the same instant
-        graceful_shutdown([("save history", comm.dump_history),
-                           ("close the database", lambda: close_database(_votes_store)),
-                           ("stop tailscale serve", lambda: tailscale_serve.stop_serve(WEB_PORT) if tailscale_started else None),
-                           ("stop https proxy", lambda: stop_process(https_proc,"https proxy",group=True)),
-                           ("stop speech process", lambda: stop_process(speak_proc,"speech process",group=True))],
-                          pause=cfg.get("shutdown_pause",DEFAULT_PAUSE))
+        graceful_shutdown(stop_list(https_proc, speak_proc, tailscale_started), pause=cfg.get("shutdown_pause",DEFAULT_PAUSE))
         print("MIA stopped.")

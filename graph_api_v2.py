@@ -15,6 +15,7 @@ from flask import Blueprint, Flask, g, jsonify, request
 
 try:
     from . import accounts, accounts_api, graph_model, graph_rule_set
+    from .graph_store_transfer import lag_summary
     from .storage import Storage, StorageError
     from .toolbox import Toolbox, ToolboxError
     from .workflow_library import WorkflowLibrary
@@ -23,6 +24,7 @@ except ImportError:
     import accounts_api
     import graph_model
     import graph_rule_set
+    from graph_store_transfer import lag_summary
     from storage import Storage, StorageError
     from toolbox import Toolbox, ToolboxError
     from workflow_library import WorkflowLibrary
@@ -345,8 +347,33 @@ class GraphWriter:
         return {"version": saved["version"], "saved": len(kept)}
 
 
-def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
-    """the v2 routes on `backend` (an IF-102 backend); `store` the configured name, `is_owner(account)`, `allowed_origins()` the origins of the page"""
+def _opened(live):
+    """the live store if it answers now, else None: `live()` may fail while the store is down (REQ-API-063)"""
+    try:
+        found = live()
+    except Exception:      # an address nobody answers, a lost connection, a driver error: the store does not answer now
+        return None
+    return found if reachable(found) else None
+
+
+def _store_answer(backend, store, live):
+    """GET /store: with no copy the fixed fields of REQ-API-022; with a copy the copy is shown, the live store asked now (REQ-API-064)"""
+    up = reachable(backend)
+    if live is None:
+        return {"store": store, "reachable": up, "shown": "live", "live_reachable": up, "lag": {"graphs": 0, "since": None}}
+    found = _opened(live)
+    lag = {"graphs": 0, "since": None}
+    if found is not None and up:
+        try:
+            lag = lag_summary(found, backend)
+        except Exception:      # the live store went away while it was read: answered as not reachable, like _opened
+            found = None
+    return {"store": store, "reachable": up, "shown": "copy", "live_reachable": found is not None, "lag": lag}
+
+
+def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins, *, live=None):
+    """the v2 routes on `backend` (an IF-102 backend); `store` the configured name, `is_owner(account)`, `allowed_origins()` the origins of the page.
+    `live`: with a copy set, `backend` is the copy the routes read (REQ-API-060) and `live()` opens the live store, which the writes go to (D-544)"""
     bp = Blueprint("graph_api_v2", __name__, url_prefix="/api/v2")
 
     def error(status, code, **fields):
@@ -360,8 +387,10 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
             return error(401, "unauthenticated")
         if request.method in WRITES and not is_owner(g.account):
             return error(403, "not_owner")
-        if request.endpoint not in OPEN_ROUTES and not reachable(backend):
-            return error(503, "store_unreachable")
+        if request.endpoint not in OPEN_ROUTES:
+            target = written() if request.method in WRITES else backend
+            if target is None or not reachable(target):
+                return error(503, "store_unreachable")
         return None
 
     @bp.get("/me")
@@ -370,12 +399,20 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
 
     @bp.get("/store", endpoint="store")
     def store_route():
-        up = reachable(backend)
-        # shown, live_reachable and lag are fixed until G-V4.GRAPHSTORE.TRANSFER brings the copy (REQ-API-022, D-460)
-        return jsonify({"store": store, "reachable": up, "shown": "live", "live_reachable": up, "lag": {"graphs": 0, "since": None}})
+        return jsonify(_store_answer(backend, store, live))
 
     reader = GraphReader(backend)
-    writer = GraphWriter(backend, reader)
+    writers = {}       # the live store's writer, made once the live store has answered
+
+    def written():
+        """the store the writes go to: the backend itself, or with a copy the live store if it answers now"""
+        return backend if live is None else _opened(live)
+
+    def writer():
+        target = written()
+        if id(target) not in writers:
+            writers[id(target)] = GraphWriter(target, reader if target is backend else GraphReader(target))
+        return writers[id(target)]
 
     @bp.errorhandler(NotFound)
     def unknown(err):
@@ -387,19 +424,19 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
 
     @bp.post("/graphs/<graph_id>/check", endpoint="check")
     def check(graph_id):
-        return jsonify(writer.check(graph_id, request.get_json(silent=True)))
+        return jsonify(writer().check(graph_id, request.get_json(silent=True)))
 
     @bp.put("/graphs/<graph_id>", endpoint="save")
     def save(graph_id):
-        return jsonify(writer.save(graph_id, request.get_json(silent=True), g.account))
+        return jsonify(writer().save(graph_id, request.get_json(silent=True), g.account))
 
     @bp.post("/graphs/<graph_id>/restore", endpoint="restore")
     def restore(graph_id):
-        return jsonify(writer.restore(graph_id, request.get_json(silent=True), g.account))
+        return jsonify(writer().restore(graph_id, request.get_json(silent=True), g.account))
 
     @bp.put("/graphs/<graph_id>/arrangement", endpoint="save_arrangement")
     def save_arrangement(graph_id):
-        return jsonify(writer.save_arrangement(graph_id, request.get_json(silent=True), g.account))
+        return jsonify(writer().save_arrangement(graph_id, request.get_json(silent=True), g.account))
 
     @bp.get("/graphs", endpoint="list_graphs")
     def list_graphs():
@@ -426,8 +463,9 @@ def create_graph_v2_blueprint(backend, store, is_owner, allowed_origins):
     return bp
 
 
-def create_app(backend, accounts_store, store, allowed_origins):
-    """IF-104 v2 as a Flask app of its own: the account routes of IF-101, the guard, and the v2 routes on `backend` (REQ-API-030); the owner is the first account"""
+def create_app(backend, accounts_store, store, allowed_origins, *, live=None):
+    """IF-104 v2 as a Flask app of its own: the account routes of IF-101, the guard, and the v2 routes on `backend` (REQ-API-030); the owner is the first account.
+    `live`: see create_graph_v2_blueprint (keyword only, so the positional calls of VIEW cannot shift, D-470)"""
     if store not in STORES:
         raise ValueError('the setting "store" must be "files" or "database", not %s' % (_shown(store),))
     origins = list(allowed_origins)
@@ -435,5 +473,5 @@ def create_app(backend, accounts_store, store, allowed_origins):
     service = accounts_api.SessionService(accounts_store)
     app.register_blueprint(accounts_api.create_accounts_blueprint(service))
     accounts_api.install_guard(app, service, open_paths=(), open_prefixes=(), allowed_origins=lambda: origins)
-    app.register_blueprint(create_graph_v2_blueprint(backend, store, accounts.owner_check({}, accounts_store), lambda: origins))
+    app.register_blueprint(create_graph_v2_blueprint(backend, store, accounts.owner_check({}, accounts_store), lambda: origins, live=live))
     return app

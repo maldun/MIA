@@ -114,11 +114,47 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **Traceability:** 549 ERROR lines, the same as the export (compared line by line); none new.
 
+## T-06: Copy setting, AutoSync, store answer, smoke
+
+**Before the task (2026-11-27)**
+- `goal/v4` (VIEW merged) brought into this branch (merge commit after `f2ab2ffc`): the only conflicts lay in the generated node-requirements block of `specs/mia/architecture.sysml`, rewritten with `tools/gen_node_requirements_model.py` (it also took A-176's new REQ-GA-016 text, which `goal/v4` had not regenerated); `check_sysml_model.py` and `check_sysml.sh` clean. TC-SLY-030 runs now (no skip) and is green; the four TRANSFER acceptance files green.
+- One of my T-04 unit tests assumed VIEW's side tables undefined; since the merge they are defined. Fixed by patching both states (`5af24dc0`, test only).
+- Red tests TC-API-060 to 064 staged (D-541, D-542; `6750b808`), installed by the owner (`943b8dac`): five failures by assertion, none skipped.
+
+**What was done**
+- `graph_store_transfer.py`: `lag_summary(live, copy)` (REQ-API-064, D-540: `since` from the header versions the copy lacks); `AutoSync(open_live, copy, name, log).run(when)`: the sync, one log line per run; a live store that does not answer (OSError or a driver error by name, as in the prototype) is a report naming the store and "sync not run" (REQ-API-063); a refused sync is a log line, the copy stays; any other error is raised.
+- `graph_api_v2.py`: keyword-only `live=None` on `create_graph_v2_blueprint` and `create_app` (D-470). With `live` the routes read `backend` (the copy, REQ-API-060), writes go to the live store if it answers now, else 503 `store_unreachable` (D-544); `GET /store` gives `shown: copy`, `live_reachable` as the live store answers now and the lag (REQ-API-064); with `live=None` nothing changes (REQ-API-022).
+- `web_app.py`: the settings `copy` (a folder; relative to MIA's folder; empty or absent = no copy) and `autosync` (true only when `true`, default off, REQ-API-061); the live store opened on first use (`_LiveStore`), so MIA starts with a copy while the live database does not answer (REQ-API-063); a copy of a newer format is not opened: MIA reads the live store and logs it (D-543); `sync_copy(when)`.
+- `__main__.py`: `start_backend()` (AutoSync before `socketio.run`) and `stop_list(...)` ("sync the copy" after "save history", before "close the database"); `__main__` calls both (D-541, TR-TRANSFER-009).
+- `setup_cfg.example.json` (`"copy": ""`, `"autosync": false`) and `README.md` (the two settings; `test_config` asks for both).
+- Unit tests written first and seen red: `tests/test_graph_store_transfer.py` class CopyInUse (9: lag summary empty, since of one graph, since over two graphs, a differing copy, AutoSync syncs and logs, unreachable, driver error by name, refused, a bug raised); `tests/test_graph_api_v2.py` class CopySet (3: reads from the copy and the store answer, a save goes to the live store, a live store that does not answer).
+
+**Tests green (my runs, feedback only):** `tests/acceptance/test_transfer_backend.py` 5/5; `test_transfer_move.py`, `test_transfer_sync.py` (TC-SLY-030 included), `test_transfer_interrupt.py`, `test_transfer_sets.py` OK; `test_view_backend.py` OK; `contract/test_if_104_v2_graph_api.py` OK; `tests/test_graph_store_transfer.py` 31/31; `tests/test_graph_api_v2.py` 33/33; `tests/test_config.py` OK.
+
+**Regression set (2026-11-27, sequential, `/tmp/claude-1000/-home-maldun-prog-Python-MIA/d6e37aaa-c64d-4052-90a2-252b37dbe6a0/scratchpad/regress_t06.sh`):** unit suite 2635 tests, 2 failures, both mine and fixed: `test_config` (the two new settings missing from the example) and the "since over two graphs" check, which ran against a stale `graph_store_transfer` bytecode (see Findings); both green alone afterwards together with the files above. Acceptance scripts one by one: red only the known `test_decide_guard.py`, `test_judge_calibration.py`.
+
+**Deliberate defects** (planted in the code, the backend checks run, the file restored; runner `/tmp/claude-1000/-home-maldun-prog-Python-MIA/d6e37aaa-c64d-4052-90a2-252b37dbe6a0/scratchpad/mutate_t06.sh`):
+| Defect | Failing checks |
+|---|---|
+| AutoSync only at start (no stop step) | TC-API-062 |
+| no AutoSync at start | TC-API-062, TC-API-063 |
+| AutoSync on by default | TC-API-060, 061, 064 |
+| reads from the live store | TC-API-060, 063, 064 |
+| `since` = newest instead of oldest | none of TC-API-06x (AC-006 lags one graph); caught by the new unit check "since over all lagging graphs" |
+| an unreachable live store raises | TC-API-063 |
+| `live_reachable` fixed true | unit check `CopySet.test_a_live_store_that_does_not_answer` |
+
+**Smoke SMOKE-TRANSFER-001 (2026-11-27, owner's yes; "it is podman, do as you see fit"):** `mia_db_1` (stopped) started with `podman start`; the check ran in a throw-away container from `localhost/mia:g-v4-view` on `mia_default` over an export of this worktree (tracked and new files, T-06 included), server URL from `deploy/.env` (never printed): 4 PASS, exit 0. Afterwards the server lists only `mia`, `postgres`, `template0`, `template1`; `mia_db_1` stopped again; no container left.
+
+**Traceability:** 585 ERROR lines, the same as `943b8dac` (compared line by line); none new. (549 before the VIEW merge.)
+
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
 | `tests/acceptance/test_skill_run_view_browser.py` failed once in the full acceptance run and passed twice alone (not storage; not changed by T-03) | T-03 | none new: a protected check, reported for Verify; no change made |
 | `tests/test_sandbox.py` (`test_runs_are_independent_and_leave_nothing_behind`) counts `mia-sandbox-*` folders in the shared `/tmp`; it failed once while another session ran checks, OK twice alone | T-05 | none new: not changed by TRANSFER; reported for Verify (a check that reads a shared folder can see other sessions' runs) |
+| A restored module ran as stale bytecode: the restore after a planted defect kept the size and the second of the file, so `__pycache__` still held the defect (`max`) and the regression ran it | T-06 | the unit check "since over all lagging graphs" (it failed on the stale code); the runner must remove the bytecode after each restore (lesson for the shared tools, after T-06) |
+| `deploy/.env` names the database `db` (the stack network); the host cannot reach it: the smoke runs in a container on `mia_default` (as CORE's) | T-06 | none: by design (no published port, `deploy/compose.yaml`) |
 
 ## Plan amendments
 None.
@@ -139,6 +175,10 @@ None.
 | `--data` is required per command, not by argparse, so `lag`/`sync` can take the live store from `--database-url` alone | `migrate.main` | none: follows the plan's `--data DIR` or `--database-url URL` |
 | A differing record of the graph group that no graph names is refused (`conflict`) by the sync, not overwritten | `_refuse_other_conflicts` | open for Phase 4: REQ-SLY-025 says the copy equals the live store for every record of the group; since T-04 the side records belong to their graph, so this concerns only steps or connections no header names and `skills` records |
 | `move_graph` takes the copy's lock only when the target is a files folder | `_lock_of` | none: REQ-SLY-028 locks the copy, which is always a files folder; a database has no lock file |
+| With a copy set, the writes of IF-104 v2 go to the live store (503 `store_unreachable` while it does not answer); the reads come from the copy, so a save is seen on the copy only after the next sync | `graph_api_v2.create_graph_v2_blueprint` | D-544: proposed for REQ-API-060 at TRANSFER's amendment batch (the rationale says "writes go to the live store", no requirement text does) |
+| While the live store does not answer, `GET /store` gives `live_reachable: false` and the lag `{"graphs": 0, "since": null}` | `graph_api_v2._store_answer` | D-545: proposed for REQ-API-064 (the lag cannot be known then) |
+| A copy of a newer format: MIA reads the live store and logs one line | `web_app._open_copy` | D-543 (owner): proposed for REQ-API-060 |
+| The live store, once opened, is kept; a database connection that is lost later is not reopened | `web_app._LiveStore` | V-3 (handed to TRANSFER): next, with a failing test first |
 
 ## Decisions
 - T-01: `library-seed` does not run the per-graph check of the move; it keeps `copy_records`' checks and the write order (members first). REQ-SLY-009 asks for identical entries and the order, not for the graph check; a damaged library folder is refused by `copy_records` only where a record breaks put's rules.
@@ -148,3 +188,5 @@ None.
 ## Open questions for Phase 4
 - T-03: should the sync also overwrite (with an aside file) a differing graph-group record that no graph names, instead of refusing it? See Unspecified behavior.
 - T-01: should `library-seed` also refuse a folder whose headers name missing members (the check of REQ-SLY-017)? Not asked by REQ-SLY-009; noted above.
+- T-06: D-543, D-544, D-545 are behaviour no requirement text states yet (amendment batch proposed after V-3).
+- T-06: `setup_cfg.example.json` names `copy` and `autosync` (needed by `test_config`); a machine's own file without them gets the usual "missing options" warning (REQ-OPR-003).

@@ -21,6 +21,9 @@ from storage import Storage, StorageError         # noqa: E402
 from storage_copy import export_library           # noqa: E402
 from storage_files import FileBackend             # noqa: E402
 
+# the storage module the helpers write through: plain `storage` alone, or MIA.storage when the suite put the checkout copy first
+STORAGE = sys.modules[Storage.__module__]
+
 
 class Move(unittest.TestCase):
     def setUp(self):
@@ -360,6 +363,101 @@ class Export(unittest.TestCase):
         export_library(Storage(source), os.path.join(base, "export"))
         # Then: the graph group is in the folder
         self.assertEqual(ts.graph_group(FileBackend(os.path.join(base, "export"))), ts.graph_group(source))
+
+
+class CopyInUse(unittest.TestCase):
+    """the lag in IF-104 v2 terms and AutoSync (T-06)"""
+
+    def setUp(self):
+        self.base = tempfile.mkdtemp(prefix="transfer-unit-")
+        self.addCleanup(shutil.rmtree, self.base, True)
+        self.live = ts.small_store(FileBackend(os.path.join(self.base, "live")))
+        self.copy = FileBackend(os.path.join(self.base, "copy"))
+        ts.equalize(self.live, self.copy)
+        self.lines = []
+
+    def auto(self, open_live):
+        return transfer.AutoSync(open_live, self.copy, "the folder live", self.lines.append)
+
+    @mark.req("REQ-API-064")
+    def test_the_lag_summary_of_a_current_copy_is_empty(self):
+        """Example: live and copy equal -> {"graphs": 0, "since": None}."""
+        self.assertEqual(transfer.lag_summary(self.live, self.copy), {"graphs": 0, "since": None})
+
+    @mark.req("REQ-API-064")
+    def test_since_is_the_oldest_header_version_the_copy_lacks(self):
+        """D-540. Example: two new live versions of cp2.multi -> 1 graph, since the time of live version 5."""
+        # Given: two newer live versions of cp2.multi, the older one stamped earlier
+        with mock.patch.object(STORAGE, "utc_now", side_effect=["2026-11-27T10:00:0%dZ" % n for n in range(9)]):
+            ts.new_multi_version(self.live, "a")
+        ts.new_multi_version(self.live, "b")
+        # When / Then: one graph lags, since the header version 5
+        self.assertEqual(transfer.lag_summary(self.live, self.copy),
+                         {"graphs": 1, "since": self.live.versions("graphs", ts.MULTI)[4]["time"]})
+
+    @mark.req("REQ-API-064")
+    def test_since_is_the_oldest_over_all_lagging_graphs(self):
+        """Example: cp2.multi new at 10:00, sample.code new at 11:00 -> 2 graphs since 10:00 (whichever graph is read first)."""
+        with mock.patch.object(STORAGE, "utc_now", return_value="2026-11-27T11:00:00Z"):
+            ts.new_code_version(self.live, "later", "anna")
+        with mock.patch.object(STORAGE, "utc_now", return_value="2026-11-27T10:00:00Z"):
+            ts.new_multi_version(self.live, "earlier")
+        self.assertEqual(transfer.lag_summary(self.live, self.copy), {"graphs": 2, "since": "2026-11-27T10:00:00Z"})
+
+    @mark.req("REQ-API-064")
+    def test_a_differing_copy_lags_since_the_first_live_version_it_does_not_share(self):
+        """Example: sample.code version 2 differs on live and copy -> 1 graph, since live's version 2."""
+        ts.ac007(self.live, self.copy, with_store=False)
+        self.assertEqual(transfer.lag_summary(self.live, self.copy),
+                         {"graphs": 1, "since": self.live.versions("graphs", ts.CODE)[1]["time"]})
+
+    @mark.req("REQ-API-062")
+    def test_autosync_brings_the_copy_to_the_live_store_and_logs_one_line(self):
+        """Example: a new live version -> after run("start") the copy equals live; one line names start and the counts."""
+        ts.new_multi_version(self.live, "a")
+        report = self.auto(lambda: self.live).run("start")
+        self.assertEqual(ts.graph_group(self.copy), ts.graph_group(self.live))
+        self.assertEqual(report["graphs"], 1)
+        self.assertEqual(len(self.lines), 1)
+        self.assertIn("AutoSync at start", self.lines[0])
+
+    @mark.req("REQ-API-063")
+    def test_an_unreachable_live_store_is_one_line_and_the_copy_stays(self):
+        """Example: opening the live store raises OSError -> no exception, the copy unchanged, one line naming the store and "sync not run"."""
+        before = ts.graph_group(self.copy)
+
+        def down():
+            raise ConnectionRefusedError("refused")
+        report = self.auto(down).run("stop")
+        self.assertEqual(ts.graph_group(self.copy), before)
+        self.assertEqual(report["unreachable"], "the folder live")
+        self.assertEqual(len(self.lines), 1)
+        self.assertIn("the folder live", self.lines[0])
+        self.assertIn("sync not run", self.lines[0])
+
+    @mark.req("REQ-API-063")
+    def test_a_database_driver_error_counts_as_unreachable(self):
+        """Example: an error class named OperationalError (psycopg's) -> reported, not raised."""
+        OperationalError = type("OperationalError", (Exception,), {})
+
+        def down():
+            raise OperationalError("connection failed")
+        self.assertIn("unreachable", self.auto(down).run("start"))
+
+    @mark.req("REQ-API-062")
+    def test_a_refused_sync_is_a_log_line_not_a_crash(self):
+        """Example: the copy's lock is held -> the report names `locked`, one line, nothing raised."""
+        ts.new_multi_version(self.live, "a")
+        with transfer.copy_lock(self.copy.root):
+            report = self.auto(lambda: self.live).run("start")
+        self.assertEqual(report["refused"], "locked")
+        self.assertEqual(len(self.lines), 1)
+
+    def test_a_bug_is_not_hidden(self):
+        """Example: a KeyError while syncing is raised, not logged as unreachable."""
+        with mock.patch.object(transfer, "sync_store", side_effect=KeyError("x")):
+            with self.assertRaises(KeyError):
+                self.auto(lambda: self.live).run("start")
 
 
 if __name__ == "__main__":

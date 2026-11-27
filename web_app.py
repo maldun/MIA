@@ -56,9 +56,10 @@ from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
 from .skill_digest import LiveDigest
 from .internal_auth import ensure_token, internal_headers
-from .storage import Storage
+from .storage import Storage, StorageError
 from .skill_record import SkillCatalog, SkillRecords
 from .storage_files import FileBackend
+from .graph_store_transfer import AutoSync
 from .moods import MoodTracker
 from .memory_records import MemoryRecords, memory_hooks
 from .speech_text import speech_text
@@ -670,6 +671,54 @@ def _graph_backend():
     from .storage_postgres import PostgresBackend          # psycopg only where the database is used (requirements-db.txt)
     return PostgresBackend(url)
 
+
+class _LiveStore:
+    """the live store, opened on first use and kept: with a copy set MIA starts even while the live database does not answer (REQ-API-063)"""
+
+    def __init__(self, opener):
+        self._opener, self._opened, self._lock = opener, None, threading.Lock()
+
+    def __call__(self):
+        with self._lock:
+            if self._opened is None:
+                self._opened = self._opener()
+            return self._opened
+
+
+def _live_name():
+    """the live store as the log names it: the folder, or the database's host:port/name without the password (REQ-API-063)"""
+    if _graph_store == "files":
+        return "files " + _db_dir
+    from urllib.parse import urlsplit
+    url = urlsplit(os.environ.get("MIA_DATABASE_URL", ""))
+    return "database %s:%s%s" % (url.hostname, url.port or 5432, url.path)
+
+
+def _open_copy():
+    """the copy MIA reads the graphs from (`copy`, a folder, relative to MIA's folder; absent = no copy, REQ-API-060, D-467); a copy of a newer
+    format than this MIA knows is not opened: MIA reads the live store and says so in the log (D-543)"""
+    if not cfg.get("copy"):
+        return None
+    folder = _own_path("copy", "")
+    try:
+        return FileBackend(folder)
+    except StorageError as err:
+        if err.code != "format":
+            raise
+        logger.warning("The copy %s has format %s, this MIA knows %s: the graphs are read from the live store" % (folder, err.detail["found"], err.detail["known"]))
+        return None
+
+
+_live_store = _LiveStore(_graph_backend)
+_graph_copy = _open_copy()
+_autosync = AutoSync(_live_store, _graph_copy, _live_name(), logger.info) if _graph_copy is not None and cfg.get("autosync", False) is True else None
+
+
+def sync_copy(when):
+    """AutoSync at the start and at an orderly stop, only while `autosync` is on (REQ-API-061, 062); __main__ calls it"""
+    if _autosync is not None:
+        _autosync.run(when)
+
 _workflow_library = WorkflowLibrary(_votes_store, is_owner=accounts.owner_check(cfg, _votes_store), pins=lambda: pins_from_config(cfg))             # IF-203 on the same storage; the review workflow is its first entry (a draft); the owner of the snapshots is `owner_account`, else the first account
 
 def run_memory_skill(inputs):
@@ -720,7 +769,10 @@ app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_graph_blueprint(_workflow_library))          # IF-104 for the Graph app, under the same session
-app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_graph_backend(), _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins))      # IF-104 v2 under the same session (REQ-API-030)
+if _graph_copy is None:
+    app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_live_store(), _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins))      # IF-104 v2 under the same session (REQ-API-030)
+else:          # the graphs are read from the copy, the writes go to the live store (REQ-API-060, D-544)
+    app.register_blueprint(graph_api_v2.create_graph_v2_blueprint(_graph_copy, _graph_store, accounts.owner_check(cfg, _votes_store), lambda: allowed_origins, live=_live_store))
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads
                                                       os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json")), socketio.emit))
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])

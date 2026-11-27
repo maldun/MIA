@@ -16,6 +16,9 @@ FileBackend, its root holds the aside folder, the lock and the format marker.
   graphs that are not current (REQ-SLY-024).
 - sync_store(live, copy) -> {"graphs": n, "records": n, "set_aside": {graph ID: {"versions": [...], "file": path relative to the copy, "reason"}}}
   (REQ-SLY-025 to 028, 038). Locked: StorageError("locked", detail={"lock": LOCK}).
+- lag_summary(live, copy) -> {"graphs": n, "since": time or None}: the lag in IF-104 v2 terms (REQ-API-064, D-540).
+- AutoSync(open_live, copy, name, log).run("start" | "stop") -> report: the sync as MIA runs it at start and orderly stop (REQ-API-062, 063);
+  a live store that does not answer and a refused sync are one log line each, never an exception.
 - An older set (no marker) with an unscoped record: StorageError("invalid", rule="older_format", detail={"table", "id", "conversion": CONVERSION_STEP})
   (REQ-SLY-034). A newer set: the FileBackend refuses to open it, StorageError("format", detail={"found": n, "known": FORMAT}) (REQ-SLY-035).
 """
@@ -298,3 +301,47 @@ def sync_store(live, copy):
         answer["records"] = sum(len(live.versions(t, i)) - len(copy.versions(t, i)) for t in tables for i in live.ids(t))
         copy_records(live, copy, tables)
         return answer
+
+
+def lag_summary(live, copy):
+    """`graphs`: the graphs not current on the copy; `since`: the time of the oldest header version the live store has and the copy lacks, None
+    when there is none (REQ-API-064). Headers only: the lag is counted by graph (REQ-SLY-024), members of one save carry the same second (D-540)."""
+    rows = lag(live, copy)
+    times = []
+    for graph_id in rows:
+        have = copy.versions(HEADERS, graph_id)
+        missing = [entry for k, entry in enumerate(live.versions(HEADERS, graph_id)) if k >= len(have) or have[k] != entry]
+        if missing:
+            times.append(missing[0]["time"])
+    return {"graphs": len(rows), "since": min(times) if times else None}
+
+
+# a live store that cannot be reached: the system's errors and the database driver's, named so psycopg stays optional
+UNREACHABLE = ("OperationalError", "InterfaceError", "AdminShutdown", "ConnectionTimeout")
+
+
+def _unreachable(error):
+    return isinstance(error, (OSError, TimeoutError)) or type(error).__name__ in UNREACHABLE
+
+
+class AutoSync:
+    """The sync MIA runs at its start and at an orderly stop while `autosync` is on (REQ-API-062). `open_live()` gives the live store and may
+    fail when it does not answer; `name` names it in the log (REQ-API-063); `log(line)` takes one line per run. A refused sync (move_refused,
+    older_format, conflict, locked) leaves the copy as it is and is logged as well: MIA goes on with the copy either way."""
+
+    def __init__(self, open_live, copy, name, log):
+        self.open_live, self.copy, self.name, self.log = open_live, copy, name, log
+
+    def run(self, when):
+        try:
+            report = sync_store(self.open_live(), self.copy)
+            self.log("AutoSync at %s: %d graph(s), %d record(s) from the live store %s to the copy" % (when, report["graphs"], report["records"], self.name))
+        except StorageError as err:
+            report = {"refused": err.rule or err.code, "detail": err.detail}
+            self.log("AutoSync at %s: refused (%s %s), the copy stays as it is" % (when, report["refused"], err.detail))
+        except Exception as err:
+            if not _unreachable(err):
+                raise
+            report = {"unreachable": self.name}
+            self.log("AutoSync at %s: the live store %s does not answer (%s), sync not run" % (when, self.name, type(err).__name__))
+        return report
