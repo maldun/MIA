@@ -210,7 +210,7 @@ V-2, V-3 and V-4 if the owner chooses "accept" in questions 1, 3 and 4; question
 
 **Re-verify verdict (proposal): verified with accepted deviations.** V-1 to V-4 are fixed as the owner decided (D-548, D-549). Each fix has a check that fails when the fix is taken out. V-5 was fixed on `goal/v4` (b259b533, merged in). V-6 goes to Commit (decision below). The accepted deviations are D-549's known limit of V-1 and the two small gaps R-1 and R-2 below. No blocker.
 
-- [ ] Re-verify accepted by the owner (verdict; V-6 to Commit; R-1, R-2 accepted). Date:
+- [X] Re-verify accepted by the owner (verdict; V-6 to Commit; R-1, R-2 accepted). Date:
 
 ### Automated checks (my runs)
 | Check | Result |
