@@ -16,7 +16,7 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 | 5 | CR | Ability to fail | TR-TRANSFER-008 |
 
 ### TR-TRANSFER-001 – Exact values
-- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-022, TC-SLY-023, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-027, TC-SLY-030, TC-SLY-031, TC-SLY-032, TC-SLY-033, TC-SLY-034, TC-SLY-035, TC-SLY-039, TC-SLY-009, TC-API-060, TC-API-061, TC-API-062, TC-API-064
+- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-022, TC-SLY-023, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-027, TC-SLY-030, TC-SLY-031, TC-SLY-032, TC-SLY-033, TC-SLY-034, TC-SLY-035, TC-SLY-039, TC-SLY-009, TC-API-060, TC-API-061, TC-API-062, TC-API-064, TC-API-065, TC-API-066, TC-API-067
 - Requirement: REQ-SLY-016
 - Group: EX
 - Kind: unit
@@ -84,7 +84,7 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 - Status: Approved
 
 ### TR-TRANSFER-007 – Only throw-away databases and folders
-- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-029, TC-SLY-036, TC-SLY-038, TC-API-063, SMOKE-TRANSFER-001
+- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-029, TC-SLY-036, TC-SLY-038, TC-API-063, TC-API-065, TC-API-066, TC-API-067, SMOKE-TRANSFER-001
 - Requirement: REQ-SLY-016
 - Group: BK
 - Kind: setup
@@ -106,7 +106,7 @@ At the merge these go unchanged into the protected `specs/mia/test-requirements.
 - Status: Approved
 
 ### TR-TRANSFER-009 – The backend is started and stopped for real
-- Applies to: TC-API-060, TC-API-061, TC-API-062, TC-API-063, TC-API-064
+- Applies to: TC-API-060, TC-API-061, TC-API-062, TC-API-063, TC-API-064, TC-API-065, TC-API-066, TC-API-067
 - Requirement: REQ-API-062
 - Group: EP
 - Kind: setup

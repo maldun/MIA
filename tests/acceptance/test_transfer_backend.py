@@ -1,10 +1,10 @@
 """
-Acceptance tests of the copy setting in the backend (group AS of G-V4.GRAPHSTORE.TRANSFER): TC-API-060 to TC-API-064 (REQ-API-060 to 064;
-HR-004, HR-006), under TR-TRANSFER-001, -009, -010.
+Acceptance tests of the copy setting in the backend (group AS of G-V4.GRAPHSTORE.TRANSFER): TC-API-060 to TC-API-067 (REQ-API-060 to 066;
+HR-002, HR-004, HR-006), under TR-TRANSFER-001, -009, -010. TC-API-065 to 067 came with amendment A-195 (D-543 to D-545).
 MIA's real web_app runs from a copy of the checkout with its own configuration (`store`, `copy`, `autosync`) in a separate process, started
 through `start_backend()` and stopped through `graceful_shutdown(stop_list())` of MIA's `__main__` module, the two functions `python -m MIA`
 calls (TR-TRANSFER-009), and asked through Flask's test client. The live store is the data folder of that copy (`store: files`) or, for
-TC-API-063, a database address on a port where nothing listens; the copy is a fresh folder. Stores and cases from transfer_stores (AC-006).
+TC-API-063 and 067, a database address on a port where nothing listens; the copy is a fresh folder. Stores and cases from transfer_stores (AC-006).
 Until T-06 builds the copy setting, every case fails by assertion (the start function is missing, or the start stops at the database).
 Run with: /home/maldun/prog/Python/venvs/mia312/bin/python tests/acceptance/test_transfer_backend.py
 """
@@ -224,6 +224,95 @@ print(json.dumps(out))
         status, after = out["after"]
         self.assertEqual(status, 200, after)
         self.assertEqual((after["shown"], after["live_reachable"], after["lag"]), ("copy", True, {"graphs": 0, "since": None}))
+
+    @mark.req("REQ-API-065")
+    def test_TC_API_065_a_copy_of_a_newer_format_is_not_read(self):
+        """TC-API-065: a copy folder whose marker names a newer format is not read: the graphs come from the live store, the store answer
+        says `shown` live, and one log line names the copy and its format.
+
+        Example: copy marker {"format": 2}, live cp2.multi at 4 -> the read answers 4; store: shown live; one line "<copy> has format 2".
+        """
+        # Given: the live store with the sample store (cp2.multi at version 4), a copy folder holding only a marker of format 2
+        def case(live, copy):
+            ts.sample_store(live)
+            with open(os.path.join(copy.root, "mia-store.json"), "w", encoding="utf-8") as f:
+                json.dump({"format": 2}, f)
+        folder, live, copy = backend_with(self, {"accounts_enabled": True, "store": "files"}, case=case)
+        # When: the backend starts and cp2.multi and the store are read
+        out = started(self, folder, live, copy, """
+out = {}
+main.start_backend()
+""" + LOGIN + """
+out["read"] = ask("/api/v2/graphs/cp2.multi")
+out["store"] = ask("/api/v2/store")
+print(json.dumps(out))
+""")
+        # Then: the live store's version is read and the store answer shows the live store
+        self.assertEqual(out["read"][0], 200, out["read"])
+        self.assertEqual(out["read"][1]["version"], 4)
+        self.assertEqual((out["store"][1]["shown"], out["store"][1]["lag"]), ("live", {"graphs": 0, "since": None}))
+        # And: one log line names the copy and its format
+        with open(os.path.join(folder, "MIA", "mia.log"), encoding="utf-8") as f:
+            lines = [line for line in f if copy in line]
+        self.assertEqual(len(lines), 1, lines)
+        self.assertIn("format 2", lines[0])
+
+    @mark.req("REQ-API-066")
+    def test_TC_API_066_while_a_copy_is_set_a_save_goes_to_the_live_store(self):
+        """TC-API-066: with `copy` set, a save through IF-104 v2 is written to the live store and the copy is left as it is.
+
+        Example: AC-006 (live 6, copy 4), a save of cp2.multi on version 6 -> 200 version 7; live holds 7 versions; the copy's graph group unchanged.
+        """
+        # Given: AC-006 with `copy` set, no AutoSync
+        folder, live, copy = backend_with(self, {"accounts_enabled": True, "store": "files"})
+        before = as_json(ts.graph_group(FileBackend(copy)))
+        # When: the owner saves cp2.multi on the live version 6 with one value changed
+        out = started(self, folder, live, copy, """
+out = {}
+main.start_backend()
+""" + LOGIN + """
+from MIA.storage import Storage as Store
+from MIA.graph_model import GraphModel as Model
+graph = Model(Store(FileBackend(LIVE))).read_graph("cp2.multi")
+next(n for n in graph["nodes"] if n["id"] == "var.in")["data"]["value"] = "saved"
+answer = web.put("/api/v2/graphs/cp2.multi", headers={"Origin": wa.allowed_origins[0]},
+                 json={"graph": {"description": graph["description"], "nodes": graph["nodes"], "edges": graph["edges"]}, "expected_version": 6})
+out["save"] = [answer.status_code, answer.get_json(silent=True)]
+print(json.dumps(out))
+""")
+        # Then: version 7 is written to the live store
+        self.assertEqual(out["save"][0], 200, out["save"])
+        self.assertEqual(out["save"][1]["version"], 7)
+        self.assertEqual(len(FileBackend(live).versions("graphs", ts.MULTI)), 7)
+        # And: the copy is unchanged
+        self.assertEqual(as_json(ts.graph_group(FileBackend(copy))), before)
+
+    @mark.req("REQ-API-064")
+    def test_TC_API_067_the_store_answer_while_the_live_store_does_not_answer(self):
+        """TC-API-067: with `copy` set and a live database nobody answers, the store answer says the copy is shown and readable, the live
+        store not reachable, and a lag of no graphs.
+
+        Example: store database at 127.0.0.1:<free port> -> {"shown": "copy", "reachable": true, "live_reachable": false, "lag": {0, null}}.
+        """
+        try:
+            import psycopg  # noqa: F401
+        except ImportError:
+            self.skipTest("psycopg 3 is missing: MIA's database backend cannot be loaded here (requirements-db.txt)")
+        # Given: `copy` set (the sample store), no AutoSync, `store` database with an address on a port where nothing listens
+        folder, live, copy = backend_with(self, {"accounts_enabled": True, "store": "database"}, case=lambda live, copy: ts.sample_store(copy))
+        # When: the backend starts and the store is asked
+        out = started(self, folder, live, copy, """
+out = {}
+main.start_backend()
+""" + LOGIN + """
+out["store"] = ask("/api/v2/store")
+print(json.dumps(out))
+""", env={"MIA_DATABASE_URL": "postgresql://mia@127.0.0.1:%d/mia?connect_timeout=3" % free_port()})
+        # Then: the copy is shown and answers, the live store does not, the lag is no graphs
+        status, store = out["store"]
+        self.assertEqual(status, 200, store)
+        self.assertEqual({k: store[k] for k in ("shown", "reachable", "live_reachable", "lag")},
+                         {"shown": "copy", "reachable": True, "live_reachable": False, "lag": {"graphs": 0, "since": None}})
 
 
 if __name__ == "__main__":
