@@ -64,6 +64,10 @@ def _check_entries(table, record_id, entries):
     """Raises StorageError("invalid") with the table and id of the record when its versions could not have come from put."""
     def refuse(rule, detail):
         raise StorageError("invalid", rule=rule, detail={"table": table, "id": record_id, "detail": detail})
+    # a file that is no list of versions was not written by the store: the usual cause is a folder above the store's own (F-1 of G-V4.VIEW's
+    # Deploy: MIA's data folder, whose presets/ holds the preset store's plain files, instead of `accounts_dir`)
+    if not isinstance(entries, list) or not all(isinstance(entry, dict) for entry in entries):
+        refuse("not_a_history", "the file holds no list of versions; is this the store's folder (accounts_dir, default data/db)?")
     for number, entry in enumerate(entries, 1):
         if entry.get("id") != record_id:
             refuse("id", entry.get("id"))
