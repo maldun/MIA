@@ -92,15 +92,15 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 
 ### REQ-GA-008 – Library export and seed
 - Level: high   Subject: GraphApp
-- Text: The Graph app shall offer the export of the library to files and the seed from files.
-- Rationale: refines FR-22
+- Text: The Graph app shall leave the export and the seed of the library to the commands of the Storage layer (superseded by REQ-SLY-009).
+- Rationale: D-367 moved export and seed from the graph app to GRAPHSTORE; D-460 re-parents it to FR-59 as a storage command (shown in the plan review); the Graph app keeps no export button
 - Parent: FR-22
 - Priority: Could
-- Verification method: Test
-- Acceptance criterion: AC-16: export then seed gives identical entries (exact)
-- Verified by: TC-GA-008
+- Verification method: Inspection
+- Acceptance criterion: the Graph app's page has no export or seed control, and REQ-SLY-009's check covers export and seed (exact)
+- Verified by: TC-SLY-009
 - Status: Approved
-- History: –
+- History: G-V1, approved, out (D-177); G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, superseded by REQ-SLY-009 (plan gate 2026-11-23); verified (G-V4.GRAPHSTORE.TRANSFER verification report and re-verify of the fix commits, both boxes ticked by the owner 2026-11-27) and moved here from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/requirements.md` at the merge (plan.md, "At the merge"); the Status stays as approved until the owner sets Verified.
 
 ### REQ-GA-009 – Plain stack with a vendored library
 - Level: high   Subject: GraphApp

@@ -208,3 +208,77 @@ Unchanged from `specs/mia/goals/G-V4.VIEW/test-spec.md`; their test requirements
 - When: each of the eleven v2 routes is called with it
 - Then: each is 401 `unauthenticated`
 - And: cp2.multi still has 4 versions; anna's real login works and `me` names her owner; a wrong password is 401
+
+## Test cases of G-V4.GRAPHSTORE.TRANSFER (moved at the merge 2026-11-27)
+Unchanged from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/test-spec.md` (TC-SLY-040 by A-196, the path search of TC-SLY-037 by A-197); their test requirements TR-TRANSFER-001 to 011 are in `specs/mia/test-requirements.md`. All checks are exact and run in stage 2 (`tests/acceptance/test_transfer_*.py`); the PostgreSQL half needs podman, the local `postgres:16` image and psycopg 3. The storage checks, the smoke row and the witnesses of the accepted cases are in `specs/mia/nodes/N-3-database/nodes/N-3.1-storage-layer/test-spec.md`.
+
+| Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |
+|---|---|---|---|---|---|---|
+| TC-API-060 | REQ-API-060 | component | 2 | the backend app with `store` files (live) and `copy` set to a folder holding a different version of `cp2.multi` | `GET` of `cp2.multi` through IF-104 v2 answers the copy's version | exact |
+| TC-API-061 | REQ-API-061 | component | 2 | `copy` set, no `autosync`; the live store has a newer version; start and orderly stop of the backend | the copy is unchanged after start and after stop | exact |
+| TC-API-062 | REQ-API-062 | component | 2 | `copy` set, `autosync` true; the live store has a newer version; a version written to the live store while running; orderly stop | the newer version is on the copy before the first answer; the version written while running is on the copy after the stop | exact |
+| TC-API-063 | REQ-API-063 | component | 2 | `copy` set, `autosync` true, `store` database with an address on a closed port | the backend starts and answers graphs from the copy; the log holds one line naming the live store and `sync not run` | exact |
+| TC-API-064 | REQ-API-064 | component | 2 | AC-006 with `copy` set; `GET /api/v2/store` before and after a sync | before: `shown` `copy`, `live_reachable` true, `lag` `{"graphs": 1, "since": <time of live version 5 of cp2.multi>}`; after: `lag` `{"graphs": 0, "since": null}` | exact |
+| TC-API-065 | REQ-API-065 | component | 2 | the live store with cp2.multi at 4; `copy` set to a folder whose marker names format 2 | the read answers version 4; `shown` live, lag no graphs; one log line naming the copy and `format 2` | exact |
+| TC-API-066 | REQ-API-066 | component | 2 | AC-006 with `copy` set, no `autosync`; the owner saves cp2.multi on version 6 | version 7 in the live store (7 versions); the copy's graph group unchanged | exact |
+| TC-API-067 | REQ-API-064 | component | 2 | `copy` set, no `autosync`, `store` database with an address on a closed port; `GET /api/v2/store` | `shown` copy, `reachable` true, `live_reachable` false, `lag` `{"graphs": 0, "since": null}` | exact |
+
+## Edge inputs of G-V4.GRAPHSTORE.TRANSFER (per operation: empty, missing, at and past the limit)
+| Operation | Edge | Check |
+|---|---|---|
+| AutoSync | off; on with live reachable; on with live unreachable | TC-API-061 to 063 |
+
+## Scenarios (G-V4.GRAPHSTORE.TRANSFER, approved 2026-11-22, D-468)
+
+### TC-API-060 – MIA reads graphs from the copy
+- Verifies: REQ-API-060
+- Given: the backend with the live store on files and `copy` set to a folder holding a different version of `cp2.multi`
+- When: `cp2.multi` is read through the graph interface
+- Then: the answer is the copy's version
+
+### TC-API-061 – Without AutoSync nothing is synced
+- Verifies: REQ-API-061
+- Given: `copy` set, no `autosync`; the live store has a newer version of `cp2.multi`
+- When: the backend starts and stops in an orderly way
+- Then: the copy is unchanged after the start and after the stop
+
+### TC-API-062 – AutoSync at start and at an orderly stop
+- Verifies: REQ-API-062
+- Given: `copy` set, `autosync` true; the live store has a newer version of `cp2.multi`
+- When: the backend starts, a new version is written to the live store while it runs, and the backend stops in an orderly way
+- Then: the newer version is on the copy before the first answer
+- And: the version written while running is on the copy after the stop
+
+### TC-API-063 – An unreachable live store is reported, not fatal
+- Verifies: REQ-API-063
+- Given: `copy` set, `autosync` true, `store` database with an address on a port where nothing listens
+- When: the backend starts
+- Then: it starts and answers graphs from the copy
+- And: its log holds one line naming the live store and "sync not run"
+
+### TC-API-064 – The store answer tells how far the copy lags
+- Verifies: REQ-API-064
+- Given: the case of AC-006 with `copy` set
+- When: `GET /api/v2/store` is asked before and after a sync
+- Then: before: `shown` is `copy`, `live_reachable` true, `lag` `{"graphs": 1, "since": <time of live version 5 of cp2.multi>}`
+- And: after: `lag` is `{"graphs": 0, "since": null}`
+
+### TC-API-065 – A copy of a newer format is not read
+- Verifies: REQ-API-065
+- Given: the live store on files with the sample store (cp2.multi at version 4); `copy` set to a folder whose marker names format 2
+- When: the backend starts, and cp2.multi and the store are read through the graph interface
+- Then: the read answers version 4 (the live store's), the store answer has `shown` live and a lag of no graphs
+- And: `mia.log` holds one line naming the copy folder and "format 2"
+
+### TC-API-066 – While a copy is set, a save goes to the live store
+- Verifies: REQ-API-066
+- Given: AC-006 with `copy` set, no `autosync`
+- When: the owner saves cp2.multi on version 6 with one value changed
+- Then: the answer is version 7 and the live store holds 7 versions
+- And: the copy's graph group is unchanged, entry by entry
+
+### TC-API-067 – The store answer while the live store does not answer
+- Verifies: REQ-API-064
+- Given: `copy` set (the sample store), no `autosync`, `store` database with an address on a port where nothing listens
+- When: `GET /api/v2/store` is asked
+- Then: `shown` copy, `reachable` true, `live_reachable` false, `lag` `{"graphs": 0, "since": null}`

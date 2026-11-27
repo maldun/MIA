@@ -2,6 +2,8 @@
 
 **Top-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE/top-level-spec.md` (FR-58, FR-59, FR-93, NFR-15, NFR-16 move and sync part)   **High-level spec:** `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/high-level-spec.md` (HR-001 to HR-008, approved 2026-11-22)   **Status:** Approved by the owner group by group (MV, SB, SY, SR, PT, AS; 2026-11-22, review-log.md; D-466, D-467)   **Plan baseline:** –
 
+**Moved at the merge (2026-11-27, plan.md "At the merge"):** the 33 requirements are now in `specs/mia/nodes/N-3-database/nodes/N-3.1-storage-layer/requirements.md` (REQ-SLY-016 to 039, section "Iteration 4 (goal G-V4.GRAPHSTORE.TRANSFER ...)"; REQ-SLY-009 changed in place), `specs/mia/nodes/N-2-backend/nodes/N-2.1-api-and-accounts/requirements.md` (REQ-API-060 to 066) and `specs/mia/nodes/N-5-graph-app/requirements.md` (REQ-GA-008, in place), with the approved changes in force and without the `In force:` lines; the specification points of the merge (D-551: the command texts of REQ-SLY-039, the rationale of REQ-SLY-025 and REQ-SLY-028) are written only in the node files. The node files are the source from now on (they win over this file for the same ID); this file stays as the record of the goal.
+
 <!-- The requirements this subgoal adds, and the proposed wording changes of requirements in force.
      Basis: the approved high-level spec, the decisions D-460, D-463, D-464, prototype rounds 02 and 03 (`graph_store_move.py`, `graph_store_sync.py`,
      cp2, cp3, cp9, cp15 on `prototype/g-v4`), the survey of 2026-11-22, the accepted cases AC-004 to AC-008, AC-027, AC-033.
