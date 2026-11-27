@@ -5803,6 +5803,101 @@ package MIA_NodeRequirements {
         doc /* The Graph app shall send no request that changes a graph, an arrangement or a version. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-053'> OneLoadedGraphFromTheStoredForm_Gtb053 {
+        subject s : Persistence;
+        doc /* When `load` of IF-301 is given a graph in stored form, the Graph tables shall return a networkx `MultiDiGraph` with one node per well-formed step and one edge per well-formed connection. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-054'> StepsKeepTheirFieldsAndTheirPosition_Gtb054 {
+        subject s : Persistence;
+        doc /* The Graph tables shall give each node of a loaded graph the attribute `data`, equal to the step's `data`, and the attribute `position`, the step's position in the stored form. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-055'> ConnectionsKeepTheirFieldsAndTheirPosition_Gtb055 {
+        subject s : Persistence;
+        doc /* The Graph tables shall give each edge of a loaded graph the key of the connection ID and the attributes `data`, equal to the connection's `data`, and `position`, the connection's position in the stored form. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-056'> TheGraphSOwnFields_Gtb056 {
+        subject s : Persistence;
+        doc /* The Graph tables shall keep in the attributes of the loaded graph every field of the stored form other than `nodes` and `edges`, and the kind `workflow` where the stored form names no kind. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-057'> MalformedItemsAreLeftOutNeverAnError_Gtb057 {
+        subject s : Persistence;
+        doc /* If a step or connection of the given graph is not well-formed, then the Graph tables shall leave it out of the loaded graph and raise no exception. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-058'> LoadingChangesNothing_Gtb058 {
+        subject s : Persistence;
+        doc /* The Graph tables shall build the loaded graph from copies, so that a change of the loaded graph leaves the stored form unchanged and a change of the stored form leaves the loaded graph unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-059'> TheGraphRulesReadTheLoadedGraph_Gtb059 {
+        subject s : Persistence;
+        doc /* The Graph tables shall evaluate the rules about adjacency, one writer, session setting and stop limit, cycle and unsupplied inputs on the graph that `load` gives for the checked stored form. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-GTB-060'> TheSameRuleAnswersAsBefore_Gtb060 {
+        subject s : Persistence;
+        doc /* The Graph tables shall give, through the loaded graph, the same `rule_report` and `run_check` answers as IF-301 v4 gave before this change, for every stored form whose connections have unique non-empty text IDs and lead from and to existing steps. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-166'> EveryStepAfterTheStepsItReadsFrom_Wfm166 {
+        subject s : TaskRuntime;
+        doc /* When the order of a workflow graph is asked, the Workflow management shall list every step of its loaded graph once, each after every step it reads from. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-167'> TiesInTheOrderStepsBecameReady_Wfm167 {
+        subject s : TaskRuntime;
+        doc /* When the order of a workflow graph is asked, the Workflow management shall list first the steps that read from no step, in their position in the stored form, and then each further step as soon as the last step it reads from is listed, in the order in which the steps became ready. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-040'> OneStepAtATime_Run040 {
+        subject s : TaskRuntime;
+        doc /* While a graph is running, the Pipeline runner shall start a step only after the step before it in the order has finished. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-041'> TheRunReadsTheLoadedGraph_Run041 {
+        subject s : TaskRuntime;
+        doc /* When a graph is run, the Pipeline runner shall take the types of the steps and the roles and names of the connections from the graph that `load` gives for it. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-RUN-047'> TheGraphRunStandsOnItsOwn_Run047 {
+        subject s : TaskRuntime;
+        doc /* The modules of the graph run (`graph_run.py`) and of the graph rule set (`graph_rule_set.py`) shall import only the Python standard library, networkx and each other. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-RUN-042'> ASkillWithAStoredGraphRunsFromIt_Run042 {
+        subject s : TaskRuntime;
+        doc /* When a skill runs whose graph is in the store, the Pipeline runner shall run the newest version of that graph, loaded by IF-301, with the step functions of the toolbox. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-043'> WithoutAStoredGraphAsBefore_Run043 {
+        subject s : TaskRuntime;
+        doc /* While a skill has no graph in the store, the Pipeline runner shall run it as before this change. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-044'> TheRunRecordNamesTheGraphAndItsVersion_Run044 {
+        subject s : TaskRuntime;
+        doc /* When a skill runs from its stored graph, the Pipeline runner shall write the graph ID and the version that ran into the fields `graph` and `graph_version` of the run record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-045'> AStoredGraphThatCannotRunIsRefusedNamed_Run045 {
+        subject s : TaskRuntime;
+        doc /* If the stored graph of a skill is refused by the run check, then the Pipeline runner shall end the run refused, name the graph ID and its version and run no step. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-046'> TheAnswerOfARunFromTheStoredGraph_Run046 {
+        subject s : TaskRuntime;
+        doc /* When a skill runs from its stored graph, the Pipeline runner shall give as the answer the value of the data step that the skill's pipeline names as its result. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-168'> TheSameModelCallsFromTheStoredGraph_Wfm168 {
+        subject s : TaskRuntime;
+        doc /* When one of the six skills runs from its stored graph on scripted replies, the Workflow management shall make the model calls of the old runner, in order, with equal prompts and options. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
 
     requirement r_req_clv_001 : ChatViewWithSenderAndStreaming_Clv001;
     requirement r_req_clv_002 : StopAndQueuePosition_Clv002;
@@ -6472,6 +6567,25 @@ package MIA_NodeRequirements {
     requirement r_req_ga_041 : ByKeyboard_Ga041;
     requirement r_req_ga_042 : NothingFromOutside_Ga042;
     requirement r_req_ga_043 : ThePageWritesNothing_Ga043;
+    requirement r_req_gtb_053 : OneLoadedGraphFromTheStoredForm_Gtb053;
+    requirement r_req_gtb_054 : StepsKeepTheirFieldsAndTheirPosition_Gtb054;
+    requirement r_req_gtb_055 : ConnectionsKeepTheirFieldsAndTheirPosition_Gtb055;
+    requirement r_req_gtb_056 : TheGraphSOwnFields_Gtb056;
+    requirement r_req_gtb_057 : MalformedItemsAreLeftOutNeverAnError_Gtb057;
+    requirement r_req_gtb_058 : LoadingChangesNothing_Gtb058;
+    requirement r_req_gtb_059 : TheGraphRulesReadTheLoadedGraph_Gtb059;
+    requirement r_req_gtb_060 : TheSameRuleAnswersAsBefore_Gtb060;
+    requirement r_req_wfm_166 : EveryStepAfterTheStepsItReadsFrom_Wfm166;
+    requirement r_req_wfm_167 : TiesInTheOrderStepsBecameReady_Wfm167;
+    requirement r_req_run_040 : OneStepAtATime_Run040;
+    requirement r_req_run_041 : TheRunReadsTheLoadedGraph_Run041;
+    requirement r_req_run_047 : TheGraphRunStandsOnItsOwn_Run047;
+    requirement r_req_run_042 : ASkillWithAStoredGraphRunsFromIt_Run042;
+    requirement r_req_run_043 : WithoutAStoredGraphAsBefore_Run043;
+    requirement r_req_run_044 : TheRunRecordNamesTheGraphAndItsVersion_Run044;
+    requirement r_req_run_045 : AStoredGraphThatCannotRunIsRefusedNamed_Run045;
+    requirement r_req_run_046 : TheAnswerOfARunFromTheStoredGraph_Run046;
+    requirement r_req_wfm_168 : TheSameModelCallsFromTheStoredGraph_Wfm168;
 
     satisfy r_req_clv_001 by mia.frontEnd;
     satisfy r_req_clv_002 by mia.frontEnd;
@@ -7141,6 +7255,25 @@ package MIA_NodeRequirements {
     satisfy r_req_ga_041 by mia.graphApp;
     satisfy r_req_ga_042 by mia.graphApp;
     satisfy r_req_ga_043 by mia.graphApp;
+    satisfy r_req_gtb_053 by mia.persistence;
+    satisfy r_req_gtb_054 by mia.persistence;
+    satisfy r_req_gtb_055 by mia.persistence;
+    satisfy r_req_gtb_056 by mia.persistence;
+    satisfy r_req_gtb_057 by mia.persistence;
+    satisfy r_req_gtb_058 by mia.persistence;
+    satisfy r_req_gtb_059 by mia.persistence;
+    satisfy r_req_gtb_060 by mia.persistence;
+    satisfy r_req_wfm_166 by mia.taskRuntime;
+    satisfy r_req_wfm_167 by mia.taskRuntime;
+    satisfy r_req_run_040 by mia.taskRuntime;
+    satisfy r_req_run_041 by mia.taskRuntime;
+    satisfy r_req_run_047 by mia.taskRuntime;
+    satisfy r_req_run_042 by mia.taskRuntime;
+    satisfy r_req_run_043 by mia.taskRuntime;
+    satisfy r_req_run_044 by mia.taskRuntime;
+    satisfy r_req_run_045 by mia.taskRuntime;
+    satisfy r_req_run_046 by mia.taskRuntime;
+    satisfy r_req_wfm_168 by mia.taskRuntime;
     allocate r_req_clv_001 to mia.frontEnd;
     allocate r_req_clv_002 to mia.frontEnd;
     allocate r_req_clv_003 to mia.frontEnd;
@@ -7809,6 +7942,25 @@ package MIA_NodeRequirements {
     allocate r_req_ga_041 to mia.graphApp;
     allocate r_req_ga_042 to mia.graphApp;
     allocate r_req_ga_043 to mia.graphApp;
+    allocate r_req_gtb_053 to mia.persistence;
+    allocate r_req_gtb_054 to mia.persistence;
+    allocate r_req_gtb_055 to mia.persistence;
+    allocate r_req_gtb_056 to mia.persistence;
+    allocate r_req_gtb_057 to mia.persistence;
+    allocate r_req_gtb_058 to mia.persistence;
+    allocate r_req_gtb_059 to mia.persistence;
+    allocate r_req_gtb_060 to mia.persistence;
+    allocate r_req_wfm_166 to mia.taskRuntime;
+    allocate r_req_wfm_167 to mia.taskRuntime;
+    allocate r_req_run_040 to mia.taskRuntime;
+    allocate r_req_run_041 to mia.taskRuntime;
+    allocate r_req_run_047 to mia.taskRuntime;
+    allocate r_req_run_042 to mia.taskRuntime;
+    allocate r_req_run_043 to mia.taskRuntime;
+    allocate r_req_run_044 to mia.taskRuntime;
+    allocate r_req_run_045 to mia.taskRuntime;
+    allocate r_req_run_046 to mia.taskRuntime;
+    allocate r_req_wfm_168 to mia.taskRuntime;
 
     dependency from r_req_clv_001 to r_req_fe_001;
     dependency from r_req_clv_002 to r_req_fe_002;
@@ -8535,5 +8687,24 @@ package MIA_NodeRequirements {
     dependency from r_req_ga_041 to nfr14;
     dependency from r_req_ga_042 to nfr13;
     dependency from r_req_ga_043 to nfr12;
+    dependency from r_req_gtb_053 to fr65;
+    dependency from r_req_gtb_054 to fr65;
+    dependency from r_req_gtb_055 to fr65;
+    dependency from r_req_gtb_056 to fr65;
+    dependency from r_req_gtb_057 to fr65;
+    dependency from r_req_gtb_058 to fr65;
+    dependency from r_req_gtb_059 to fr65;
+    dependency from r_req_gtb_060 to nfr17;
+    dependency from r_req_wfm_166 to fr65;
+    dependency from r_req_wfm_167 to fr65;
+    dependency from r_req_run_040 to fr65;
+    dependency from r_req_run_041 to fr65;
+    dependency from r_req_run_047 to fr65;
+    dependency from r_req_run_042 to fr65;
+    dependency from r_req_run_043 to fr65;
+    dependency from r_req_run_044 to fr65;
+    dependency from r_req_run_045 to fr65;
+    dependency from r_req_run_046 to fr65;
+    dependency from r_req_wfm_168 to nfr17;
 }
 // END GENERATED: node requirements
