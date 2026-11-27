@@ -150,7 +150,7 @@ $('next').addEventListener('click', () => { const v = neighbour(versions, curren
 // a selected step in the viewing mode: its fields, and for the owner the form that copies it into another graph (FR-94)
 function showStep(step, info) {
   renderPanel(document, $('detail'), step, info);
-  if (!isOwner || editing || overlay || !step || info?.kind === 'missing' || step.data?.type === 'missing') return;
+  if (!isOwner || editing || overlay || !step || info?.kind === 'missing' || step.data?.type === 'missing' || !kindInfo().editable) return;   // round 05 CP22: no copy out of a kind the editor cannot change
   renderCopyPanel(document, $('detail'), step, graphs, chosen, {
     onCopy: async ({ target, name }) => {
       const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/copy-step`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: step.id, target, name, version: current.version }) });
@@ -215,7 +215,7 @@ function draw() {
   $('problems').replaceChildren(...named.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
   renderPanel(document, $('detail'), null);
   if (editing && history) refreshUndo();
-  $('restore').hidden = !(isOwner && !editing && !overlay && current.version !== current.current);
+  $('restore').hidden = !(isOwner && !editing && !overlay && current.version !== current.current && kindInfo().editable);   // round 05 CP22: no restore of a kind the editor cannot change
   $('replay-bar').hidden = !overlay;
   $('edit-toggle').disabled = !canEdit(storeStatus) || Boolean(overlay) || !kindInfo().editable;
   if (!kindInfo().editable) { $('edit-toggle').title = kindInfo().reason; $('kind-note').textContent = kindInfo().reason; } else $('kind-note').textContent = '';

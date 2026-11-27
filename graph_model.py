@@ -180,6 +180,19 @@ class GraphModel:
             doc = self.tables.get(table, pin["id"], pin["version"])["doc"]
             ends = {end: local(doc[end]) for end in ("from", "to") if end in doc}
             return {**doc, "id": local(doc["id"]), **ends}
+        if data["kind"] not in MEMBER_TABLES:
+            # PROTOTYPE round 05 CP22: a kind this program does not know (a store of a newer program, D-404) has no known member tables; each member
+            # is read from whichever known table holds its record, so the graph can be shown read-only with its kind named (FR-48, finding for Plan)
+            def found(pin, tables):
+                for table in tables:
+                    try:
+                        return member(table, pin)
+                    except Exception:       # noqa: BLE001 -- not in this table
+                        continue
+                return {"id": local(pin["id"]), "data": {"type": "unknown"}}
+            return {"id": header["id"], "kind": data["kind"], **{key: data.get(key, "") for key in HEADER},
+                    "nodes": [found(pin, [n for n, _ in MEMBER_TABLES.values()]) for pin in data["nodes"]],
+                    "edges": [found(pin, [e for _, e in MEMBER_TABLES.values()]) for pin in data["edges"]]}
         node_table, edge_table = MEMBER_TABLES[data["kind"]]
         kind = {"kind": "context"} if data["kind"] == "context" else {}        # a workflow graph keeps the shape it had before (REQ-WFM-157)
         return {"id": header["id"], **kind, **{key: data[key] for key in HEADER},

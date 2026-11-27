@@ -215,6 +215,18 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
     def owner_only():
         return None if is_owner(getattr(g, "account", None)) else (jsonify({"error": "not_owner"}), 403)
 
+    def kind_refusal(graph_id):
+        """PROTOTYPE round 05 CP22 (FR-72, FR-73, D-404, D-602): None when the editor may change a graph of this kind; otherwise the refusal, from the
+        same kinds answer the page reads: 422 unknown_kind for a kind the registry does not have, 422 not_editable with the reason for a known kind
+        whose profile is not editable (context, until G-V4.CONTEXT). Nothing is written."""
+        kind = wmodel.read_graph(graph_id).get("kind", "workflow")
+        entry = graph_profiles_proto.kinds_answer()["kinds"].get(kind)
+        if entry is None:
+            return jsonify({"error": "unknown_kind", "kind": kind}), 422
+        if not entry["editable"]:
+            return jsonify({"error": "not_editable", "kind": kind, "reason": entry["reason"]}), 422
+        return None
+
     def full_graph(graph_id, body):
         """the graph a request describes: its steps and connections, with the header of the stored graph"""
         stored = wmodel.read_graph(graph_id)
@@ -239,8 +251,11 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
                 return jsonify({"error": "not_found", "detail": "version"}), 404
             current = max(versions)
             old = wmodel.read_graph(graph_id, version)
+            refused = kind_refusal(graph_id)
         except StorageError:
             return jsonify({"error": "not_found"}), 404
+        if refused:
+            return refused
         wmodel.author = g.account
         saved = wmodel.save_graph(old)
         if not saved.saved:
@@ -337,8 +352,11 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         try:
             current = max(e["version"] for e in wmodel.graph_versions(graph_id))
             graph = full_graph(graph_id, body)
+            refused = kind_refusal(graph_id)
         except StorageError:
             return jsonify({"error": "not_found"}), 404
+        if refused:
+            return refused
         if graph is None:
             return jsonify({"error": "invalid", "detail": "graph"}), 422
         if body.get("expected_version") is not None and body["expected_version"] != current:
