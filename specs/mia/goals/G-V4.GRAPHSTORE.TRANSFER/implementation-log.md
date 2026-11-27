@@ -158,6 +158,8 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 
 **Amendments (D-550):** A-196 (V-2) and A-197 (V-4) drafted in `specs/mia/amendments/A-196-197/`, note `A-196-197-note.md`, install script `tools/apply_amendment_a196_a197.sh`. TC-SLY-040 is red on the branch by assertion (lag `{}`), files and database. The A-197 draft of TC-SLY-037 is green and fails on D1. The installed check passes D1.
 
+
+**A-196 implemented (after the owner's install 5fd14c6d and approval):** records no graph names are synced like a graph (`_unnamed_records`, `_set_aside_record` in `graph_store_transfer.py`); `_refuse_other_conflicts` is gone. Red first: the unit check that expected `conflict` was rewritten to `Sync.test_a_differing_record_outside_every_graph_is_set_aside_before_it_is_cut` (StorageError conflict), new `CopyInUse.test_a_record_no_graph_names_counts_in_the_lag_summary_without_a_time` (graphs 0 instead of 1); TC-SLY-040 red by assertion on both backends since the install. Then the code of the trial branch (`wip/transfer-a196-trial`, deleted afterwards), names and docstrings tidied. Green: the unit file, every `tests/acceptance/test_transfer_*.py` (TC-SLY-040 on files and PostgreSQL, none skipped), `test_migrate.py`, `test_graph_api_v2.py`; repro V-2a: orphan set aside and removed, graph group equal; V-2b: set aside, synced. Model block regenerated (`tools/gen_node_requirements_model.py`), `check_sysml.sh` and `check_sysml_model.py` OK.
 **Tests green (my runs, feedback only):** `tests/test_graph_store_transfer.py`, `test_migrate.py`, `test_storage_copy.py`, `tests/acceptance/test_transfer_*.py` OK. `verify-repro/repro_sync_edges.py`: V-1 refused `locked`; V-3 refused `older_format` both times; V-2a/b unchanged (A-196). Full unit suite: 2648 tests, 1 failure in the first run (flake above), OK in the rerun.
 
 ## Findings
@@ -176,8 +178,8 @@ Goal: G-V4.GRAPHSTORE.TRANSFER   Line of work: goal/v4.graphstore.transfer   Sup
 | Amendment | Why | State |
 |---|---|---|
 | A-195 | D-543 to D-545: the copy setting's behaviour that no requirement text stated (REQ-API-064 changed, REQ-API-065, 066 new; TC-API-065 to 067) | drafts committed 2026-11-27; waits for the owner's install and approval (D-546) |
-| A-196 | V-2 of Verify, D-548: records no graph names synced like a graph (aside, cut back, removed when only on the copy), listed by the lag; REQ-SLY-024 to 027 changed, TC-SLY-040 new | drafts committed 2026-11-27 (D-550); waits for the owner's install and approval; trial implementation on `wip/transfer-a196-trial` |
-| A-197 | V-4 of Verify, D-548: TC-SLY-037 searches every folder the check made; REQ-SLY-037 acceptance criterion and TR-TRANSFER-011 changed | drafts committed 2026-11-27 (D-550); waits for the owner's install and approval |
+| A-196 | V-2 of Verify, D-548: records no graph names synced like a graph (aside, cut back, removed when only on the copy), listed by the lag; REQ-SLY-024 to 027 changed, TC-SLY-040 new | drafts committed 2026-11-27 (D-550); installed 5fd14c6d; approved by the owner in Emacs 2026-11-27; implemented (see Fixes after Verify) |
+| A-197 | V-4 of Verify, D-548: TC-SLY-037 searches every folder the check made; REQ-SLY-037 acceptance criterion and TR-TRANSFER-011 changed | drafts committed 2026-11-27 (D-550); installed 5fd14c6d; approved by the owner in Emacs 2026-11-27 |
 
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |

@@ -13,9 +13,10 @@ FileBackend, its root holds the aside folder, the lock and the format marker.
 - move_graph(source, target, graph_id) -> {"graphs": 1, "records": n}: the versions the target lacks, header last (REQ-SLY-031). A target whose
   history of the graph differs: StorageError("conflict", detail={"graph": graph_id}).
 - lag(live, copy) -> {graph ID: {"live": n, "copy": m, "state": "behind" | "differs" | "copy_only" | "refused", "reason": text or None}}, only
-  graphs that are not current (REQ-SLY-024).
+  graphs that are not current (REQ-SLY-024); a record no graph names is a row of its own under "<table>|<record ID>", its versions counted
+  (A-196).
 - sync_store(live, copy) -> {"graphs": n, "records": n, "set_aside": {graph ID: {"versions": [...], "file": path relative to the copy, "reason"}}}
-  (REQ-SLY-025 to 028, 038). Locked: StorageError("locked", detail={"lock": LOCK}).
+  (REQ-SLY-025 to 028, 038); a record no graph names is synced like a graph, under its lag key (A-196). Locked: StorageError("locked", detail={"lock": LOCK}).
 - lag_summary(live, copy) -> {"graphs": n, "since": time or None}: the lag in IF-104 v2 terms (REQ-API-064, D-540).
 - AutoSync(open_live, copy, name, log).run("start" | "stop") -> report: the sync as MIA runs it at start and orderly stop (REQ-API-062, 063);
   a live store that does not answer and a refused sync are one log line each, never an exception.
@@ -243,7 +244,7 @@ def _graphs(live, copy):
 def lag(live, copy):
     """Every graph that is not current on the copy, with its header versions in both stores, its state and its reason (REQ-SLY-024): behind
     (the copy lacks live versions), differs (the copy holds versions of the graph or a member the live store does not), copy_only, refused (the
-    live store's graph cannot be moved, reason: its rules, REQ-SLY-021)."""
+    live store's graph cannot be moved, reason: its rules, REQ-SLY-021). Then every record no graph names that is not current (A-196)."""
     node_ids = {table: set(live.ids(table)) for table in ("graph_nodes", "context_nodes")}
     out = {}
     for graph_id in _graphs(live, copy):
@@ -255,12 +256,31 @@ def lag(live, copy):
             row["state"] = _state(live, copy, graph_id)[0]
         if row["state"] != "current":
             out[graph_id] = row
+    for key, (state, (have, wanted, _)) in _unnamed_records(live, copy).items():
+        out[key] = {"live": len(wanted), "copy": len(have), "state": state, "reason": None}
+    return out
+
+
+def _unnamed_records(live, copy):
+    """{"<table>|<record ID>": (state, (copy entries, live entries, shared count))} of every record of the graph group that no graph names (no
+    header version in either store names it, no side record of a graph) and that is not current: synced like a graph (A-196)"""
+    named = {key for graph_id in _graphs(live, copy) for key in _graph_records(live, copy, graph_id)}
+    out = {}
+    for table in [t for t in GRAPH_GROUP if t in table_definitions() and t != HEADERS]:
+        for record_id in sorted(set(live.ids(table)) | set(copy.ids(table))):
+            if (table, record_id) in named:
+                continue
+            have, wanted = copy.versions(table, record_id), live.versions(table, record_id)
+            shared = _shared(have, wanted)
+            state = "copy_only" if not wanted else "differs" if len(have) > shared else "behind" if len(wanted) > len(have) else None
+            if state:
+                out["%s|%s" % (table, record_id)] = (state, (have, wanted, shared))
     return out
 
 
 def _aside_path(copy, graph_id, stamp):
     """a path under the aside folder, relative to the copy (REQ-SLY-027), that no earlier aside file uses"""
-    base = "%s/%s__%s" % (ASIDE, graph_id.replace("/", "_"), stamp)
+    base = "%s/%s__%s" % (ASIDE, graph_id.replace("/", "_").replace("|", "_"), stamp)
     path, n = base + ".json", 1
     while os.path.exists(os.path.join(copy.root, path)):
         n += 1
@@ -281,6 +301,17 @@ def _set_aside(copy, graph_id, records, state):
     return {"versions": [e["version"] for e in doc["header"]], "file": path, "reason": reason}
 
 
+def _set_aside_record(copy, key, record, state):
+    """Writes the copy's versions of one record no graph names that the live store does not hold to one aside file, durably (A-196)."""
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    reason = "the live store won" if state == "differs" else "the record exists only on the copy"
+    have, _, shared = record
+    doc = {"record": key, "set_aside_at": stamp, "reason": reason, "versions": have[shared:]}
+    path = _aside_path(copy, key, stamp)
+    copy.put_file(path, json.dumps(doc, ensure_ascii=False, indent=1, sort_keys=True))
+    return {"versions": [e["version"] for e in doc["versions"]], "file": path, "reason": reason}
+
+
 def _cut_back(copy, records):
     """Cuts every record of the graph back to the versions the live store shares, the header first, so the copy lists the graph at its last
     shared version, complete, at every step (REQ-SLY-038); a graph without a shared version leaves header first."""
@@ -289,31 +320,27 @@ def _cut_back(copy, records):
             copy.cut(table, record_id, shared)
 
 
-def _refuse_other_conflicts(live, copy, handled):
-    """A record of the graph group outside every graph whose history on the copy is not the start of the live one: refused before any write."""
-    for table in [t for t in GRAPH_GROUP if t in table_definitions()]:
-        for record_id in live.ids(table):
-            have = copy.versions(table, record_id)
-            if (table, record_id) not in handled and have != live.versions(table, record_id)[:len(have)]:
-                raise StorageError("conflict", detail={"table": table, "id": record_id})
-
-
 def sync_store(live, copy):
     """Makes the copy's graph group equal the live store's (REQ-SLY-025); the live store wins. Under the copy's lock (REQ-SLY-028), after every
     graph of the live store is checked (REQ-SLY-021): each graph that differs or exists only on the copy is written to an aside file first
     (REQ-SLY-026, 027), then cut back (REQ-SLY-038); then the live versions the copy lacks follow, members before headers (REQ-SLY-019).
-    "graphs" counts the graphs that were not current, "records" the versions appended."""
+    A record no graph names is set aside and cut back alike, removed when only on the copy (A-196). "graphs" counts the rows of the lag
+    before the sync, "records" the versions appended."""
     with copy_lock(copy.root):
         check_formats(live, copy)
         check_graphs(live, live.ids(HEADERS))
         states = {graph_id: _state(live, copy, graph_id) for graph_id in _graphs(live, copy)}
         states = {graph_id: found for graph_id, found in states.items() if found[0] != "current"}
-        _refuse_other_conflicts(live, copy, {key for _, records in states.values() for key in records})
-        answer = {"graphs": len(states), "records": 0, "set_aside": {}}
+        unnamed = _unnamed_records(live, copy)
+        answer = {"graphs": len(states) + len(unnamed), "records": 0, "set_aside": {}}
         for graph_id, (state, records) in sorted(states.items()):
             if state in ("differs", "copy_only"):
                 answer["set_aside"][graph_id] = _set_aside(copy, graph_id, records, state)
                 _cut_back(copy, records)
+        for key, (state, record) in sorted(unnamed.items()):
+            if state in ("differs", "copy_only"):
+                answer["set_aside"][key] = _set_aside_record(copy, key, record, state)
+                copy.cut(*key.split("|", 1), record[2])
         tables = [t for t in GRAPH_GROUP if t in table_definitions()]
         answer["records"] = sum(len(live.versions(t, i)) - len(copy.versions(t, i)) for t in tables for i in live.ids(t))
         copy_records(live, copy, tables)
@@ -322,10 +349,11 @@ def sync_store(live, copy):
 
 def lag_summary(live, copy):
     """`graphs`: the graphs not current on the copy; `since`: the time of the oldest header version the live store has and the copy lacks, None
-    when there is none (REQ-API-064). Headers only: the lag is counted by graph (REQ-SLY-024), members of one save carry the same second (D-540)."""
+    when there is none (REQ-API-064). `graphs` counts every row of the lag, a record no graph names as one (A-196); `since` from header
+    versions only, as members of one save carry the same second (D-540)."""
     rows = lag(live, copy)
     times = []
-    for graph_id in rows:
+    for graph_id in [key for key in rows if "|" not in key]:
         have = copy.versions(HEADERS, graph_id)
         missing = [entry for k, entry in enumerate(live.versions(HEADERS, graph_id)) if k >= len(have) or have[k] != entry]
         if missing:

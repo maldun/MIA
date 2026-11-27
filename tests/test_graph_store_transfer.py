@@ -197,20 +197,26 @@ class Sync(unittest.TestCase):
         self.assertNotIn("own", self.copy.ids("graphs"))
         self.assertEqual(ts.graph_group(self.copy), ts.graph_group(self.live))
 
-    @mark.req("REQ-SLY-025")
-    def test_a_differing_record_outside_every_graph_is_a_conflict_before_any_write(self):
-        """Example: graph_nodes `loose/x` differs and no header names it: StorageError conflict naming it; the copy is unchanged."""
-        # Given: a step no graph names, with another history on each side, and a live graph the copy lacks
+    @mark.req("REQ-SLY-025", "REQ-SLY-026")
+    def test_a_differing_record_outside_every_graph_is_set_aside_before_it_is_cut(self):
+        """A-196: a record no graph names is synced like a graph, and no longer refused as a conflict.
+        Example: graph_nodes `loose/x` differs: aside file first, then the copy's version cut, then the live one; a live graph version follows."""
+        # Given: a step no graph names, with another history on each side, and a live graph version the copy lacks
         for store, author in ((self.live, "ann"), (self.copy, "bob")):
             store.append("graph_nodes", "loose/x", {"id": "loose/x", "version": 1, "author": author, "time": ts.STAMP,
                                                     "doc": {"id": "loose/x", "data": {"type": "data"}}})
         ts.new_multi_version(self.live, "new")
-        before = ts.entries(self.copy)
-        # When / Then: the sync is refused naming the record, and nothing is written
-        with self.assertRaises(StorageError) as refused:
-            transfer.sync_store(self.live, self.copy)
-        self.assertEqual((refused.exception.code, refused.exception.detail), ("conflict", {"table": "graph_nodes", "id": "loose/x"}))
-        self.assertEqual(ts.entries(self.copy), before)
+        own = self.copy.versions("graph_nodes", "loose/x")
+        logged = ts.WriteLog(self.copy)
+        # When: the copy is synced
+        answer = transfer.sync_store(self.live, logged)
+        # Then: the record is set aside with the copy's version, the aside file is written before the cut
+        named = answer["set_aside"]["graph_nodes|loose/x"]
+        self.assertEqual((named["versions"], named["reason"]), ([1], "the live store won"))
+        self.assertEqual(ts.read_json(os.path.join(self.copy.root, named["file"]))["versions"], own)
+        self.assertLess(logged.log.index(("file", named["file"])), logged.log.index(("cut", "graph_nodes|loose/x")))
+        # And: the copy equals the live store, the new graph version included
+        self.assertEqual(ts.graph_group(self.copy), ts.graph_group(self.live))
 
     @mark.req("REQ-SLY-028")
     def test_the_lock_is_refused_while_held_and_free_after(self):
@@ -443,6 +449,15 @@ class CopyInUse(unittest.TestCase):
         # When / Then: one graph lags, since the header version 5
         self.assertEqual(transfer.lag_summary(self.live, self.copy),
                          {"graphs": 1, "since": self.live.versions("graphs", ts.MULTI)[4]["time"]})
+
+    def test_a_record_no_graph_names_counts_in_the_lag_summary_without_a_time(self):
+        """A-196: the summary counts every row of the lag; `since` stays counted from header versions (D-540).
+        Example: one step no header names, only live: {"graphs": 1, "since": None}."""
+        # Given: an equal copy and one live step that no header names
+        self.live.append("graph_nodes", "loose/x", {"id": "loose/x", "version": 1, "author": "ann", "time": ts.STAMP,
+                                                    "doc": {"id": "loose/x", "data": {"type": "data"}}})
+        # When / Then: the summary counts it, with no header time
+        self.assertEqual(transfer.lag_summary(self.live, self.copy), {"graphs": 1, "since": None})
 
     @mark.req("REQ-API-064")
     def test_since_is_the_oldest_over_all_lagging_graphs(self):
