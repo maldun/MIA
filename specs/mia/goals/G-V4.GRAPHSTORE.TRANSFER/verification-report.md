@@ -189,6 +189,8 @@ Notes, no finding: the two flaky checks of the log were green in my one full run
 V-2, V-3 and V-4 if the owner chooses "accept" in questions 1, 3 and 4; question 2 of the open questions (`library-seed`).
 
 ## Owner's decisions (prepared; batched by group, recommended option first)
+**Answered 2026-11-27 (D-548):** V-1 (a) Phase 3 fix; V-2 (a) amendment A-196; V-3 (a) Phase 3 fix; V-4 (a) amendment A-197; V-5 fixed on `goal/v4` in b259b533. Verdict and V-6 after the fixes; then re-verify the fix commits only.
+
 **Group MV/SY (move and sync):**
 1. *V-2, records no graph names:* (a) **recommended:** Phase 2 amendment. The sync treats such a record like a graph: the copy's own versions go to an aside file, then the record is cut back to the live history (removed if the record is only on the copy). The lag lists it as a row `records` with the record's ID. Then Phase 3. (b) Accept as a deviation, with one sentence in REQ-SLY-025 ("records named by a graph or a side record") and the lag listing lone differing records, so that a refused sync is not a surprise. (c) Accept as built.
 2. *V-1, the lock of a whole-store move:* (a) **recommended:** Phase 3 fix (`move_store` under the copy's lock for a files target), with a failing unit test first. (b) Narrow REQ-SLY-028 to "a sync or a one-graph move" by amendment.
