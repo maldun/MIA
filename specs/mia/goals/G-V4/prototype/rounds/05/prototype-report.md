@@ -1,7 +1,7 @@
 # Prototype report: G-V4, round 05 (G-V4.EDIT, MVP)
 
 Status: Prototype (reviewable draft, no product guarantees until parts are `real`) · Location: `specs/mia/goals/G-V4/prototype/rounds/05/` · Code: worktree `/home/maldun/prog/Python/MIA/.claude/worktrees/prototype-g-v4`, branch `prototype/g-v4`
-Scope: the outcomes of G-V4.EDIT not tried in round 02 (`run.md`) · Budget: 5 checkpoints of about an hour · State: CP21 and CP22 done; CP23 to CP25 open
+Scope: the outcomes of G-V4.EDIT not tried in round 02 (`run.md`) · Budget: 5 checkpoints of about an hour · State: CP21 to CP23 done; CP24 and CP25 open
 
 ## Question
 Can one editor, which knows no kind of graph, build its forms, checks and choices from a description of the graph's kind that the backend gives (FR-92, D-403, D-404, D-471 (2)), refuse to change graphs of kinds it cannot edit (FR-72, FR-73, D-602), copy a step only within its kind (FR-94), and fit into VIEW's frame in a layout the owner chooses (FB-1)?
@@ -23,6 +23,11 @@ FR-68 to FR-74, FR-91, FR-92, FR-94, NFR-18 of `specs/mia/goals/G-V4.EDIT/top-le
   - One guard in the prototype backend (`kind_refusal`) reads the same kinds answer as the page. It answers `422 unknown_kind` with the kind for a kind the registry does not have, and `422 not_editable` with the kind and the reason for a known kind whose profile is not editable.
   - The page disables "Edit this graph" (CP21) and hides the restore button and the copy form for such a graph.
   - Checked before the fix (6 of 13 failed), then 13 pass.
+- **CP23: copy within the kind.**
+  - `copy-step` compares the kinds of both graphs. Different kinds are refused with `422 kinds_differ`, naming `from_kind` and `to_kind`. The same kind that the editor cannot change gets CP22's refusal (`not_editable` or `unknown_kind`). Nothing is written in either graph.
+  - The copy form offers only graphs of the source graph's kind, and says why a copy was refused.
+  - `proto_checks/cp23_check.py`: 8 of 13 failed before the change, 13 pass after. `cp23.test.mjs` adds 2 checks. Round 02's `cp10` (independent copy, own history, names, rules, owner only, live store) is rerun: 20 pass.
+  - The fixtures of CP22 moved to `proto_checks/cp22_check_fixtures.py`, so both checks share them.
 
 ## Findings
 1. **The round 02 forms come out of the profile unchanged.** Same fields, labels, start contents and messages for the three workflow types. The only visible difference is the internal field name of the stop limits (`stop.max_repetitions` instead of `max_repetitions`), which `cp8.test.mjs` now uses.
@@ -45,6 +50,10 @@ FR-68 to FR-74, FR-91, FR-92, FR-94, NFR-18 of `specs/mia/goals/G-V4.EDIT/top-le
 8. **The refusals of an unknown kind were not one answer.** Before CP22 a keep gave `422 rules_broken` with the rule `unknown_kind`, and a restore gave `422 refused` with `schema_break`/`kind`. Now both give `422 unknown_kind` with the kind, which is what FR-72 and FR-73 ask ("refused with the reason unknown kind"). **For IF-104 v3:** two error rows, `unknown_kind` and `not_editable`, on routes 9, 10 and `copy-step`.
 9. **Open for the owner:** saving the arrangement of a graph the editor cannot change is still allowed (FR-74: the arrangement is not a version and the same for everyone). Allow it (the owner can tidy a context graph's picture) or refuse it with the same guard?
 
+10. **A workflow step could be copied into a context graph.** Before CP23 the copy was kept as a new version of `ctx.one`, because the context rules do not look at step types. A context step copied into a workflow graph was refused only through the rule `step_kind`, which says nothing about kinds. VIEW's product backend has no `copy-step` route (it is IF-104 v3, EDIT's), so this exists only in the prototype. **For IF-104 v3:** the `kinds_differ` row with both kinds, checked before the rules.
+11. **The field checks of a profile live only in the page.** The rules check the graph, but nothing on the backend checks a node against its type's fields: a keep or a copy sent directly can carry, for example, a processing step without a tool, or a stop limit of `-1`. The run sheet asked that a copy keep the target profile's checks. Within one kind the content is the same as in the source graph, which the same keep path accepted, so CP23 adds nothing here. **For Plan:** whether the backend checks the fields of the profile on keep and copy (one more refusal, `invalid` with the field), or the page alone. Today the rule set is the only backend check (FR-70).
+12. **Round 02's copy form offered context graphs as targets** (`cp10.test.mjs` expected `ctx.main`); D-403 came after round 02. The expectation was changed, with a second workflow target `plan.b` in the fixture so the form's checks still test two targets.
+
 ## Assumptions and choices the prototype made
 | ID | Choice | Alternative | Why |
 |---|---|---|---|
@@ -58,7 +67,8 @@ FR-68 to FR-74, FR-91, FR-92, FR-94, NFR-18 of `specs/mia/goals/G-V4.EDIT/top-le
 |---|---|---|
 | CP21 kinds answer, profile consistency, the JSON copy | `/home/maldun/prog/Python/venvs/mia312/bin/python proto_checks/cp21_check.py` | 15 pass, 2026-11-27, Fedora host |
 | CP21 profile-driven editor, a made-up kind | `node --test proto_checks/cp21.test.mjs` | 4 pass, 2026-11-27 |
+| CP23 copy across kinds and within a kind the editor cannot change | `/home/maldun/prog/Python/venvs/mia312/bin/python proto_checks/cp23_check.py`; `node --test proto_checks/cp23.test.mjs` | 13 pass (8 failed before the change); 2 pass, 2026-11-28 |
 | CP22 context and unknown kind: read, keep and restore refused, nothing written | `/home/maldun/prog/Python/venvs/mia312/bin/python proto_checks/cp22_check.py` | 13 pass (6 failed before the guard), 2026-11-28 |
 | product tests touching the read path | `tests/test_graph_model_*.py` (4 files), `tests/acceptance/test_view_backend.py` | OK |
 | round 02 and 04 regression after the merge | `cp8_check.py`, `cp9_check.py`, `cp10_check.py`, `cp11_check.py`, `cp19_check.py` | 24, 19, 20, 21, 14 pass |
-| all prototype JS checks | `node --test "proto_checks/*.test.mjs"` | 64 pass |
+| all prototype JS checks | `node --test "proto_checks/*.test.mjs"` | 66 pass (after CP23) |

@@ -8,6 +8,7 @@ const graphs = [
   { id: 'research', kind: 'workflow', version: 3, steps: 9, connections: 8, description: 'checks claims' },
   { id: 'chat.answer', kind: 'workflow', version: 1, steps: 4, connections: 3, description: 'answers' },
   { id: 'ctx.main', kind: 'context', version: 2, steps: 5, connections: 4, description: '' },
+  { id: 'plan.b', kind: 'workflow', version: 1, steps: 2, connections: 1, description: 'second target' },   // round 05 CP23: a second workflow target, since ctx.main is no longer one
 ];
 
 function fakeDoc() {
@@ -20,8 +21,9 @@ function fakeDoc() {
 const all = (e) => [e, ...e.children.flatMap(all)];
 
 test('FR-94: the other graphs are offered, never the one the step is in, narrowed by what was typed', () => {
-  assert.deepEqual(copyTargets(graphs, 'research', '').map((g) => g.id), ['chat.answer', 'ctx.main']);
-  assert.deepEqual(copyTargets(graphs, 'research', 'ctx').map((g) => g.id), ['ctx.main']);
+  // round 05 CP23: only graphs of the same kind (D-403, decided after round 02); ctx.main is a context graph and no longer offered
+  assert.deepEqual(copyTargets(graphs, 'research', '').map((g) => g.id), ['chat.answer', 'plan.b']);
+  assert.deepEqual(copyTargets(graphs, 'research', 'ctx').map((g) => g.id), []);
   assert.deepEqual(copyTargets(graphs, 'research', 'research'), []);
   assert.deepEqual(copyTargets(null, 'x', ''), []);
 });
@@ -48,11 +50,11 @@ test('FR-94: the form is text and inputs only, the button waits for a graph, and
   form.button.listeners.click();
   assert.deepEqual(got, []);                                                      // nothing chosen: nothing sent
   form.list.children[1].listeners.click();
-  assert.equal(form.chosen, 'ctx.main');
+  assert.equal(form.chosen, 'plan.b');
   assert.equal(form.button.disabled, false);
   form.name.value = '  copy  ';
   form.button.listeners.click();
-  assert.deepEqual(got, [{ target: 'ctx.main', name: 'copy' }]);
+  assert.deepEqual(got, [{ target: 'plan.b', name: 'copy' }]);
   form.search.value = 'chat'; form.search.listeners.input();
   assert.equal(form.list.children.length, 1);
 });
@@ -63,7 +65,7 @@ test('FR-94: the list is reachable by keyboard (Enter and Space choose)', () => 
   form.list.children[0].listeners.keydown({ key: ' ', preventDefault() {} });
   assert.equal(form.chosen, 'chat.answer');
   form.list.children[1].listeners.keydown({ key: 'Enter', preventDefault() {} });
-  assert.equal(form.chosen, 'ctx.main');
+  assert.equal(form.chosen, 'plan.b');
   assert.equal(form.list.children[0].attrs.tabindex, undefined);
 });
 

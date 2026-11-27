@@ -3,8 +3,11 @@ import { filterGraphs, entryLabel } from './list-filter.js';
 
 const el = (doc, tag, text) => { const e = doc.createElement(tag); if (text !== undefined) e.textContent = text; return e; };
 
-/** the graphs a step can be copied into: every stored graph except the one it is in, narrowed by what was typed */
-export const copyTargets = (graphs, sourceId, text) => filterGraphs((graphs ?? []).filter((g) => g.id !== sourceId), text);
+/** the graphs a step can be copied into: every other stored graph of the same kind (round 05 CP23, FR-94, D-403), narrowed by what was typed */
+export function copyTargets(graphs, sourceId, text) {
+  const kind = (graphs ?? []).find((g) => g.id === sourceId)?.kind ?? 'workflow';
+  return filterGraphs((graphs ?? []).filter((g) => g.id !== sourceId && (g.kind ?? 'workflow') === kind), text);
+}
 
 /** what the owner is told after the copy was tried; `status` is the HTTP status, `body` the answer */
 export function copyMessage(status, body, step, target) {
@@ -12,6 +15,9 @@ export function copyMessage(status, body, step, target) {
   if (status === 409 && body?.error === 'name_taken') return `${target} already has a step named "${body.name}": choose another name for the copy.`;
   if (status === 422 && body?.rules) return `The copy would break a rule in ${target} and was not made: ${body.rules.map((r) => `${r.rule} (${r.parts.join(', ')})`).join('; ')}`;
   if (status === 422 && body?.error === 'same_graph') return 'Choose another graph: a step is copied into a different graph.';
+  if (status === 422 && body?.error === 'kinds_differ') return `A step is copied only into a graph of the same kind: this is a ${body.from_kind} graph, ${target} is a ${body.to_kind} graph. Nothing was copied.`;
+  if (status === 422 && body?.error === 'unknown_kind') return `The program does not know the kind "${body.kind}" of ${target}: nothing was copied.`;
+  if (status === 422 && body?.error === 'not_editable') return `${body.reason} Nothing was copied.`;
   if (status === 503) return 'The live store cannot be reached: nothing was copied.';
   if (status === 403) return 'Only the owner can copy a step into a graph.';
   return `The step was not copied (${status} ${body?.error ?? ''}).`;

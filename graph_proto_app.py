@@ -219,7 +219,9 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         """PROTOTYPE round 05 CP22 (FR-72, FR-73, D-404, D-602): None when the editor may change a graph of this kind; otherwise the refusal, from the
         same kinds answer the page reads: 422 unknown_kind for a kind the registry does not have, 422 not_editable with the reason for a known kind
         whose profile is not editable (context, until G-V4.CONTEXT). Nothing is written."""
-        kind = wmodel.read_graph(graph_id).get("kind", "workflow")
+        return refusal_for_kind(wmodel.read_graph(graph_id).get("kind", "workflow"))
+
+    def refusal_for_kind(kind):
         entry = graph_profiles_proto.kinds_answer()["kinds"].get(kind)
         if entry is None:
             return jsonify({"error": "unknown_kind", "kind": kind}), 422
@@ -437,6 +439,13 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         step = next((n for n in source["nodes"] if n["id"] == step_id), None)
         if step is None:
             return jsonify({"error": "not_found", "detail": "step"}), 404
+        # PROTOTYPE round 05 CP23 (FR-94, D-403, D-404): only within one kind, and only a kind the editor may change; both kinds named when they differ
+        from_kind, to_kind = source.get("kind", "workflow"), target.get("kind", "workflow")
+        if from_kind != to_kind:
+            return jsonify({"error": "kinds_differ", "from_kind": from_kind, "to_kind": to_kind}), 422
+        refused = refusal_for_kind(to_kind)
+        if refused:
+            return refused
         if not isinstance(name, str) or not name.strip() or "/" in name:
             return jsonify({"error": "invalid", "detail": "name"}), 422
         if any(n["id"] == name for n in target["nodes"]):
