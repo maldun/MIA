@@ -11,6 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-369: editing context graphs is its 
 - Line of work: goal/v4.context
 - Subgoals: –
 - Depends on: G-V4.GRAPHSTORE (context graphs in the stored form), G-V4.VIEW, G-V4.EDIT (the editor)
+- Order: planned before G-V4.EDIT (D-606, 2026-11-28); EDIT's Plan is paused. Open for this goal's Plan step 0: who builds the editor core (D-403 gave it to EDIT), and how a node type and its fields are described for categories with a JSON schema (the editor profile of EDIT's prototype round 05 describes fixed types per kind, `../G-V4/prototype/rounds/05/prototype-report.md` finding 13)
 - Status: Agreed
 
 ## Outcome criteria

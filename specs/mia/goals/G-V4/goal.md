@@ -9,7 +9,7 @@ Opened 2026-11-20 on the owner's request ("G-V4 starts a bigger rework"). Scope 
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4
-- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, G-V4.CONTEXT (after EDIT), G-V4.BUILDER (after CONTEXT)
+- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, G-V4.CONTEXT (planned before EDIT, D-606), G-V4.BUILDER (after CONTEXT)
 - Status: Proposed
 
 ## Owner's scope of 2026-11-20 (D-360)
@@ -81,6 +81,7 @@ Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for th
 | FR-21 | partly | the graph app needs login and attributes every edit to the account (G-V4.EDIT); no change to accounts |
 | NFR-3 | in | stored code and imported steps stay data until the toolbox runs them (G-V4.GRAPHAPI, THR-013); the refusal of harmful imports with a recorded case is in G-V5.LEFTOVER |
 | REQ-GA-010 | in | the viewer works inside the home network and loads nothing from outside (NFR-13 of G-V4.VIEW); the rest of NFR-5 is not changed |
+| REQ-GA-021, REQ-GA-027, REQ-GA-037, REQ-GA-045 | in | the Targets of TD-91 to TD-94, deferred from G-V4.VIEW to the Plan of G-V4.EDIT (D-502, D-600 (2)) |
 | NFR-6 | partly | the graph app is reached only through the same authenticated access (G-V4.VIEW); no change to the access rules |
 | NFR-8 | in | files and database behave the same behind the storage interface (G-V4.GRAPHSTORE) |
 | NFR-9 | partly | the graph app runs as its own container (G-V4.VIEW); the other containers are unchanged |
