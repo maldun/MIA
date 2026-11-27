@@ -12,7 +12,7 @@ Supersedes `handover-2026-11-27-g-v4-view-deploy-done.md` for the session that p
 Lesson behind the tools: a deliberate defect restored with the same size within the same second left stale bytecode, so later checks ran the defect (TRANSFER T-06 finding). Use `tools/plant_defects.py` instead of hand-made sed and copy scripts.
 
 ## Waiting for the owner
-- [ ] REQ-GA-016: your commit `4e989647` set the copy in `specs/mia/goals/G-V4.VIEW/requirements.md` to Draft; approve it there. The node file `specs/mia/nodes/N-5-graph-app/requirements.md` (the source of the generated model block) still says `Verified` with A-176's new text: set it to Draft and approve it there too, then run `python3 -I tools/gen_node_requirements_model.py .` (the agent can do that step).
+- [ ] REQ-GA-016 (state at the end of this session): the node file `specs/mia/nodes/N-5-graph-app/requirements.md` says `Approved` in the working tree but is **not committed**; the goal copy `specs/mia/goals/G-V4.VIEW/requirements.md` still says `Draft` (`4e989647`). Approve the goal copy, save, commit both (`git add` of the two paths in the `goal-v4` worktree). Then the next session runs `python3 -I tools/gen_node_requirements_model.py .`, `python3 -I tools/check_sysml_model.py .` and `bash tools/check_sysml.sh specs/mia/architecture.sysml`, and commits `specs/mia/architecture.sysml` ("docs: model block regenerated, REQ-GA-016 approved").
 - [ ] RUN: REQ-GTB-060 (text changed twice, still Approved) and REQ-GTB-043 (Draft) in `/home/maldun/prog/Python/MIA/.claude/worktrees/goal-v4-run/specs/mia/goals/G-V4.GRAPHAPI.RUN/requirements.md`; A-189 as a joint amendment of IF-301.
 
 ## Next (pick one per session)
