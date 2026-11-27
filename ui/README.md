@@ -491,6 +491,9 @@ Changes to a check, a prompt, a pipeline or a model are judged by running the sa
   (the same status every time?), cost (seconds, model calls, characters), and the paired comparison of two runs with the exact sign test.
 - **Runs** (`harness.py`, `tools/eval.py`): `python tools/eval.py run <suite> --pin MP-light [--variant name] [--repeats n] [--tag t] [--pipeline id@version] [--skill s]`; the variant is saved with the run
   in `data/eval/`; `report <suite|file>`, `compare <fileA> <fileB>` or `compare <suite> <variantA> <variantB>`, `list`, `cases <suite>`. A case that breaks the target is an `error:` result, not the end of the run.
+  `--stored` (G-V4.GRAPHAPI.RUN T-04, REQ-WFM-110 to 114) runs the skill from its own graph: the graph is converted and bound as the graph path does it, saved into a throw-away files store, and
+  the case runs through `Core` with `graph_store=` (the stored-graph path, REQ-RUN-042) on the model of the pin; the run header gets `stored_graph` (path, graph ID, version). Not together with
+  `--pipeline` or `--converted`; for the extraction suite add `--skill extract_claims`. A case that the core runs on the old runner instead is an `error:` result naming the stored graph.
 - **The rule** from here on: a check or pipeline change that touches behaviour gets a case first (a failing one), then the fix. `tests/test_harness.py` runs the `hard_checks` suite as a regression (every case
   must match, no false pass, deterministic); the model suites are run by hand (`tools/eval.py run computable --pin MP-light`) because they need the model and take minutes.
 - What the first run of `hard_checks` found: **four false passes** (an exact integer result was accepted within a percentage tolerance, for example `250 * 4 = 1004` or 2 hours as 121 minutes) and a wrong

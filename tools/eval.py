@@ -6,6 +6,7 @@ The evaluation harness on the command line (ui/REQUIREMENTS_CORE.md 9). Run with
   python tools/eval.py run computable --pin MP-light --repeats 3             the same case 3 times: shows how stable the model is
   python tools/eval.py run computable --pin MP-light --variant c1 --pipeline verify.computable@1
   python tools/eval.py run hard_checks --pin MP-light --tag numeric --limit 10        only some cases
+  python tools/eval.py run verdicts --pin MP-light --repeats 3 --variant stored --stored      the skill runs from its graph saved into a throw-away store (REQ-WFM-110 to 114)
   python tools/eval.py run verdicts_vitaminc --pipeline verify.single@1 --pin MP-light --sample 100 --repeats 1     seeded sample, pinned model setting
   python tools/eval.py report hard_checks                  the report of the newest saved run of a suite (or of a file)
   python tools/eval.py compare data/eval/a.jsonl data/eval/b.jsonl     the same cases under two variants, with the exact sign test
@@ -29,9 +30,10 @@ os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
 from MIA.config import default_path as default_config  # noqa: E402
 
-from MIA import harness  # noqa: E402
+from MIA import harness, pipeline_graph, skill_converter  # noqa: E402
 from MIA.core import Core  # noqa: E402
 from MIA.events import environment, model_digests  # noqa: E402
+from MIA.graph_model import GraphModel  # noqa: E402
 from MIA.library import Library  # noqa: E402
 from MIA.run_workflow import WorkflowRuns  # noqa: E402
 from MIA.sandbox import create_router  # noqa: E402
@@ -88,8 +90,57 @@ def build_platform(cfg, core):
     return WorkflowRuns(library, core, pins={i: {"name": p["name"], "digest": p["digest"]} for i, p in PINS.items()}, held=held)
 
 
-def make_harness(cfg, core):
+def make_harness(cfg, core, stored=None):
+    if stored:
+        return StoredHarness(core, stored, platform=build_platform(cfg, core))
     return harness.Harness(core, platform=build_platform(cfg, core))
+
+
+def store_skill_graph(core, skill_name, folder):
+    """saves the skill's graph, converted and bound as the graph path converts it in memory (skill_converter.run_converted), through CORE's save path
+    into a new files store in `folder`, and gives that store to the core (REQ-RUN-042, D-476); returns (graph ID, version)"""
+    skill = core.skills.get(skill_name)
+    if skill is None:
+        sys.exit("there is no skill '%s'" % skill_name)
+    pipeline = core.library.resolve(skill["pipeline"], "pipeline")
+    nodes = skill_converter._latest_nodes(os.path.join(core.library.shipped_dir, "nodes"))
+    found = pipeline_graph.convert({k: v for k, v in pipeline.items() if not k.startswith("_")}, nodes, (skill.get("budget") or {}).get("seconds", 300))
+    if found["graph"] is None:
+        sys.exit("%s cannot be converted, so it has no stored graph: %s" % (skill_name, found["refused"]))
+    store = GraphModel(Storage(FileBackend(folder)), "eval")
+    saved = store.save_graph(pipeline_graph.bind_skill(found["graph"], nodes, skill, None))
+    if not saved.saved:
+        sys.exit("the graph of %s was not saved: %s" % (skill_name, saved.rules or saved.rule))
+    core.graph_store = store
+    return skill_converter.pipeline_ref(pipeline), saved.version
+
+
+class StoredHarness(harness.Harness):
+    """the harness on the stored-graph path (T-04): a skill runs through Core.run with the store, as the app runs it (REQ-RUN-042), on the model of the pin
+    as on the converted path; `stored` = (graph ID, version) goes into the run header"""
+
+    def __init__(self, core, stored, **kwargs):
+        super().__init__(core, **kwargs)
+        self.stored = stored
+
+    def run(self, *args, **kwargs):
+        run = super().run(*args, **kwargs)
+        run.header["stored_graph"] = {"path": "Core graph_store (REQ-RUN-042)", "graph": self.stored[0], "version": self.stored[1]}
+        return run
+
+    def _run_skill(self, skill, inputs, suite, variant, tools=None):
+        if not variant.get("stored"):
+            return super()._run_skill(skill, inputs, suite, variant, tools)
+        model = self.core.runner.model
+        self.core.runner.model = harness._PinnedChat(model, self.pin)
+        try:
+            result = self.core.run(skill["name"], inputs, started_by="command", **({"tools": tools} if tools else {}))
+        finally:
+            self.core.runner.model = model
+        # the core falls back to the old runner when it finds no stored graph or cannot convert: that answer is not the one measured here
+        if not result.cost.get("converted"):
+            raise harness.SuiteError("%s did not run from the stored graph %s (the core ran the old runner)" % (skill["name"], self.stored[0]))
+        return result
 
 
 def is_holdout(name):
@@ -133,6 +184,7 @@ def main():
     parser.add_argument("--skill")
     parser.add_argument("--pipeline")
     parser.add_argument("--converted", action="store_true", help="run the skill on the graph path (skill_converter.run_converted), for the targets extraction, pipeline, plan and research (REQ-WFM-110 to 114)")
+    parser.add_argument("--stored", action="store_true", help="run the skill from its graph saved into a throw-away store, through Core with graph_store= (REQ-WFM-110 to 114, G-V4.GRAPHAPI.RUN T-04); the header names the graph and its version")
     parser.add_argument("--model", help="refused by run: the model of a run is the one of --pin (D-166)")
     parser.add_argument("--pin", choices=sorted(PINS), help="model pin of eval-spec.md, required by run: its seed and temperature go to every model call and the pin is written to the run header")
     parser.add_argument("--sample", type=int, metavar="N", help="a seeded sample of N active cases; the two halves of a pair stay together")
@@ -200,15 +252,20 @@ def main():
     if args.model:                                                  # D-166: the pin decides the model, so the header names what ran
         sys.exit("--model together with --pin: the pin decides the model of a run (%s); drop --model" %
                  ", ".join("%s = %s" % (i, p["name"]) for i, p in sorted(PINS.items())))
+    if args.stored and (args.pipeline or args.converted):            # the stored graph is the skill's own graph: another pipeline or the in-memory conversion would not be it
+        sys.exit("--stored runs the skill's own graph: drop --pipeline and --converted")
     suite = open_suite(args.args[0], args.holdout)
-    need_model, need_sandbox = core_needs(suite.target["kind"], bool(args.skill or args.pipeline))
+    need_model, need_sandbox = core_needs(suite.target["kind"], bool(args.skill or args.pipeline or args.stored))
     core = build_core(cfg, need_model, need_sandbox)
+    stored = store_skill_graph(core, args.skill or suite.target["skill"], tempfile.mkdtemp(prefix="mia-eval-store-")) if args.stored else None
     variant = {"name": args.variant}
     for key in ("skill", "pipeline", "model"):
         if getattr(args, key):
             variant[key] = getattr(args, key)
     if args.converted:
         variant["converted"] = True
+    if args.stored:
+        variant["stored"] = True
     only = args.only.split(",") if args.only else None
     if args.sample:
         sampled = [c["id"] for c in harness.sample_cases(suite.select(args.tag or None, only, None, args.include_retired), args.sample, args.sample_seed)]
@@ -217,7 +274,7 @@ def main():
         only = sampled
     count = len(suite.select(args.tag or None, only, args.limit, args.include_retired))
     print("running %s (%d cases x %d) as variant '%s' ...\n" % (suite.name, count, args.repeats, args.variant))
-    run = make_harness(cfg, core).run(suite, variant, args.repeats, args.tag or None, only, args.limit, None if args.quiet else show_progress,
+    run = make_harness(cfg, core, stored).run(suite, variant, args.repeats, args.tag or None, only, args.limit, None if args.quiet else show_progress,
                                       pin=pin_record(args.pin), include_retired=args.include_retired)
     run.header["commit"] = environment(root=REPO)["commit"]          # the version of the code that ran (the only one of a code target)
     print("\n" + harness.format_report(run))
