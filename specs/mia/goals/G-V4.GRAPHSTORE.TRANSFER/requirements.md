@@ -404,7 +404,7 @@
 - Acceptance criterion: with AutoSync on and the live store's address unreachable, the backend starts, answers graphs from the copy, and its log holds one line naming the live store and "sync not run" (exact)
 - Verified by: TC-API-063
 - Status: Approved
-- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460)
+- History: G-V4.GRAPHSTORE.TRANSFER Plan step 1b, 2026-11-22, new (D-460); Approved confirmed in Emacs on 2026-11-27
 
 ### REQ-API-065 – A copy MIA cannot read
 - Level: low   Subject: WebApplication
@@ -416,8 +416,8 @@
 - Verification method: Test
 - Acceptance criterion: a copy whose marker names format 2 and a live store with cp2.multi at version 4: the backend starts, `GET` of cp2.multi answers version 4, the store answer has `shown: "live"`, and `mia.log` holds one line naming the copy folder and "format 2" (exact)
 - Verified by: TC-API-065
-- Status: Draft
-- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-543)
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-543); Approved confirmed in Emacs on 2026-11-27
 
 ### REQ-API-066 – Writes go to the live store
 - Level: low   Subject: WebApplication
@@ -429,8 +429,8 @@
 - Verification method: Test
 - Acceptance criterion: AC-006 with `copy` set and no AutoSync: a save of cp2.multi on version 6 answers version 7, the live store holds 7 versions, and the copy's graph group is unchanged entry by entry (exact)
 - Verified by: TC-API-066
-- Status: Draft
-- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-544)
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Implement, 2026-11-27, new by A-195 (D-544); Approved confirmed in Emacs on 2026-11-27
 ## Changed requirements (proposed; the approved text in `In force:` stays in force until the owner approves the change, M8)
 
 ### REQ-API-064 – The store answer while a copy is set
