@@ -16,7 +16,7 @@ What remains:
 - **V-5 (medium for the owner, docs on `goal/v4`):** the migration command that `deploy/REQUIREMENTS_DB.md` item 7 now documents uses `--data MIA/data`. That is exactly the folder that F-1 now refuses. The store's folder is `MIA/data/db`.
 - **V-6 (low):** the model's text still calls T-06 "planned".
 
-- [ ] Verified by the owner (verdict, and the answers to the questions in "Owner's decisions" below). Date:
+- [X] Verified by the owner (verdict, and the answers to the questions in "Owner's decisions" below). Date:
 
 ## Automated checks (all run by me, 2026-11-27, Python 3.12 venv `mia312`, node; scratch output under `/tmp/claude-1000/-home-maldun-prog-Python-MIA--claude-worktrees-goal-v4/05424c0e-29dd-4d3e-a583-210a12d5482a/scratchpad/`)
 | Check | Result |
