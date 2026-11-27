@@ -29,6 +29,8 @@ Almost every check is exact: the expected value is an ID, an order, a list of ca
 | TC-RUN-045 | REQ-RUN-043 | component | 2 | an empty throw-away store; the six skills on the scripted replies of REQ-WFM-058; the oracle of TR-RUN-002 | each run makes the recorded model calls and gives the recorded answer | 0 differences |
 | TC-RUN-046 | REQ-RUN-044 | component | 1 | the store of TC-RUN-044 with the graph saved twice (versions 1 and 2); an empty store | the run record has `graph` = `verify.single@1` and `graph_version` = 2; with the empty store the record has neither field | exact |
 | TC-RUN-047 | REQ-RUN-045 | component | 1 | the store of TC-RUN-044 with a version 2 that has a cycle; a marker per step | the run ends `refused` naming `cycle`, `verify.single@1` and version 2; every marker was called 0 times; version 1 alone runs and calls the markers | exact counts |
+| TC-RUN-048 | REQ-RUN-046 | component | 2 | the six skills, each saved into a throw-away store; the scripted replies of REQ-WFM-058; the oracle of TR-RUN-002 | each run from the stored graph gives the answer the oracle recorded for the old runner (A-190) | 0 differences |
+| TC-RUN-049 | REQ-RUN-047 | inspection | 0 | the import statements of `graph_run.py` and `graph_rule_set.py`, read with `ast` | only modules of the standard library, `networkx`, `graph_rule_set` and `graph_run` (A-190) | exact |
 | TC-WFM-187 | REQ-WFM-168 | component | 2 | the six skills, each saved into a throw-away store; the fake model server with the scripted replies of REQ-WFM-058 | for each skill the list of model calls (order, prompt, options) from the stored graph equals that of the old runner; a planted change of one option is reported with the first differing call | exact |
 | TC-WFM-115 | REQ-WFM-115 | component | 2 | extract_claims_rules saved into a throw-away store; the 51 dev cases of EV-extraction; no model | the 51 outputs from the stored graph equal the 51 outputs of the old runner run in the same check; a planted difference is reported with a diff naming the case | exact |
 
@@ -46,6 +48,8 @@ TC-RUN-016 (AC-31) stays as it is and verifies REQ-RUN-016 together with TC-RUN-
 | REQ-RUN-040 | a map step with `workers` 2 | TC-RUN-042 | its items may overlap inside the step; the next step starts after the map step ended (D-475, key decisions) |
 | REQ-RUN-042 | the graph saved twice | TC-RUN-046 | version 2 runs |
 | REQ-RUN-045 | version 2 refused, version 1 sound | TC-RUN-047 | refused; the runner does not fall back to version 1 |
+| REQ-RUN-046 | research: 22 data steps that no step reads, the result `var.answer#2` among them | TC-RUN-048 | the value of `var.answer#2`, as the old runner's answer |
+| REQ-RUN-047 | an import inside a function or under `try` | TC-RUN-049 | counted: every import statement of the module is read, wherever it stands |
 
 ## Statistical checks (M19)
 The five skills with a model, run from their stored graph. Rule, pin, repeats, thresholds and false alarm are those of the `Eval criterion` lines (unchanged since A-122); the reference is the old-runner baseline of commit `1fb0c35`, recorded with 3 repeats. A FAIL is re-run once with fresh seeds; only the re-run counts. Stage 4, run once per task that changes the run path and before the Verify gate; before each run the other sessions are told (the Ollama server is shared).
@@ -184,6 +188,20 @@ None in this subgoal: RUN's Validate is the first test run of G-V5 (parked, D-38
 - Then: the run ends `refused`, naming the rule `cycle`, the graph `verify.single@1` and version 2
 - And: every marker was called 0 times, and the runner did not fall back to version 1
 - And: with only version 1 in the store the run ends `done` and calls its markers (TR-RUN-006)
+
+### TC-RUN-048 – The answer of a run from the stored graph (A-190)
+- Verifies: REQ-RUN-046
+- Given: each of the six skills saved into its own throw-away store; the scripted replies of REQ-WFM-058 (TR-RUN-005); the answers the oracle of TR-RUN-002 recorded for the old runner
+- When: each skill runs its scripted input from the stored graph
+- Then: each run read its stored graph once and gives the recorded answer
+- And: research, whose stored graph has 22 data steps that no step reads, answers with the value of its result step `var.answer#2`
+
+### TC-RUN-049 – The graph run stands on its own (inspection, A-190)
+- Verifies: REQ-RUN-047
+- Given: the source of `graph_run.py` and `graph_rule_set.py`
+- When: every import statement in them is read with Python's `ast` (also inside functions and `try` blocks)
+- Then: each imported module is in `sys.stdlib_module_names`, is `networkx`, or is `graph_rule_set` or `graph_run` (a relative import `from . import x` counts as `x`)
+- And: a module that imports `graph_model` is reported (the sound twin of the check, TR-RUN-007)
 
 ### TC-WFM-187 – The same model calls from the stored graph
 - Verifies: REQ-WFM-168

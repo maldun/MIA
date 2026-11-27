@@ -1,8 +1,9 @@
 """Acceptance tests of the order of steps and the run order (G-V4.GRAPHAPI.RUN, protected after the Plan gate): TC-WFM-185, TC-WFM-186 (REQ-WFM-166,
-REQ-WFM-167) against `graph_model.order_of`, and TC-RUN-041, TC-RUN-042, TC-RUN-043 (REQ-RUN-016, REQ-RUN-040, REQ-RUN-041) against GraphRunner. They guard
+REQ-WFM-167) against `graph_model.order_of`, and TC-RUN-041, TC-RUN-042, TC-RUN-043 (REQ-RUN-016, REQ-RUN-040, REQ-RUN-041) against GraphRunner, and TC-RUN-049 (REQ-RUN-047, A-190) on the imports. They guard
 the order of today (the oracle): green from the start, except TC-RUN-043 (the run reads the loaded graph), which is red until the runner task.
 Run with: python tests/acceptance/test_run_graph_order.py
 """
+import ast
 import os
 import sys
 import time
@@ -128,6 +129,39 @@ class RunOrder(unittest.TestCase):
         commit = oracle()["header"]["commit"]
         diff = git("diff", "--stat", commit, "HEAD", "--", "tests/acceptance/test_graph_run.py", "tests/acceptance/test_graph_run_stages.py")
         self.assertEqual(diff.stdout.strip(), "")
+
+
+ALONE = {"networkx", "graph_rule_set", "graph_run"}
+
+
+def foreign_imports(source):
+    """the top-level names of every module the source imports (inside functions and try blocks too) that are not of the standard library or ALONE"""
+    names = []
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            names += [alias.name for alias in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            # `from . import x` names x; `from .m import y` and `from m import y` name m
+            names += [alias.name for alias in node.names] if node.level and not node.module else [node.module]
+    return sorted({n.split(".")[0] for n in names} - set(sys.stdlib_module_names) - ALONE)
+
+
+class StandsOnItsOwn(unittest.TestCase):
+    @mark.req("REQ-RUN-047")
+    def test_the_graph_run_imports_only_the_standard_library_networkx_and_the_rule_set(self):
+        """TC-RUN-049 (A-190): graph_run.py and graph_rule_set.py import only the standard library, networkx and each other.
+
+        Example: `from .graph_model import order_of` in graph_run.py is reported as ["graph_model"].
+        """
+        # Given: the sound twin, a module that imports graph_model (TR-RUN-007)
+        self.assertEqual(foreign_imports("try:\n    from .graph_model import order_of\nexcept ImportError:\n    import graph_rule_set\n"), ["graph_model"])
+        for module in ("graph_run.py", "graph_rule_set.py"):
+            with self.subTest(module=module):
+                # When: every import statement of the module is read
+                with open(os.path.join(REPO, module), encoding="utf-8") as fp:
+                    found = foreign_imports(fp.read())
+                # Then: none names a module outside the standard library, networkx and the two
+                self.assertEqual(found, [])
 
 
 if __name__ == "__main__":

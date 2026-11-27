@@ -35,8 +35,8 @@
 | 1 | LG | The loader: the stored form becomes one loaded graph, in IF-301 v5 (HR-001, HR-003, HR-005) | REQ-GTB-053, REQ-GTB-054, REQ-GTB-055, REQ-GTB-056, REQ-GTB-057, REQ-GTB-058 |
 | 2 | RV | The rule set reads the loaded graph, with the same answers (HR-001, HR-006) | REQ-GTB-059, REQ-GTB-060, REQ-GTB-043 (changed) |
 | 3 | OR | The order of steps on the loaded graph, ties in the order steps became ready (FR-65, HR-002) | REQ-WFM-166, REQ-WFM-167, REQ-RUN-016 (changed) |
-| 4 | RN | The run reads the loaded graph, one step at a time (FR-65, HR-001, HR-002, HR-003) | REQ-RUN-040, REQ-RUN-041 (and REQ-RUN-030 to 035 taken in unchanged, below) |
-| 5 | SP | A skill runs from its stored graph, and its run record says which (HR-004) | REQ-RUN-042, REQ-RUN-043, REQ-RUN-044, REQ-RUN-045 |
+| 4 | RN | The run reads the loaded graph, one step at a time (FR-65, HR-001, HR-002, HR-003) | REQ-RUN-040, REQ-RUN-041, REQ-RUN-047 (A-190) (and REQ-RUN-030 to 035 taken in unchanged, below) |
+| 5 | SP | A skill runs from its stored graph, and its run record says which (HR-004) | REQ-RUN-042, REQ-RUN-043, REQ-RUN-044, REQ-RUN-045, REQ-RUN-046 (A-190) |
 | 6 | EQ | The six skills give the same results from their stored graph (NFR-17, HR-007) | REQ-WFM-168, REQ-WFM-110 (changed), REQ-WFM-111 (changed), REQ-WFM-112 (changed), REQ-WFM-113 (changed), REQ-WFM-114 (changed), REQ-WFM-115 (changed) |
 
 ## Group LG – the loader
@@ -229,6 +229,19 @@
 - Status: Approved
 - History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
 
+### REQ-RUN-047 – The graph run stands on its own
+- Level: low-2   Subject: TaskRuntime
+- Group: RN
+- Text: The modules of the graph run (`graph_run.py`) and of the graph rule set (`graph_rule_set.py`) shall import only the Python standard library, networkx and each other.
+- Rationale: the owner wants the graph runner re-usable outside MIA as a module boundary only (D-485): the two files can be copied out later; no package and no command line of their own. The order of steps (`order_of`) moves into the rule set for it; `graph_model.order_of` stays the same function for its callers
+- Parent: HR-001
+- Priority: Must
+- Verification method: Inspection
+- Acceptance criterion: the import statements of `graph_run.py` and `graph_rule_set.py`, read with Python's `ast`, name only modules of `sys.stdlib_module_names`, `networkx`, `graph_rule_set` and `graph_run` (exact)
+- Verified by: TC-RUN-049
+- Status: Draft
+- History: G-V4.GRAPHAPI.RUN T-03, 2026-11-27, new by amendment A-190 (D-485, owner's word in the questionnaire)
+
 REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output writes; plain callables unchanged; broken wiring refused before any node ran; start values; order edge) are taken in **unchanged** from G-V2 (Draft there, built and checked by TC-RUN-030 to 035) for approval with this group: they state what the run does with the loaded graph's roles and names (HR-003, OC-3). Their texts stay in `specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`; only their status changes, at the merge, to Approved.
 
 ## Group SP – the stored-graph path
@@ -284,6 +297,19 @@ REQ-RUN-030 to REQ-RUN-035 (Stage gets inputs, outputs and settings; per-output 
 - Verified by: TC-RUN-047
 - Status: Approved
 - History: G-V4.GRAPHAPI.RUN Plan step 1b, 2026-11-24, new; Approved in batch in Emacs on 2026-11-24
+
+### REQ-RUN-046 – The answer of a run from the stored graph
+- Level: low-2   Subject: TaskRuntime
+- Group: SP
+- Text: When a skill runs from its stored graph, the Pipeline runner shall give as the answer the value of the data step that the skill's pipeline names as its result.
+- Rationale: the stored form names no answer step, and not every step gives an answer (owner, D-485); the pipeline of the library names its result, as for the in-memory converted run (`skill_converter.run_converted`), so the answer of research is `var.answer#2`, not one of its other data steps that no step reads. The run still runs the stored graph only; the pipeline is converted in memory for this name alone
+- Parent: HR-004
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: for each of the six skills saved into a throw-away store, the answer of the run from the stored graph on the scripted replies equals the answer recorded for the old runner by the oracle of TR-RUN-002 (0 differences)
+- Verified by: TC-RUN-048
+- Status: Draft
+- History: G-V4.GRAPHAPI.RUN T-03, 2026-11-27, new by amendment A-190 (D-485, owner's word in the questionnaire)
 
 ## Group EQ – the six skills from their stored graph
 

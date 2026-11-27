@@ -55,13 +55,13 @@ Regression set: after every task the unit suite (`discover -s tests`) and every 
 - Notes: the walk is a queue over the loaded graph, not networkx `lexicographical_topological_sort` (D-480); the risk row of the high-level spec that names that function is outdated by D-480
 
 ### T-03: The runner and the stored-graph path
-- Implements: REQ-RUN-016 (changed), REQ-RUN-040 to 045, REQ-WFM-168, and the check of REQ-WFM-115
-- Tests to turn green: TC-RUN-043 (`test_run_graph_order.py`), TC-RUN-044, 046, 047, TC-WFM-187, TC-WFM-115 (`test_stored_graph_run.py`); to keep green: TC-RUN-041, 042, 045, TC-RUN-016 to 019 and 030 to 039 unchanged
-- Touches: `graph_run.py` (types, roles and names from the loaded graph; `_kinds`, the `reads` map and `_given` go; no list `graph["nodes"]` or `graph["edges"]` is scanned); `core.py` (`graph_store=`: look up `<pipeline>@<version>`, run it, write `graph` and `graph_version`, refuse a stored graph the run check refuses); `skill_converter.py` (`run_converted` takes the loaded graph instead of converting in memory when one is given); `run_log.py` only if the record needs the two fields in its shape; unit tests
+- Implements: REQ-RUN-016 (changed), REQ-RUN-040 to 047 (046 and 047 by A-190), REQ-WFM-168, and the check of REQ-WFM-115
+- Tests to turn green: TC-RUN-043 (`test_run_graph_order.py`), TC-RUN-044, 046, 047, 048, TC-WFM-187, TC-WFM-115 (`test_stored_graph_run.py`), TC-RUN-049 (`test_run_graph_order.py`, A-190); to keep green: TC-RUN-041, 042, 045, TC-RUN-016 to 019 and 030 to 039 unchanged
+- Touches: `graph_run.py` (types, roles and names from the loaded graph; `_kinds`, the `reads` map and `_given` go; no list `graph["nodes"]` or `graph["edges"]` is scanned); `core.py` (`graph_store=`: look up `<pipeline>@<version>`, run it, write `graph` and `graph_version`, refuse a stored graph the run check refuses); `skill_converter.py` (`run_converted` takes the loaded graph instead of converting in memory when one is given); `run_log.py` only if the record needs the two fields in its shape; `graph_rule_set.py` (`order_of` moves in, A-190) and `graph_model.py` (keeps `order_of` as the same function); `run_explain.py` (`show` names graph and version, owner 2026-11-27); unit tests
 - Must not touch: protected material; the old runner `pipeline.py` and the skills, pipelines and library nodes (a skill without a stored graph runs as before)
 - Depends on: T-02
 - Demonstrator after this task: `Core(..., graph_store=store).run("verify_claim", ...)` on scripted replies, then `python tools/run_explain.py show <run>` names `verify.single@1` and its version
-- Done when: the listed tests green, the regression set holds; the defects "two steps run in a thread pool", "the stored graph ignored (the in-memory converted graph runs)", "version 1 run instead of the newest", "the run record without `graph_version`", "one prompt changed in the stored graph" each make their check fail (logged)
+- Done when: the listed tests green, the regression set holds; the defects "two steps run in a thread pool", "the stored graph ignored (the in-memory converted graph runs)", "version 1 run instead of the newest", "the run record without `graph_version`", "one prompt changed in the stored graph", "the answer taken from the last data step", "`graph_run.py` imports `graph_model`" each make their check fail (logged)
 
 ### T-04: The equivalence runs on the stored-graph path
 - Implements: REQ-WFM-110 to REQ-WFM-114 (each keeps its threshold, `Eval criterion` line, relaxation and repeats of G-V2); HR-007

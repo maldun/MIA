@@ -28,7 +28,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Status: Approved
 
 ### TR-RUN-002 – The oracle is recorded before any code changes
-- Applies to: TC-GTB-052, TC-WFM-186, TC-RUN-045
+- Applies to: TC-GTB-052, TC-WFM-186, TC-RUN-045, TC-RUN-048
 - Requirement: HR-006
 - Group: DA
 - Kind: setup
@@ -61,7 +61,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Status: Approved
 
 ### TR-RUN-005 – The fake model server
-- Applies to: TC-WFM-187, TC-RUN-044, TC-RUN-045, TC-RUN-046, TC-RUN-047
+- Applies to: TC-WFM-187, TC-RUN-044, TC-RUN-045, TC-RUN-046, TC-RUN-047, TC-RUN-048
 - Requirement: REQ-WFM-168
 - Group: EP
 - Kind: setup
@@ -83,12 +83,12 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Status: Approved
 
 ### TR-RUN-007 – Each check is shown able to fail
-- Applies to: TC-GTB-048, TC-GTB-050, TC-GTB-051, TC-GTB-052, TC-GTB-053, TC-WFM-185, TC-WFM-186, TC-RUN-042, TC-RUN-044, TC-RUN-046, TC-RUN-047, TC-WFM-187
+- Applies to: TC-GTB-048, TC-GTB-050, TC-GTB-051, TC-GTB-052, TC-GTB-053, TC-WFM-185, TC-WFM-186, TC-RUN-042, TC-RUN-044, TC-RUN-046, TC-RUN-047, TC-RUN-048, TC-RUN-049, TC-WFM-187
 - Requirement: REQ-GTB-060
 - Group: CR
 - Kind: setup
 - Text: Each of these checks shall be shown able to fail by running it once against a deliberate defect of the unit it checks, before the check is trusted.
-- Rationale: the defects: the loader keeps a second `d1` or drops a parallel connection; data shared, not copied; one rule answering from its old view with one changed branch; ties by ID instead of position; two steps run in a thread pool; the stored graph ignored (the in-memory converted graph runs); version 1 run instead of the newest; the run record without `graph_version`; one prompt changed in the stored graph.
+- Rationale: the defects: the loader keeps a second `d1` or drops a parallel connection; data shared, not copied; one rule answering from its old view with one changed branch; ties by ID instead of position; two steps run in a thread pool; the stored graph ignored (the in-memory converted graph runs); version 1 run instead of the newest; the run record without `graph_version`; one prompt changed in the stored graph; the answer taken from the last data step of the stored form (A-190); `graph_run.py` importing `graph_model` (A-190).
 - Credibility aspect: reviewer independence
 - Verified by: mutation
 - Status: Approved
@@ -105,7 +105,7 @@ At the merge TR-RUN-001 to 012 go unchanged into the protected `specs/mia/test-r
 - Status: Approved
 
 ### TR-RUN-009 – The throw-away store and the counted read
-- Applies to: TC-RUN-044, TC-RUN-045, TC-RUN-046, TC-RUN-047, TC-WFM-187, TC-WFM-115, TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114, SMOKE-RUN-001
+- Applies to: TC-RUN-044, TC-RUN-045, TC-RUN-046, TC-RUN-047, TC-RUN-048, TC-WFM-187, TC-WFM-115, TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114, SMOKE-RUN-001
 - Requirement: REQ-RUN-042
 - Group: EP
 - Kind: setup

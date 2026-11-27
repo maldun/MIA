@@ -1,5 +1,6 @@
 """Acceptance tests of the stored-graph path of the run (G-V4.GRAPHAPI.RUN, protected after the Plan gate): TC-RUN-044 to TC-RUN-047, TC-WFM-187 and
-TC-WFM-115 (REQ-RUN-042 to 045, REQ-WFM-168, REQ-WFM-115) against Core with `graph_store=` (D-480), on the scripted replies of REQ-WFM-058 and a throw-away
+TC-RUN-048 (A-190), TC-WFM-187 and
+TC-WFM-115 (REQ-RUN-042 to 046, REQ-WFM-168, REQ-WFM-115) against Core with `graph_store=` (D-480), on the scripted replies of REQ-WFM-058 and a throw-away
 files store (TR-RUN-005, -006, -009). The model here is the scripted fake: it shows the code path, never decides an eval criterion. TC-RUN-045 is green from the
 start (it guards a run without a stored graph); the others are red until the runner task. "No step ran" is shown by the model and the tools as markers: every
 step of verify_claim with an effect goes through one of them, and the sound twin of each check shows they fire (TR-RUN-006).
@@ -127,6 +128,28 @@ class RunFromTheStore(StoreCase):
         sound, sound_rec, _ = stored_run("verify_claim", twin, tempfile.mkdtemp(prefix="run-log-"))
         self.assertEqual(sound.status, "done")
         self.assertGreaterEqual(len(sound_rec.model_calls()), 1)
+
+    @mark.req("REQ-RUN-046")
+    def test_the_answer_is_the_value_of_the_pipelines_result_step(self):
+        """TC-RUN-048 (A-190): each of the six skills run from its stored graph gives the answer the oracle recorded for the old runner.
+
+        Example: research, whose stored graph has 22 data steps no step reads, answers with the value of var.answer#2, as recorded.
+        """
+        # Given: the oracle's answers of the old runner; research's stored graph has more than one data step that no step reads
+        recorded = oracle()["old_runner"]
+        research = GRAPHS["research.md"]
+        unread = {n["id"] for n in research["nodes"] if n["data"].get("type") == "data"} - {e["from"] for e in research["edges"]}
+        self.assertGreater(len(unread), 1)
+        for skill in SIX:
+            with self.subTest(skill=skill):
+                # When: the skill runs its scripted input from its stored graph
+                store = ThrowAwayStore()
+                self.addCleanup(store.close)
+                store.save(GRAPHS[skill + ".md"])
+                result, _, _ = stored_run(skill, store, tempfile.mkdtemp(prefix="run-log-"))
+                # Then: it read the stored graph once and gives the recorded answer
+                self.assertEqual(len(store.reads), 1)
+                self.assertEqual(json.loads(json.dumps(result.answer)), recorded[skill]["answer"])
 
 
 class SameCallsAndOutputs(StoreCase):
