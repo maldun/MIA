@@ -43,3 +43,28 @@ Contract test cases of IF-302: TC-IF-302-01 to the last of the suite (listed in 
 - Given: the Record tables with the table transforms of IF-302 (A-112, proposed) and a record with id `t.one`, version 1, input and output schemas and a code text
 - When: definitions() is read; the record is validated; then copies with an empty code, a null code and no code, two copies each lacking one of id and version, a copy with an empty id, and copies with version 0, -1, true, 1.0, 1.5, "1" and null are validated
 - Then: transforms is versioned and not deletable; the complete record and the three code variants are accepted (a stub transform is valid); each bad copy is refused as rule schema naming its field; a version of 7 as the first record is accepted as a twin
+
+## Test cases of G-V4.VIEW (moved at the merge 2026-11-25)
+Unchanged from `specs/mia/goals/G-V4.VIEW/test-spec.md`; their test requirements TR-VIEW-001 to 021 are in `specs/mia/test-requirements.md`. All checks are exact. VAL-VIEW-01 stays in the goal record.
+
+### Contract suite IF-302 v15 (`tests/acceptance/contract/test_if_302_record_tables.py`, real side and mock)
+| Test ID | Verifies | Expected result |
+|---|---|---|
+| TC-IF-302-13 | REQ-RTB-010 | `arrangements` versioned, not deletable; a place 10.5 is rule `schema` detail `positions` |
+| TC-IF-302-14 | REQ-RTB-011 | `graph_changes` versioned, not deletable; kind `before_the_record` is rule `schema` detail `kind` |
+
+## Scenarios (G-V4.VIEW, approved by the owner 2026-11-22, D-441)
+
+### TC-IF-302-13 – The table `arrangements`
+- Verifies: REQ-RTB-010
+- Given: the record tables of IF-302 v15 and its mock
+- When: `arrangements` is defined and records with every field missing or wrong are validated
+- Then: it is versioned and not deletable; a valid record passes, also with an empty mapping and an extra field
+- And: a missing field or a bad value (an empty graph, a place 10.5, a boolean, a list) is rule `schema` naming the field
+
+### TC-IF-302-14 – The table `graph_changes`
+- Verifies: REQ-RTB-011
+- Given: the record tables of IF-302 v15 and its mock
+- When: `graph_changes` is defined and records of each kind and with each field missing or wrong are validated
+- Then: it is versioned and not deletable; kinds editor, derived and restore pass
+- And: a missing field or a bad value (version 0, 5.0, true, "5"; kind `before_the_record`) is rule `schema` naming the field

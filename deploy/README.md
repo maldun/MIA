@@ -20,6 +20,8 @@ Browsers run the 3D character only in a secure context: `http://localhost:8585` 
 podman cp mia_https_1:/data/caddy/pki/authorities/local/root.crt mia-ca.crt     # then import it as trusted certificate authority
 ```
 
+The graph page is only on the https front (`https://localhost:8586/graph/`). It shows the theme chosen in the main app's menu, which the browser keeps per address: choose it in the main app at `https://localhost:8586`, not at `http://localhost:8585`, and use the same name (`localhost` or `127.0.0.1`) for both (REQ-GA-016, D-504).
+
 For other devices set `MIA_BIND=0.0.0.0` in `deploy/.env` and open `https://<address of this machine>:8586`. If MIA refuses the page (origin), add the name you use to `public_hosts` in the config. The CA lives in the volume `caddy-data`, so the certificates stay the same after a restart.
 
 ## What is mounted

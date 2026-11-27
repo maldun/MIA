@@ -1,0 +1,1088 @@
+diff --git a/contracts/IF-301-graph-tables.md b/contracts/IF-301-graph-tables.md
+index 6ad4cb9b..4aa58264 100644
+--- a/contracts/IF-301-graph-tables.md
++++ b/contracts/IF-301-graph-tables.md
+@@ -1,8 +1,8 @@
+-# IF-301 – Graph table definitions, record checks and conversion, v2
++# IF-301 – Graph table definitions, record checks and conversion, v3
+ 
+ Owner (provider): N-3.2 Graph tables   Consumers: N-3.1 Storage layer, N-2.3 Workflow management (converts), N-2.4.1 Pipeline runner (reads)   Decided by: N-3   Mock complexity: 1 (a fixed list of types and pure functions, nothing stored)   Suites: `tests/acceptance/contract/test_if_301_graph_tables.py` (v1, unchanged) and `tests/acceptance/contract/test_if_301_v2_graph_tables.py` (v2)
+ 
+-What the storage layer needs to know about the tables of workflows and context graphs, and, since v2, about the graphs kept as separate node and edge records. Python calls; draft v0, v1 since A-60, v2 since A-90 (text approved 2026-11-07, D-262 to D-266). The rules are those of FR-7 and IF-102.
++What the storage layer needs to know about the tables of workflows and context graphs, and, since v2, about the graphs kept as separate node and edge records. Python calls; draft v0, v1 since A-60, v2 since A-90 (text approved 2026-11-07, D-262 to D-266), v3 since A-167 (scoped IDs of steps and connections, G-V4.GRAPHSTORE.CORE). The rules are those of FR-7 and IF-102.
+ 
+ ## What changes against v1
+ 1. Four new tables, all versioned and not deletable: `graph_nodes`, `graph_edges` (REQ-GTB-005, 006, 013), `graphs` (the graph header and its members, D-264) and `skills` (the skill record of REQ-WFM-040, D-264). `workflows` and `context_graphs` stay as they are (document form, REQ-GTB-015). `definitions()` stays the v1 result; the four tables are listed by the new `record_definitions()` (owner, 2026-11-07: the v1 suite and REQ-GTB-001 say exactly two tables for `definitions()`).
+@@ -10,6 +10,12 @@ What the storage layer needs to know about the tables of workflows and context g
+ 3. New refusals `unknown_type`, `schema_break`, `unknown_member` and `unknown_endpoint` (REQ-GTB-010, 011, 019, 020) and the rule that a refused edit leaves the stored version alone (REQ-GTB-016).
+ 4. Conversion between the record form and the document form of v1 (REQ-GTB-015).
+ 
++## What changes against v2 (A-167)
++1. A record of `graph_nodes`, `graph_edges`, `context_nodes` and `context_edges` carries the ID `<graph id>/<local id>`: the text before the first slash is the graph ID, the rest the local ID, both non-empty (REQ-GTB-029, REQ-GTB-031). Any other ID is `{"rule": "unscoped_id", "detail": <the record ID>}`.
++2. A graph header (`graphs`) names only members whose ID begins with `<its own ID>/`; another member is `{"rule": "unscoped_id", "detail": <that member ID>}` (REQ-GTB-030). This is checked with and without `stored`, member by member before `unknown_member`.
++3. The ends `from` and `to` of an edge are the scoped IDs of its nodes, so `unknown_endpoint` names a scoped ID. The IDs of `graphs` and `skills` records are not scoped.
++4. A caller of v2 that writes plain IDs is refused; the Workflow management (N-2.3) scopes the IDs when it saves a graph and strips them when it reads one (REQ-WFM-144).
++
+ ## Operations
+ | Name | Input | Output | Notes |
+ |---|---|---|---|
+@@ -17,7 +23,7 @@ What the storage layer needs to know about the tables of workflows and context g
+ | `record_definitions()` | | the same form for `graph_nodes`, `graph_edges`, `graphs`, `skills`, `context_nodes` and `context_edges`: `{"versioned": true, "deletable": false}` | the versions are kept by the Storage layer from this flag (REQ-GTB-013) |
+ | `validate(table, doc)` | table name, document | `None` or `{"rule", "detail"}` | for `workflows` and `context_graphs` exactly as v1: the first broken rule: `node_identity`, `adjacent_data_nodes`, `adjacent_process_nodes`, `session_stopping_criterion`, `cycle` (detail: the cycle as ids, first id repeated at the end). Any document gives a rule or `None`, never an exception (A-60) |
+ | `types()` | | the type IDs of the fixed list for workflow graphs, sorted, each with its JSON schema | the list is part of this contract (below); context graphs have no fixed list (decision 5) |
+-| `check_record(table, record, categories=None, stored=None, record_id=None)` | `graph_nodes`, `graph_edges`, `graphs` or `skills`; `{"id", "data"}` for a node, a skill and a graph header, `{"id", "from", "to", "data"}` for an edge; for a record of a context graph `categories` = `{type ID: JSON schema}` of that context graph; `stored` = `{"nodes": {id: [versions]}, "edges": {id: [versions]}}`, what the caller has stored; `record_id` = the record ID the caller writes the record under (optional) | `None` or `{"rule", "detail"}` | rules: `record_identity` (detail: the field; `id` also when `record_id` is given and differs from the `id` inside the record, REQ-GTB-021), `unknown_member` (a graph header names a node or edge version that is not in `stored`; detail: its ID, REQ-GTB-019), `unknown_endpoint` (an edge names a start or end node that is not in `stored["nodes"]`; detail: that node ID, REQ-GTB-020), `unknown_type` (detail: the type ID, REQ-GTB-010; for a workflow graph the type is not in the fixed list, for a context graph not in `categories`), `schema_break` (detail: the path of the broken field, REQ-GTB-011). Without `stored` the two rules that need it are not checked (a pure function stores nothing); the Storage layer and the Workflow management always pass it. A record of a context graph without `categories` is `unknown_type`. Any input gives a rule or `None`, never an exception (as A-60); a table that is not one of the four is a `ValueError` |
++| `check_record(table, record, categories=None, stored=None, record_id=None)` | `graph_nodes`, `graph_edges`, `graphs` or `skills`; `{"id", "data"}` for a node, a skill and a graph header, `{"id", "from", "to", "data"}` for an edge; for a record of a context graph `categories` = `{type ID: JSON schema}` of that context graph; `stored` = `{"nodes": {id: [versions]}, "edges": {id: [versions]}}`, what the caller has stored; `record_id` = the record ID the caller writes the record under (optional) | `None` or `{"rule", "detail"}` | rules: `unscoped_id` (a record of a step or connection table whose ID is not `<graph id>/<local id>`, or a header member of another graph; detail: that ID, REQ-GTB-029, REQ-GTB-030), `record_identity` (detail: the field; `id` also when `record_id` is given and differs from the `id` inside the record, REQ-GTB-021), `unknown_member` (a graph header names a node or edge version that is not in `stored`; detail: its ID, REQ-GTB-019), `unknown_endpoint` (an edge names a start or end node that is not in `stored["nodes"]`; detail: that node ID, REQ-GTB-020), `unknown_type` (detail: the type ID, REQ-GTB-010; for a workflow graph the type is not in the fixed list, for a context graph not in `categories`), `schema_break` (detail: the path of the broken field, REQ-GTB-011). Without `stored` the two rules that need it are not checked (a pure function stores nothing); the Storage layer and the Workflow management always pass it. A record of a context graph without `categories` is `unknown_type`. Any input gives a rule or `None`, never an exception (as A-60); a table that is not one of the four is a `ValueError` |
+ | `to_object(record, categories=None)` | a node record, `categories` as above for a context graph | `{"object": obj}` or `{"refused": {"rule", "detail"}}` | for a workflow node `obj` is an instance of the class listed for the type ID in `record["data"]["type"]` (REQ-GTB-009); for a context-graph node it is a plain `ContextNode` (ID, type, JSON field) |
+ | `to_record(obj)` | an object of a listed class | a node record | `to_object(to_record(x))` equals `x` (REQ-GTB-014) |
+ | `to_document(nodes, edges)` | node records, edge records of one workflow | `{"document": doc}` or `{"refused": {"rule", "detail"}}` | the v1 document form (`{"nodes", "edges"}`): type `transform` becomes kind `process`, `data` stays `data`; a graph with a master node is `not_representable` (decision 3) |
+@@ -79,18 +85,20 @@ The list is closed for the fields of a type too (A-93, REQ-GTB-022): the schema
+ 7. Failure (v2): a node whose required key is missing gives `{"rule": "schema_break", "detail": "<path of the key>"}` (the path as the pinned validator names it, TR-GTB-003).
+ 8. Edge (v2): a refused edit leaves version 1 as the latest version (REQ-GTB-016); `check_record` itself stores nothing and changes neither its input nor `stored`.
+ 9. Compatibility (v2): `from_document(to_document(g))` equals `g` for a graph without a master node; the v1 suite passes unchanged.
+-10. Header (v2): a `graphs` record naming n1 at version 5 with `stored = {"nodes": {"n1": [1, 2]}, "edges": {}}` gives `{"rule": "unknown_member", "detail": "n1"}`; naming version 2 gives `None`.
+-11. Edge (v2): an edge `e1` from `n1` to `n9` with `stored["nodes"] == {"n1": [1]}` gives `{"rule": "unknown_endpoint", "detail": "n9"}`.
++10. Header (v2, IDs scoped in v3): a `graphs` record `wf1` naming `wf1/n1` at version 5 with `stored = {"nodes": {"wf1/n1": [1, 2]}, "edges": {}}` gives `{"rule": "unknown_member", "detail": "wf1/n1"}`; naming version 2 gives `None`.
++11. Edge (v2, IDs scoped in v3): an edge `g/e1` from `g/n1` to `g/n9` with `stored["nodes"] == {"g/n1": [1]}` gives `{"rule": "unknown_endpoint", "detail": "g/n9"}`.
+ 12. Skill (v2): `{"id": "lookup", "data": {"command": "/lookup", "workflow_graph_id": "wf-lookup"}}` (no context graph ID) gives `{"rule": "schema_break", "detail": "context_graph_id"}`.
+ 13. Context graph (v2): a node of category `entity` with `categories = {"entity": <schema>}` and a field that fits gives `None`; the same node without `categories` gives `{"rule": "unknown_type", "detail": "entity"}`.
+ 14. Document form (v2): `to_document` of a graph with a master node gives `{"refused": {"rule": "not_representable", "detail": "<master node ID>"}}`.
+-15. Record identity (v2): a node record whose `id` is `n1`, checked with `record_id="x"`, gives `{"rule": "record_identity", "detail": "id"}`; with `record_id="n1"` or without `record_id` it gives `None`.
+-16. Extra field (v2): a node record `{"id": "d1", "data": {"type": "data", "foo": 1}}` gives `{"rule": "schema_break", "detail": "foo"}` in `check_record`, and `to_object` of it gives `{"refused": {"rule": "schema_break", "detail": "foo"}}`; a key `id` inside `data` is named `id`; the same node without the extra field gives `None`.
+-17. Context node (v2): `{"id": "c1", "data": {"type": "entity"}}` checked as `context_nodes` without `categories` gives `None`; `{"id": "c1", "data": {}}` gives `{"rule": "schema_break", "detail": "type"}`; with `categories = {"entity": <schema>}` and a field that breaks the schema it names that field.
+-18. Context edge (v2): an edge `e1` from `c1` to `c9` checked as `context_edges` with `stored["context_nodes"] == {"c1": [1]}` gives `{"rule": "unknown_endpoint", "detail": "c9"}`; with `stored["nodes"] == {"c9": [1]}` besides it still does; from `c1` to `c1` gives `None`.
+-19. Context header (v2): a `graphs` record of kind `context` naming `c9` with `stored["context_nodes"] == {"c1": [1]}` gives `{"rule": "unknown_member", "detail": "c9"}`; naming `c1` gives `None`; a record of kind `workflow` naming `c1` gives `{"rule": "unknown_member", "detail": "c1"}`.
++15. Record identity (v2, IDs scoped in v3): a node record whose `id` is `g/n1`, checked with `record_id="x"`, gives `{"rule": "record_identity", "detail": "id"}`; with `record_id="g/n1"` or without `record_id` it gives `None`.
++16. Extra field (v2, IDs scoped in v3): a node record `{"id": "g/d1", "data": {"type": "data", "foo": 1}}` gives `{"rule": "schema_break", "detail": "foo"}` in `check_record`, and `to_object` of it gives `{"refused": {"rule": "schema_break", "detail": "foo"}}`; a key `id` inside `data` is named `id`; the same node without the extra field gives `None`.
++17. Context node (v2, IDs scoped in v3): `{"id": "cg/c1", "data": {"type": "entity"}}` checked as `context_nodes` without `categories` gives `None`; `{"id": "cg/c1", "data": {}}` gives `{"rule": "schema_break", "detail": "type"}`; with `categories = {"entity": <schema>}` and a field that breaks the schema it names that field.
++18. Context edge (v2, IDs scoped in v3): an edge `cg/e1` from `cg/c1` to `cg/c9` checked as `context_edges` with `stored["context_nodes"] == {"cg/c1": [1]}` gives `{"rule": "unknown_endpoint", "detail": "cg/c9"}`; with `stored["nodes"] == {"cg/c9": [1]}` besides it still does; from `cg/c1` to `cg/c1` gives `None`.
++19. Context header (v2, IDs scoped in v3): a `graphs` record `cg` of kind `context` naming `cg/c9` with `stored["context_nodes"] == {"cg/c1": [1]}` gives `{"rule": "unknown_member", "detail": "cg/c9"}`; naming `cg/c1` gives `None`; a record `cg` of kind `workflow` naming `cg/c1` gives `{"rule": "unknown_member", "detail": "cg/c1"}`.
+ 20. Input that cannot be checked (v2): a data node whose `value` is nested 300 levels gives `{"rule": "schema_break", "detail": "data"}` (150 levels give `None`); a category `{"type": 5}` gives `{"rule": "schema_break", "detail": "type"}`.
+ 21. Size (v2): a data node whose `value` is a list of 99,995 numbers (100,000 values with the record, its `id`, its `data` object, its `type` and the list) gives `None`; a list of 99,996 numbers gives `{"rule": "schema_break", "detail": "data"}`; a record that names the same child twice on 30 levels gives the same refusal at once.
++22. Scoped ID (v3): a node, an edge, a context node and a context edge, each written under `n1`, `/n1` and `g/`, give `{"rule": "unscoped_id", "detail": <that ID>}`; the empty ID stays `{"rule": "record_identity", "detail": "id"}` (checked first, as in v2); under `g/n1` they give `None` (an edge with the ends `g/a` and `g/b`); `lookup/a/b` is the local ID `a/b` of the graph `lookup` and is accepted.
++23. Header of one graph (v3): a `graphs` record `g` naming the node `h/n1` gives `{"rule": "unscoped_id", "detail": "h/n1"}`, also without `stored`; naming the edge `h/e1` gives `{"rule": "unscoped_id", "detail": "h/e1"}`; naming `g/n1` and `g/e1` (both stored) gives `None`.
+ 
+ ## Decisions of the owner, 2026-11-07 (D-262, D-263, D-264, D-266)
+ 1. **Graph rules for the new node types** stay in the Workflow management only. IF-301 keeps the v1 rules for the document form and adds only the record rules; A-90's "validate also reports ..." is read as `check_record`.
+@@ -109,6 +117,7 @@ The list is closed for the fields of a type too (A-93, REQ-GTB-022): the schema
+ 14. **A-98 (Verify finding F-02, owner's decisions of 2026-11-08):** the nodes and edges of a context graph are kept in their own tables `context_nodes` and `context_edges`, because the Storage layer cannot know the categories of a context graph (IF-102 `put` has no such argument). Symmetric tables, so ends and members of a context graph are looked up inside the context tables. The Storage layer checks the shape only (it calls `check_record` without `categories`); the context-graph owner or the Workflow management calls it with the categories before it writes. IF-102 does not change. v2 is not merged yet, so this is part of v2.
+ 15. **A-98 (Verify finding F-09, owner's decision of 2026-11-08):** input that cannot be checked is `schema_break`, not `record_identity`: a record nested deeper than 200 levels names `data`, a category with an invalid schema names `type`. The limit is fixed so that mock and real code agree.
+ 16. **A-102 (Verify finding F-22, owner's decision of 2026-11-08):** a record with more than 100,000 values, counting a value once for every path, is `schema_break` naming `data`. A record that shares sub-objects can have an exponential number of paths; the check made `check_record` run for minutes. 100,000 is about 190 times the largest stored document in the repository (529 values). v2 is not merged yet, so this is part of v2.
++17. **A-167 (G-V4.GRAPHSTORE.CORE, D-368, D-402; owner's review of 2026-11-21):** a step or connection belongs to exactly one graph, and its record ID says which: `<graph id>/<local id>`, split at the first slash. The Graph tables refuse any other ID of a step or connection, and any header member of another graph, as `unscoped_id`. Plain IDs of v2 are refused, so this is v3; the protected tests of v2 that wrote plain IDs are rewritten with scoped IDs (same checks, same rules).
+ 
+ ## Clarifications fixed by the v2 mock and suite (for approval with this text; the approved text of D-262 to D-266 was silent on them)
+ - `types()` returns a dict `{type ID: JSON schema}` whose keys are the three type IDs in sorted order: `data`, `master`, `transform`.
+@@ -126,3 +135,4 @@ The list is closed for the fields of a type too (A-93, REQ-GTB-022): the schema
+ | v0 | 2026-10-25 | first draft | – |
+ | v1 | 2026-10-31 | a session limit is a positive integer (not a boolean, null = not given); a malformed part (a `stop` that is not an object, an edge endpoint that is not text) is named by its rule instead of raising; golden 4 | A-60 (D-160, D-162) |
+ | v2 | 2026-11-07 | tables `graph_nodes`, `graph_edges`, `graphs`, `skills` (listed by `record_definitions()`); fixed list of types; `types`, `check_record`, `to_object`, `to_record`, `to_document`, `from_document`; rules `record_identity`, `unknown_type`, `schema_break`, `unknown_member`, `unknown_endpoint`; golden 5 to 21, `record_id` of `check_record`, the fixed types forbid additional fields, tables `context_nodes` and `context_edges`, input that cannot be checked, a size limit of 100,000 values | A-90 (D-188, D-262 to D-266), A-92, A-93, A-98, A-102 |
++| v3 | 2026-11-21 (draft) | rule `unscoped_id`: scoped record IDs of steps and connections, a header names only its own members; golden 10, 11, 15 to 19 with scoped IDs, golden 22 and 23 | A-167 |
+diff --git a/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md b/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md
+index 386f3b13..5c600c73 100644
+--- a/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md
++++ b/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md
+@@ -4,6 +4,8 @@
+ 
+ The tables of workflows and context graphs and the graph rules that every write of such a record must pass (the second line of defence for TB-edit). Provides IF-301. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
+ 
++IDs of steps and connections (A-167, IF-301 v3): the IDs `n1`, `e1`, `c1`, ... named in the acceptance criteria below are local IDs. Since IF-301 v3 (REQ-GTB-029) a step or connection is stored under `<graph id>/<local id>`, so the tests write the scoped form (`wf1/n1`, `g/e1`, `h1/c1`); the rules and the expected results are unchanged.
++
+ ## Requirements
+ 
+ ### REQ-GTB-001 – Shared state held
+diff --git a/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/test-spec.md b/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/test-spec.md
+index c2e91779..697374cc 100644
+--- a/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/test-spec.md
++++ b/specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/test-spec.md
+@@ -4,6 +4,8 @@
+ 
+ Tests of this part alone against the mocks of its neighbours: unit tests with plain data, no database. The interface IF-301 is tested by its contract suite against the mock and the real part. Stages (M27): 1 = commit gate, under 2 minutes; 2 = up to 10 minutes; 3 = up to 30 minutes.
+ 
++IDs of steps and connections (A-167, IF-301 v3): the IDs `n1`, `e1`, `c1`, ... named in the scenarios below are local IDs. Since IF-301 v3 (REQ-GTB-029) a step or connection is stored under `<graph id>/<local id>`, so the tests write the scoped form (`wf1/n1`, `g/e1`, `h1/c1`); the rules and the expected results are unchanged.
++
+ ## Test cases
+ 
+ | Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |
+diff --git a/tests/acceptance/contract/test_if_301_v2_graph_tables.py b/tests/acceptance/contract/test_if_301_v2_graph_tables.py
+index c1842519..edf12ea9 100644
+--- a/tests/acceptance/contract/test_if_301_v2_graph_tables.py
++++ b/tests/acceptance/contract/test_if_301_v2_graph_tables.py
+@@ -73,15 +73,15 @@ class GraphTablesV2Contract(unittest.TestCase):
+     def test_a_known_type_with_a_fitting_field_is_accepted_and_rebuilt(self, tables):
+         """TC-IF-301-07 golden 1: a record of each type with a fitting field gives None; to_object returns an object with equal values; to_record returns the record.
+ 
+-        Example: {"id": "t1", "data": {"type": "transform", "toolbox_id": "t-demo"}} -> None; the object has id t1 and toolbox_id t-demo.
++        Example: {"id": "g/t1", "data": {"type": "transform", "toolbox_id": "t-demo"}} -> None; the object has id g/t1 and toolbox_id t-demo.
+         """
+         # Given: one record of each type, written by hand (the master one with a task and a stopping criterion)
+-        records = {"data": node("d1", "data", value=7, parameters={"k": 1}),
+-                   "transform": node("t1", "transform", toolbox_id="t-demo"),
+-                   "master": node("m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 3, "max_seconds": 2.5}, task={"goal": "x"})}
+-        expected = {"data": {"id": "d1", "value": 7, "parameters": {"k": 1}},
+-                    "transform": {"id": "t1", "toolbox_id": "t-demo"},
+-                    "master": {"id": "m1", "toolbox_id": "t-lead", "stop": {"max_repetitions": 3, "max_seconds": 2.5}, "task": {"goal": "x"}}}
++        records = {"data": node("g/d1", "data", value=7, parameters={"k": 1}),
++                   "transform": node("g/t1", "transform", toolbox_id="t-demo"),
++                   "master": node("g/m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 3, "max_seconds": 2.5}, task={"goal": "x"})}
++        expected = {"data": {"id": "g/d1", "value": 7, "parameters": {"k": 1}},
++                    "transform": {"id": "g/t1", "toolbox_id": "t-demo"},
++                    "master": {"id": "g/m1", "toolbox_id": "t-lead", "stop": {"max_repetitions": 3, "max_seconds": 2.5}, "task": {"goal": "x"}}}
+         classes = set()
+         for type_id, record in records.items():
+             with self.subTest(type=type_id):
+@@ -105,10 +105,10 @@ class GraphTablesV2Contract(unittest.TestCase):
+     def test_the_context_tables_are_checked(self, tables):
+         """TC-IF-301-22 golden 17 to 19: context_nodes and context_edges check the shape, the ends of an edge and the members of a context header in the context tables.
+ 
+-        Example: {"id": "c1", "data": {}} as context_nodes -> schema_break "type"; an edge to c9 with only c1 stored -> unknown_endpoint "c9".
++        Example: {"id": "h1/c1", "data": {}} as context_nodes -> schema_break "type"; an edge to h1/c9 with only h1/c1 stored -> unknown_endpoint "h1/c9".
+         """
+-        # Given: a stored context node c1, and the shapes of the context records
+-        stored = {"context_nodes": {"c1": [1]}}
++        # Given: a stored context node h1/c1, and the shapes of the context records
++        stored = {"context_nodes": {"h1/c1": [1]}}
+         entity = {"entity": {"type": "object", "properties": {"type": {}, "name": {"type": "string"}}}}
+ 
+         def header(kind, member):
+@@ -118,22 +118,22 @@ class GraphTablesV2Contract(unittest.TestCase):
+         for table in ("context_nodes", "context_edges"):
+             self.assertEqual(tables.record_definitions()[table], {"versioned": True, "deletable": False})
+         # And: the shape of a node is checked without categories, the type and schema with them
+-        self.assertIsNone(tables.check_record("context_nodes", node("c1", "entity")))
+-        self.assertEqual(tables.check_record("context_nodes", {"id": "c1", "data": {}}), {"rule": "schema_break", "detail": "type"})
+-        self.assertEqual(tables.check_record("context_nodes", {"id": "c1"}), {"rule": "schema_break", "detail": "data"})
+-        self.assertEqual(tables.check_record("context_nodes", node("c1", "entity", name=5), categories=entity), {"rule": "schema_break", "detail": "name"})
+-        self.assertEqual(tables.check_record("context_nodes", node("c1", "other"), categories=entity), {"rule": "unknown_type", "detail": "other"})
+-        self.assertIsNone(tables.check_record("context_nodes", node("c1", "entity", name="x"), categories=entity))
++        self.assertIsNone(tables.check_record("context_nodes", node("h1/c1", "entity")))
++        self.assertEqual(tables.check_record("context_nodes", {"id": "h1/c1", "data": {}}), {"rule": "schema_break", "detail": "type"})
++        self.assertEqual(tables.check_record("context_nodes", {"id": "h1/c1"}), {"rule": "schema_break", "detail": "data"})
++        self.assertEqual(tables.check_record("context_nodes", node("h1/c1", "entity", name=5), categories=entity), {"rule": "schema_break", "detail": "name"})
++        self.assertEqual(tables.check_record("context_nodes", node("h1/c1", "other"), categories=entity), {"rule": "unknown_type", "detail": "other"})
++        self.assertIsNone(tables.check_record("context_nodes", node("h1/c1", "entity", name="x"), categories=entity))
+         # And: an edge needs a text end and stored context nodes as ends; a workflow node does not count
+-        self.assertEqual(tables.check_record("context_edges", {"id": "e1", "from": "c1", "data": {}}), {"rule": "record_identity", "detail": "to"})
+-        self.assertEqual(tables.check_record("context_edges", edge("e1", "c1", "c9"), stored=stored), {"rule": "unknown_endpoint", "detail": "c9"})
+-        self.assertEqual(tables.check_record("context_edges", edge("e1", "c1", "c9"), stored={"nodes": {"c9": [1]}, "context_nodes": {"c1": [1]}}),
+-                         {"rule": "unknown_endpoint", "detail": "c9"})
+-        self.assertIsNone(tables.check_record("context_edges", edge("e1", "c1", "c1"), stored=stored))
++        self.assertEqual(tables.check_record("context_edges", {"id": "h1/e1", "from": "h1/c1", "data": {}}), {"rule": "record_identity", "detail": "to"})
++        self.assertEqual(tables.check_record("context_edges", edge("h1/e1", "h1/c1", "h1/c9"), stored=stored), {"rule": "unknown_endpoint", "detail": "h1/c9"})
++        self.assertEqual(tables.check_record("context_edges", edge("h1/e1", "h1/c1", "h1/c9"), stored={"nodes": {"h1/c9": [1]}, "context_nodes": {"h1/c1": [1]}}),
++                         {"rule": "unknown_endpoint", "detail": "h1/c9"})
++        self.assertIsNone(tables.check_record("context_edges", edge("h1/e1", "h1/c1", "h1/c1"), stored=stored))
+         # And: a header of kind context looks in the context tables, a header of kind workflow does not
+-        self.assertEqual(tables.check_record("graphs", header("context", "c9"), stored=stored), {"rule": "unknown_member", "detail": "c9"})
+-        self.assertEqual(tables.check_record("graphs", header("workflow", "c1"), stored=stored), {"rule": "unknown_member", "detail": "c1"})
+-        self.assertIsNone(tables.check_record("graphs", header("context", "c1"), stored=stored))
++        self.assertEqual(tables.check_record("graphs", header("context", "h1/c9"), stored=stored), {"rule": "unknown_member", "detail": "h1/c9"})
++        self.assertEqual(tables.check_record("graphs", header("workflow", "h1/c1"), stored=stored), {"rule": "unknown_member", "detail": "h1/c1"})
++        self.assertIsNone(tables.check_record("graphs", header("context", "h1/c1"), stored=stored))
+ 
+     @mark.req("IF-301", "REQ-GTB-028")
+     @each_provider(IF, make=subject)
+@@ -156,10 +156,10 @@ class GraphTablesV2Contract(unittest.TestCase):
+             thread.join(5)
+             return answers.get(name, "no answer within 5 s")
+         # When/Then: the record at the limit is accepted, the one over it is refused naming data
+-        self.assertIsNone(check("at", node("d1", "data", value=[1] * 99995)))
+-        self.assertEqual(check("over", node("d1", "data", value=[1] * 99996)), {"rule": "schema_break", "detail": "data"})
++        self.assertIsNone(check("at", node("g/d1", "data", value=[1] * 99995)))
++        self.assertEqual(check("over", node("g/d1", "data", value=[1] * 99996)), {"rule": "schema_break", "detail": "data"})
+         # And: the record with 2**30 paths is refused the same way within the time limit
+-        self.assertEqual(check("shared", node("d1", "data", value=shared)), {"rule": "schema_break", "detail": "data"})
++        self.assertEqual(check("shared", node("g/d1", "data", value=shared)), {"rule": "schema_break", "detail": "data"})
+ 
+     @mark.req("IF-301", "REQ-GTB-027")
+     @each_provider(IF, make=subject)
+@@ -176,28 +176,28 @@ class GraphTablesV2Contract(unittest.TestCase):
+             shallow = [shallow]
+         # When/Then: the deep record is refused as schema_break naming data, in the check and in the rebuild, and nothing raises
+         refused = {"rule": "schema_break", "detail": "data"}
+-        self.assertEqual(tables.check_record("graph_nodes", node("d1", "data", value=deep)), refused)
+-        self.assertEqual(tables.to_object(node("d1", "data", value=deep)), {"refused": refused})
++        self.assertEqual(tables.check_record("graph_nodes", node("g/d1", "data", value=deep)), refused)
++        self.assertEqual(tables.to_object(node("g/d1", "data", value=deep)), {"refused": refused})
+         # And: the twin nested 150 levels is accepted
+-        self.assertIsNone(tables.check_record("graph_nodes", node("d1", "data", value=shallow)))
++        self.assertIsNone(tables.check_record("graph_nodes", node("g/d1", "data", value=shallow)))
+         # And: a category whose schema is not valid is refused naming type, for both node tables
+         broken = {"rule": "schema_break", "detail": "type"}
+-        self.assertEqual(tables.check_record("graph_nodes", node("c1", "entity"), categories={"entity": {"type": 5}}), broken)
+-        self.assertEqual(tables.check_record("context_nodes", node("c1", "entity"), categories={"entity": {"type": 5}}), broken)
++        self.assertEqual(tables.check_record("graph_nodes", node("g/c1", "entity"), categories={"entity": {"type": 5}}), broken)
++        self.assertEqual(tables.check_record("context_nodes", node("g/c1", "entity"), categories={"entity": {"type": 5}}), broken)
+ 
+     @mark.req("IF-301", "REQ-GTB-022")
+     @each_provider(IF, make=subject)
+     def test_a_node_with_an_extra_field_is_refused_naming_it(self, tables):
+         """TC-IF-301-21 golden 16: a node with a field its type does not list gives schema_break naming that field, in check_record and in to_object.
+ 
+-        Example: {"id": "d1", "data": {"type": "data", "foo": 1}} -> {"rule": "schema_break", "detail": "foo"}; a key id inside data -> detail "id".
++        Example: {"id": "g/d1", "data": {"type": "data", "foo": 1}} -> {"rule": "schema_break", "detail": "foo"}; a key id inside data -> detail "id".
+         """
+         # Given: one node per type with an extra field foo, and a data node with a key id inside its JSON field
+         stop = {"max_repetitions": 1}
+-        cases = [(node("d1", "data", foo=1), "foo"),
+-                 (node("t1", "transform", toolbox_id="t", foo=1), "foo"),
+-                 (node("m1", "master", toolbox_id="t", stop=stop, foo=1), "foo"),
+-                 (node("d2", "data", id="x"), "id")]
++        cases = [(node("g/d1", "data", foo=1), "foo"),
++                 (node("g/t1", "transform", toolbox_id="t", foo=1), "foo"),
++                 (node("g/m1", "master", toolbox_id="t", stop=stop, foo=1), "foo"),
++                 (node("g/d2", "data", id="x"), "id")]
+         for record, field in cases:
+             with self.subTest(record=record):
+                 # When/Then: the check and the rebuild both refuse it as schema_break naming the field, and the rebuild does not raise
+@@ -205,24 +205,24 @@ class GraphTablesV2Contract(unittest.TestCase):
+                 self.assertEqual(tables.check_record("graph_nodes", record), refusal)
+                 self.assertEqual(tables.to_object(record), {"refused": refusal})
+         # And: the twins without the extra field are accepted
+-        for record in (node("d1", "data"), node("t1", "transform", toolbox_id="t"), node("m1", "master", toolbox_id="t", stop=stop)):
++        for record in (node("g/d1", "data"), node("g/t1", "transform", toolbox_id="t"), node("g/m1", "master", toolbox_id="t", stop=stop)):
+             self.assertIsNone(tables.check_record("graph_nodes", record))
+         # And: a missing required key is named before an extra field (decision 13)
+-        self.assertEqual(tables.check_record("graph_nodes", node("t1", "transform", foo=1)), {"rule": "schema_break", "detail": "toolbox_id"})
++        self.assertEqual(tables.check_record("graph_nodes", node("g/t1", "transform", foo=1)), {"rule": "schema_break", "detail": "toolbox_id"})
+         # And: the schemas of the fixed list say so, and the node of a context graph keeps the fields of its own category
+         for type_id, schema in tables.types().items():
+             self.assertIs(schema.get("additionalProperties"), False, type_id)
+-        self.assertIsNone(tables.check_record("graph_nodes", node("c1", "entity", foo=1), categories={"entity": {"type": "object"}}))
++        self.assertIsNone(tables.check_record("graph_nodes", node("g/c1", "entity", foo=1), categories={"entity": {"type": "object"}}))
+ 
+     @mark.req("IF-301", "REQ-GTB-010")
+     @each_provider(IF, make=subject)
+     def test_an_unknown_type_is_refused_naming_it(self, tables):
+         """TC-IF-301-08 golden 2: a node whose type is x.unknown gives unknown_type naming it, in check_record and in to_object.
+ 
+-        Example: {"id": "u1", "data": {"type": "x.unknown"}} -> {"rule": "unknown_type", "detail": "x.unknown"}.
++        Example: {"id": "g/u1", "data": {"type": "x.unknown"}} -> {"rule": "unknown_type", "detail": "x.unknown"}.
+         """
+         # Given: a record with a type that is not in the fixed list
+-        record = node("u1", "x.unknown")
++        record = node("g/u1", "x.unknown")
+         # When/Then: the check and the rebuild both refuse it and name the type
+         self.assertEqual(tables.check_record("graph_nodes", record), {"rule": "unknown_type", "detail": "x.unknown"})
+         self.assertEqual(tables.to_object(record), {"refused": {"rule": "unknown_type", "detail": "x.unknown"}})
+@@ -235,21 +235,21 @@ class GraphTablesV2Contract(unittest.TestCase):
+         Example: {"type": "transform"} without toolbox_id -> {"rule": "schema_break", "detail": "toolbox_id"}.
+         """
+         # Given: records that break one field each (paths of the pinned validator, top-level fields only: nested paths are not fixed by the contract)
+-        cases = [(node("t1", "transform"), "toolbox_id"),                                            # required key missing
+-                 (node("t1", "transform", toolbox_id=5), "toolbox_id"),                            # wrong kind
+-                 (node("m1", "master", toolbox_id="t"), "stop"),                                   # required key missing
+-                 (node("m1", "master", toolbox_id="t", stop="x"), "stop"),                         # wrong kind
+-                 (node("m1", "master", toolbox_id="t", stop={}), "stop"),                          # at least one limit is required
+-                 (node("d1", "data", parameters="x"), "parameters"),                               # wrong kind
+-                 ({"id": "n1", "data": "x"}, "data")]                                              # no JSON field
++        cases = [(node("g/t1", "transform"), "toolbox_id"),                                            # required key missing
++                 (node("g/t1", "transform", toolbox_id=5), "toolbox_id"),                            # wrong kind
++                 (node("g/m1", "master", toolbox_id="t"), "stop"),                                   # required key missing
++                 (node("g/m1", "master", toolbox_id="t", stop="x"), "stop"),                         # wrong kind
++                 (node("g/m1", "master", toolbox_id="t", stop={}), "stop"),                          # at least one limit is required
++                 (node("g/d1", "data", parameters="x"), "parameters"),                               # wrong kind
++                 ({"id": "g/n1", "data": "x"}, "data")]                                              # no JSON field
+         for record, path in cases:
+             with self.subTest(record=record):
+                 # When/Then: refused as schema_break with the path as detail
+                 self.assertEqual(tables.check_record("graph_nodes", record), {"rule": "schema_break", "detail": path})
+         # And: a data node needs only its type; optional fields may be absent
+-        self.assertIsNone(tables.check_record("graph_nodes", node("d1", "data")))
++        self.assertIsNone(tables.check_record("graph_nodes", node("g/d1", "data")))
+         # And: a limit below its minimum is a schema_break inside `stop`
+-        broken = tables.check_record("graph_nodes", node("m1", "master", toolbox_id="t", stop={"max_repetitions": 0}))
++        broken = tables.check_record("graph_nodes", node("g/m1", "master", toolbox_id="t", stop={"max_repetitions": 0}))
+         self.assertIsNotNone(broken)
+         self.assertEqual(broken["rule"], "schema_break")
+         self.assertTrue(broken["detail"].startswith("stop"))
+@@ -262,12 +262,12 @@ class GraphTablesV2Contract(unittest.TestCase):
+         Example: a refused record checked twice -> the same refusal; `stored` equal to its copy afterwards.
+         """
+         # Given: a refused record (unknown endpoint) and the state the caller holds
+-        record, stored = edge("e1", "n1", "n9"), {"nodes": {"n1": [1]}, "edges": {}}
++        record, stored = edge("g/e1", "g/n1", "g/n9"), {"nodes": {"g/n1": [1]}, "edges": {}}
+         before = copy.deepcopy((record, stored))
+         # When: it is checked twice
+         first, second = tables.check_record("graph_edges", record, stored=stored), tables.check_record("graph_edges", record, stored=stored)
+         # Then: the same refusal both times
+-        self.assertEqual(first, {"rule": "unknown_endpoint", "detail": "n9"})
++        self.assertEqual(first, {"rule": "unknown_endpoint", "detail": "g/n9"})
+         self.assertEqual(second, first)
+         # And: nothing was changed; the version of a refused edit stays with the Storage layer (TC-GTB-017)
+         self.assertEqual((record, stored), before)
+@@ -277,18 +277,18 @@ class GraphTablesV2Contract(unittest.TestCase):
+     def test_the_document_form_and_the_record_form_convert_both_ways(self, tables):
+         """TC-IF-301-11 golden 5: from_document(to_document(g)) equals g for a graph without a master node, and the document passes the v1 validation.
+ 
+-        Example: records d1, t1 (transform), d2 with edges e1, e2 -> document kinds data, process, data -> the same records back.
++        Example: records g/d1, g/t1 (transform), g/d2 with edges g/e1, g/e2 -> document kinds data, process, data -> the same records back.
+         """
+         # Given: a graph of records without a master node (data, transform, data)
+-        nodes = [node("d1", "data", value=7, parameters={"k": 1}), node("t1", "transform", toolbox_id="tb"), node("d2", "data", value="x", parameters={})]
+-        edges = [edge("e1", "d1", "t1", label="a"), edge("e2", "t1", "d2")]
++        nodes = [node("g/d1", "data", value=7, parameters={"k": 1}), node("g/t1", "transform", toolbox_id="tb"), node("g/d2", "data", value="x", parameters={})]
++        edges = [edge("g/e1", "g/d1", "g/t1", label="a"), edge("g/e2", "g/t1", "g/d2")]
+         # When: it is written as a document
+         converted = tables.to_document(nodes, edges)
+         # Then: the kinds follow the types (transform is process) and the v1 rules accept the document
+         self.assertEqual(set(converted), {"document"})
+         doc = converted["document"]
+-        self.assertEqual([(n["id"], n["kind"]) for n in doc["nodes"]], [("d1", "data"), ("t1", "process"), ("d2", "data")])
+-        self.assertEqual([(e["from"], e["to"]) for e in doc["edges"]], [("d1", "t1"), ("t1", "d2")])
++        self.assertEqual([(n["id"], n["kind"]) for n in doc["nodes"]], [("g/d1", "data"), ("g/t1", "process"), ("g/d2", "data")])
++        self.assertEqual([(e["from"], e["to"]) for e in doc["edges"]], [("g/d1", "g/t1"), ("g/t1", "g/d2")])
+         self.assertIsNone(tables.validate("workflows", doc))
+         # And: reading the document back gives the graph that was written
+         self.assertEqual(tables.from_document(doc), {"nodes": nodes, "edges": edges})
+@@ -316,39 +316,39 @@ class GraphTablesV2Contract(unittest.TestCase):
+     @mark.req("IF-301", "REQ-GTB-017", "REQ-GTB-019")
+     @each_provider(IF, make=subject)
+     def test_a_header_names_stored_versions_only(self, tables):
+-        """TC-IF-301-13 golden 6: a graph header naming n1 at version 5 when n1 has versions 1 and 2 gives unknown_member naming n1; version 2 gives None.
++        """TC-IF-301-13 golden 6: a graph header naming wf1/n1 at version 5 when wf1/n1 has versions 1 and 2 gives unknown_member naming wf1/n1; version 2 gives None.
+ 
+-        Example: stored nodes {"n1": [1, 2]}; header names {"id": "n1", "version": 5} -> {"rule": "unknown_member", "detail": "n1"}.
++        Example: stored nodes {"wf1/n1": [1, 2]}; header names {"id": "wf1/n1", "version": 5} -> {"rule": "unknown_member", "detail": "wf1/n1"}.
+         """
+-        # Given: what the caller has stored, and a header that names n1 at version 5 (the twin names version 2)
+-        stored = {"nodes": {"n1": [1, 2]}, "edges": {}}
++        # Given: what the caller has stored, and a header that names wf1/n1 at version 5 (the twin names version 2)
++        stored = {"nodes": {"wf1/n1": [1, 2]}, "edges": {}}
+         def header(version):
+             return {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "ctx", "testbench_id": "", "description": "d",
+-                                          "nodes": [{"id": "n1", "version": version}], "edges": []}}
+-        # When/Then: version 5 is refused naming n1, version 2 is accepted
+-        self.assertEqual(tables.check_record("graphs", header(5), stored=stored), {"rule": "unknown_member", "detail": "n1"})
++                                          "nodes": [{"id": "wf1/n1", "version": version}], "edges": []}}
++        # When/Then: version 5 is refused naming wf1/n1, version 2 is accepted
++        self.assertEqual(tables.check_record("graphs", header(5), stored=stored), {"rule": "unknown_member", "detail": "wf1/n1"})
+         self.assertIsNone(tables.check_record("graphs", header(2), stored=stored))
+         # And: an edge member is checked against the stored edges the same way
+         edge_header = header(2)
+-        edge_header["data"]["edges"] = [{"id": "e1", "version": 1}]
+-        self.assertEqual(tables.check_record("graphs", edge_header, stored=stored), {"rule": "unknown_member", "detail": "e1"})
++        edge_header["data"]["edges"] = [{"id": "wf1/e1", "version": 1}]
++        self.assertEqual(tables.check_record("graphs", edge_header, stored=stored), {"rule": "unknown_member", "detail": "wf1/e1"})
+         # And: without `stored` the rule is not checked (a pure function stores nothing)
+         self.assertIsNone(tables.check_record("graphs", header(5)))
+ 
+     @mark.req("IF-301", "REQ-GTB-006", "REQ-GTB-020")
+     @each_provider(IF, make=subject)
+     def test_an_edge_names_stored_nodes_only(self, tables):
+-        """TC-IF-301-14 golden 7: an edge e1 from n1 to n9 with only n1 stored gives unknown_endpoint naming n9; with n9 stored it gives None.
++        """TC-IF-301-14 golden 7: an edge g/e1 from g/n1 to g/n9 with only g/n1 stored gives unknown_endpoint naming g/n9; with g/n9 stored it gives None.
+ 
+-        Example: stored nodes {"n1": [1]} -> {"rule": "unknown_endpoint", "detail": "n9"}; stored nodes {"n1": [1], "n9": [1]} -> None.
++        Example: stored nodes {"g/n1": [1]} -> {"rule": "unknown_endpoint", "detail": "g/n9"}; stored nodes {"g/n1": [1], "g/n9": [1]} -> None.
+         """
+         # Given: the edge and the two states of the store
+-        record = edge("e1", "n1", "n9", label="x")
++        record = edge("g/e1", "g/n1", "g/n9", label="x")
+         # When/Then: refused naming the missing end; accepted when it is stored
+-        self.assertEqual(tables.check_record("graph_edges", record, stored={"nodes": {"n1": [1]}, "edges": {}}), {"rule": "unknown_endpoint", "detail": "n9"})
+-        self.assertIsNone(tables.check_record("graph_edges", record, stored={"nodes": {"n1": [1], "n9": [1]}, "edges": {}}))
++        self.assertEqual(tables.check_record("graph_edges", record, stored={"nodes": {"g/n1": [1]}, "edges": {}}), {"rule": "unknown_endpoint", "detail": "g/n9"})
++        self.assertIsNone(tables.check_record("graph_edges", record, stored={"nodes": {"g/n1": [1], "g/n9": [1]}, "edges": {}}))
+         # And: a start node that is missing is named the same way
+-        self.assertEqual(tables.check_record("graph_edges", record, stored={"nodes": {"n9": [1]}, "edges": {}}), {"rule": "unknown_endpoint", "detail": "n1"})
++        self.assertEqual(tables.check_record("graph_edges", record, stored={"nodes": {"g/n9": [1]}, "edges": {}}), {"rule": "unknown_endpoint", "detail": "g/n1"})
+         # And: without `stored` the rule is not checked
+         self.assertIsNone(tables.check_record("graph_edges", record))
+ 
+@@ -374,36 +374,36 @@ class GraphTablesV2Contract(unittest.TestCase):
+     def test_a_context_graph_node_takes_its_schema_from_the_caller(self, tables):
+         """TC-IF-301-16 golden 9: a node of category entity with categories {"entity": schema} and a fitting field gives None; without categories it is unknown_type naming entity.
+ 
+-        Example: {"id": "c1", "data": {"type": "entity", "name": "Ada"}} with the schema "name is text" -> None; without categories -> unknown_type entity.
++        Example: {"id": "g/c1", "data": {"type": "entity", "name": "Ada"}} with the schema "name is text" -> None; without categories -> unknown_type entity.
+         """
+         # Given: a context graph's own category with its schema, and a node of that category
+         categories = {"entity": {"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}}
+-        record = node("c1", "entity", name="Ada")
++        record = node("g/c1", "entity", name="Ada")
+         # When/Then: accepted with the categories, a plain ContextNode is built; refused without them
+         self.assertIsNone(tables.check_record("graph_nodes", record, categories=categories))
+         built = tables.to_object(record, categories=categories)
+         self.assertEqual(set(built), {"object"})
+         obj = built["object"]
+-        self.assertEqual((obj.id, obj.type), ("c1", "entity"))
++        self.assertEqual((obj.id, obj.type), ("g/c1", "entity"))
+         self.assertEqual(tables.to_record(obj), record)
+         self.assertEqual(tables.check_record("graph_nodes", record), {"rule": "unknown_type", "detail": "entity"})
+         # And: a field that breaks the category's schema is a schema_break naming it
+-        self.assertEqual(tables.check_record("graph_nodes", node("c2", "entity", name=5), categories=categories), {"rule": "schema_break", "detail": "name"})
++        self.assertEqual(tables.check_record("graph_nodes", node("g/c2", "entity", name=5), categories=categories), {"rule": "schema_break", "detail": "name"})
+         # And: a category the context graph does not list is unknown_type
+-        self.assertEqual(tables.check_record("graph_nodes", node("c3", "place"), categories=categories), {"rule": "unknown_type", "detail": "place"})
++        self.assertEqual(tables.check_record("graph_nodes", node("g/c3", "place"), categories=categories), {"rule": "unknown_type", "detail": "place"})
+ 
+     @mark.req("IF-301", "REQ-GTB-015")
+     @each_provider(IF, make=subject)
+     def test_a_master_node_has_no_document_form(self, tables):
+         """TC-IF-301-17 golden 10: to_document of a graph with a master node gives not_representable naming the master node.
+ 
+-        Example: nodes d1, m1 (master), d2 -> {"refused": {"rule": "not_representable", "detail": "m1"}}.
++        Example: nodes g/d1, g/m1 (master), g/d2 -> {"refused": {"rule": "not_representable", "detail": "g/m1"}}.
+         """
+         # Given: a graph with a master node
+-        nodes = [node("d1", "data"), node("m1", "master", toolbox_id="t", stop={"max_repetitions": 1}), node("d2", "data")]
+-        edges = [edge("e1", "d1", "m1"), edge("e2", "m1", "d2")]
++        nodes = [node("g/d1", "data"), node("g/m1", "master", toolbox_id="t", stop={"max_repetitions": 1}), node("g/d2", "data")]
++        edges = [edge("g/e1", "g/d1", "g/m1"), edge("g/e2", "g/m1", "g/d2")]
+         # When/Then: refused, naming the master node
+-        self.assertEqual(tables.to_document(nodes, edges), {"refused": {"rule": "not_representable", "detail": "m1"}})
++        self.assertEqual(tables.to_document(nodes, edges), {"refused": {"rule": "not_representable", "detail": "g/m1"}})
+ 
+     @mark.req("IF-301", "REQ-GTB-005", "REQ-GTB-006", "REQ-GTB-018")
+     @each_provider(IF, make=subject)
+@@ -415,18 +415,18 @@ class GraphTablesV2Contract(unittest.TestCase):
+         # Given/When/Then: the identity fields are named
+         self.assertEqual(tables.check_record("graph_nodes", {"data": {"type": "data"}}), {"rule": "record_identity", "detail": "id"})
+         self.assertEqual(tables.check_record("graph_nodes", {"id": 5, "data": {"type": "data"}}), {"rule": "record_identity", "detail": "id"})
+-        self.assertEqual(tables.check_record("graph_edges", {"id": "e1", "from": "n1", "data": {}}), {"rule": "record_identity", "detail": "to"})
++        self.assertEqual(tables.check_record("graph_edges", {"id": "g/e1", "from": "g/n1", "data": {}}), {"rule": "record_identity", "detail": "to"})
+         self.assertEqual(tables.check_record("skills", {"data": {}}), {"rule": "record_identity", "detail": "id"})
+         # And: a table that is not defined here is a ValueError (the caller asks IF-302 instead)
+         with self.assertRaises(ValueError):
+             tables.check_record("memory", {})
+         # And: any other input gives a rule, never an exception (as A-60)
+         for table in ("graph_nodes", "graph_edges", "graphs", "skills"):
+-            for garbage in (None, [], "x", 5, {}, {"id": "a"}, {"id": "a", "data": None}, {"id": "a", "data": {"type": ["x"]}}):
++            for garbage in (None, [], "x", 5, {}, {"id": "g/a"}, {"id": "g/a", "data": None}, {"id": "g/a", "data": {"type": ["x"]}}):
+                 with self.subTest(table=table, record=garbage):
+                     result = tables.check_record(table, garbage, categories={"entity": {}}, stored={"nodes": {}, "edges": {}})
+                     self.assertEqual(set(result), {"rule", "detail"})
+-        for garbage in (None, [], "x", 5, {}, {"id": "a"}, {"id": "a", "data": {"type": ["x"]}}):
++        for garbage in (None, [], "x", 5, {}, {"id": "g/a"}, {"id": "g/a", "data": {"type": ["x"]}}):
+             with self.subTest(to_object=garbage):
+                 self.assertEqual(set(tables.to_object(garbage)), {"refused"})
+ 
+@@ -435,12 +435,12 @@ class GraphTablesV2Contract(unittest.TestCase):
+     def test_500_node_records_and_500_edge_records_are_checked_in_half_a_second(self, tables):
+         """TC-IF-301-19 bound: 500 node records and 500 edge records are checked in at most 500 ms (best of 3 runs, so a busy host does not decide).
+ 
+-        Example: 500 transform nodes n0..n499 and 500 edges e0..e499 between stored nodes -> all None in at most 0.5 s.
++        Example: 500 transform nodes g/n0..g/n499 and 500 edges g/e0..g/e499 between stored nodes -> all None in at most 0.5 s.
+         """
+         # Given: 500 valid node records, 500 valid edge records and the store state they need
+-        nodes = [node("n%d" % i, "transform", toolbox_id="tb") for i in range(500)]
+-        stored = {"nodes": {"n%d" % i: [1] for i in range(500)}, "edges": {}}
+-        edges = [edge("e%d" % i, "n%d" % i, "n%d" % ((i + 1) % 500)) for i in range(500)]
++        nodes = [node("g/n%d" % i, "transform", toolbox_id="tb") for i in range(500)]
++        stored = {"nodes": {"g/n%d" % i: [1] for i in range(500)}, "edges": {}}
++        edges = [edge("g/e%d" % i, "g/n%d" % i, "g/n%d" % ((i + 1) % 500)) for i in range(500)]
+         timings = []
+         for _ in range(3):
+             # When: all 1000 are checked
+@@ -455,21 +455,60 @@ class GraphTablesV2Contract(unittest.TestCase):
+     @mark.req("IF-301", "REQ-GTB-021")
+     @each_provider(IF, make=subject)
+     def test_a_record_under_another_id_is_refused(self, tables):
+-        """TC-IF-301-20 golden 15: a record whose id is n1, checked with record_id x, gives record_identity naming id; with record_id n1, or without, it gives None.
++        """TC-IF-301-20 golden 15: a record whose id is g/n1, checked with record_id x, gives record_identity naming id; with record_id g/n1, or without, it gives None.
+ 
+-        Example: {"id": "n1", "data": {"type": "data"}} with record_id="x" -> {"rule": "record_identity", "detail": "id"}.
++        Example: {"id": "g/n1", "data": {"type": "data"}} with record_id="x" -> {"rule": "record_identity", "detail": "id"}.
+         """
+-        # Given: a node record with its own ID n1
+-        record = node("n1", "data")
++        # Given: a node record with its own ID g/n1
++        record = node("g/n1", "data")
+         # When/Then: under another record ID it is refused naming the field id; the twin under its own ID and the call without record_id are accepted
+         self.assertEqual(tables.check_record("graph_nodes", record, record_id="x"), {"rule": "record_identity", "detail": "id"})
+-        self.assertIsNone(tables.check_record("graph_nodes", record, record_id="n1"))
++        self.assertIsNone(tables.check_record("graph_nodes", record, record_id="g/n1"))
+         self.assertIsNone(tables.check_record("graph_nodes", record))
+         # And: the same holds for the other three tables
+-        for table, other in (("graph_edges", edge("e1", "n1", "n2")), ("skills", {"id": "s1", "data": {"command": "/s", "workflow_graph_id": "w", "context_graph_id": "c"}})):
++        for table, other in (("graph_edges", edge("g/e1", "g/n1", "g/n2")), ("skills", {"id": "s1", "data": {"command": "/s", "workflow_graph_id": "w", "context_graph_id": "c"}})):
+             self.assertEqual(tables.check_record(table, other, record_id="x"), {"rule": "record_identity", "detail": "id"})
+             self.assertIsNone(tables.check_record(table, other, record_id=other["id"]))
+ 
+ 
++    @mark.req("IF-301", "REQ-GTB-029", "REQ-GTB-031")
++    @each_provider(IF, make=subject)
++    def test_a_step_or_connection_without_its_graph_in_the_id_is_refused(self, tables):
++        """TC-IF-301-25 golden 22 (v3, A-167): a record of a step or connection table under n1, /n1 or g/ is unscoped_id naming that ID; the empty ID stays record_identity; g/n1 and lookup/a/b are accepted.
++
++        Example: {"id": "n1", "data": {"type": "data"}} as graph_nodes -> {"rule": "unscoped_id", "detail": "n1"}; {"id": "lookup/a/b", ...} -> None.
++        """
++        # Given: one record of each of the four tables, made under a given ID (an edge with the ends g/a and g/b)
++        make = {"graph_nodes": lambda i: node(i, "data"), "graph_edges": lambda i: edge(i, "g/a", "g/b"),
++                "context_nodes": lambda i: node(i, "entity"), "context_edges": lambda i: edge(i, "g/a", "g/b")}
++        for table, build in make.items():
++            # When/Then: a plain ID, an empty graph part and an empty local part are refused naming the ID
++            for bad in ("n1", "/n1", "g/"):
++                self.assertEqual(tables.check_record(table, build(bad)), {"rule": "unscoped_id", "detail": bad}, (table, bad))
++            # And: the empty ID is still record_identity naming id (checked first, as in v2; D-409)
++            self.assertEqual(tables.check_record(table, build("")), {"rule": "record_identity", "detail": "id"}, table)
++            # And: a scoped ID is accepted, also one whose local ID holds a slash (the first slash separates, REQ-GTB-031)
++            for good in ("g/n1", "lookup/a/b"):
++                self.assertIsNone(tables.check_record(table, build(good)), (table, good))
++
++    @mark.req("IF-301", "REQ-GTB-030")
++    @each_provider(IF, make=subject)
++    def test_a_header_names_only_members_of_its_own_graph(self, tables):
++        """TC-IF-301-26 golden 23 (v3, A-167): a header g naming the node h/n1 or the edge h/e1 is unscoped_id naming that member, with and without stored; g/n1 and g/e1 are accepted.
++
++        Example: header g with nodes [{"id": "h/n1", "version": 1}] -> {"rule": "unscoped_id", "detail": "h/n1"}.
++        """
++        # Given: a header of the workflow graph g and what is stored of g
++        def header(nodes, edges):
++            return {"id": "g", "data": {"kind": "workflow", "context_graph_id": "", "testbench_id": "", "description": "d",
++                                        "nodes": [{"id": i, "version": 1} for i in nodes], "edges": [{"id": i, "version": 1} for i in edges]}}
++        stored = {"nodes": {"g/n1": [1], "h/n1": [1]}, "edges": {"g/e1": [1], "h/e1": [1]}}
++        # When/Then: a node or an edge of the graph h is refused naming it, even when it is stored and when nothing is passed as stored
++        for nodes, edges, member in ((["h/n1"], [], "h/n1"), (["g/n1"], ["h/e1"], "h/e1")):
++            for given in (stored, None):
++                self.assertEqual(tables.check_record("graphs", header(nodes, edges), stored=given), {"rule": "unscoped_id", "detail": member})
++        # And: the members of g itself are accepted
++        self.assertIsNone(tables.check_record("graphs", header(["g/n1"], ["g/e1"]), stored=stored))
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/acceptance/test_graph_records.py b/tests/acceptance/test_graph_records.py
+index 40ccb05c..5c3fe534 100644
+--- a/tests/acceptance/test_graph_records.py
++++ b/tests/acceptance/test_graph_records.py
+@@ -85,13 +85,13 @@ class GraphRecordAcceptance(unittest.TestCase):
+     def test_a_node_of_each_type_is_stored_as_a_record(self):
+         """TC-GTB-016: one node of each registered type is written and read back with the same ID and the same JSON field, which holds its type.
+ 
+-        Example: {"id": "t1", "data": {"type": "transform", "toolbox_id": "t-demo"}} -> read back equal, data["type"] == "transform".
++        Example: {"id": "g/t1", "data": {"type": "transform", "toolbox_id": "t-demo"}} -> read back equal, data["type"] == "transform".
+         """
+         # Given: the registered types are data, master and transform; one node of each, with an ID and a JSON field that holds its type
+         store = new_store(self)
+         self.assertEqual(list(graph_tables.types()), NODE_TYPES)
+-        records = [node("d1", "data", value=7, parameters={"k": 1}), node("t1", "transform", toolbox_id="t-demo"),
+-                   node("m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 3})]
++        records = [node("g/d1", "data", value=7, parameters={"k": 1}), node("g/t1", "transform", toolbox_id="t-demo"),
++                   node("g/m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 3})]
+         for record in records:
+             # When: each is written and read back
+             self.assertEqual(store.put("graph_nodes", record["id"], record, WHO), {"version": 1})
+@@ -105,17 +105,17 @@ class GraphRecordAcceptance(unittest.TestCase):
+     def test_an_edge_is_stored_as_a_record(self):
+         """TC-GTB-006: an edge with an ID, a start node, an end node and a JSON field is read back with the same four fields.
+ 
+-        Example: e1 from n1 to n2 with {"label": "x"} -> {"id": "e1", "from": "n1", "to": "n2", "data": {"label": "x"}}.
++        Example: g/e1 from g/n1 to g/n2 with {"label": "x"} -> {"id": "g/e1", "from": "g/n1", "to": "g/n2", "data": {"label": "x"}}.
+         """
+-        # Given: the nodes n1 and n2 are stored, and the edge e1 with its JSON field
++        # Given: the nodes g/n1 and g/n2 are stored, and the edge g/e1 with its JSON field
+         store = new_store(self)
+-        store.put("graph_nodes", "n1", node("n1", "data"), WHO)
+-        store.put("graph_nodes", "n2", node("n2", "data"), WHO)
++        store.put("graph_nodes", "g/n1", node("g/n1", "data"), WHO)
++        store.put("graph_nodes", "g/n2", node("g/n2", "data"), WHO)
+         # When: the edge is written and read back
+-        self.assertEqual(store.put("graph_edges", "e1", edge("e1", "n1", "n2", label="x"), WHO), {"version": 1})
+-        read = store.get("graph_edges", "e1")["doc"]
++        self.assertEqual(store.put("graph_edges", "g/e1", edge("g/e1", "g/n1", "g/n2", label="x"), WHO), {"version": 1})
++        read = store.get("graph_edges", "g/e1")["doc"]
+         # Then: it has the same ID, start node, end node and JSON field
+-        self.assertEqual(read, {"id": "e1", "from": "n1", "to": "n2", "data": {"label": "x"}})
++        self.assertEqual(read, {"id": "g/e1", "from": "g/n1", "to": "g/n2", "data": {"label": "x"}})
+ 
+     @mark.req("REQ-GTB-007")
+     def test_a_transform_node_keeps_its_toolbox_id(self):
+@@ -125,9 +125,9 @@ class GraphRecordAcceptance(unittest.TestCase):
+         """
+         # Given: a transform node that names the toolbox ID t-demo
+         store = new_store(self)
+-        store.put("graph_nodes", "t1", node("t1", "transform", toolbox_id="t-demo"), WHO)
++        store.put("graph_nodes", "g/t1", node("g/t1", "transform", toolbox_id="t-demo"), WHO)
+         # When: it is read back and rebuilt
+-        read = store.get("graph_nodes", "t1")["doc"]
++        read = store.get("graph_nodes", "g/t1")["doc"]
+         built = graph_tables.to_object(read)
+         # Then: the node names t-demo
+         self.assertEqual(read["data"]["toolbox_id"], "t-demo")
+@@ -145,9 +145,9 @@ class GraphRecordAcceptance(unittest.TestCase):
+         marker = os.path.join(folder, "ran")
+         task, stop = {"command": "touch %s" % marker}, {"max_repetitions": 3, "max_seconds": 2.5}
+         store = new_store(self)
+-        store.put("graph_nodes", "m1", node("m1", "master", toolbox_id="t-lead", stop=stop, task=task), WHO)
++        store.put("graph_nodes", "g/m1", node("g/m1", "master", toolbox_id="t-lead", stop=stop, task=task), WHO)
+         # When: it is read back and rebuilt
+-        read = store.get("graph_nodes", "m1")["doc"]
++        read = store.get("graph_nodes", "g/m1")["doc"]
+         built = graph_tables.to_object(read)
+         # Then: the definition and the stopping criterion are equal to what was written
+         self.assertEqual((read["data"]["task"], read["data"]["stop"]), (task, stop))
+@@ -160,14 +160,14 @@ class GraphRecordAcceptance(unittest.TestCase):
+     def test_the_class_is_rebuilt_from_the_type_id(self):
+         """TC-GTB-009: each stored node is rebuilt as the class registered for its type ID, with equal values.
+ 
+-        Example: stored d1 (data, value 7) and d2 (data) -> two objects of one class; t1 (transform) and m1 (master) -> two other classes.
++        Example: stored g/d1 (data, value 7) and g/d2 (data) -> two objects of one class; g/t1 (transform) and g/m1 (master) -> two other classes.
+         """
+         # Given: stored nodes of each registered type, two of type data (they must share their class)
+         store = new_store(self)
+-        records = [node("d1", "data", value=7, parameters={"k": 1}), node("d2", "data"), node("t1", "transform", toolbox_id="t-demo"),
+-                   node("m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 2}, task={"goal": "x"})]
+-        expected = {"d1": {"value": 7, "parameters": {"k": 1}}, "d2": {"value": None, "parameters": {}},   # an absent parameters is the empty object (contract)
+-                    "t1": {"toolbox_id": "t-demo"}, "m1": {"toolbox_id": "t-lead", "stop": {"max_repetitions": 2}, "task": {"goal": "x"}}}
++        records = [node("g/d1", "data", value=7, parameters={"k": 1}), node("g/d2", "data"), node("g/t1", "transform", toolbox_id="t-demo"),
++                   node("g/m1", "master", toolbox_id="t-lead", stop={"max_repetitions": 2}, task={"goal": "x"})]
++        expected = {"g/d1": {"value": 7, "parameters": {"k": 1}}, "g/d2": {"value": None, "parameters": {}},   # an absent parameters is the empty object (contract)
++                    "g/t1": {"toolbox_id": "t-demo"}, "g/m1": {"toolbox_id": "t-lead", "stop": {"max_repetitions": 2}, "task": {"goal": "x"}}}
+         for record in records:
+             store.put("graph_nodes", record["id"], record, WHO)
+         # When: each is read and rebuilt
+@@ -177,8 +177,8 @@ class GraphRecordAcceptance(unittest.TestCase):
+             self.assertEqual(set(built), {"object"})
+             objects[record["id"]] = built["object"]
+         # Then: the class depends on the type ID alone
+-        self.assertIs(type(objects["d1"]), type(objects["d2"]))
+-        self.assertEqual(len({type(objects[i]) for i in ("d1", "t1", "m1")}), 3)
++        self.assertIs(type(objects["g/d1"]), type(objects["g/d2"]))
++        self.assertEqual(len({type(objects[i]) for i in ("g/d1", "g/t1", "g/m1")}), 3)
+         # And: the values equal the stored ones
+         for node_id, values in expected.items():
+             self.assertEqual(objects[node_id].id, node_id)
+@@ -189,23 +189,23 @@ class GraphRecordAcceptance(unittest.TestCase):
+     def test_an_unknown_type_is_refused_when_written_and_when_read(self):
+         """TC-GTB-010: a node with the type ID x.unknown is refused as a write and as a record already in storage, both naming x.unknown.
+ 
+-        Example: {"id": "u1", "data": {"type": "x.unknown"}} -> write refused (unknown_type, x.unknown); read gives {"refused": unknown_type, x.unknown}.
++        Example: {"id": "g/u1", "data": {"type": "x.unknown"}} -> write refused (unknown_type, x.unknown); read gives {"refused": unknown_type, x.unknown}.
+         """
+         # Given: a good node already stored, and a node of the type x.unknown
+         store = new_store(self)
+-        store.put("graph_nodes", "ok", node("ok", "transform", toolbox_id="t"), WHO)
+-        record = node("u1", "x.unknown")
++        store.put("graph_nodes", "g/ok", node("g/ok", "transform", toolbox_id="t"), WHO)
++        record = node("g/u1", "x.unknown")
+         # When: it is written
+-        rule = refusal(self, store, "graph_nodes", "u1", record)
++        rule = refusal(self, store, "graph_nodes", "g/u1", record)
+         # Then: the write is refused and the message names x.unknown (no other record changed: refusal() compares the whole store)
+         self.assertEqual(rule, ("unknown_type", "x.unknown"))
+         # When: the same record is present in storage (put past the check, as a record written by an older or damaged writer) and is read
+-        StorageMock.put(store, "graph_nodes", "u1", record, WHO)
+-        built = graph_tables.to_object(store.get("graph_nodes", "u1")["doc"])
++        StorageMock.put(store, "graph_nodes", "g/u1", record, WHO)
++        built = graph_tables.to_object(store.get("graph_nodes", "g/u1")["doc"])
+         # Then: the read is refused and the message names x.unknown
+         self.assertEqual(built, {"refused": {"rule": "unknown_type", "detail": "x.unknown"}})
+         # And: the other record is as before
+-        self.assertEqual(store.get("graph_nodes", "ok")["version"], 1)
++        self.assertEqual(store.get("graph_nodes", "g/ok")["version"], 1)
+ 
+     @mark.req("REQ-GTB-011")
+     def test_a_field_that_breaks_its_schema_is_refused_naming_its_path(self):
+@@ -215,11 +215,11 @@ class GraphRecordAcceptance(unittest.TestCase):
+         """
+         # Given: two stored nodes for the edge to join, and one broken record each (top-level fields: the path is the key as the validator names it)
+         store = new_store(self)
+-        store.put("graph_nodes", "n1", node("n1", "data"), WHO)
+-        store.put("graph_nodes", "n2", node("n2", "data"), WHO)
+-        cases = [("graph_nodes", node("t1", "transform"), "toolbox_id"),                # a required key is missing
+-                 ("graph_nodes", node("t1", "transform", toolbox_id=5), "toolbox_id"),  # a value of the wrong kind
+-                 ("graph_edges", {"id": "e1", "from": "n1", "to": "n2", "data": "x"}, "data")]   # the JSON field of an edge must be an object
++        store.put("graph_nodes", "g/n1", node("g/n1", "data"), WHO)
++        store.put("graph_nodes", "g/n2", node("g/n2", "data"), WHO)
++        cases = [("graph_nodes", node("g/t1", "transform"), "toolbox_id"),                # a required key is missing
++                 ("graph_nodes", node("g/t1", "transform", toolbox_id=5), "toolbox_id"),  # a value of the wrong kind
++                 ("graph_edges", {"id": "g/e1", "from": "g/n1", "to": "g/n2", "data": "x"}, "data")]   # the JSON field of an edge must be an object
+         for table, record, path in cases:
+             with self.subTest(record=record):
+                 # When/Then: each write is refused as schema_break and names the path of the broken field
+@@ -246,17 +246,17 @@ class GraphRecordAcceptance(unittest.TestCase):
+     def test_an_edit_is_a_new_version(self):
+         """TC-GTB-013: after an edit of a node, an edge and the whole graph, the new version exists and the one before is unchanged; all earlier versions can still be read.
+ 
+-        Example: node n1 toolbox "t-old" -> "t-new": versions [1, 2], version 1 still names "t-old".
++        Example: node wf1/n1 toolbox "t-old" -> "t-new": versions [1, 2], version 1 still names "t-old".
+         """
+         # Given: a stored graph at version 1 (two nodes, an edge, the header)
+         store = new_store(self)
+-        n1, n2, e1 = node("n1", "transform", toolbox_id="t-old"), node("n2", "data"), edge("e1", "n1", "n2", label="a")
+-        wf1 = header("wf1", [("n1", 1), ("n2", 1)], [("e1", 1)])
++        n1, n2, e1 = node("wf1/n1", "transform", toolbox_id="t-old"), node("wf1/n2", "data"), edge("wf1/e1", "wf1/n1", "wf1/n2", label="a")
++        wf1 = header("wf1", [("wf1/n1", 1), ("wf1/n2", 1)], [("wf1/e1", 1)])
+         for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf1)):
+             self.assertEqual(store.put(table, record["id"], record, WHO), {"version": 1})
+         # When: one node is edited, then one edge, then the whole graph
+-        n1b, e1b = node("n1", "transform", toolbox_id="t-new"), edge("e1", "n1", "n2", label="b")
+-        wf1b = header("wf1", [("n1", 2), ("n2", 1)], [("e1", 2)], description="edited")
++        n1b, e1b = node("wf1/n1", "transform", toolbox_id="t-new"), edge("wf1/e1", "wf1/n1", "wf1/n2", label="b")
++        wf1b = header("wf1", [("wf1/n1", 2), ("wf1/n2", 1)], [("wf1/e1", 2)], description="edited")
+         edits = [("graph_nodes", n1, n1b), ("graph_edges", e1, e1b), ("graphs", wf1, wf1b)]
+         for table, before, after in edits:
+             self.assertEqual(store.put(table, after["id"], after, WHO), {"version": 2})
+@@ -277,18 +277,18 @@ class GraphRecordAcceptance(unittest.TestCase):
+     def test_a_refused_edit_changes_nothing(self):
+         """TC-GTB-017: an edit that breaks a check (unknown type, schema break, an ID that already exists) is refused; the latest version stays 1 with its content.
+ 
+-        Example: node n1 edited to type x.unknown -> refused; version 1 of n1 is still the latest and no version 2 exists.
++        Example: node wf1/n1 edited to type x.unknown -> refused; version 1 of wf1/n1 is still the latest and no version 2 exists.
+         """
+         # Given: a stored graph at version 1, and one breaking edit each of a node, an edge and the whole graph
+         store = new_store(self)
+-        n1, n2, e1 = node("n1", "transform", toolbox_id="t"), node("n2", "data"), edge("e1", "n1", "n2", label="a")
+-        wf1 = header("wf1", [("n1", 1), ("n2", 1)], [("e1", 1)])
++        n1, n2, e1 = node("wf1/n1", "transform", toolbox_id="t"), node("wf1/n2", "data"), edge("wf1/e1", "wf1/n1", "wf1/n2", label="a")
++        wf1 = header("wf1", [("wf1/n1", 1), ("wf1/n2", 1)], [("wf1/e1", 1)])
+         stored = [("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf1)]
+         for table, record in stored:
+             store.put(table, record["id"], record, WHO)
+-        edits = [("graph_nodes", "n1", node("n1", "x.unknown")),                                     # an unknown type
+-                 ("graph_edges", "e1", {"id": "e1", "from": "n1", "to": "n2", "data": "x"}),         # a field that breaks its schema
+-                 ("graphs", "wf1", header("wf1", [("n1", 1), ("n1", 1)], [("e1", 1)]))]              # an ID that is already a member of the graph
++        edits = [("graph_nodes", "wf1/n1", node("wf1/n1", "x.unknown")),                                     # an unknown type
++                 ("graph_edges", "wf1/e1", {"id": "wf1/e1", "from": "wf1/n1", "to": "wf1/n2", "data": "x"}),         # a field that breaks its schema
++                 ("graphs", "wf1", header("wf1", [("wf1/n1", 1), ("wf1/n1", 1)], [("wf1/e1", 1)]))]              # an ID that is already a member of the graph
+         for table, record_id, record in edits:
+             with self.subTest(table=table):
+                 # When: the edit is made; Then: it is refused (refusal() also checks that no table changed)
+@@ -305,35 +305,35 @@ class GraphRecordAcceptance(unittest.TestCase):
+ 
+     @mark.req("REQ-GTB-017")
+     def test_a_graph_version_pins_its_members(self):
+-        """TC-GTB-018: header version 1 still reads node n1 at version 1 with its old content after n1 was edited; header version 2 reads n1 at version 2.
++        """TC-GTB-018: header version 1 still reads node wf1/n1 at version 1 with its old content after wf1/n1 was edited; header version 2 reads wf1/n1 at version 2.
+ 
+-        Example: n1 toolbox "t-old" (version 1) -> "t-new" (version 2); header version 1 -> n1 at version 1 names "t-old".
++        Example: wf1/n1 toolbox "t-old" (version 1) -> "t-new" (version 2); header version 1 -> wf1/n1 at version 1 names "t-old".
+         """
+-        # Given: a header wf1 (kind workflow, context graph, empty testbench ID, description) naming n1, n2 and e1, each at version 1
++        # Given: a header wf1 (kind workflow, context graph, empty testbench ID, description) naming wf1/n1, wf1/n2 and wf1/e1, each at version 1
+         store = new_store(self)
+-        n1, n2, e1 = node("n1", "transform", toolbox_id="t-old"), node("n2", "data"), edge("e1", "n1", "n2")
+-        wf_v1 = header("wf1", [("n1", 1), ("n2", 1)], [("e1", 1)])
++        n1, n2, e1 = node("wf1/n1", "transform", toolbox_id="t-old"), node("wf1/n2", "data"), edge("wf1/e1", "wf1/n1", "wf1/n2")
++        wf_v1 = header("wf1", [("wf1/n1", 1), ("wf1/n2", 1)], [("wf1/e1", 1)])
+         for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1)):
+             store.put(table, record["id"], record, WHO)
+         # When: the header is stored and read back
+         store.put("graphs", "wf1", wf_v1, WHO)
+         # Then: the first read equals what was stored
+         self.assertEqual(store.get("graphs", "wf1")["doc"], wf_v1)
+-        # When: n1 is edited (version 2) and a second header version naming n1 at version 2 is stored
+-        n1_v2 = node("n1", "transform", toolbox_id="t-new")
+-        self.assertEqual(store.put("graph_nodes", "n1", n1_v2, WHO), {"version": 2})
+-        wf_v2 = header("wf1", [("n1", 2), ("n2", 1)], [("e1", 1)])
++        # When: wf1/n1 is edited (version 2) and a second header version naming wf1/n1 at version 2 is stored
++        n1_v2 = node("wf1/n1", "transform", toolbox_id="t-new")
++        self.assertEqual(store.put("graph_nodes", "wf1/n1", n1_v2, WHO), {"version": 2})
++        wf_v2 = header("wf1", [("wf1/n1", 2), ("wf1/n2", 1)], [("wf1/e1", 1)])
+         self.assertEqual(store.put("graphs", "wf1", wf_v2, WHO), {"version": 2})
+ 
+         def members(version):
+             """The nodes of a header version as the header pins them."""
+             pinned = store.get("graphs", "wf1", version=version)["doc"]["data"]["nodes"]
+             return {m["id"]: (m["version"], store.get("graph_nodes", m["id"], version=m["version"])["doc"]) for m in pinned}
+-        # And: header version 1 still reads n1 at version 1 with its old content
+-        self.assertEqual(members(1), {"n1": (1, n1), "n2": (1, n2)})
+-        # And: header version 2 reads n1 at version 2; the other members are the same as in version 1
+-        self.assertEqual(members(2), {"n1": (2, n1_v2), "n2": (1, n2)})
+-        self.assertEqual(store.get("graphs", "wf1", version=2)["doc"]["data"]["edges"], [{"id": "e1", "version": 1}])
++        # And: header version 1 still reads wf1/n1 at version 1 with its old content
++        self.assertEqual(members(1), {"wf1/n1": (1, n1), "wf1/n2": (1, n2)})
++        # And: header version 2 reads wf1/n1 at version 2; the other members are the same as in version 1
++        self.assertEqual(members(2), {"wf1/n1": (2, n1_v2), "wf1/n2": (1, n2)})
++        self.assertEqual(store.get("graphs", "wf1", version=2)["doc"]["data"]["edges"], [{"id": "wf1/e1", "version": 1}])
+ 
+     @mark.req("REQ-GTB-018")
+     def test_a_skill_is_stored_as_a_versioned_record(self):
+@@ -360,34 +360,34 @@ class GraphRecordAcceptance(unittest.TestCase):
+ 
+     @mark.req("REQ-GTB-019")
+     def test_a_header_with_a_missing_member_is_refused(self):
+-        """TC-GTB-020: a header naming n1 at version 5 when n1 has versions 1 and 2 is refused naming n1; the same header naming version 2 is accepted.
++        """TC-GTB-020: a header naming wf1/n1 at version 5 when wf1/n1 has versions 1 and 2 is refused naming wf1/n1; the same header naming version 2 is accepted.
+ 
+-        Example: n1 versions [1, 2]; member {"id": "n1", "version": 5} -> unknown_member "n1"; version 2 -> stored as header version 1.
++        Example: wf1/n1 versions [1, 2]; member {"id": "wf1/n1", "version": 5} -> unknown_member "wf1/n1"; version 2 -> stored as header version 1.
+         """
+-        # Given: node n1 stored with versions 1 and 2
++        # Given: node wf1/n1 stored with versions 1 and 2
+         store = new_store(self)
+-        store.put("graph_nodes", "n1", node("n1", "transform", toolbox_id="a"), WHO)
+-        store.put("graph_nodes", "n1", node("n1", "transform", toolbox_id="b"), WHO)
+-        # When: a header naming n1 at version 5 is stored; Then: it is refused and names n1
+-        self.assertEqual(refusal(self, store, "graphs", "wf1", header("wf1", [("n1", 5)], [])), ("unknown_member", "n1"))
++        store.put("graph_nodes", "wf1/n1", node("wf1/n1", "transform", toolbox_id="a"), WHO)
++        store.put("graph_nodes", "wf1/n1", node("wf1/n1", "transform", toolbox_id="b"), WHO)
++        # When: a header naming wf1/n1 at version 5 is stored; Then: it is refused and names wf1/n1
++        self.assertEqual(refusal(self, store, "graphs", "wf1", header("wf1", [("wf1/n1", 5)], [])), ("unknown_member", "wf1/n1"))
+         # When: the same header naming version 2 is stored; Then: it is accepted (the twin differs only in the broken rule)
+-        self.assertEqual(store.put("graphs", "wf1", header("wf1", [("n1", 2)], []), WHO), {"version": 1})
++        self.assertEqual(store.put("graphs", "wf1", header("wf1", [("wf1/n1", 2)], []), WHO), {"version": 1})
+ 
+     @mark.req("REQ-GTB-020")
+     def test_an_edge_to_a_missing_node_is_refused(self):
+-        """TC-GTB-021: an edge e1 from n1 to n9 with only n1 stored is refused naming n9; the same edge after n9 is stored is accepted.
++        """TC-GTB-021: an edge g/e1 from g/n1 to g/n9 with only g/n1 stored is refused naming g/n9; the same edge after g/n9 is stored is accepted.
+ 
+-        Example: stored n1 -> e1 (n1 to n9) refused with unknown_endpoint "n9"; after n9 is stored e1 is stored as version 1.
++        Example: stored g/n1 -> g/e1 (g/n1 to g/n9) refused with unknown_endpoint "g/n9"; after g/n9 is stored g/e1 is stored as version 1.
+         """
+-        # Given: node n1 stored and the edge e1 from n1 to n9
++        # Given: node g/n1 stored and the edge g/e1 from g/n1 to g/n9
+         store = new_store(self)
+-        store.put("graph_nodes", "n1", node("n1", "data"), WHO)
+-        record = edge("e1", "n1", "n9", label="x")
+-        # When: the edge is stored; Then: it is refused and names n9
+-        self.assertEqual(refusal(self, store, "graph_edges", "e1", record), ("unknown_endpoint", "n9"))
+-        # When: n9 is stored and the same edge again; Then: it is accepted (the twin differs only in the broken rule)
+-        store.put("graph_nodes", "n9", node("n9", "data"), WHO)
+-        self.assertEqual(store.put("graph_edges", "e1", record, WHO), {"version": 1})
++        store.put("graph_nodes", "g/n1", node("g/n1", "data"), WHO)
++        record = edge("g/e1", "g/n1", "g/n9", label="x")
++        # When: the edge is stored; Then: it is refused and names g/n9
++        self.assertEqual(refusal(self, store, "graph_edges", "g/e1", record), ("unknown_endpoint", "g/n9"))
++        # When: g/n9 is stored and the same edge again; Then: it is accepted (the twin differs only in the broken rule)
++        store.put("graph_nodes", "g/n9", node("g/n9", "data"), WHO)
++        self.assertEqual(store.put("graph_edges", "g/e1", record, WHO), {"version": 1})
+ 
+ 
+ class StorageStandInAcceptance(unittest.TestCase):
+@@ -506,8 +506,8 @@ def generated_graph(seed):
+             fields = {"toolbox_id": "t%d" % rnd.randint(0, 5), "stop": stop}
+             if rnd.random() < 0.5:
+                 fields["task"] = {"goal": "g%d" % i}
+-        nodes.append(node("n%d" % i, kind, **fields))
+-    edges = [edge("e%d" % i, rnd.choice(nodes)["id"], rnd.choice(nodes)["id"], **({"label": "l%d" % i} if rnd.random() < 0.5 else {}))
++        nodes.append(node("g%d/n%d" % (seed, i), kind, **fields))
++    edges = [edge("g%d/e%d" % (seed, i), rnd.choice(nodes)["id"], rnd.choice(nodes)["id"], **({"label": "l%d" % i} if rnd.random() < 0.5 else {}))
+              for i in range(rnd.randint(0, 40))]
+     members = header("g%d" % seed, [(n["id"], 1) for n in nodes], [(e["id"], 1) for e in edges])
+     return nodes, edges, members
+diff --git a/tests/helpers/mocks/if_301_graph_tables_v2.py b/tests/helpers/mocks/if_301_graph_tables_v2.py
+index f6ae7554..dd0537a5 100644
+--- a/tests/helpers/mocks/if_301_graph_tables_v2.py
++++ b/tests/helpers/mocks/if_301_graph_tables_v2.py
+@@ -167,6 +167,15 @@ def _check_context(table, record, data, categories, stored):
+     return None
+ 
+ 
++SCOPED = ("graph_nodes", "graph_edges", "context_nodes", "context_edges")
++
++
++def _split_scoped(record_id):
++    """(graph ID, local ID) of `<graph id>/<local id>`, split at the first slash, or None (IF-301 v3, REQ-GTB-029, REQ-GTB-031)."""
++    graph, sep, local = str(record_id).partition("/")
++    return (graph, local) if sep and graph and local else None
++
++
+ def _check(table, record, categories, stored, record_id=None):
+     if not isinstance(record, dict):
+         return {"rule": "record_identity", "detail": "record"}
+@@ -174,6 +183,8 @@ def _check(table, record, categories, stored, record_id=None):
+         return {"rule": "record_identity", "detail": "id"}
+     if record_id is not None and record_id != record["id"]:      # the record is stored under the ID it carries (REQ-GTB-021)
+         return {"rule": "record_identity", "detail": "id"}
++    if table in SCOPED and _split_scoped(record["id"]) is None:  # a step or connection names its graph (v3, REQ-GTB-029)
++        return {"rule": "unscoped_id", "detail": record["id"]}
+     if _too_deep(record):                                        # cannot be checked (REQ-GTB-027)
+         return {"rule": "schema_break", "detail": "data"}
+     if table in ("graph_edges", "context_edges"):
+@@ -214,12 +225,14 @@ def _check(table, record, categories, stored, record_id=None):
+         for key in ("nodes", "edges"):
+             if _dup(data[key]):
+                 return {"rule": "record_identity", "detail": key}
+-        if stored is not None:
+-            for key in ("nodes", "edges"):
+-                where = ("context_" + key) if data["kind"] == "context" else key        # a context header looks in the context tables (REQ-GTB-026)
+-                for member in data[key]:
+-                    if member["version"] not in stored.get(where, {}).get(member["id"], []):
+-                        return {"rule": "unknown_member", "detail": member["id"]}
++        for key in ("nodes", "edges"):
++            where = ("context_" + key) if data["kind"] == "context" else key            # a context header looks in the context tables (REQ-GTB-026)
++            for member in data[key]:
++                parts = _split_scoped(member["id"])
++                if parts is None or parts[0] != record["id"]:                           # a member of another graph (v3, REQ-GTB-030)
++                    return {"rule": "unscoped_id", "detail": member["id"]}
++                if stored is not None and member["version"] not in stored.get(where, {}).get(member["id"], []):
++                    return {"rule": "unknown_member", "detail": member["id"]}
+     return None
+ 
+ 
+diff --git a/tests/test_graph_record_checks.py b/tests/test_graph_record_checks.py
+index 969fbbcb..0fe07351 100644
+--- a/tests/test_graph_record_checks.py
++++ b/tests/test_graph_record_checks.py
+@@ -17,7 +17,7 @@ from storage_files import FileBackend  # noqa: E402
+ 
+ 
+ def master(**fields):
+-    return {"id": "m1", "data": dict({"type": "master", "toolbox_id": "t"}, **fields)}
++    return {"id": "g/m1", "data": dict({"type": "master", "toolbox_id": "t"}, **fields)}
+ 
+ 
+ class RecordCheckEdges(unittest.TestCase):
+@@ -48,13 +48,13 @@ class RecordCheckEdges(unittest.TestCase):
+     def test_a_malformed_header_is_named_and_never_raises(self):
+         """A header whose members are not objects, or whose kind is unknown, is a schema_break naming the field, not an exception.
+ 
+-        Example: nodes ["n1"] -> schema_break "nodes.0"; kind "x" -> schema_break "kind".
++        Example: nodes ["g/n1"] -> schema_break "nodes.0"; kind "x" -> schema_break "kind".
+         """
+         # Given: two broken headers and the empty store state
+         base = {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d", "nodes": [], "edges": []}
+         stored = {"nodes": {}, "edges": {}}
+         # When/Then
+-        self.assertEqual(graph_tables.check_record("graphs", {"id": "g", "data": dict(base, nodes=["n1"])}, stored=stored),
++        self.assertEqual(graph_tables.check_record("graphs", {"id": "g", "data": dict(base, nodes=["g/n1"])}, stored=stored),
+                          {"rule": "schema_break", "detail": "nodes.0"})
+         self.assertEqual(graph_tables.check_record("graphs", {"id": "g", "data": dict(base, kind="x")}, stored=stored),
+                          {"rule": "schema_break", "detail": "kind"})
+@@ -65,8 +65,8 @@ class RecordCheckEdges(unittest.TestCase):
+         Example: {"type": ["x"]} -> unknown_type; an empty `categories` makes even "data" unknown (a context graph without that category).
+         """
+         # Given/When/Then
+-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "a", "data": {"type": ["x"]}})["rule"], "unknown_type")
+-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "a", "data": {"type": "data"}}, categories={}),
++        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/a", "data": {"type": ["x"]}})["rule"], "unknown_type")
++        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/a", "data": {"type": "data"}}, categories={}),
+                          {"rule": "unknown_type", "detail": "data"})
+ 
+ 
+@@ -81,7 +81,7 @@ class FixedFieldsOfANode(unittest.TestCase):
+         # Given
+         cases = {"foo": {"type": "data", "foo": 1}, "id": {"type": "data", "id": "x"}}
+         for field, data in cases.items():
+-            record = {"id": "n1", "data": data}
++            record = {"id": "g/n1", "data": data}
+             # When/Then
+             self.assertEqual(graph_tables.check_record("graph_nodes", record), {"rule": "schema_break", "detail": field})
+             self.assertEqual(graph_tables.to_object(record), {"refused": {"rule": "schema_break", "detail": field}})
+@@ -89,18 +89,18 @@ class FixedFieldsOfANode(unittest.TestCase):
+     def test_several_extra_fields_name_the_first_in_sorted_order(self):
+         """Example: {"type": "data", "zed": 1, "bar": 2} -> detail bar; a missing key is named before an extra field."""
+         # Given/When/Then
+-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "zed": 1, "bar": 2}})["detail"], "bar")
+-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "transform", "foo": 1}})["detail"], "toolbox_id")
++        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "data", "zed": 1, "bar": 2}})["detail"], "bar")
++        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "transform", "foo": 1}})["detail"], "toolbox_id")
+ 
+     def test_storage_put_refuses_an_extra_field_and_stores_nothing(self):
+-        """Example: put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}) -> invalid, schema_break, foo; ids() is empty."""
++        """Example: put("graph_nodes", "g/n1", {"id": "g/n1", "data": {"type": "data", "foo": 1}}) -> invalid, schema_break, foo; ids() is empty."""
+         # Given
+         directory = tempfile.mkdtemp()
+         self.addCleanup(shutil.rmtree, directory)
+         store = Storage(FileBackend(os.path.join(directory, "main")))
+         # When
+         with self.assertRaises(StorageError) as caught:
+-            store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}, "anna")
++            store.put("graph_nodes", "g/n1", {"id": "g/n1", "data": {"type": "data", "foo": 1}}, "anna")
+         # Then
+         self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "foo"))
+         self.assertEqual(list(store.ids("graph_nodes")), [])
+@@ -117,7 +117,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
+         # Given/When
+         for _ in range(10000):
+             categories = {"entity": {"type": "object", "properties": {"type": {}}}}
+-            graph_tables.check_record("context_nodes", {"id": "c", "data": {"type": "entity"}}, categories=categories)
++            graph_tables.check_record("context_nodes", {"id": "g/c", "data": {"type": "entity"}}, categories=categories)
+         # Then
+         self.assertLess(len(graph_tables._validators), 256)
+ 
+@@ -129,7 +129,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
+         # Given
+         schema = {"type": "object", "properties": {"type": {}}, "patternProperties": {"^x": {}}, "additionalProperties": False}
+         # When/Then
+-        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "entity", "xa": 1, "zz": 2}}, categories={"entity": schema}),
++        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "entity", "xa": 1, "zz": 2}}, categories={"entity": schema}),
+                          {"rule": "schema_break", "detail": "zz"})
+ 
+     def test_a_record_nested_too_deep_is_a_schema_break_naming_data(self):
+@@ -142,7 +142,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
+             value = {}
+             for _ in range(levels - 3):
+                 value = {"k": value}
+-            return {"id": "n", "data": {"type": "data", "value": value}}
++            return {"id": "g/n", "data": {"type": "data", "value": value}}
+         deep = nested(250)
+         refusal = {"rule": "schema_break", "detail": "data"}
+         # When/Then
+@@ -159,7 +159,7 @@ class RobustnessOfTheChecks(unittest.TestCase):
+         categories = {"entity": {"type": "nope"}}
+         # When/Then
+         for table in ("graph_nodes", "context_nodes"):
+-            self.assertEqual(graph_tables.check_record(table, {"id": "n", "data": {"type": "entity"}}, categories=categories),
++            self.assertEqual(graph_tables.check_record(table, {"id": "g/n", "data": {"type": "entity"}}, categories=categories),
+                              {"rule": "schema_break", "detail": "type"}, table)
+ 
+ 
+@@ -168,7 +168,7 @@ def nested_record(levels):
+     value = {}
+     for _ in range(levels - 3):
+         value = {"k": value}
+-    return {"id": "n", "data": {"type": "data", "value": value}}
++    return {"id": "g/n", "data": {"type": "data", "value": value}}
+ 
+ 
+ class RecordCheckBounds(unittest.TestCase):
+@@ -187,7 +187,7 @@ class RecordCheckBounds(unittest.TestCase):
+ 
+         Example: 20 000 categories {"t": {"type": "object", "title": str(i)}} -> len(_validators) <= _MAX_VALIDATORS; 1000 equal -> 1.
+         """
+-        record = {"id": "n", "data": {"type": "t"}}
++        record = {"id": "g/n", "data": {"type": "t"}}
+         # Given/When: distinct schemas
+         graph_tables._validators.clear()
+         for i in range(20000):
+@@ -212,7 +212,7 @@ class ScalarsAndTuplesAreLevels(unittest.TestCase):
+             value = leaf
+             for _ in range(levels - 3):
+                 value = container(value)
+-            return {"id": "n", "data": {"type": "data", "value": value}}
++            return {"id": "g/n", "data": {"type": "data", "value": value}}
+         for name, leaf in (("empty object", {}), ("empty list", []), ("scalar", 7), ("empty tuple", ())):
+             for container in (lambda v: {"k": v}, lambda v: [v], lambda v: (v,)):
+                 # When / Then
+@@ -235,7 +235,7 @@ class ScalarsAndTuplesAreLevels(unittest.TestCase):
+             deep = (deep,)
+         refusal = {"rule": "schema_break", "detail": "data"}
+         for name, value in (("cyclic", loop), ("shared", shared), ("deep", deep)):
+-            record = {"id": "n", "data": {"type": "data", "value": value}}
++            record = {"id": "g/n", "data": {"type": "data", "value": value}}
+             for label, call, expected in (("check_record", lambda r=record: graph_tables.check_record("graph_nodes", r), refusal),
+                                           ("to_object", lambda r=record: graph_tables.to_object(r), {"refused": refusal})):
+                 outcome = []
+@@ -259,8 +259,8 @@ class ScalarsAndTuplesAreLevels(unittest.TestCase):
+         Example: data {"type": "data", "value": (1, float("nan"))} is refused with the same detail as the value [1, nan].
+         """
+         # Given / When
+-        as_list = graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "value": [1, float("nan")]}})
+-        as_tuple = graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "value": (1, float("nan"))}})
++        as_list = graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "data", "value": [1, float("nan")]}})
++        as_tuple = graph_tables.check_record("graph_nodes", {"id": "g/n", "data": {"type": "data", "value": (1, float("nan"))}})
+         # Then
+         self.assertIsNotNone(as_list)
+         self.assertEqual(as_tuple, as_list)
+@@ -294,7 +294,7 @@ class RecordCheckRemoteReference(unittest.TestCase):
+         categories = {"entity": {"type": "object", "properties": {"x": {"$ref": url}}}}
+         graph_tables._validators.clear()
+         # When/Then: both tables refuse and no request arrives
+-        results = [graph_tables.check_record(table, {"id": "n", "data": {"type": "entity", "x": 1}}, categories=categories)
++        results = [graph_tables.check_record(table, {"id": "g/n", "data": {"type": "entity", "x": 1}}, categories=categories)
+                    for table in ("graph_nodes", "context_nodes")]
+         self.assertEqual(requests, [])
+         self.assertEqual(results, [{"rule": "schema_break", "detail": "type"}] * 2)
+@@ -310,7 +310,7 @@ class RecordCheckRemoteReference(unittest.TestCase):
+         nested = 7
+         for _ in range(190):
+             nested = [nested]
+-        record = {"id": "n", "data": {"type": "entity", "x": nested}}
++        record = {"id": "g/n", "data": {"type": "entity", "x": nested}}
+         value = {"type": ["integer", "array"], "items": {"$ref": "#/$defs/v"}}
+         categories = {"entity": {"type": "object", "$defs": {"v": value}, "properties": {"x": {"$ref": "#/$defs/v"}}}}
+         cannot_check = {"rule": "schema_break", "detail": "data"}
+@@ -355,9 +355,9 @@ class RecordCheckRemoteReference(unittest.TestCase):
+         # Given: a category whose schema refers to its own `$defs`
+         categories = {"entity": {"type": "object", "$defs": {"s": {"type": "string"}}, "properties": {"x": {"$ref": "#/$defs/s"}}}}
+         # When / Then: the reference is followed, so a wrong x is named and a right x passes
+-        self.assertEqual(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": 1}}, categories=categories),
++        self.assertEqual(graph_tables.check_record("context_nodes", {"id": "g/n", "data": {"type": "entity", "x": 1}}, categories=categories),
+                          {"rule": "schema_break", "detail": "x"})
+-        self.assertIsNone(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": "a"}}, categories=categories))
++        self.assertIsNone(graph_tables.check_record("context_nodes", {"id": "g/n", "data": {"type": "entity", "x": "a"}}, categories=categories))
+ 
+ 
+ if __name__ == "__main__":

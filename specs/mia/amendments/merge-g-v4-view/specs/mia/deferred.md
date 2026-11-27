@@ -1,0 +1,636 @@
+# Deferrals: MIA
+
+Compromises we chose on purpose (blueprint M26). People decide; agents propose with effort and risk and never weaken a check.
+Check with `trace_check.py` (records, `Relaxed`/`Target` links, `deferred` markers, TODO references, trigger dates).
+
+Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 T-09 (A-23, A-24, D-101, D-103). Every record below is a proposal: the owner confirms, changes or drops it
+(the line `Decision` names the person who has to decide).
+
+## TD-01 – The status card is gone after a reload
+- Kind: defer
+- Requirement: REQ-CLV-023
+- Interim criterion: the card is checked in a browser (`tests/test_task_files_browser.py`, TC-CLV-023: draw, update in place, pause, resume, stop, late status after done, 360 px) and its model with `node --test` (`tests/js/taskcard.test.mjs`); the card lives as long as the page is open
+- Target: a card that is still there, with its final figures, after a reload (browser test)
+- Reason: a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
+- Effort: about half a day for the kept card (a field in the history record and in the amendment of IF-101)
+- Risk of the gap: after a reload the user sees no final figures of a finished task. Mitigation: the report and the files tab keep the result
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V3.PANEL (was: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first; D-172, wording of A-131, D-302); status stays open
+- Target check: specified only
+- Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
+- Note: narrowed to the reload target on 2026-11-07 on the owner's instruction; the browser part is done (branch `td-01-02-browser-tests`). FR-46 (goal B) moves the card into the skill subwindow, so the reload target may be redone there.
+- Status: open
+- Note (A-131, D-302, owner 2026-11-08): REQ-CLV-023 is superseded by the Skill run view; the reload target is met by REQ-CLV-038 (the Skill run view shows the last run with its final figures after a reload and a restart, browser test). TD-01 moves to REQ-CLV-038 when REQ-CLV-023 is retired in Implement of G-V3.PANEL (owner decision of 2026-11-08: no change of approved text now).
+
+## TD-02 – The Files tab is not tested in a browser
+- Kind: defer
+- Requirement: REQ-CLV-024
+- Interim criterion: the routes are tested (`tests/test_files_api.py`, the IF-101 contract suite TC-IF-101-30); the tab itself is looked at by the owner
+- Target: a browser test that lists the files newest first, checks the download link and the redraw after `files_changed`
+- Reason: the same missing browser test harness as TD-01
+- Effort: part of the harness of TD-01, about half a day more
+- Risk of the gap: a wrong link or a list that does not redraw is found by a person only. Mitigation: hand test, step 4 of the list
+- Owner: Stefan Reiterer
+- Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
+- Target check: specified only
+- Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
+- Status: done
+- Closed: 2026-11-07, marked done on the owner's instruction; browser test `tests/test_task_files_browser.py` (TC-CLV-024: newest first, download links, redraw after `files_changed`, no delete control)
+
+## TD-03 – Tokens on the card are an estimate
+- Kind: relax
+- Requirement: REQ-WFM-032
+- Interim criterion: the tokens of a review are counted as characters divided by 4 and shown as an estimate (the page says "Tokens (estimated)"); calls, search requests and sources are counted exactly
+- Target: the tokens used are the counts that the model server reports for each call
+- Reason: the pipeline runner does not pass the token counts of the model server on (`tokens_out` is None in its events); passing them touches the model interface (IF-103) and the run log
+- Effort: about half a day, in the pipeline runner and the run log, plus an amendment of IF-103 if the counts are part of the interface
+- Risk of the gap: a hard cap on tokens may end a run too early or too late by the error of the estimate (a factor of about 1.5 for English, more for other scripts). The cap is 10 times the limit and ends a run only in extreme cases
+- Owner: Stefan Reiterer
+- Trigger: the first review run that ends at the cap of tokens, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-173, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-04 – The glue of lookup and search stays in the core
+- Kind: relax
+- Requirement: REQ-WFM-039
+- Interim criterion: the three skills are folders with a manifest and an entry, the core names none of them (inspection test), the code of the review lies in its folder; `research_chat.py` (the glue of lookup and search, and `friendly_error` that the review also uses) and `research.py` stay in the core
+- Target: the code of lookup and search lies in their folders; what the three share (the plain text of a failure, the speaking of an answer) is a small library of the core with its own name
+- Reason: the three skills share `research_chat.py` today and `research.py` is used by the core runner; splitting it is a larger change with many test imports and no gain for the user now
+- Effort: about 1 day (move, shared library, imports of about 10 tests), in the refactoring form of M31
+- Risk of the gap: a new skill may copy the habit of putting its glue into the core. Mitigation: the inspection test `tests/test_core_names_no_skill.py` and the manifests as the model for a new skill
+- Owner: Stefan Reiterer
+- Trigger: the fourth skill is added, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-173, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-06 – The workflow library folder is not there yet
+- Kind: defer
+- Requirement: REQ-GTB-004
+- Interim criterion: workflow documents are stored and checked through the graph tables (IF-301) and the library API; TC-GTB-005 stays skipped
+- Target: `library/workflows` exists (root task T-10) and TC-GTB-005, rewritten for the entry format after D-108 and D-112, runs green
+- Reason: T-10 never ran; the entry format of the test predates D-108/D-112, and FB-03 re-specifies how workflows are built
+- Effort: about half a day after FB-03's Explore
+- Risk of the gap: workflow documents have no folder form to back up or review by hand. Mitigation: the database backup (N-4.2)
+- Owner: Stefan Reiterer
+- Trigger: root task T-10, or 2026-12-31, whichever first
+- Target check: skip: `library/workflows` is missing (root task T-10); TC-GTB-005 is rewritten with FB-03 and then carries deferred('TD-06') until green
+- Decision: D-160, 2026-10-31, Stefan Reiterer
+- Status: open
+
+## TD-07 – Judge calibrations are not loaded yet
+- Kind: defer
+- Requirement: REQ-EVL-003
+- Interim criterion: the calibration functions of `harness.py` and `metrics.py` are tested on fixtures; no eval target uses a judge, so nothing is calibrated
+- Target: the harness loads the calibration of each judge and applies it in every run whose target uses that judge
+- Reason: no target has a judge in G-V1 (N-4.1 Verify, D-166)
+- Effort: about 2 h with fake-model tests
+- Risk of the gap: a first judge would run uncalibrated. Mitigation: the trigger below
+- Owner: Stefan Reiterer
+- Trigger: the first eval target with a judge, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-166, 2026-10-31, Stefan Reiterer
+- Status: open
+
+## TD-08 – Older eval suite kinds run the in-process Core
+- Kind: defer
+- Requirement: REQ-EVL-011
+- Interim criterion: workflow targets run through IF-105 with the pinned model and the recorded versions; the older suite kinds run the in-process Core with `--pin` and the versions in the header
+- Target: every suite kind runs through IF-105
+- Reason: the older suite kinds are research experiments whose form FB-03 re-specifies (N-4.1 re-verification R3, D-172)
+- Effort: about half a day after FB-03's Plan
+- Risk of the gap: an older suite kind could measure a path the app does not take. Mitigation: the header names the pin and the versions
+- Owner: Stefan Reiterer
+- Trigger: the Plan of FB-03, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-172, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-09 – Deleting the chat history after a confirmation
+- Kind: defer
+- Requirement: REQ-CHA-005
+- Interim criterion: the history is bounded and the oldest messages are dropped over the limit (`test_oldest_are_dropped_over_the_limit`); the only deletion is the token-guarded legacy route `POST /api/chat/clear`, which the page does not offer
+- Target: a user deletes the history on the page after a confirmation dialog; the backend refuses a deletion without `confirm: true`; the IF-101 contract names the operation
+- Reason: no page control and no confirmation parameter exist; privacy is not an issue for now (D-131); it needs an IF-101 amendment and a page change
+- Effort: about half a day (backend flag, button and dialog, amendment, tests)
+- Risk of the gap: a user cannot delete the history on his or her own. Mitigation: the operator deletes the `history` records
+- Owner: Stefan Reiterer
+- Trigger: the first request to delete a history, or 2026-12-31, whichever first
+- Target check: specified only
+- Sign-off: Stefan Reiterer, 2026-11-01
+- Decision: D-173, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-10 – Persona check dialogues (AC-8)
+- Kind: defer
+- Requirement: REQ-CHA-008
+- Interim criterion: the persona file is read at every call, the default address is "master", and the persona message is the system message of every call (`tests/test_persona_prompt.py`)
+- Target: AC-8 is decided statistically: check dialogues against the baseline of today's MIA, with the rule fixed in Plan (D-52)
+- Reason: it needs the labelled dialogues and a baseline run; the owner postponed it to after the field test (2026-10-26)
+- Effort: about one day plus GPU time
+- Risk of the gap: the persona can drift without a number. Mitigation: the owner's use
+- Owner: Stefan Reiterer
+- Trigger: the first iteration after the field test
+- Target check: specified only
+- Decision: D-173, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-11 – The voice goes through IF-204
+- Kind: defer
+- Requirement: REQ-VOI-001
+- Interim criterion: the app speaks through `SpeechStreamer`, the sound server (`speak.py`) and `Speaker.render_voice` with the `speech_text` filter; `SpeechService` passes the IF-204 contract suite and TC-VOI-001 to -003; the chat agent emits one `audio_chunk` per sentence of an answer (TC-IF-201-01 green, `tests/test_chat_answer_events.py`)
+- Target: the playback of the chat agent's voice on the backend goes through `SpeechService` (IF-204) instead of `SpeechStreamer` and the sound server, with the order of sentences, stop, speak again and repair (REQ-CHA-014) kept; needs a Plan step first (see the Note)
+- Reason: the older route works on the host; `SpeechService.synthesize` renders one sentence to bytes and has no playing, ordering, pipelining or cancel, so routing the playback through it means a new backend playback pipeline (probably a changed audio-route contract), not wiring; it risks the working voice for no gain to the user now
+- Effort: open until the Plan step (the agent's first estimate of one day was for wiring only)
+- Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only (the IF-201 case TC-IF-201-01 is green; the IF-101 case TC-IF-101-04 stays skipped until the expression event exists, see A-130 section 8)
+- Decision: D-173, 2026-11-01, Stefan Reiterer
+- Note: 2026-11-07, owner Stefan Reiterer (D-275): narrowed. The IF-201 part is done (answer events, helper fixes D-272 and D-274, `chat_service.py`); the `expression` event is split out of TD-11 (A-130 section 8, draft TD-60, not yet adopted). What stays open is the playback route. A Plan step has to come first: an amendment for the audio route, a requirement for stop and ordering, and host hand-test criteria. See `amendments/A-130-note.md`.
+- Note: 2026-11-07, found in the hand test on the host (owner Stefan Reiterer, D-276): the button "Speak again" does nothing. `/api/speak_again` only emits `audio_chunk` events and no page code handles them (`templates/static/chat/` has no `audio_chunk` handler); live answers are spoken by the backend sound server. Not caused by the TD-11 work (`speak_again` is unchanged). Folded into the Plan step of this deferral: speak again plays through the backend voice route; the Plan step needs a requirement and a failing test first.
+- Status: dropped
+- Closed: 2026-11-07, replaced by TD-61 (owner decision, D-278); the IF-201 work (answer events, `chat_delta` flush, helper fixes) is recorded in D-275 and D-277; "Speak again" is planned as the requirements REQ-CHA-030 to 034 (A-132, option B), not as a deferral
+
+## TD-12 – Verify before asserting; lookup (TC-MIA-002)
+- Kind: defer
+- Requirement: FR-9, FR-10
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them the number gate (`tests/acceptance/test_number_gate.py`), `tests/test_claim_pipelines_check_first.py`, `tests/test_verify_workflow.py`, `tests/test_search_command.py`; the pipelines run on the fake model
+- Target: the suites of the verify workflow (VitaminC and Wikidata, holdout, MP-light, single voice as baseline, 3 repeats) are decided by `eval_decide.py` against the baseline: the chosen gate passes fewer wrong claims and loses no more true claims among those with evidence (AC-2)
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the verdicts suites have holdouts, the lookup suites (`research`, `research_compound`) have none (12 + 8 cases are for the owner to label); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 2 days plus GPU time (proposed)
+- Risk of the gap: a gate that passes more wrong claims than the single voice is not seen; the owner's use shows it
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-13 – Literature review quality (TC-MIA-003)
+- Kind: defer
+- Requirement: FR-11, FR-12, NFR-4
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_review_stages.py`, `tests/test_review_request.py`, `tests/test_gate_limits.py` and the scholarly source contract (IF-405)
+- Target: the review benchmark per tier: source recall and precision against the recorded baseline, 0 violations of the cut-off, 0 invented references, 100 % of quotes anchored (AC-3)
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the review entry is out of G-V1 (REQ-RUN-013 partly, D-128, D-130), the suite `review_toy` has no holdout and the recall threshold is the owner's (open question 3 of the draft); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 3 days plus GPU time and the owner's labels (proposed)
+- Risk of the gap: invented references or unanchored quotes in a review are found by a reader only; the cut-off and the retraction rules are tested in code
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-14 – The skill path (TC-MIA-009)
+- Kind: defer
+- Requirement: FR-20
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_skill_path_doc.py`, `tests/test_seed_workflows.py`, `tests/test_check_baselines.py`, `tests/test_workflow_library.py`
+- Target: the record of the skill path: lookup as the documented example, the literature review added by the same path with specification, context graph and benchmark with holdout and baseline, and the review promoted within one month of the lookup (AC-9)
+- Reason: the review is the next goal's (VAL-002 moved, D-134), so the second workflow of the skill path does not exist yet; the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day to read the record once the review is promoted (proposed)
+- Risk of the gap: the path may not work for a second workflow; found when the review is added
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-15 – Adaptation to negative feedback (TC-MIA-011)
+- Kind: defer
+- Requirement: FR-29
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_chat_behaviour.py`, `tests/test_converse_behaviours.py`, `tests/test_chat_answers.py`
+- Target: the statistical run of AC-11: after 5 net negative votes at most 10 appearances in 1000 opportunities with fixed seeds, a higher rate after a positive vote, a vote on a fact leaves the fact unchanged; the implemented rate is 0.5 %, not 1 % (finding F-1 of the test table)
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the seeds, repeats and the rate (0.5 % implemented, 1 % in the text, finding F-1 of the test table) are not decided; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about half a day (proposed)
+- Risk of the gap: the rate after votes may differ from the wording; the unit tests of the mechanism pass
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Sign-off: Stefan Reiterer, 2026-11-01
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-16 – Speed and frame rate (TC-MIA-019)
+- Kind: defer
+- Requirement: NFR-7
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_measure_latency.py`, `tests/test_runner_budgets.py`, `tests/test_model_turns.py`; the order of the turns is tested
+- Target: BM-MIA-001 (first text within 10 s on MP-light, also while a review slice runs) and BM-MIA-002 (30 fps or more on any phone inside the network and on desktop), median of repeated runs on the reference hardware (AC-19); and the baseline of BM-GATE-001 (seconds per claim of the number gate on MP-light, `benchmarks/baseline.json`) is measured, so that `tests/acceptance/test_benchmarks.py` turns green
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the benchmark REQ-RUN-007 is a proposal of the draft that needs an amendment to live under `benchmarks/` (open question 4), the 10 s part is out of G-V1 (REQ-RUN-009 partly, D-128) and the frame rate on the phones is a field measurement (D-62); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day plus the field measurement (proposed)
+- Risk of the gap: slow first text or low frame rates are found by the users; VAL-006 collects them in use
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-17 – Cost of the first try; comparing variants; learned choices (TC-MIA-022)
+- Kind: defer
+- Requirement: NFR-2, FR-17, FR-18
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_runner_context_share.py`, `tests/test_eval_platform.py`, `tests/test_judge_calibration.py`
+- Target: the lookup suites on MP-light: fewer than 15 model calls per question, every model input at most 50 % of the context window, variants compared on the same cases with repeats, a learned choice logged next to the default and reversible (AC-22)
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the AC-22 measurement is out of G-V1 (REQ-RUN-005 partly, D-128), the criterion for REQ-RUN-006 is only a proposal in the draft, and the learning layer is not built (REQ-RUN-004 out, D-119); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 2 days plus GPU time (proposed)
+- Risk of the gap: the first try may need more calls than planned; the budget refusal of the runner holds
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-18 – Memory that improves (TC-MIA-024)
+- Kind: defer
+- Requirement: FR-14
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_memory_records.py`, `tests/test_chat_memory.py`, `tests/test_items_api.py`, `tests/test_memory_write_skill.py`
+- Target: the memory test set (store, update, contradict, recall, unknown) is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record shows its source and can be corrected and deleted (AC-24)
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the check is marked later and Should in the root table, and no criterion for the memory test set is in either draft; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 3 days plus GPU time (proposed)
+- Risk of the gap: memory quality is judged by the users; records can be corrected and deleted
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-19 – Speech rules (TC-MIA-025)
+- Kind: defer
+- Requirement: FR-15
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_chat_repair.py` and `tests/test_speech_repair.py`
+- Target: the behaviour suite with the speech-rule detectors keeps the recorded precision and recall; a violation is repaired silently and never enters the memory as a scolding (AC-25)
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the suite `behaviour` exists without a recorded baseline and without a holdout, and no criterion for the detectors is in either draft; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day (proposed)
+- Risk of the gap: a detector may drift without a number; the repair tests pass
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-20 – Estimate before a run (TC-MIA-028)
+- Kind: defer
+- Requirement: FR-33
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_workflow_library.py` and the IF-202 and IF-203 contract suites; the refusal of a run whose estimate exceeds its budget is tested
+- Target: on the recorded lookup runs the estimate of time, calls and tokens lies within a factor of 3 of the measured time, either way (AC-28, OPEN-3)
+- Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); no criterion for the estimate is in either draft, and no set of recorded lookup runs is named as its reference; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day once runs are recorded (proposed)
+- Risk of the gap: the estimate may be off by more than 3; the user sees the estimate and the run still works
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-21 – The state is in PostgreSQL
+- Kind: defer
+- Requirement: NFR-8, CON-7
+- Interim criterion: the storage layer behind IF-102 works on files and is tested there (`tests/test_storage.py`, the IF-102 contract suite on the file backend) and on PostgreSQL where psycopg exists (`tests/test_storage_postgres.py`, `tools/contract_postgres.sh`, not run in the goal Verify); the stack starts the database and `deploy/up.sh backup` and `restore` save and restore it together with the data folder; the app keeps its state in the file backend (`web_app.py`), accounts, history, records and workflows alike
+- Target: the app reads `MIA_DATABASE_URL`, the `mia` image holds psycopg (`requirements-db.txt`), the shared state is in PostgreSQL, files to database and back give identical files, a change by one user is visible on a second connection within 5 s with its author, and backup and restore return the same records (AC-15, TC-MIA-015)
+- Reason: the storage layer was built and verified node by node (N-3.1 to N-3.3), but wiring the app and the image to it was never planned as a task; recorded at node level (D-139 (4), N-4.2 F3) and found at the goal Verify (F-01); the owner chose to defer it (D-180)
+- Effort: about 2 days (wire `web_app.py` to `Storage` on PostgreSQL, add psycopg to the image, the move command, run the PostgreSQL contract suites, rebuild the image) (proposed)
+- Risk of the gap: a lost or damaged data volume loses the state; the database that runs is empty. Mitigation: `deploy/up.sh backup` saves the data folder, to be done before every update
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-180, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-22 – Red-team cases of the untrusted inputs
+- Kind: defer
+- Requirement: NFR-3
+- Interim criterion: the deterministic mitigations pass: the tool door and its untrusted-input handling (`tests/test_tool_calls_untrusted.py`, `tests/test_tool_calls_web_log.py`), the sandbox tests, the injection signal checks and the PDF wall (`tests/test_pdf_text.py` with bwrap); the compose stack runs with `sandbox_backend: none`, so the script check is off there
+- Target: 0 failures over all red-team cases: the seven `rt_*` suites hold enough labelled cases (not 2 each, target kind `pending`) and the injection suites `verdicts_injection` run with their holdouts on MP-light (TC-MIA-006, AC-6)
+- Reason: the red-team suites are drafts of 2 cases each, their cases are the owner's to label and the runs belong to the stage 4 evals that were deferred (D-178); `tests/test_harness.py` fails on the same fact (rt_edit has 2 cases, wants 30); found at the goal Verify (F-02), the owner chose to defer it (D-180)
+- Effort: about 3 days plus GPU time, the labelling is the owner's (proposed)
+- Risk of the gap: an injected instruction in a page or paper may change a verdict or start a tool without a test noticing. Mitigation: the tool set per step is the protection (THR entries), the deterministic tests above, and the users are trusted (CON-6)
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Sign-off: Stefan Reiterer, 2026-11-01
+- Decision: D-180, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-23 – Real sides of the contract suites IF-103, IF-404, IF-405
+- Kind: defer
+- Requirement: IF-404, IF-405, IF-103
+- Interim criterion: the mock side of each suite is green and the providers are covered by node tests (`tests/test_tool_calls*.py`, `tests/test_scholar.py`, the fake model server of the chat and runner tests); IF-111 has `ui/godot/tools/test_bridge.gd` as its real side (D-155, D-175), IF-102 on PostgreSQL is in TD-21
+- Target: the three suites run their real side: IF-404 against the web client and SearXNG, IF-405 against the scholarly APIs, IF-103 against a real model-server provider (stage 2, decomposition rule 3); the IF-104 JS real cases name `tests/test_graph_api.py` as their real side or run against the routes
+- Reason: the real sides need the network, the search engine or the model server, and the IF-103 suite cannot hand its scripted replies to a real provider (REQ-RUN-011 out, D-118); found at the goal Verify (D-5, F-03); the owner chose to give them a record (D-181)
+- Effort: about 2 days (the IF-103 provider and a suite amendment included) (proposed)
+- Risk of the gap: a mock that differs from the real service goes unnoticed; the node tests and the owner's use are the check
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-181, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-24 – Sandbox backend in the deployed stack
+- Kind: defer
+- Requirement: REQ-TLS-005
+- Interim criterion: REQ-TLS-005 holds by its refuse branch: with `sandbox_backend: none` a script check reports unavailable and nothing runs (the sandbox tests, `tests/test_sandbox*.py`, pass with bubblewrap on the host); the PDF wall and the tool door do not depend on it
+- Target: the deployed stack has a sandbox backend (bubblewrap or podman) so that the script checks run there, and the red-team cases for scripts (THR-005) are run against it
+- Reason: `deploy/setup_cfg.compose.json` sets `sandbox_backend` to `none`, so the script check is off in the stack; found at the goal Verify (D-8, F-15); the owner chose to give it a record (D-181)
+- Effort: about 1 day (a backend in the image or next to it, the config, a smoke test) (proposed)
+- Risk of the gap: the checks that run model-written code are not available in the deployed system, MIA refuses them; nothing unsafe runs
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-181, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-25 – The smoke tests are not part of the merge gate
+- Kind: defer
+- Requirement: NFR-9
+- Interim criterion: the same ground is covered by the stage 3 steps `container-alone` (TC-API-013) and `contract-postgres` (IF-102 on a throwaway postgres:16), by the stage 2 integration steps and by the tests of the compose files (`tests/test_deploy.py`, `tests/test_delivery_on_stack.py`); the smoke tests themselves are run in Deploy
+- Target: the smoke tests of `tests/smoke/` have run on the owner's workstation in the Deploy phase of G-V1 (`goals/G-V1/deploy-plan.md`), their results are in `deployment-record.md`, and the stage ladder has a smoke step that finds them (pattern `smoke_*.py`)
+- Reason: `tests/smoke/` holds `smoke_fresh_install.py` (SMOKE-MIA-001), `smoke_stack.py` (SMOKE-MIA-003) and `smoke_gate.py` (SMOKE-GATE-001, -002). The step `smoke` used the pattern `test_*.py`, found no test and failed with NO TESTS RAN. The files themselves say they run on the owner's workstation in Phase 6: the first two bring up the whole compose stack (this machine cannot run it, fatal CPU machine checks at shutdown under load), the third runs the number gate through the real Ollama, which is an eval-style run (none belongs in this Verify, D-178); found at the merge gate of G-V1, the owner chose this (D-182)
+- Effort: about half a day on the workstation (three commands, then the record), and one line in `stages.yaml`
+- Risk of the gap: a fresh install that does not start, or a stack whose front does not answer, is found in Deploy and not at the merge. Mitigation: `container-alone`, `contract-postgres` and the stack test of N-1.3 run in the gate
+- Owner: Stefan Reiterer
+- Trigger: the Deploy phase of G-V1, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-182, 2026-11-01, Stefan Reiterer
+- Progress 2026-11-02: the three smoke scripts ran green on the owner's workstation (`goals/G-V1/deployment-record.md`); still open: a smoke step in `stages.yaml` that finds `smoke_*.py`
+- Status: open
+
+## TD-26 – The Tailscale smoke test SMOKE-MIA-002 was not run in Deploy
+- Kind: defer
+- Requirement: NFR-6, CON-5 (OP-4 of the baseline: Tailscale never tried against a real tailnet)
+- Interim criterion: MIA is published on 127.0.0.1 only (`ss`: `127.0.0.1:8585` and `:8586`, shown in the deployment record); the https front of the stack answers in the smoke test SMOKE-MIA-003; `tests/test_tailscale.py` covers `tailscale_serve.py` and `ui/tools/remote.sh` with a fake `tailscale`
+- Target: SMOKE-MIA-002 run once on a phone outside the home network (`ui/tools/remote.sh up`, page loads, a message is answered, `tailscale serve status` shows no Funnel, no public port), result in `goals/G-V1/deployment-record.md`; it is a precondition of VAL-004
+- Reason: Tailscale is not installed on the workstation (2026-11-02); the owner defers the setup (account, MagicDNS, HTTPS certificates) to a different run
+- Effort: about an hour once (install, `tailscale up`, admin console, phone), then five minutes
+- Risk of the gap: the phone path over the tailnet (origin handling, certificate, secure context for the 3D character) is untested; VAL-004 cannot be judged without it; a finding is possible
+- Owner: Stefan Reiterer
+- Trigger: before VAL-004 starts, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-184, 2026-11-02, Stefan Reiterer
+- Status: open
+
+## TD-61 – The app has two voice paths: the sound server and SpeechService
+- Kind: defer
+- Requirement: REQ-VOI-001
+- Interim criterion: live answers and "Speak again" are spoken through `SpeechStreamer` and the sound server (`speak.py`), with `Speaker.render_voice` and the `speech_text` filter; `SpeechService` (IF-204) passes its contract suite and TC-VOI-001 to -003 but nothing in the app calls it; both paths share `speech_text` and `render_voice`
+- Target: one voice path: the sentences of every answer and of every spoken-again message are rendered and played through one component built on `SpeechService` (IF-204), with the order of sentences, rendering ahead, stop and the repair of REQ-CHA-014 kept, and the sound server and `SpeechStreamer` removed or reduced to that one path
+- Reason: merging the paths means a backend playback pipeline (render ahead, serials, cancel, upload or direct publish) and probably an IF-204 v1 and a changed audio-route contract (A-132 option A); it risks the working voice for no gain the user can see now
+- Effort: about 3 to 5 days (estimate of A-132, not measured), after its own Plan step
+- Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`; the sound-server hand-over has its own check (TC-CHA-036)
+- Owner: Stefan Reiterer
+- Trigger: the Plan of an iteration that changes the voice, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: confirmed by Stefan Reiterer, 2026-11-07 (D-278)
+- Status: open
+
+## TD-62 – The unit test without Tailscale runs the real `tailscale up` on a host that has it
+- Kind: defer
+- Requirement: NFR-6, CON-5 (test of `ui/tools/remote.sh`, `tests/test_tailscale.py`)
+- Interim criterion: the other tests of `tests/test_tailscale.py` pass with a fake `tailscale`; on a host without Tailscale the test `ScriptTest.test_without_tailscale_it_says_how_to_install` passes; the stage `unit` is red on this host for that one test (the merge gate of TD-11 ran locally with this deviation)
+- Target: the lookup of `tailscale` in that test ignores the host's `PATH`, so the test gives the same result on every host; the stage `unit` is green here
+- Reason: `/usr/bin/tailscale` is installed on the workstation, so the test runs the real `tailscale up` and times out after 30 s; neither `remote.sh` nor the test changed in TD-11; the owner defers the fix to a later goal (2026-11-08)
+- Effort: about an hour (proposed), test first
+- Risk of the gap: the stage `unit` stays red on this host and hides a real failure; mitigation: the single red test is known by name
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: `tests/test_tailscale.py::ScriptTest::test_without_tailscale_it_says_how_to_install` (exists, red on a host with Tailscale)
+- Decision: D-289, 2026-11-08, Stefan Reiterer
+- Sign-off: maldun, 2026-11-08
+- Status: open
+
+## TD-80 – The 25 open Dependabot alerts of the repository are not handled yet
+- Kind: defer
+- Requirement: none (maintenance of the dependencies; no requirement covers it)
+- Interim criterion: none beyond the pinned versions of `requirements.txt` and `requirements-db.txt` and the rule that no dependency is added or changed without the owner's approval; the app runs only on the owner's workstation and inside the private network (CON-5)
+- Target: the open alerts (25 on 2026-11-12: 1 critical, 5 high, 15 moderate, 4 low, https://github.com/maldun/MIA/security/dependabot) are listed, matched to our pins, and each is fixed by a version change, accepted with a reason, or dismissed as not reachable; the tests of the new versions are green
+- Reason: the owner decided on 2026-11-12 to go through them once everything is implemented, as a goal of its own (a cleanup goal), so that version changes do not mix with the feature goals
+- Effort: not estimated; it is a goal of its own, with its own Explore and Plan
+- Risk of the gap: a known flaw in a dependency stays in the code until the cleanup; mitigation: personal use on a trusted network, no public port, no untrusted users (the owner's privacy and trust statement); the web tools read untrusted text, so alerts about `requests`, `lxml` and `Flask` should be looked at first when the goal starts
+- Owner: Stefan Reiterer
+- Trigger: all nodes of the decomposition are implemented and integrated (the owner's wording, 2026-11-12; no date)
+- Target check: specified only
+- Decision: the owner's instruction in the session of 2026-11-12 (no D-number yet)
+- Sign-off: maldun, 2026-11-12
+- Status: open
+
+## TD-81 – A skill run left `running` by a crash is shown as running after every restart
+- Kind: defer
+- Requirement: REQ-CLV-034, REQ-CLV-038, REQ-WFM-134 (finding F-10 of the first Verify run of G-V3.PANEL)
+- Interim criterion: a run record whose process died stays in state `running` in `skill_runs`; `shown` prefers running runs, so the Skill run view shows it as running until another run starts; nothing closes it
+- Target: at the start of the app, a record still `running` that no process owns is closed (state `failed`, reason "interrupted by a restart"), so the view shows the true end; with a test that restarts the real backend on one folder
+- Reason: the owner decided on 2026-11-13 (questionnaire, option "backlog") that this does not go into the fix task T-11; closing records needs a requirement change and a rule for runs that a second instance still owns (multi-user is test-only, so the case is rare)
+- Effort: not estimated; a small task with its own Plan step
+- Risk of the gap: after a crash the panel shows a dead run as running; the owner can start a new run, which replaces it as the shown run; no data is lost
+- Owner: Stefan Reiterer
+- Trigger: the Validate of G-V3 (VAL-012), or 2026-12-31, whichever first (confirmed by the owner, 2026-11-13)
+- Target check: specified only
+- Decision: D-331, 2026-11-13, Stefan Reiterer
+- Sign-off: maldun, 2026-11-13
+- Status: open
+
+## TD-82 – Nothing in the product writes the history table, so "history deleted" cannot reach a skill run (DRAFT)
+- Kind: defer
+- Requirement: REQ-WFM-135 (finding F-15 of the second Verify run of G-V3.PANEL, A-144)
+- Interim criterion: `SkillRunRecorder` subscribes to deletes in the table `history` of the storage (`skill_runs.py`), and the acceptance tests of TC-WFM-135 show that a delete removes the run with the id of the history record; in the product the chat log is not kept in that table, so no delete notice can arrive and the mapping history id = run id is checked only by the tests
+- Target: the chat log is written to and deleted from the table `history` (IF-102), the id of a history record of a skill run is the run id, and a test through the real chat log shows that deleting the message removes the run
+- Reason: the chat log moves into the shared storage with the shared-state plan (deploy/REQUIREMENTS_DB.md, postponed); a link before that has nothing to link to. A delete of a history record also removes a run of any account with that id (accepted by A-144)
+- Effort: not estimated; part of moving the chat log to IF-102
+- Risk of the gap: none today (the case cannot occur); once the chat log writes `history`, a missing or wrong id mapping would delete the wrong run or none
+- Owner: Stefan Reiterer
+- Trigger: the chat log is moved to the storage (IF-102), or the Plan of the shared-state database, whichever first
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-15 later); decision row pending
+- Sign-off: maldun, 2026-11-14
+- Status: open
+
+## TD-83 – The lock of the skill run recorder is per recorder, two recorders on one storage lose answers (DRAFT)
+- Kind: defer
+- Requirement: REQ-WFM-133 (finding F-16 of the second Verify run of G-V3.PANEL)
+- Interim criterion: an `RLock` in `skill_runs.py` makes the writes of one recorder atomic (`tests/test_skill_runs_race.py`: 30 of 30 answers kept); the product builds one `ChatService` and so one recorder (`web_app.py`)
+- Target: the write of a run record is atomic on the storage itself (for example `expected_version` with a retry), so that two recorders on one storage keep every answer (a test with two recorders and concurrent answers; the reviewer's probe lost 60 of 120)
+- Reason: two recorders exist only with a second instance on one shared database, which is the postponed shared-state plan; the owner keeps several accounts on one instance for tests only
+- Effort: not estimated; a small task with a storage test
+- Risk of the gap: none today; with two instances on one database, answers of a run would be lost
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the shared-state database (deploy/REQUIREMENTS_DB.md), before a second instance uses one database
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-16 later); decision row pending
+- Sign-off: maldun, 2026-11-14
+- Status: open
+
+## TD-84 – The mock of IF-101 does not pin the account check of delete_history, TC-CLV-036 is not reworded (DRAFT)
+- Kind: defer
+- Requirement: REQ-CLV-036, REQ-WFM-135 (finding F-17 of the second Verify run of G-V3.PANEL, A-146)
+- Interim criterion: the account check in `delete_history` of the IF-101 mock (`tests/helpers/mocks/if_101_chat_api.py`) is not covered by a test (a mutant that removes it survives); the browser driver measures `.srv-full-body`, but the text of TC-CLV-036 in `test-spec.md` still names the old measure, and A-146 announced the rewording ("the height of the opened part")
+- Target: a contract test that a delete of another account's run changes nothing, and TC-CLV-036 worded as A-146 says (the height of the opened part), both through the protected-file route (payload, owner installs) and a plan amendment
+- Reason: both changes touch protected material (`tests/helpers/`, `tests/acceptance/contract/`) or an approved test spec, so they need a payload, a plan amendment and a review row; the owner chose on 2026-11-14 to leave F-15 to F-17 for a later stage
+- Effort: about an hour for the payload and the amendment
+- Risk of the gap: a later change could remove the account check of the mock unnoticed; the real adapter has its own check
+- Owner: Stefan Reiterer
+- Trigger: the next plan amendment or contract change that touches `tests/helpers/` or `tests/acceptance/contract/test_if_101_chat_api.py`, or the Validate of G-V3, whichever first
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-17 later); decision row pending
+- Sign-off: maldun, 2026-11-14
+- Status: open
+
+## TD-85 – The fixes of F-33, F-34 and F-35 of the fifth Verify run of G-V3.CHAT are not re-checked by a reviewer (accepted by the owner)
+- Kind: defer
+- Requirement: REQ-CHA-056, REQ-CHA-064, REQ-CHA-066 (finding F-33: the cleaning of the text of the digest step raised on a character reference with more than 4300 digits; finding F-34: an open code fence, an indented code line or a table row swallowed the link to the run; finding F-35: `<?` was left as markup and swallowed the link)
+- Interim criterion: all three are fixed in the code with tests that failed first and pass now (`tests/test_chat_verify_fixes.py`, class `FifthVerifyRun`: the cleaning returns text for every text, a run whose summary holds such a reference ends with its message and is closed, no code fence can open and the link ends the text, `<?` is escaped); the unit suite is green; no fresh reviewer has re-checked the fixes (the fifth run reported them as the reasons of 'Not verified'); the rendering of the link after an open block was checked by the reviewer with the vendored marked before the fix, and by the structure of the text after it, not in a browser
+- Target: a sixth narrow Verify run (fresh reviewer, brief like `verify-brief-run5.md`) that checks F-33 to F-35 and their neighbours, and one look at the real page with DOMPurify (not run so far) at a done message that ends in an open code fence
+- Reason: the owner accepted the deviation on 2026-11-15: the verification did not go through to the end, and the gap does not harm the end product (the page also sanitizes the text; the fixes are tested)
+- Effort: about 25 minutes of a background reviewer run
+- Risk of the gap: another edge case of the same family may remain in the cleaning of the model text, or a block of the markdown may still swallow the link; the page's DOMPurify is a second layer and the full result stays in the Skill run view
+- Owner: Stefan Reiterer
+- Trigger: the Validate of G-V3 (VAL-013, real summaries in use), or earlier when the owner wants a sixth run
+- Target check: specified only
+- Decision: D-339, 2026-11-15, Stefan Reiterer
+- Sign-off: maldun, 2026-11-15
+- Status: open
+
+## TD-86 – Converted runs read a fresh seeded toolbox, not the live trust and lifecycle of the owner
+- Kind: defer
+- Requirement: REQ-WFM-060, REQ-WFM-058 (finding F-07 of the Verify of G-V2.CONVERT: trust and lifecycle of a node are not live on the converted path)
+- Interim criterion: each converted run builds a fresh in-memory toolbox and seeds the node code shipped in `library/nodes` as trusted and tested; the code text comes from the repository, so no code that the owner has not reviewed runs; the five accepted skills use only those nodes
+- Target: a test with `code.normalize_plan` set untrusted by the owner: `Core.run("plan_question")` refuses and says why; the converted path reads the toolbox store of the app
+- Reason: the owner decided on 2026-11-17 that this belongs to the sub goal that improves the skills; no skill breaks today
+- Effort: about half a day (wire the real toolbox into `Core._run_converted`, one protected check)
+- Risk of the gap: an untrusted or retired node that the owner sets in the toolbox still runs in a converted skill, as long as its text is in `library/nodes`
+- Owner: Stefan Reiterer
+- Trigger: the start of the sub goal "improve the skills", or the first node that is not shipped in the repository, whichever first
+- Target check: specified only
+- Decision: D-355, 2026-11-20 (F-07 first decided 2026-11-17)
+- Sign-off: maldun, 2026-11-20
+- Status: open
+
+## TD-87 – Budgets and a stop request on the converted path have no requirement (REQ-WFM-143 stays a draft)
+- Kind: defer
+- Requirement: FR-45 (finding F-05 of the Verify of G-V2.CONVERT: seconds and steps are checked only inside controllers, calls and tokens not at all, a stop is read only at the start and in controllers)
+- Interim criterion: the five converted skills declare only steps, seconds and tool budgets and are short; the tool budgets and the IF-402 door are checked by `tests/test_converted_tools.py`; the old runner remains the path of a skill whose converted run fails its criterion
+- Target: REQ-WFM-143 as drafted in section 4 of `amendments/A-159-draft-split-snapshots.md` (the Workflow execution checks the declared budgets and the stop request before each step and ends the run with status `budget` naming the key, or `stopped`), with the check TC-WFM-143 and a test requirement; implementation in the sub goal that improves the skills (it also lists "`model_step` has no budget")
+- Reason: the owner decided on 2026-11-20 (D-355) to accept the deviation for G-V2 and not to write the requirement now
+- Effort: a requirement block with review and plausibility record (about 1 hour of the owner), then about a day of code and tests
+- Risk of the gap: a converted run can overrun calls or tokens and a stop that comes in the middle of a top-level step is seen late
+- Owner: Stefan Reiterer
+- Trigger: the start of the sub goal "improve the skills", or the first converted skill with a budget of calls or tokens, whichever first
+- Target check: specified only
+- Decision: D-355, 2026-11-20
+- Sign-off: maldun, 2026-11-20
+- Status: open
+
+## TD-88 – AC-34 is decided on the dev split only, the suites of research, plans, verdicts, computable and extraction have no holdout
+- Kind: defer
+- Requirement: AC-34, REQ-WFM-110 to 114 (equivalence of the converted skills with the old runner)
+- Interim criterion: each criterion is decided on the dev split as AC-34 says, with the pin MP-light (digest `38044be4f923`, seed 7, temperature 0), 3 repeats and the baselines of the old runner of 2026-11-15; a criterion that fails and cannot be re-run with fresh seeds (the pin fixes the seed, `tools/eval.py` has no seed option) is NOT DECIDED, accepted by the owner, and that skill stays on the old runner
+- Target: holdout suites for the five skills, cases labelled by the owner, decided once with `eval_decide.py` in a Verify, and a way to re-run with fresh seeds (an amendment of `eval-spec.md`)
+- Reason: AC-34 names the dev split; the owner chose on 2026-11-20 (D-355) to verify G-V2 on dev and not to build holdouts now
+- Effort: labelling 20 to 50 holdout cases per suite by the owner, about a day; a seed option about 2 hours
+- Risk of the gap: a prompt or graph detail tuned on the dev cases can pass the dev criterion and be worse on unseen cases; the dev-holdout gap is not measured
+- Owner: Stefan Reiterer
+- Trigger: the first change of a converted skill that is tuned on its dev cases (the sub goal "improve the skills"), or the Validate of G-V2 (VAL-007), whichever first
+- Target check: specified only
+- Decision: D-355, 2026-11-20
+- Sign-off: maldun, 2026-11-20
+- Status: open
+
+## TD-89 – The converter check of research runs on research.escalate@3, the skill runs research.escalate@1
+- Kind: defer
+- Requirement: REQ-WFM-059, REQ-WFM-058, REQ-WFM-110 (check TC-WFM-128 and the protected test `tests/acceptance/test_pipeline_graph.py`, `test_research_escalate_keeps_its_calls_as_transforms_and_wraps_every_map_and_loop`, which load `research.escalate@3`; the skill `research`, version 3, names `pipeline: research.escalate@1`; finding F-09(e) of the Verify of G-V2.CONVERT, noted again in the Verify of G-V2)
+- Interim criterion: the equivalence of the converted skill is decided on the pipeline that runs: TC-WFM-110 runs the skill through `Core.run` on the graph path, so the rate of `research` (0.95, 57 of 60 on the dev run of 2026-11-16, criterion 0.85) is measured on `research.escalate@1`; TC-WFM-128 checks only that the converter turns the version-3 pipeline into a valid graph with its maps, branch and loop
+- Target: decide which version is the right one for the skill (move the skill to `@3`, or move the check to `@1`); then the check, its scenario and the protected test name the same version as the skill file and the acceptance record; if `@1` and `@3` differ in graph shape, a check on `@1` too
+- Reason: the owner decided on 2026-11-20 (D-356) to leave it as it is and to take it up in the sub goal that improves the skills; changing it moves a protected test and may change what the skill does
+- Effort: about 1 hour to compare the three pipeline versions and one protected patch, more if the skill moves to `@3` (it then needs a new acceptance run and record)
+- Risk of the gap: a change that breaks the conversion of `research.escalate@1` only (its map or loop shape) is not caught by TC-WFM-128; the equivalence run TC-WFM-110 would show it as a worse rate
+- Owner: Stefan Reiterer
+- Trigger: the start of the sub goal "improve the skills", or the next edit of `library/pipelines/research.escalate/**` or of `skills/research.md`, whichever first
+- Target check: specified only
+- Decision: D-356, 2026-11-20
+- Sign-off: maldun, 2026-11-20
+- Status: open
+
+## TD-90 – The fake model server of TC-WFM-058 is not shown to be as faithful as the real one: the real half of the IF-103 contract suite is skipped
+- Kind: defer
+- Requirement: REQ-WFM-058 (TR-CONVERT-006: "the fake model server passes the contract suite of the model server interface"; finding F-09(a) of the Verify of G-V2.CONVERT)
+- Interim criterion: the check TC-WFM-058 compares the model calls of the old runner and of the graph path on the same scripted replies, so both sides send through the same fake; the fake never decides an eval criterion (the rates of TC-WFM-110 to 114 are decided on the real pinned model); the mock side of the IF-103 suite passes (6 of 6), the real side is skipped by the table of reasons in `tests/helpers/contract.py` ("the real model server is only used in stage 2") because a real Ollama cannot be scripted to give bad output, a timeout or an unreachable server
+- Target: a scripted proxy in front of Ollama (or another real adapter, a `real_subject` for IF-103) so that the real half of the suite runs; the same part would serve the real halves of IF-404 and IF-405; then TR-CONVERT-006 holds as written, or is reworded to what the check really compares (prompt and options as the real client sends them)
+- Reason: the owner decided on 2026-11-20 (D-357) to accept TR-CONVERT-006 in spirit; the proxy is a new part, which needs a plan step and the owner's approval
+- Effort: about a day (the proxy, its contract adapter, the removal of the skip reasons of IF-103, and the check of TC-WFM-058 against it)
+- Risk of the gap: the fake can differ from the real client in the shape of the options or the prompt sent, so that TC-WFM-058 passes on calls the real server would see differently; a difference would show as a worse rate in TC-WFM-110 to 114, not as a failure of TC-WFM-058
+- Owner: Stefan Reiterer
+- Trigger: the first change of the model client (`model_client`, the options sent to Ollama) or of the runner's calls, the first provider other than Ollama, or the start of the stage 2 integration of IF-404 and IF-405, whichever first
+- Target check: specified only
+- Decision: D-357, 2026-11-20
+- Sign-off: maldun, 2026-11-20
+- Status: open
+
+## TD-91 – Errors other than 401 and 503 show nothing on the graph page
+- Kind: defer
+- Requirement: REQ-GA-045 (Verify V-11 of G-V4.VIEW)
+- Interim criterion: a 401 shows the login note (TC-GA-019) and a 503 keeps the picture with a line that the store does not answer (TC-GA-020); any other error (a 404 between list and opening, a 500, MIA down) leaves the page as it was, with nothing said
+- Target: REQ-GA-045 as written: one line in the status band names the failure and its reason, the picture stays (node test with the JS mock answering 404, 500 and nothing)
+- Reason: the owner wants the notice (D-502 (2)); the page side of the write routes comes with G-V4.EDIT, which reworks the same error handling of `viewer.js`
+- Effort: about two hours (the band line, three mock cases)
+- Risk of the gap: the owner clicks a graph and nothing happens, with no hint why. Mitigation: read-only viewer, nothing is lost; the browser console shows the failed request
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (2), 2026-11-25
+- Sign-off: [ ]
+- Status: open
+
+## TD-92 – An untrusted step's dashed border looks like a missing step
+- Kind: defer
+- Requirement: REQ-GA-027 (Verify V-14 item 1 of G-V4.VIEW)
+- Interim criterion: an untrusted step carries the one-word mark `untrusted` (TC-GA-024) and, in the code, a dashed `--danger` border (`graph_app/drawing.js`); a missing step is drawn dashed and labelled `missing step` (TC-GA-023), so the words tell them apart, the border does not
+- Target: an untrusted step and a missing step that differ at a glance without reading the words (a node check of the drawing options), as REQ-GA-027 "a mark of at most one word" asks
+- Reason: the owner sees it as a defect (D-502 (3)); the close look in Firefox in Deploy (`sample.broken`) shows how much it matters before EDIT changes the look
+- Effort: about an hour
+- Risk of the gap: the owner mistakes an untrusted step for a broken connection or the other way round. Mitigation: the word mark and the left column
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or the owner's close look in Deploy if it shows the mix-up, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [ ]
+- Status: open
+
+## TD-93 – A transform step without trust hides its trust fields
+- Kind: defer
+- Requirement: REQ-GA-037 (Verify V-14 item 10 of G-V4.VIEW)
+- Interim criterion: a transform step without a toolbox entry is marked `untrusted` in the picture (TC-GA-024), and the hostile step of sample.code shows trust, lifecycle, reason, changed and code in words (TC-GA-029); for a transform step whose step data carries no trust the left column hides these fields
+- Target: every processing or loop-controlling step shows its trust, lifecycle, reason, changed and code in the left column, also when it is untrusted for lack of an entry (node check)
+- Reason: the owner sees it as a defect (D-502 (3)); EDIT shows the same column with edit controls
+- Effort: about an hour
+- Risk of the gap: the picture says untrusted and the column says nothing about why. Mitigation: the mark is shown
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [ ]
+- Status: open
+
+## TD-94 – Answers that arrive out of order when two graphs are opened quickly
+- Kind: defer
+- Requirement: REQ-GA-021 (Verify V-14 item 11 of G-V4.VIEW)
+- Interim criterion: choosing a graph draws its current version (TC-GA-017); when two graphs are chosen in quick succession, the answer that arrives last is drawn, which can be the first graph chosen
+- Target: only the graph chosen last is drawn, whatever order the answers arrive in (node check with a mock that answers out of order)
+- Reason: the owner sees it as a defect (D-502 (3)); EDIT adds saves on the same path, where a stale answer would matter more
+- Effort: about two hours (a request counter or abort per opening)
+- Risk of the gap: the list shows one graph chosen and the picture another. Mitigation: the status bar names the drawn graph
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.EDIT, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [ ]
+- Status: open
+
+## TD-95 – An empty toolbox reason becomes "it is in the toolbox"
+- Kind: defer
+- Requirement: REQ-API-027 (Verify V-14 item 12 of G-V4.VIEW)
+- Interim criterion: a step with a toolbox entry is answered with that entry's trust, lifecycle and reason (TC-IF-104-19); when the entry's reason is empty, `graph_api_v2.py` answers the made-up reason "it is in the toolbox"
+- Target: the stored reason as it is (empty stays empty, or a reason the toolbox itself gives), checked in the IF-104 v2 suite
+- Reason: the owner sees it as a defect (D-502 (3)); trust per step and its reasons are the subject of G-V4.GRAPHAPI.CODE
+- Effort: under an hour, plus a contract case
+- Risk of the gap: the left column states a reason nobody gave. Mitigation: only trusted entries without a reason are affected
+- Owner: Stefan Reiterer
+- Trigger: the Plan of G-V4.GRAPHAPI.CODE, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-502 (3), 2026-11-25
+- Sign-off: [ ]
+- Status: open

@@ -1,6 +1,6 @@
 # Several MIA instances: shared state in a database (plan, not built yet)
 
-**Status 2026-10-24: wanted again** (owner decisions D-4, D-9, D-11 of `specs/mia/review-log.md`: one shared MIA, a graph app on the database, PostgreSQL in a container). Earlier status, 2026-10-21: postponed. Nothing of this is built; one instance on the volume `mia-data` is the supported setup. This file keeps the requirements and the design for later. Start with stage 0 when several instances are really needed.
+**Status 2026-10-24: wanted again** (owner decisions D-4, D-9, D-11 of `specs/mia/review-log.md`: one shared MIA, a graph app on the database, PostgreSQL in a container). Earlier status, 2026-10-21: postponed. Nothing of this was built then; one instance on the volume `mia-data` is the supported setup. Since built (2026-11): the storage layer (`storage*.py`), the `db` service (`deploy/up.sh db`), the schema in `deploy/db/` and the migration (`migrate.py`, item 7). This file keeps the requirements and the design for later. Start with stage 0 when several instances are really needed.
 **Decided:** several instances are **one shared MIA with one memory** (persona `mia` for all). Separate memories stay possible later through another `persona` value, but nothing is planned for it.
 
 Decided 2026-10-21: a database container is wanted because **several MIA instances** will run in the future (other machines, other front ends). One instance on one volume works today and stays the default.
@@ -9,7 +9,7 @@ Decided 2026-10-21: a database container is wanted because **several MIA instanc
 
 - `storage: "files"` (default): everything as today, no database, no new dependency.
 - `storage: "postgres"` + `database_url`: the state below lives in PostgreSQL; instances on different machines share it. The compose stack gets a `db` service (profile `db`, volume `pgdata`, healthcheck) like `ollama`; `DATABASE_URL` in `deploy/.env` uses an existing server instead (same pattern as `OLLAMA_URL`).
-- Moving from files to the database is one command (`deploy/up.sh migrate`), reversible by an export.
+- Moving from files to the database is one command (`python -m MIA.migrate files-to-db`, run in the `mia` container, see item 7 of the design), reversible by `db-to-files`.
 
 ## What MIA stores today
 
@@ -34,7 +34,9 @@ Decided 2026-10-21: a database container is wanted because **several MIA instanc
 4. **Histories**: written after every exchange (not at shutdown), a message is a row `(persona, seq, role, content, created)`; the summarizer takes a row lock (`SELECT ... FOR UPDATE SKIP LOCKED`) so only one instance summarizes. The in-memory list is a cache reloaded when another instance has appended (cheap check of the last seq before each answer).
 5. **Schema** by numbered SQL files in `deploy/db/` applied at start (table `schema_version`), no ORM.
 6. **Compose**: `db` (postgres:16, profile `db`, volume `pgdata`, `POSTGRES_PASSWORD` in `.env` made by `up.sh`), MIA waits for it like for Ollama (`database_wait`). `up.sh backup|restore` use `pg_dump` and `psql` in the container.
-7. **Migration**: `python -m MIA.migrate files-to-db` (and back) reads the file stores through the same interfaces, so both directions are the same code; `up.sh migrate` runs it in the container. Idempotent (rows keyed by their content/time), dry run first.
+7. **Migration**: `python -m MIA.migrate files-to-db` (and `db-to-files`) reads the file stores through the same interfaces, so both directions are the same code (`migrate.py`). There is no `up.sh migrate`; with the database running (`deploy/up.sh db`), it runs in the container through the compose pass-through of `up.sh`:
+   `deploy/up.sh exec mia sh -c 'python -m MIA.migrate files-to-db --data MIA/data --database-url "$MIA_DATABASE_URL" --dry-run'`
+   (drop `--dry-run` to write). Idempotent (a second run copies nothing; a conflict writes nothing).
 
 ## Stages (each one is useful and tested on its own)
 

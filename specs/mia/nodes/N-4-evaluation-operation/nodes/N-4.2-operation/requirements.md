@@ -125,3 +125,26 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verified by: TC-OPR-010
 - Status: Verified
 - History: –
+
+## Iteration 4 (goal G-V4.VIEW, graph viewer and the IF-104 v2 backend; moved at the merge 2026-11-25)
+Requirements of the subgoal G-V4.VIEW (goal record `specs/mia/goals/G-V4.VIEW/`: plan, test requirements TR-VIEW-001 to 021, verification report). Verified 2026-11-24 (both boxes ticked by the owner); Verify findings decided in D-501: V-1, V-2, V-4, V-5, V-8, V-9, V-10, V-13 fixed, V-15 closed by the owner's image build, V-3 handed to G-V4.GRAPHSTORE.TRANSFER, V-6, V-7, V-11, V-12, V-14 accepted; the specification points of the merge in D-502. The routes are offered through IF-104 v2 (`contracts/`, A-171, A-174), the record tables through IF-302 v15 (A-172).
+
+Terms (store setting, owner, record of changes, entry, what cannot be drawn): see the section "Terms of G-V4.VIEW" in `specs/mia/nodes/N-2-backend/nodes/N-2.1-api-and-accounts/requirements.md`.
+
+## Groups of G-V4.VIEW
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | SA | Store and setting: which store is read, how it is chosen, the image (HR-004, D-430 (6), (9), D-460) | REQ-OPR-011 |
+
+### REQ-OPR-011 – Database driver in the release image
+- Level: low   Subject: OperationLayer
+- Group: SA
+- Text: The Operation shall build the release image with the packages of `requirements-db.txt`, so that the PostgreSQL store opens from the image.
+- Rationale: D-430 (9); the image of v0.2.1 has no psycopg (CORE deployment finding, handover section 5)
+- Parent: HR-004
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: in the built image `import psycopg` succeeds and the IF-104 v2 store route answers `database` against the owner's database (exact)
+- Verified by: TC-OPR-011, SMOKE-VIEW-001
+- Status: Verified
+- History: G-V4.VIEW Plan step 1b, 2026-11-22, new (Track A; basis: IF-104 v2 A-171, IF-302 v15 A-172, prototype round 02 R5); verified (G-V4.VIEW verification report, both boxes ticked by the owner 2026-11-24) and moved here from `specs/mia/goals/G-V4.VIEW/requirements.md` at the merge (plan.md, "At the merge").
