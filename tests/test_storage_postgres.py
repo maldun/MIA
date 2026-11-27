@@ -99,6 +99,29 @@ class PostgresStorage(StorageBehaviour, unittest.TestCase):
         self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "foo"))
         self.assertEqual(list(self.store.ids("graph_nodes")), [])
 
+    @mark.req("REQ-SLY-038")
+    def test_a_record_cut_back_to_version_2_lists_versions_1_and_2(self):
+        """cut keeps the versions 1 to n unchanged, deletes the ones above, and touches no other record; cut to 0 leaves no record.
+
+        Example: sample.code at versions 1..4, cut to 2 -> versions [1, 2]; other.code keeps 1..3; other.code cut to 0 -> ids [sample.code].
+        """
+        # Given: two records with four and three versions
+        backend = self._previous
+        for record_id, n in (("sample.code", 4), ("other.code", 3)):
+            for version in range(1, n + 1):
+                backend.append("graphs", record_id, {"id": record_id, "version": version, "author": "ann",
+                                                     "time": "2026-11-23T10:00:0%dZ" % version, "doc": {"text": "v%d" % version}})
+        before = backend.versions("graphs", "sample.code")
+        # When: one is cut back to version 2
+        backend.cut("graphs", "sample.code", 2)
+        # Then: it lists versions 1 and 2 as they were; the other record is untouched
+        self.assertEqual(backend.versions("graphs", "sample.code"), before[:2])
+        self.assertEqual([e["version"] for e in backend.versions("graphs", "other.code")], [1, 2, 3])
+        # When: the other is cut back to version 0
+        backend.cut("graphs", "other.code", 0)
+        # Then: it is gone
+        self.assertEqual(backend.ids("graphs"), ["sample.code"])
+
 
 class SharedDatabase(unittest.TestCase):
     @classmethod
@@ -198,6 +221,22 @@ class SharedDatabase(unittest.TestCase):
             time.sleep(0.3)
         # Then: the second instance hears again
         self.assertTrue(heard)
+
+    @mark.req("REQ-API-050", "REQ-API-021")
+    def test_a_dropped_connection_is_opened_again_on_the_next_call(self):
+        """V-3 of G-V4.VIEW's verification: a restart of the database left every call failing until MIA restarted.
+        Example: the server ends the second instance's connection; one call may fail, the next one reads the record the first wrote."""
+        # Given: a record, and the server ends the second instance's own connection (as a database restart does)
+        self.a.put("tasks", "t", {"text": "x"}, "anna")
+        pid = self.second._query("SELECT pg_backend_pid()")[0][0]
+        self.first._query("SELECT pg_terminate_backend(%s)", (pid,))
+        # When: the second instance is asked twice
+        try:
+            self.second.ids("tasks")
+        except psycopg.OperationalError:
+            pass                                   # the call that meets the dropped connection may fail; it is not repeated
+        # Then: the next call answers again
+        self.assertEqual(self.second.ids("tasks"), ["t"])
 
     @mark.req("REQ-SLY-006")
     def test_a_delete_on_one_instance_is_heard_on_the_other(self):

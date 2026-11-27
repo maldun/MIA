@@ -78,6 +78,24 @@ class Migrate(unittest.TestCase):
         self.assertFalse(os.path.exists(self.db))
 
     @mark.req("REQ-SLY-007")
+    def test_a_file_that_is_no_history_is_one_line_not_a_traceback(self):
+        """Finding F-1 of G-V4.VIEW's Deploy: `--data` named MIA's data folder, whose presets/ holds the preset store's plain files.
+        Example: data/presets/no.json = {"name": "no", ...} -> exit 1, "refused: presets/no (not_a_history: ...)", nothing written."""
+        # Given: a file in the shape of the preset store (one object, not a list of versions) where a table of the store is read
+        os.makedirs(os.path.join(self.data, "presets"))
+        with open(os.path.join(self.data, "presets", "no.json"), "w", encoding="utf-8") as f:
+            f.write('{"name": "no", "description": "shakes the head", "weights": {}, "bones": {}, "tags": [], "updated": "2026-11-26"}')
+        # When: the folder is moved, dry and for real
+        for dry in (("--dry-run",), ()):
+            code, text = self.run_command("files-to-db", "--data", self.data, "--database-url", "x", *dry)
+            # Then: one line naming the file and that it is no history, exit 1, nothing written
+            self.assertEqual(code, 1, text)
+            self.assertEqual(len(text.strip().splitlines()), 1, text)
+            self.assertIn("refused: presets/no (not_a_history", text)
+            self.assertIn("nothing was written", text)
+            self.assertFalse(os.path.exists(self.db))
+
+    @mark.req("REQ-SLY-007")
     def test_the_database_is_closed_after_a_run_and_after_a_refused_one(self):
         """Finding F4 of the verification (the psycopg ResourceWarning): migrate closes the database it opened.
         Example: files-to-db, then db-to-files into a folder with another history (a conflict): the database was closed twice."""

@@ -16,12 +16,12 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 | 2 | Conversion stand-ins | the fake model server of the same-calls check | TR-CONVERT-006 |
 | 3 | Conversion exact values | hand-checked expected values of the deterministic conversion and snapshot tests | TR-CONVERT-007 |
 | 4 | Conversion component checks | The unit and component checks of the converter, the toolbox entries and the descriptors | TR-CONVERT-008 |
-| 5 | FI | Fault injection: what makes the interruption checks credible | TR-CORE-001, TR-CORE-002 |
-| 6 | BK | Backends and data: the stores and the graphs the checks run on | TR-CORE-003, TR-CORE-004, TR-CORE-009 |
-| 7 | EX | Exact values: expected names, IDs and counts, signed off as a group | TR-CORE-005, TR-CORE-007, TR-CORE-008, TR-RULES-001, TR-VIEW-018, TR-VIEW-019, TR-VIEW-020 |
-| 8 | CR | Ability to fail: the checks are shown able to fail; the older suites stay untouched (RULES) | TR-CORE-006, TR-RULES-008, TR-RULES-009, TR-VIEW-021 |
+| 5 | FI | Fault injection: what makes the interruption checks credible | TR-CORE-001, TR-CORE-002, TR-TRANSFER-004, TR-TRANSFER-006 |
+| 6 | BK | Backends and data: the stores and the graphs the checks run on | TR-CORE-003, TR-CORE-004, TR-CORE-009, TR-TRANSFER-002, TR-TRANSFER-003, TR-TRANSFER-007 |
+| 7 | EX | Exact values: expected names, IDs and counts, signed off as a group | TR-CORE-005, TR-CORE-007, TR-CORE-008, TR-RULES-001, TR-VIEW-018, TR-VIEW-019, TR-VIEW-020, TR-TRANSFER-001, TR-TRANSFER-005 |
+| 8 | CR | Ability to fail: the checks are shown able to fail; the older suites stay untouched (RULES) | TR-CORE-006, TR-RULES-008, TR-RULES-009, TR-VIEW-021, TR-TRANSFER-008 |
 | 9 | DA | Data (RULES): the graphs, the corpus and the skills the checks run on | TR-RULES-002, TR-RULES-003, TR-RULES-004 |
-| 10 | EP | Entry points and stand-ins (RULES): how the run, the save and the check route are driven, and what the mock proves | TR-RULES-005, TR-RULES-006, TR-RULES-007 |
+| 10 | EP | Entry points and stand-ins (RULES): how the run, the save and the check route are driven, and what the mock proves | TR-RULES-005, TR-RULES-006, TR-RULES-007, TR-TRANSFER-009, TR-TRANSFER-010, TR-TRANSFER-011 |
 | 11 | SD | Stores and data: the stores, the fixture graphs, the accounts the checks run on (VIEW) | TR-VIEW-001, TR-VIEW-002, TR-VIEW-003 |
 | 12 | SI | Stand-ins: what the mocks, the fake DOM and the fault wrappers prove (VIEW) | TR-VIEW-004, TR-VIEW-005, TR-VIEW-006, TR-VIEW-007 |
 | 13 | BR | Browser: Firefox, the test server, "settled", the request record, keyboard, colours (VIEW) | TR-VIEW-008, TR-VIEW-009, TR-VIEW-010, TR-VIEW-011, TR-VIEW-012, TR-VIEW-013 |
@@ -954,3 +954,142 @@ Test requirements of the checks TC-API-018 to 025, TC-OPR-011, TC-GA-017 to 039,
 - Credibility aspect: reviewer independence
 - Verified by: mutation (each listed defect makes its check fail; recorded in the implementation log)
 - Status: Approved; moved here at the merge 2026-11-25 (G-V4.VIEW, plan.md "At the merge")
+
+## G-V4.GRAPHSTORE.TRANSFER (Plan step 3, 2026-11-22; A-196, A-197 2026-11-27; prefix TR-TRANSFER-; moved at the merge 2026-11-27)
+
+Test requirements of the checks TC-SLY-009, TC-SLY-016 to 040, TC-API-060 to 067 and SMOKE-TRANSFER-001, unchanged from `specs/mia/goals/G-V4.GRAPHSTORE.TRANSFER/test-requirements.md` (with the A-196 and A-197 changes installed on the line of work); only a History line records the move. Their groups are rows of the table `## Groups` at the top: FI, BK, EX, CR and EP are shared with CORE, RULES and VIEW (same meaning).
+
+### TR-TRANSFER-001 – Exact values
+- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-022, TC-SLY-023, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-027, TC-SLY-040, TC-SLY-030, TC-SLY-031, TC-SLY-032, TC-SLY-033, TC-SLY-034, TC-SLY-035, TC-SLY-039, TC-SLY-009, TC-API-060, TC-API-061, TC-API-062, TC-API-064, TC-API-065, TC-API-066, TC-API-067
+- Requirement: REQ-SLY-016
+- Group: EX
+- Kind: unit
+- Text: The expected values of these checks shall be written as exact values: record histories entry by entry, IDs, states, counts, call orders and refusals with rule and detail, with no tolerance and no check by "contains".
+- Rationale: every outcome is a history, a name, a count or an equality (test spec, limit column); a move "without loss" is checked entry by entry, so a check by "contains" would hide a lost or changed version.
+- Credibility aspect: reference accuracy
+- Verified by: known answer
+- Sign-off: skimmed as a group
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-002 – Both backends, skips visible
+- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-040, TC-SLY-029, TC-SLY-036, TC-SLY-038
+- Requirement: REQ-SLY-022
+- Group: BK
+- Kind: setup
+- Text: The check shall run on the files backend and on PostgreSQL 16 started as a throw-away container named by the test, with CORE's `tests/helpers/core_stores.py`, and shall report a half that cannot run as skipped, never as passed.
+- Rationale: the same behaviour on both is FR-58 and HR-005; the copy is always files, the live side is both (TR-CORE-003, adopted unchanged in substance); a missing podman must not read as success.
+- Credibility aspect: measurement conditions
+- Verified by: inspection of the test report
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-003 – The sample store from the fixtures
+- Applies to: TC-SLY-016, TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-020, TC-SLY-021, TC-SLY-024, TC-SLY-025, TC-SLY-026, TC-SLY-029, TC-SLY-033, TC-SLY-037, TC-SLY-009, SMOKE-TRANSFER-001
+- Requirement: REQ-SLY-016
+- Group: BK
+- Kind: setup
+- Text: The checks shall build the sample store from the 15 converted skill graphs, the graph `sample.code` and the context graph `context.cp13` under `tests/fixtures/graphs/`, unchanged, plus `cp2.multi` with four versions saved by four authors through the graph model.
+- Rationale: the golden examples of CORE (TR-CORE-004) cover every kind of step including a loop-controlling one (D-374) and a context graph; `cp2.multi` gives the several versions and authors of AC-005 and AC-006.
+- Credibility aspect: reference accuracy
+- Verified by: inspection of the fixture list
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-004 – Every write position is tried, and the injector fires
+- Applies to: TC-SLY-026, TC-SLY-029, TC-SLY-036, TC-SLY-038
+- Requirement: REQ-SLY-029
+- Group: FI
+- Kind: setup
+- Text: The check shall interrupt the run after every single write of that run — each append, cut back and removal on the target, and the writing of the aside file — one run per write position, through CORE's `FailingBackend` on the target side, and shall show that it fired by comparing the counted writes with the writes of the same run without a stop.
+- Rationale: HR-007 "at any one write": no sampling (TR-CORE-001, 002); an injector that never fires would let every position pass; the uninterrupted run gives the known number of writes. CORE's injector counts only appends; a sync also cuts back and removes on the copy and writes the aside file, and the positions between those writes are where the header-first defect sits (D-466), so `FailingBackend` is extended to count them (protected helper, installed with the red tests; CORE's counts stay, a save only appends; owner, review of group FI).
+- Credibility aspect: power and false-alarm rate
+- Verified by: mutation (header written first, or removed first in the sync, must fail the check)
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-005 – Times copied are compared exactly, times made are not
+- Applies to: TC-SLY-016, TC-SLY-020, TC-SLY-022, TC-SLY-025, TC-SLY-040, TC-SLY-026, TC-API-064
+- Requirement: REQ-SLY-016
+- Group: EX
+- Kind: unit
+- Text: A check shall compare the time of a version exactly where the time was copied by a move or sync, and shall set a fixed clock where it compares times made by two saves.
+- Rationale: FR-59 "times unchanged" is an exact claim about copied values; a time made by a save is the clock of the store (TR-CORE-008), so TC-SLY-022 fixes the clock instead of loosening the comparison.
+- Credibility aspect: measurement conditions
+- Verified by: review
+- Sign-off: skimmed as a group
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-006 – The lock is tried across real processes
+- Applies to: TC-SLY-028, TC-SLY-039
+- Requirement: REQ-SLY-028
+- Group: FI
+- Kind: setup
+- Text: The check shall hold the copy's lock in a separate operating-system process and kill that process with SIGKILL before the second attempt, never with threads in one process.
+- Rationale: the lock is an operating-system lock released when its process ends; a lock tried by threads of one process may pass for the wrong reason, and only a killed process shows that a crashed sync leaves no stale lock.
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-007 – Only throw-away databases and folders
+- Applies to: TC-SLY-016, TC-SLY-018, TC-SLY-022, TC-SLY-024, TC-SLY-025, TC-SLY-040, TC-SLY-029, TC-SLY-036, TC-SLY-038, TC-API-063, TC-API-065, TC-API-066, TC-API-067, SMOKE-TRANSFER-001
+- Requirement: REQ-SLY-016
+- Group: BK
+- Kind: setup
+- Text: The checks shall write only to folders under a new temporary folder and to databases they create; the smoke check shall write only to a new database `mia_smoke` and new folders, refuse any other database name, and drop them by name afterwards.
+- Rationale: TR-CORE-009 and CORE's Deploy lessons: the owner's data (volume `mia-data`, his database) is never a fixture; the live store switch is a later owner gate (D-460 (1)).
+- Credibility aspect: measurement conditions
+- Verified by: inspection
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-008 – Each check is shown able to fail
+- Applies to: TC-SLY-017, TC-SLY-018, TC-SLY-019, TC-SLY-023, TC-SLY-026, TC-SLY-029, TC-SLY-038, TC-SLY-031
+- Requirement: REQ-SLY-019
+- Group: CR
+- Kind: setup
+- Text: Each of these checks shall be shown able to fail by running it once against a deliberate defect before it is trusted: the per-record check of today, the headers written first, no flush, the removal before the aside file, the header removed first in the sync, a one-graph move that overwrites.
+- Rationale: the two defects of today (survey) and the prototype's header-first removal (D-466) are the faults these checks exist for; a check that cannot catch them proves nothing.
+- Credibility aspect: reviewer independence
+- Verified by: mutation
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-009 – The backend is started and stopped for real
+- Applies to: TC-API-060, TC-API-061, TC-API-062, TC-API-063, TC-API-064, TC-API-065, TC-API-066, TC-API-067
+- Requirement: REQ-API-062
+- Group: EP
+- Kind: setup
+- Text: The checks shall start the backend through the same start function and stop it through the same orderly-stop list as `python -m MIA` does, with a configuration naming `store`, `copy` and `autosync`, and an unreachable live store shall be a database address on a port where nothing listens.
+- Rationale: AutoSync hangs on the start and the stop hook (survey: `__main__.py`); a check that calls the sync directly would not show that the hook runs, nor that the stop sync runs before the database is closed. Today `__main__.py` does the start steps and `socketio.run` in one function: Implement splits the start steps and the stop list into two functions that `__main__` calls and the checks call with Flask's test client (a structural change inside N-2.1, no new part or interface; owner, review of group EP).
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-010 – VIEW's parts, skipped until they exist
+- Applies to: TC-SLY-030, TC-API-060, TC-API-061, TC-API-062, TC-API-063, TC-API-064
+- Requirement: REQ-SLY-030
+- Group: EP
+- Kind: setup
+- Text: TC-SLY-030 shall write the side records through the table definitions of IF-302 v15 (VIEW, A-172), and TC-API-060 to 064 shall configure the backend through VIEW's `store` setting and ask VIEW's `GET /api/v2/store`; each shall be skipped, with the reason, while that part of VIEW is missing, and shall be green before TRANSFER's Verify.
+- Rationale: D-460: the side tables are carried by an explicit list, tested once VIEW is merged into `goal/v4`; the copy setting lies on top of VIEW's store setting (D-465); a skip keeps the gap visible, a stand-in table or route would test TRANSFER against itself. Extended to the API checks by the agent on the owner's delegation (2026-11-22, D-468).
+- Credibility aspect: validity domain
+- Verified by: inspection of the test report
+- Status: Approved
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")
+
+### TR-TRANSFER-011 – The path search
+- Applies to: TC-SLY-037
+- Requirement: REQ-SLY-037
+- Group: EP
+- Kind: setup
+- Text: The check shall place the source under a folder whose name holds a random 16-character token and shall search every file of the resulting folders, as bytes, for that token, for the absolute path of every folder the check made, and for the home folder's path.
+- Rationale: AC-008 "no file holds a path of where it was made"; a random token cannot appear by chance, and a byte search also finds a path inside JSON strings. The folders the check made lie under the system's temporary folder, outside home and without the token: a file that held the copy's own path was missed (V-4 of Verify, A-197).
+- Credibility aspect: power and false-alarm rate
+- Verified by: mutation (an aside file that holds the copy's absolute folder must fail the check: defect D1 of `verify-repro/defects.json`)
+- Status: Approved
+- History: G-V4.GRAPHSTORE.TRANSFER Plan, 2026-11-22, new; Verify, 2026-11-27, changed by A-197 (D-548: every folder the check made)
+- History: moved here unchanged at the merge 2026-11-27 (G-V4.GRAPHSTORE.TRANSFER, plan.md "At the merge")

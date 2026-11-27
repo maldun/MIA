@@ -15,7 +15,7 @@ A leaf: an independent add-on tool that works only through the backend API IF-10
 | TC-GA-005 | REQ-GA-005 | Component | 1 | unit test against the mock of IF-104 (`tests/acceptance/contract` mock `if_104_graph_api`) | AC-15: the Graph app imports no database driver; every call goes to IF-104 | exact |
 | TC-GA-006 | REQ-GA-006 | Component | 1 | unit test against the mock of IF-104 (`tests/acceptance/contract` mock `if_104_graph_api`) | AC-10: a context graph edit appears as a new version | as stated |
 | TC-GA-007 | REQ-GA-007 | Component | 1 | unit test against the mock of IF-104 (`tests/acceptance/contract` mock `if_104_graph_api`) | AC-14: a request without a session shows the login only; the Graph app holds no password check of its own | exact |
-| TC-GA-008 | REQ-GA-008 | Component | 1 | unit test against the mock of IF-104 (`tests/acceptance/contract` mock `if_104_graph_api`) | AC-16: export then seed gives identical entries | exact |
+| TC-GA-008 | – | – | – | retired at the merge of G-V4.GRAPHSTORE.TRANSFER (2026-11-27): REQ-GA-008 is superseded by REQ-SLY-009 and checked by TC-SLY-009 (N-3.1); the Graph app has no export or seed control | – | – |
 | TC-GA-009 | REQ-GA-009 | Inspection | 1 | the files of the Graph app | AC-20: no bundler files; the library is in the repository | exact |
 | TC-GA-010 | REQ-GA-010 | Component (browser) | 2 | a headless browser against the mock of IF-104 | AC-5: a browser test finds 0 requests outside the host | exact |
 | TC-GA-011 | REQ-GA-011 | System | 3 | the container started alone against the mock of IF-104, then in the compose stack | AC-29: starts alone against the mock of IF-104 and in the stack | exact |
