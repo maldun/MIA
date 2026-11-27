@@ -145,6 +145,20 @@ class HostScript(unittest.TestCase):
         self.assertEqual(full.returncode, 0, full.stdout)
 
     @mark.req("REQ-OPR-001")
+    def test_a_container_side_ollama_url_is_checked_through_the_host_loopback(self):
+        """Given OLLAMA_URL names host.containers.internal (or host.docker.internal), which only containers resolve, When deploy/preflight.sh runs on the host, Then it checks 127.0.0.1 on the same port, says so, and passes (VIEW Deploy finding F-2)"""
+        url, stop = fake_ollama([{"name": "gemma4:12b-it-qat", "digest": LIGHT}, {"name": "gemma4:26b", "digest": FULL}])
+        port = url.rsplit(":", 1)[1]
+        try:
+            outs = {name: self.script("http://%s:%s" % (name, port)) for name in ("host.containers.internal", "host.docker.internal")}
+        finally:
+            stop()
+        for name, out in outs.items():
+            self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+            self.assertIn("-- model server http://127.0.0.1:%s" % port, out.stdout)
+            self.assertIn(name, out.stdout)
+
+    @mark.req("REQ-OPR-001")
     def test_no_podman_and_a_moved_digest_each_stop_it(self):
         """Given no podman, and then a moved digest, When deploy/preflight.sh runs, Then it exits 1 and says which"""
         url, stop = fake_ollama([{"name": "gemma4:12b-it-qat", "digest": LIGHT}, {"name": "gemma4:26b", "digest": FULL}])
