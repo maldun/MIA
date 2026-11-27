@@ -10,7 +10,7 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4.builder
 - Subgoals: –
-- Depends on: G-V4.GRAPHSTORE (context graphs in the stored form), G-V4.CONTEXT (editing and the rules for categories and budgets), G-V4.VIEW
+- Depends on: G-V4.GRAPHSTORE (context graphs in the stored form), G-V4.CONTEXT (its first slice, D-429 (2), D-635: the context profile with per-graph categories, relations and budget in the header, the rule set, manual entry with source notes), G-V4.VIEW
 - Status: Agreed
 
 ## Outcome criteria
