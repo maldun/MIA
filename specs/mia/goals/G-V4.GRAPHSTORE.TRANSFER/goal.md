@@ -72,7 +72,7 @@ Group spec FR-58, FR-59, FR-93, NFR-15, NFR-16 (D-389, D-406); decisions D-372 t
 | Explore | done | the group's research, spikes and top-level spec (approved 2026-11-20, D-389, D-390) |
 | Plan | done | plan gate ticked by the owner (2026-11-23); high-level spec approved; requirements, checks and test requirements approved (D-466 to D-468); A-186 installed (`fbce1924`); red tests installed (`eb0030d9`, tag `plan-baseline-g-v4-transfer`); seam with VIEW agreed (D-470); the update of 2026-11-22 agreed by the owner (Agreement, ticked 2026-11-23) |
 | Implement | done | `implementation-log.md`; T-01 to T-06 done (2026-11-23 to 27), SMOKE-TRANSFER-001 green on the branch, F-1 of VIEW's Deploy and V-3 fixed, A-195 installed and approved; image `localhost/mia:g-v4-transfer` (`2f6de35d4f4c`) built from a clean export; hand-over: `handover-2026-11-27-g-v4-transfer-verify-next.md` |
-| Verify | in progress | `verification-report.md` drafted 2026-11-27 (D-547; proposal: verified with accepted deviations after V-1); waits for the owner's answers and sign-off |
-| Commit | open | |
+| Verify | done | `verification-report.md` (D-547; first Verify and the re-verify of the fix commits 7607cca9, D-548 to D-550); verified with accepted deviations (D-549's lock limit, R-1, R-2), both boxes ticked by the owner 2026-11-27 |
+| Commit | in progress | `goal/v4` merged into the line of work (7eb2749b, docs only, no conflict), checks green; the merge steps of plan.md done (node files, model texts V-6, accepted cases, D-551); TR-TRANSFER-001 to 011 wait for the owner's `tools/apply_merge_g_v4_transfer.sh --do`; merge request `merge-request.md`; a person merges |
 | Deploy | open | smoke on the throw-away database `mia_smoke` only (D-460 (1)); SMOKE-RULES-001 runs with it (D-462) |
 | Validate | open | the first test run, G-V5 (parked, D-386) |
