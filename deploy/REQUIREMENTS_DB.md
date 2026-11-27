@@ -41,7 +41,7 @@ Decided 2026-10-21: a database container is wanted because **several MIA instanc
    `deploy/up.sh exec mia sh -c 'python -m MIA.migrate files-to-db --data MIA/data/db --database-url "$MIA_DATABASE_URL" --dry-run'`
    (drop `--dry-run` to write). Idempotent (a second run copies nothing; a conflict writes nothing).
 
-Moving or syncing a whole store or one graph between two stores (G-V4.GRAPHSTORE.TRANSFER) is under way on its own branch and not part of this line yet.
+8. **Moving and syncing** (G-V4.GRAPHSTORE.TRANSFER, merged 2026-11-27, `graph_store_transfer.py`, REQ-SLY-016 to 039): a whole store or one graph moves between files and the database, each graph checked before anything is written; a files copy of the live store is kept current by `python -m MIA.migrate lag` and `sync` (`--copy <folder>`, live store by `--data` or `--database-url`), and MIA can sync it at start and orderly stop (AutoSync, REQ-API-062, 063). One sync at a time (a lock in the copy); the copy's own changes are set aside, never lost.
 
 ## Stages (each one is useful and tested on its own)
 
