@@ -6,6 +6,8 @@
 **Decision record:** D-547 (this verification, `specs/mia/review-log.md`). The owner's answers to the questions below get the next free numbers (D-548 and up; amendments A-196 and up).
 
 ## Verdict
+**Re-verify (2026-11-27, fix commits only): verified with accepted deviations, proposed.** V-1 to V-5 are fixed, V-6 goes to Commit. See "Re-verify of the fix commits" below. The text that follows is the first Verify.
+
 **Proposal: verified with accepted deviations, after one small fix (V-1) and the owner's answers on V-2 to V-5.** Every one of the 31 requirements in scope has a green check that I ran myself. Each check ran under its test requirements, with one gap in the path search (V-4). The protected material differs from the baseline only by the red API tests (943b8dac) and A-195 (d3024c15). Both match their staged drafts byte for byte. SMOKE-TRANSFER-001 is green on the owner's server. F-1 and V-3, handed over from VIEW, are fixed and stay fixed: a planted regression of either fails a check.
 
 What remains:
@@ -203,7 +205,69 @@ V-2, V-3 and V-4 if the owner chooses "accept" in questions 1, 3 and 4; question
 5. *V-5:* (a) **recommended:** a docs commit on `goal/v4`: item 7 reads `--data MIA/data/db`, and the `--data` help of `migrate.py` says "the store's folder (`accounts_dir`, default data/db)" (the help text with V-1's fix on TRANSFER). (b) Leave it until Deploy of the live store switch.
 6. *Verdict:* (a) **recommended:** verified with accepted deviations after V-1 (and V-3 if 3(a)) are fixed and re-verified on the fix commits only. (b) Verified with accepted deviations now, V-1 into the backlog.
 
+## Re-verify of the fix commits (2026-11-27)
+**Scope:** only the commits after Verify: a844df90 (V-1), 761de3a5 (V-3), 9ffbed95 and 5fd14c6d (A-196, A-197 drafted and installed), 7956272f (A-196 code), dfb069cd (model block); branch at 697d8f3f. **Reviewer:** an independent AI reviewer (Opus 5.5, fresh context, never saw the implementation or the fix chat; no subagents). Venv `mia312`; scratch output under `/home/maldun/.claude-work/jobs/68dad9f8/tmp/`.
+
+**Re-verify verdict (proposal): verified with accepted deviations.** V-1 to V-4 are fixed as the owner decided (D-548, D-549). Each fix has a check that fails when the fix is taken out. V-5 was fixed on `goal/v4` (b259b533, merged in). V-6 goes to Commit (decision below). The accepted deviations are D-549's known limit of V-1 and the two small gaps R-1 and R-2 below. No blocker.
+
+- [ ] Re-verify accepted by the owner (verdict; V-6 to Commit; R-1, R-2 accepted). Date:
+
+### Automated checks (my runs)
+| Check | Result |
+|---|---|
+| Protected material since the first Verify (`git diff 658f0141 HEAD` on `tests/acceptance`, `tests/helpers`, `tests/smoke`, `tests/contract`, `tests/integration`, `benchmarks`, `eval`, `contracts`, test requirements) | only `test_transfer_sync.py`, `test_transfer_sets.py` and the goal's `test-requirements.md` (5fd14c6d). All three are **byte-identical** to `specs/mia/amendments/A-196-197/` (`cmp`). The diff adds TC-SLY-040, the A-197 path search of TC-SLY-037 and the `Applies to` lines and TR-TRANSFER-011 text that the note names. No other check changed, no skip added |
+| Transfer unit and neighbour files (`test_graph_store_transfer.py` 35, `test_migrate.py` 11, `test_storage_copy.py` 7, `test_graph_api_v2.py` 33) | all OK |
+| Transfer acceptance files (`test_transfer_move` 7, `_sync` 10, `_sets` 6, `_interrupt` 2, `_backend` 8) | all OK; the PostgreSQL halves ran (TC-SLY-040 on both backends, no skip line) |
+| `tests/test_storage_postgres.py` | 45/45 OK, none skipped |
+| Full unit suite `-m unittest discover -s tests` | **2649 tests OK** (skipped 5, expected failures 2), one run; no flake this time (the `CopySet` check of `test_graph_api_v2.py` that failed once in the fix session passed) |
+| `check_sysml_model.py` / `check_sysml.sh specs/mia/architecture.sysml` | OK / 0 errors, 0 warnings |
+| `trace_check.py` | 585 ERROR lines as at the first Verify, none names a TRANSFER item. REQ-SLY-024 to 027 and 037 show WARN "in architecture.sysml but not in requirements.md", the same pattern as the other TRANSFER items until the merge moves them into the node files |
+
+### Repro (`verify-repro/repro_sync_edges.py .`, at 697d8f3f)
+```
+V-1 move_store into a locked copy: refused locked {'lock': 'sync.lock'}
+V-2a sync: {'graphs': 1, 'records': 0, 'set_aside': {'graph_nodes|orphan.graph/x': {'versions': [1], 'file': 'aside/graph_nodes_orphan.graph_x__20261127T161738Z.json', 'reason': 'the record exists only on the copy'}}} lag after: {} orphan still on the copy: False graph group equal: True
+V-2b lag before the sync: {'graph_nodes|lonely.g/z': {'live': 1, 'copy': 1, 'state': 'differs', 'reason': None}}
+V-2b sync: {'graphs': 1, 'records': 1, 'set_aside': {'graph_nodes|lonely.g/z': {'versions': [1], 'file': 'aside/graph_nodes_lonely.g_z__20261127T161738Z.json', 'reason': 'the live store won'}}}
+V-3 sync into an older copy: refused invalid older_format {'table': 'graph_nodes', 'id': 'n1', 'conversion': 'the conversion of G-V4.GRAPHSTORE.MIGRATION'}
+V-3 move from it afterwards: refused invalid older_format {'table': 'graph_nodes', 'id': 'n1', 'conversion': 'the conversion of G-V4.GRAPHSTORE.MIGRATION'}
+```
+Every line is what the fixes promise: V-1 is refused naming the lock; V-2a removes the orphan after setting it aside, and the graph group is equal; V-2b lists the record and syncs it instead of `conflict`; V-3 refuses the older target, so the set keeps no marker and a later move names MIGRATION's conversion.
+
+### Planted defects (`verify-repro/defects-reverify.json`, `python tools/plant_defects.py`; every file restored, `git status` clean apart from the new defects file)
+D1 to D14 as at the first Verify (D4's text adapted to `check_formats(live, copy)`), plus D15 to D21 for the fixes.
+| Defect | Failing checks |
+|---|---|
+| D1 aside file holds the copy's absolute folder (REQ-SLY-037) | **TC-SLY-037** (was NOT CAUGHT; A-197 closes V-4) |
+| D2 to D12, D14 | the same checks as at the first Verify; each caught |
+| D13 stop sync after "close the database" | not caught, immaterial as before (different stores) |
+| D15 V-1 regression: whole-store move without the copy lock | unit `Move.test_a_whole_store_move_into_a_locked_copy_is_refused` |
+| D16 V-3 regression: only the source's format checked | unit `OlderSets.test_a_move_or_sync_into_an_older_set_is_refused_and_writes_no_marker` (all three subtests) |
+| D17 A-196: the lag skips records no graph names | TC-SLY-040 (files and PG), unit lag-summary check |
+| D18 A-196: a record cut without its aside file | TC-SLY-040 (files and PG), unit `Sync.test_a_differing_record_outside_every_graph_is_set_aside_before_it_is_cut` |
+| D19 A-196: a copy-only record not removed | TC-SLY-040 (files and PG) |
+| D20 A-196: a record's aside file holds the copy's absolute folder | **not caught** (R-1) |
+| D21 `lag_summary` takes a time from a record row too | not caught: an equivalent mutant. A record key names no header, so it adds no time. The filter only matters for a graph ID that holds `\|` (R-2) |
+
+### The fixes against the specification (both directions)
+- **V-1 (a844df90), REQ-SLY-028:** `move_store` runs under `_lock_of_copy(target)`. This is the copy's lock when the files target already holds `sync.lock`, otherwise no lock and no new file (D-549, owner). Red first, logged. `test_migrate.py` (REQ-SLY-007 identical files, F-1 "nothing written") stays green. The new unit check pins that a folder that is no copy gets no lock file. **Accepted deviation (D-549):** a folder that has never been synced is not locked while its first sync and a move start at once. REQ-SLY-028's text says "the copy"; that D-549 reads it as "a folder holding `sync.lock`" is recorded in the log. A text note at Commit is optional and needs no check change. TC-SLY-028 still checks only the sync, so the move half is held by a unit check (not protected). That is enough for a fix inside an existing requirement.
+- **V-3 (761de3a5), REQ-SLY-034:** `check_formats(source, target)` runs in `move_store`, `move_graph` and `sync_store` before the first write (inside the lock). `check_format` returns at once for a database target, so nothing changes there. Red first (three subtests), logged. It matches REQ-SLY-034 "refuse to move or sync the set"; no requirement change was needed.
+- **A-196 drafts and install (9ffbed95, 5fd14c6d):** the requirement texts in `requirements.md` (REQ-SLY-024 to 027 with `In force:` lines, REQ-SLY-037's acceptance criterion), the TC-SLY-040 row and scenario in `test-spec.md`, and the installed protected files match the note `specs/mia/amendments/A-196-197-note.md`. The owner's approval is logged (implementation log, Plan amendments). Nit for Commit: the `History` lines of the five requirements still say "change proposed by A-196/A-197"; at the merge they should say "changed".
+- **A-196 code (7956272f), REQ-SLY-024 to 027:** `_unnamed_records` lists every graph-group record outside every graph's records (headers excluded) that is not current, under `<table>|<record ID>`, with the states `copy_only`, `differs` and `behind`. `sync_store` writes the copy's own versions to an aside file through `put_file` (relative path, a document with `record`, `set_aside_at`, `reason`, `versions`, and no path) before `cut` to the shared count (0 = removed). The live versions then follow through `copy_records`. `_refuse_other_conflicts` is gone. This is what the changed texts and TC-SLY-040 ask, and nothing more. One consequence the owner approved with the note: `skills` records count as such rows, and IF-104 `lag.graphs` counts these rows (REQ-API-064 unchanged; `since` from headers only, D-540). Red first: the unit check that expected `conflict` was rewritten, and TC-SLY-040 was red by assertion after the install (log).
+- **Model block (dfb069cd):** regenerated with the new texts of REQ-SLY-024 to 027 and 037; both model checks are OK.
+- **Nothing outside the goal's parts** was touched by the fix commits: `graph_store_transfer.py`, its unit file, the goal's specs, the amendment drafts and script, `review-log.md`, `architecture.sysml`.
+
+### Remaining small gaps (accepted-deviation candidates, low)
+| ID | Finding | Proposal |
+|---|---|---|
+| R-1 | TC-SLY-037 makes only a graph's aside file, so a record's aside file (new with A-196) is not searched for paths (D20 not caught). By inspection, `_set_aside_record` writes `record`, `set_aside_at`, `reason` and the record's own versions, and no path. The file name comes from `_aside_path`, relative to the copy, like a graph's | accept with the inspection; a later amendment may add a record to TC-SLY-037's sync (protected test) |
+| R-2 | A graph ID may contain `\|`, because no rule forbids it. Such a graph would be skipped by `lag_summary`'s `since` and could share a lag key with a record (`graph_nodes\|x`). Graph IDs are made by MIA's editor and rules; I found none with `\|` | accept; note for MIGRATION or the next goal that touches graph IDs |
+
+### Decision on V-6
+V-6 (the model's text calls T-06 "planned" and names only REQ-API-060 to 064; `storageLayer` does not name `lag_summary`, `AutoSync`, the V-3 reconnect or A-196) is still open at 697d8f3f (`architecture.sysml` line 292). It is text only: the model checks are green, and no requirement, flow or `verify` link is missing. **Decided (proposal for the owner's tick): it is not a blocker for the verdict. It is a fixed item of Commit:** before the merge into `goal/v4`, the `WebApplication` and `storageLayer` texts are updated together with moving the requirements into the node files ("At the merge"), and `check_sysml.sh` is re-run.
+
 ## Notes for Commit, Deploy and Validate
+- Re-verify additions: Commit updates the model texts (V-6), sets the `History` lines of REQ-SLY-024 to 027 and 037 to "changed by A-196/A-197", and may add D-549's reading of "the copy" to REQ-SLY-028's rationale. Validate: with a copy that lacks skills, the store answer's `lag.graphs` counts those skill records too (A-196). Check whether the owner reads that number as "graphs".
 - Commit: move the 31 requirements, checks and TR-TRANSFER-001 to 011 into the node files (plan, "At the merge"); update the model text (V-6); the command texts of REQ-SLY-039 (open question 3 above).
 - Deploy: SMOKE-TRANSFER-001 is green on `mia_db_1` through `tools/smoke_in_stack.sh` (an image is needed only as a runtime with psycopg). Do not run `deploy/up.sh` from a worktree without `deploy/.env`: it writes a new one.
 - Validate: what the owner sees after a save while a copy is shown (the save appears only after the next sync); whether AutoSync log lines are noticed when a sync is refused.
