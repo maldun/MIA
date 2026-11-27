@@ -52,6 +52,7 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | NFR-14 | in | light and dark, keyboard: validation criteria with automated parts (keyboard reach); in the main app's look, its design tokens copied unchanged and kept identical (D-431) |
 | FR-70 to FR-74, FR-95, NFR-19 (backend side) | in | D-430 (7): the real backend serves all IF-104 v2 routes (check, save as a new version, conflict refused, restore, arrangement save, store unreachable, owner only); the page side of these items stays G-V4.EDIT; the check route uses IF-301 v4 once RULES is merged |
 | FR-76, FR-77, FR-80, FR-81 (backend side) | in | D-430 (7): the write-once record of changes behind the `changes` route, a table of the IF-302 amendment; playback and comparison (FR-78, FR-79) stay G-V4.REPLAY |
+| REQ-GA-021, REQ-GA-027, REQ-GA-037, REQ-GA-045 | out | Targets deferred to G-V4.EDIT (TD-91 to TD-94, D-502, D-600 (2)); VIEW verified the interim criteria |
 | FR-96 | out | search by description is its own later slice (D-425 E-H); the band keeps its place in the frame |
 | REQ-GA-001 | in | show a graph as nodes and edges; superseded by FR-48 to FR-55 (D-367); its "physics off" text is amended (D-425 B) |
 | REQ-GA-005 | in | the viewer works only through the graph interface IF-104 v2 (frozen at G-V4 level) |

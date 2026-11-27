@@ -94,8 +94,8 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Boundary: TB-edit
 - Category: LLM06 Excessive agency (and LLM04 for a poisoned library entry)
 - Impact: an edited graph gives a step more tools or a bigger budget, or removes a check, for every user
-- Mitigation: REQ-BE-039 (a workflow without specification and baseline stays draft), CON-6, NFR-3
-- Red-team cases: RT-012 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
+- Mitigation: REQ-BE-039 (a workflow without specification and baseline stays draft), CON-6, NFR-3; for edits in the Graph app (G-V4.EDIT, D-603): only the owner edits graphs (NFR-19), the rules of the graph's kind hold on every keep (FR-70), every keep is a new version that names its author (FR-71)
+- Red-team cases: RT-012 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite; two labelled in `eval/suites/rt_edit`, target pending, handed to G-V4.GRAPHAPI.CODE, D-603)
 - Residual risk: users are trusted by decision (CON-6); the edit is versioned and attributed, so it can be undone
 - Status: Draft
 
