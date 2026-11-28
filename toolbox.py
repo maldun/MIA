@@ -49,11 +49,9 @@ EXCHANGE_SCHEMA = {
 }
 
 
-IMPORT_OPS = """try:
-    from MIA import common_operations as ops
-except ImportError:
-    import common_operations as ops
-"""
+# F-7: the toolbox that runs the code (only `_code_namespace` runs it) hands it its own common_operations, the module run_converted registers model and
+# tools in; importing one could give a second module once both MIA.common_operations and common_operations are importable.
+IMPORT_OPS = "ops = common_operations\n"
 # Kinds without a common function (script: its sandbox runs only in the old runner) still define the function, so a call is a clear refusal and not a KeyError.
 REFUSED = """
 
@@ -222,7 +220,7 @@ class Toolbox:
         # An untrusted transform runs only as the baseline of a check, retired, and with the owner's allowance (REQ-WFM-091).
         if entry["trust"] != "trusted" and not (as_baseline and retired and meta.get("baseline_allowed")):
             raise ToolboxError("untrusted", "%s is not trusted and does not run." % tid)
-        namespace = {}
+        namespace = {"common_operations": common_operations}
         exec(entry["doc"]["code"], namespace)       # trusted code runs in the MIA process (SC-09 accepted); only here, never on import
         return namespace
 

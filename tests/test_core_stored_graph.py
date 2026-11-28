@@ -9,7 +9,6 @@ import shutil
 import sys
 import tempfile
 import unittest
-from unittest import mock
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 for path in (REPO, os.path.join(REPO, "tests", "helpers"), os.path.join(REPO, "tests", "helpers", "mocks")):
@@ -20,7 +19,6 @@ from run_store import ThrowAwayStore, run_record, stored_run   # noqa: E402
 from storage import StorageError                          # noqa: E402
 import core                                               # noqa: E402
 import run_explain                                        # noqa: E402
-import skill_converter                                    # noqa: E402
 
 
 def with_temperature(graph, value):
@@ -31,16 +29,6 @@ def with_temperature(graph, value):
 
 class StoreCase(unittest.TestCase):
     def setUp(self):
-        # F-7: once another test of the process made the package MIA importable (checkout_copy), the thin code of the toolbox imports
-        # MIA.common_operations, a second module beside the one run_converted registers the tools in, and every tool step fails. One module here.
-        if "MIA" in sys.modules:
-            ops = skill_converter.common_operations
-            patcher = mock.patch.dict(sys.modules, {"MIA.common_operations": ops})
-            patcher.start()
-            self.addCleanup(patcher.stop)
-            attribute = mock.patch.object(sys.modules["MIA"], "common_operations", ops, create=True)
-            attribute.start()
-            self.addCleanup(attribute.stop)
         self.store = ThrowAwayStore()
         self.addCleanup(self.store.close)
         self.runs = tempfile.mkdtemp(prefix="run-log-")
